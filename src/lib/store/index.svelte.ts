@@ -23,4 +23,4 @@ export const files = new Files();
 
 export const theme = new Theme();
 
-export const outputFilenameOption = ["default", "original"];
+export const outputFilenameOption = ["default", "original", "custom"];

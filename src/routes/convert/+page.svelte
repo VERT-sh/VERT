@@ -54,15 +54,17 @@
 	);
 
 	// Options
-	let outputFilename = $state(outputFilenameOption[0]);
-
-	onMount(() => {
-		// reloads the "output filename" option
-		const savedOption = localStorage.getItem("outputFilename");
-		if (savedOption) {
-			outputFilename = savedOption;
-		}
-	});
+	let outputFilename = $state(
+		localStorage.getItem("outputFilename") || "default",
+	);
+	let findPattern = $state(localStorage.getItem("findPattern") || "");
+	let replacePattern = $state(localStorage.getItem("replacePattern") || "");
+	let findRegex = $state(
+		localStorage.getItem("findRegex") === "true" || false,
+	);
+	let replaceRegex = $state(
+		localStorage.getItem("replaceRegex") === "true" || false,
+	);
 
 	let disabled = $derived(files.files.some((f) => !f.result));
 
@@ -206,28 +208,96 @@
 			>
 				<h2 class="font-bold text-xl mb-1">Options</h2>
 				<div class="flex flex-col w-full gap-4 mt-2">
-					<div class="flex flex-col gap-3 w-fit">
-						<h3>Output filename (for single file)</h3>
-						<div class="grid grid-rows-1 grid-cols-1">
-							<div
-								transition:blur={{
-									blurMultiplier: 8,
-									duration,
-									easing: quintOut,
-								}}
-								class="row-start-1 col-start-1 w-fit"
-							>
-								<Dropdown
-									options={outputFilenameOption}
-									selected={outputFilename}
-									onselect={(o) => {
-										outputFilename = o;
-										localStorage.setItem(
-											"outputFilename",
-											o,
-										);
+					<div class="flex flex-col gap-3">
+						<div class="flex flex-col gap-3 w-fit">
+							<h3>Output filename</h3>
+							<div class="grid grid-rows-1 grid-cols-1">
+								<div
+									transition:blur={{
+										blurMultiplier: 8,
+										duration,
+										easing: quintOut,
 									}}
-								/>
+									class="row-start-1 col-start-1 w-fit"
+								>
+									<Dropdown
+										options={outputFilenameOption}
+										bind:selected={outputFilename}
+										onselect={() => {
+											localStorage.setItem(
+												"outputFilename",
+												outputFilename,
+											);
+										}}
+									/>
+								</div>
+							</div>
+						</div>
+
+						<!-- Find/replace patterns -->
+						<div class="flex flex-col sm:flex-row gap-4">
+							<div class="flex flex-col gap-2 w-full md:w-fit">
+								<h3>Find pattern</h3>
+								<div class="flex gap-4 items-center">
+									<input
+										type="text"
+										class="px-3 py-2 bg-background border border-foreground-muted rounded-md flex-1 md:flex-none"
+										placeholder="Text to find"
+										bind:value={findPattern}
+										oninput={() =>
+											localStorage.setItem(
+												"findPattern",
+												findPattern,
+											)}
+									/>
+									<label
+										class="flex items-center gap-2 cursor-pointer whitespace-nowrap"
+									>
+										<input
+											type="checkbox"
+											class="w-4 h-4"
+											bind:checked={findRegex}
+											onchange={() =>
+												localStorage.setItem(
+													"findRegex",
+													findRegex.toString(),
+												)}
+										/>
+										<span>Regex</span>
+									</label>
+								</div>
+							</div>
+
+							<div class="flex flex-col gap-2 w-full md:w-fit">
+								<h3>Replace pattern</h3>
+								<div class="flex gap-4 items-center">
+									<input
+										type="text"
+										class="px-3 py-2 bg-background border border-foreground-muted rounded-md flex-1 md:flex-none"
+										placeholder="Text to replace with"
+										bind:value={replacePattern}
+										oninput={() =>
+											localStorage.setItem(
+												"replacePattern",
+												replacePattern,
+											)}
+									/>
+									<label
+										class="flex items-center gap-2 cursor-pointer whitespace-nowrap"
+									>
+										<input
+											type="checkbox"
+											class="w-4 h-4"
+											bind:checked={replaceRegex}
+											onchange={() =>
+												localStorage.setItem(
+													"replaceRegex",
+													replaceRegex.toString(),
+												)}
+										/>
+										<span>Regex</span>
+									</label>
+								</div>
 							</div>
 						</div>
 					</div>
