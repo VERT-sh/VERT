@@ -11,10 +11,11 @@ ENV PUB_HOSTNAME=${PUB_HOSTNAME}
 ENV PUB_PLAUSIBLE_URL=${PUB_PLAUSIBLE_URL}
 
 COPY package.json ./
-
-COPY . ./
+COPY patches/ ./patches
 
 RUN bun install
+
+COPY . ./
 
 RUN bun run build
 
