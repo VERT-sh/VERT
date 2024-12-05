@@ -6,6 +6,7 @@ services:
       args:
         PUB_HOSTNAME: "vert.sh"
         PUB_PLAUSIBLE_URL: "https://plausible.example.com"
+        PUB_ENV: production
     restart: unless-stopped
     ports:
       - 3000:3000
