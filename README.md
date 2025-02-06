@@ -6,10 +6,12 @@ VERT is built in Svelte and TypeScript.
 
 ## Features
 
-- Convert files directly on your device using WebAssembly
+- Convert files directly on your device using WebAssembly*
 - No file size limits
 - Supports multiple file formats
 - User-friendly interface built with Svelte
+
+<sup>*Non-local video conversion is planned, but the daemon will be easily self-hostable to maintain privacy and fully local functionality.</sup>
 
 ## Getting Started
 
