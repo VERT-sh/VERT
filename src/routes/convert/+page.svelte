@@ -1,568 +1,199 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
-	import { blur, duration, flip } from "$lib/animation";
+	import ConversionPanel from "$lib/components/functional/ConversionPanel.svelte";
 	import Dropdown from "$lib/components/functional/Dropdown.svelte";
-	import ProgressiveBlur from "$lib/components/visual/effects/ProgressiveBlur.svelte";
+	import Uploader from "$lib/components/functional/Uploader.svelte";
+	import Panel from "$lib/components/visual/Panel.svelte";
 	import ProgressBar from "$lib/components/visual/ProgressBar.svelte";
-	import { converters } from "$lib/converters";
-	import type { Converter } from "$lib/converters/converter.svelte";
-	import { log } from "$lib/logger";
-	import { files } from "$lib/store/index.svelte";
-	import type { VertFile } from "$lib/types";
-	import clsx from "clsx";
-	import { ArrowRight, Disc2Icon, FileAudioIcon, XIcon } from "lucide-svelte";
-	import { onMount } from "svelte";
-	import { quintOut } from "svelte/easing";
 	import {
-		fade,
-		type EasingFunction,
-		type TransitionConfig,
-	} from "svelte/transition";
+		files,
+		gradientColor,
+		showGradient,
+	} from "$lib/store/index.svelte";
+	import { VertFile } from "$lib/types";
+	import {
+		AudioLines,
+		DownloadIcon,
+		FileMusicIcon,
+		FileQuestionIcon,
+		FileVideo2,
+		FilmIcon,
+		ImageIcon,
+		ImageOffIcon,
+		RotateCwIcon,
+		XIcon,
+	} from "lucide-svelte";
 
-	const { data } = $props();
-
-	const reversedFiles = $derived(files.files.slice().reverse());
-
-	let finisheds = $state(
-		Array.from({ length: files.files.length }, () => false),
-	);
-
-	let processings = $state<boolean[]>([]);
-
-	const convertersRequired = $derived.by(() => {
-		const required: Converter[] = [];
-		for (let i = 0; i < files.files.length; i++) {
-			const file = files.files[i];
-			const converter = converters.find(
-				(c) =>
-					c.supportedFormats.includes(file.from.toLowerCase()) &&
-					c.supportedFormats.includes(file.to.toLowerCase()),
-			);
-			if (!converter) throw new Error("No converter found");
-			required.push(converter);
+	$effect(() => {
+		if (files.files.length === 1 && files.files[0].blobUrl) {
+			showGradient.set(false);
+		} else {
+			showGradient.set(true);
 		}
-		return Array.from(new Set(required));
+
+		// Set gradient color depending on the file types
+		// TODO: if more file types added, add a "fileType" property to the file object
+		const allAudio = files.files.every(
+			(file) => file.converter?.name === "ffmpeg",
+		);
+		const allImages = files.files.every(
+			(file) =>
+				file.converter?.name !== "ffmpeg" &&
+				file.converter?.name !== "vertd",
+		);
+		const allVideos = files.files.every(
+			(file) => file.converter?.name === "vertd",
+		);
+
+		if (
+			files.files.length === 0 ||
+			(!allAudio && !allImages && !allVideos)
+		) {
+			gradientColor.set("");
+		} else {
+			gradientColor.set(allAudio ? "purple" : allVideos ? "red" : "blue");
+		}
 	});
-
-	const multipleConverters = $derived(convertersRequired.length > 1);
-
-	const noMultConverter = $derived(
-		multipleConverters ? null : convertersRequired[0],
-	);
-
-	const allConvertersReady = $derived(
-		convertersRequired.every((c) => c.ready),
-	);
-
-	let disabled = $derived(files.files.some((f) => !f.result));
-
-	onMount(() => {
-		finisheds.forEach((_, i) => {
-			const duration = 575 + i * 50 - 32;
-			setTimeout(() => {
-				finisheds[i] = true;
-			}, duration);
-		});
-	});
-
-	const convertAll = async () => {
-		const perf = performance.now();
-		files.files.forEach((f) => (f.result = null));
-		const promises: Promise<void>[] = [];
-		for (let i = 0; i < files.files.length; i++) {
-			promises.push(
-				(async (i) => {
-					window.plausible("Convert", {
-						props: {
-							"Convert from": files.files[i].from.toLowerCase(),
-							"Convert to": files.files[i].to.toLowerCase(),
-							Conversion: `${files.files[i].from.toLowerCase()} to ${files.files[i].to.toLowerCase()}`,
-						},
-					});
-					await convert(files.files[i], i);
-				})(i),
-			);
-		}
-
-		await Promise.all(promises);
-		const ms = performance.now() - perf;
-		const seconds = (ms / 1000).toFixed(2);
-		log(["converter"], `converted all files in ${seconds}s`);
-	};
-
-	const convert = async (file: VertFile, index: number) => {
-		file.progress = 0;
-		processings[index] = true;
-		await file.convert();
-		processings[index] = false;
-	};
-
-	const downloadAll = async () => {
-		const dlFiles: any[] = [];
-		for (let i = 0; i < files.files.length; i++) {
-			const file = files.files[i];
-			const result = file.result;
-			if (!result) {
-				console.error("No result found");
-				continue;
-			}
-			dlFiles.push({
-				name: file.file.name.replace(/\.[^/.]+$/, "") + file.to,
-				lastModified: Date.now(),
-				input: await result.file.arrayBuffer(),
-			});
-		}
-		if (files.files.length === 0) return;
-		if (files.files.length === 1) {
-			// download the image only
-			const blob = URL.createObjectURL(
-				new Blob([dlFiles[0].input], {
-					type: files.files[0].to.slice(1),
-				}),
-			);
-			const a = document.createElement("a");
-			a.href = blob;
-			a.download = `VERT-Converted_${new Date().toISOString()}${
-				files.files[0].to
-			}`;
-			a.click();
-			URL.revokeObjectURL(blob);
-			a.remove();
-			return;
-		}
-		const { downloadZip } = await import("client-zip");
-		const blob = await downloadZip(dlFiles, "converted.zip").blob();
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = `VERT-Converted_${new Date().toISOString()}.zip`;
-		a.click();
-		URL.revokeObjectURL(url);
-		a.remove();
-	};
-
-	const deleteAll = () => {
-		files.files = [];
-		goto("/");
-	};
-
-	export const progBlur = (
-		_: HTMLElement,
-		config:
-			| Partial<{
-					duration: number;
-					easing: EasingFunction;
-			  }>
-			| undefined,
-		dir: {
-			direction: "in" | "out" | "both";
-		},
-	): TransitionConfig => {
-		const prefersReducedMotion = window.matchMedia(
-			"(prefers-reduced-motion: reduce)",
-		).matches;
-		if (!config) config = {};
-		if (!config.duration) config.duration = 300;
-		if (!config.easing) config.easing = quintOut;
-		return {
-			duration: prefersReducedMotion ? 0 : config?.duration || 300,
-			css: (t) => {
-				return "--blur-amount: " + (dir.direction !== "in" ? t : 1 - t);
-			},
-			easing: config?.easing,
-		};
-	};
 </script>
 
-<svelte:head>
-	<title>Your Conversions</title>
-	<meta name="title" content="Your Conversions — VERT.sh" />
-	<meta property="og:title" content="Your Conversions — VERT.sh" />
-	<meta property="twitter:title" content="Your Conversions — VERT.sh" />
-</svelte:head>
-
-<div class="grid grid-cols-1 grid-rows-1 w-full">
-	{#if files.files.length === 0}
-		<p class="text-foreground-muted col-start-1 row-start-1 text-center">
-			No files uploaded. Head to the Upload tab to begin!
-		</p>
-	{:else}
-		<div
-			class="flex flex-col gap-4 w-full col-start-1 row-start-1"
-			out:blur={{
-				duration,
-				easing: quintOut,
-				blurMultiplier: 16,
-			}}
-		>
-			<div
-				class="w-full p-4 max-w-screen-lg border-solid flex-col border-2 rounded-2xl border-foreground-muted-alt flex flex-shrink-0"
+{#snippet fileItem(file: VertFile, index: number)}
+	{@const isAudio = file.converter?.name === "ffmpeg"}
+	{@const isVideo = file.converter?.name === "vertd"}
+	<Panel class="p-5 flex flex-col min-w-0 gap-4 relative">
+		<div class="flex-shrink-0 h-8 w-full flex items-center gap-2">
+			{#if !file.converter}
+				<FileQuestionIcon size="24" class="flex-shrink-0" />
+			{:else if isAudio}
+				<AudioLines size="24" class="flex-shrink-0" />
+			{:else if isVideo}
+				<FilmIcon size="24" class="flex-shrink-0" />
+			{:else}
+				<ImageIcon size="24" class="flex-shrink-0" />
+			{/if}
+			<div class="flex-grow overflow-hidden">
+				{#if file.processing}
+					<ProgressBar
+						min={0}
+						max={100}
+						progress={file.converter?.reportsProgress
+							? file.progress
+							: null}
+					/>
+				{:else}
+					<h2
+						class="text-xl font-body overflow-hidden text-ellipsis whitespace-nowrap"
+					>
+						{file.name}
+					</h2>
+				{/if}
+			</div>
+			<button
+				class="flex-shrink-0 w-8 rounded-full hover:bg-panel-alt h-full flex items-center justify-center"
+				onclick={() =>
+					(files.files = files.files.filter((_, i) => i !== index))}
 			>
-				<h2 class="font-bold text-xl mb-1">Options</h2>
-				<div class="flex flex-col w-full gap-4 mt-2">
-					<div class="flex flex-col gap-3 w-fit">
-						<h3>Set all target formats</h3>
-						<div class="grid grid-rows-1 grid-cols-1">
-							{#if !multipleConverters && noMultConverter}
-								<div
-									transition:blur={{
-										blurMultiplier: 8,
-										duration,
-										easing: quintOut,
-									}}
-									class="row-start-1 col-start-1 w-fit"
-								>
-									<Dropdown
-										options={noMultConverter.supportedFormats}
-										onselect={(o) => {
-											// files.conversionTypes = Array.from(
-											// 	{ length: files.files.length },
-											// 	() => o,
-											// );
-
-											files.files.forEach((file) => {
-												file.result = null;
-												file.to = o;
-											});
-										}}
-									/>
-								</div>
-							{:else}
-								<div
-									class="italic w-fit text-foreground-muted-alt flex items-center row-start-1 col-start-1"
-									transition:blur={{
-										blurMultiplier: 8,
-										duration,
-										easing: quintOut,
-									}}
-								>
-									The listed files require different
-									converters, so you can't set them in bulk.
-								</div>
-							{/if}
-						</div>
-					</div>
-				</div>
-
-				<div class="grid gap-3 sm:grid-cols-3 mt-4">
-					<button
-						onclick={convertAll}
-						class={clsx("btn flex-grow", {
-							"btn-highlight":
-								disabled && !processings.some((p) => p),
-						})}
-						disabled={!allConvertersReady ||
-							processings.some((p) => p)}
-					>
-						{#if allConvertersReady}
-							Convert {files.files.length > 1 ? "All" : ""}
-						{:else}
-							Loading...
-						{/if}
-					</button>
-					<button
-						onclick={downloadAll}
-						class={clsx("btn flex-grow", {
-							"btn-highlight": !disabled,
-						})}
-						{disabled}
-						>Download {files.files.length > 1 ? "All" : ""}</button
-					>
-					<button
-						onclick={deleteAll}
-						disabled={processings.some((p) => p)}
-						class="btn flex-grow"
-					>
-						Delete All
-					</button>
-				</div>
-			</div>
-			<div class="w-full gap-4 grid md:grid-cols-2">
-				{#each reversedFiles as file, i (file.id)}
-					{@const converter = (() => {
-						return converters.find((c) =>
-							c.supportedFormats.includes(
-								file.from.toLowerCase(),
-							),
-						);
-					})()}
-					<div
-						class="relative"
-						animate:flip={{ duration, easing: quintOut }}
-						out:blur={{
-							duration,
-							easing: quintOut,
-							blurMultiplier: 16,
-						}}
-					>
-						<div
-							class={clsx(
-								"flex relative flex-shrink-0 items-center w-full rounded-xl h-72",
-								{
-									"initial-fade": !finisheds[i],
-								},
-							)}
-							style="--delay: {i * 50}ms; z-index: {files.files
-								.length - i}; border: solid 2px {file.result
-								? 'var(--accent-bg)'
-								: 'var(--fg-muted-alt)'}; transition: border 1000ms ease; transition: filter {duration}ms var(--transition), transform {duration}ms var(--transition);"
-						>
-							<div
-								class="flex h-full flex-col items-center w-full z-50 relative"
-							>
-								<div class="w-full flex-shrink-0">
-									<div
-										class={clsx(
-											"py-3 dynadark:[--transparency:50%] [--transparency:25%] px-4 w-full flex transition-colors duration-300 flex-shrink text-left border-b-2 border-solid border-foreground-muted-alt rounded-tl-[9.5px] rounded-tr-[10px] overflow-hidden",
-											{
-												"text-accent-foreground":
-													file.result,
-												"text-foreground": !file.result,
-											},
-										)}
-										style="background-color: color-mix(in srgb, var(--{file.result
-											? 'accent-bg'
-											: 'bg'}), transparent var(--transparency)); backdrop-filter: blur({data.isFirefox
-											? 0
-											: 18}px);"
-									>
-										<div
-											class="w-full grid grid-cols-1 grid-rows-1"
-										>
-											{#if processings[files.files.length - i - 1]}
-												<div
-													class="w-full row-start-1 col-start-1 h-full flex items-center pr-4"
-													transition:blur={{
-														blurMultiplier: 6,
-														duration,
-														easing: quintOut,
-														scale: {
-															start: 0.9,
-															end: 1,
-														},
-													}}
-												>
-													<ProgressBar
-														min={0}
-														max={100}
-														progress={file.converter
-															?.reportsProgress
-															? file.result
-																? 100
-																: file.progress
-															: null}
-													/>
-												</div>
-											{:else}
-												<h3
-													class="row-start-1 col-start-1 whitespace-nowrap overflow-hidden text-ellipsis font-medium"
-													transition:blur={{
-														blurMultiplier: 6,
-														duration,
-														easing: quintOut,
-														scale: {
-															start: 0.9,
-															end: 1,
-														},
-													}}
-												>
-													{file.file.name}
-												</h3>
-											{/if}
-										</div>
-										<button
-											onclick={() => {
-												// delete the file from the list
-												files.files =
-													files.files.filter(
-														(f) => f !== file,
-													);
-												if (files.files.length === 0)
-													goto("/");
-											}}
-											class="ml-2 mr-1 flex-shrink-0"
-										>
-											<XIcon size="24" />
-										</button>
-									</div>
-								</div>
-								<div
-									class="flex gap-3 justify-normal flex-grow w-full h-full"
-								>
-									<div
-										class="flex flex-col items-end gap-3 w-full"
-									>
-										<div
-											class="flex items-end gap-3 w-full h-full px-5"
-										>
-											<div
-												class="flex items-center justify-center gap-3 w-full pb-4"
-											>
-												{#if converter && converter.supportedFormats.includes(file.from.toLowerCase())}
-													<span>from</span>
-													<span
-														class="py-2 px-3 font-display bg-foreground text-background rounded-xl"
-														>{file.from}</span
-													>
-													<span>to</span>
-													<div class="inline-flex">
-														<Dropdown
-															options={converter.supportedFormats}
-															bind:selected={files
-																.files[
-																files.files
-																	.length -
-																	i -
-																	1
-															].to}
-															onselect={() => {
-																file.result =
-																	null;
-															}}
-														/>
-													</div>
-												{:else}
-													<span
-														class="py-2 px-3 font-display bg-foreground-failure text-white rounded-xl"
-														>{file.from}</span
-													>
-
-													<span
-														class="text-foreground-failure"
-													>
-														is not supported!
-													</span>
-												{/if}
-											</div>
-										</div>
-										<!-- <div
-											class="hidden lg:flex gap-4 w-full"
-										>
-											<button
-												class="btn flex-grow flex-shrink-0"
-												onclick={() => convert(file)}
-											>
-												Convert
-											</button>
-											<button
-												class="btn flex-grow flex-shrink-0"
-												disabled={!file.result}
-												onclick={file.download}
-											>
-												Download
-											</button>
-										</div> -->
-									</div>
-								</div>
-							</div>
-							{#if converter && converter.supportedFormats.includes(file.from.toLowerCase())}
-								<!-- god knows why, but setting opacity > 0.98 causes a z-ordering issue in firefox ??? -->
-								<div
-									class="absolute top-[0px] -z-50 left-0 w-full h-full opacity-[0.98] rounded-xl overflow-hidden"
-								>
-									{#if file.blobUrl}
-										<div
-											class="bg-cover bg-center w-full h-full"
-											style="background-image: url({file.blobUrl})"
-											in:blur={{
-												blurMultiplier: 24,
-												scale: {
-													start: 1.1,
-													end: 1,
-												},
-												duration,
-												easing: quintOut,
-											}}
-										></div>
-										<div
-											class="absolute left-0 top-0 pt-[50px] h-full w-full"
-											transition:progBlur={{
-												duration,
-												easing: quintOut,
-											}}
-										>
-											<ProgressiveBlur
-												direction="bottom"
-												endIntensity={64}
-												iterations={8}
-												fadeTo="var(--bg-transparent)"
-											/>
-										</div>
-									{:else}
-										<div
-											class="w-full h-full flex items-center justify-center"
-										>
-											<FileAudioIcon
-												size="96"
-												strokeWidth="1.5"
-												color="var(--fg)"
-												opacity="0.9"
-											/>
-										</div>
-									{/if}
-								</div>
-							{/if}
-						</div>
-					</div>
-				{/each}
-			</div>
+				<XIcon size="24" class="text-muted" />
+			</button>
 		</div>
-	{/if}
+		{#if !file.converter}
+			<div
+				class="h-full flex flex-col text-center justify-center text-failure"
+			>
+				<p class="font-body font-bold">We can't convert this file.</p>
+				<p class="font-normal">
+					Only image, video, and audio files are supported
+				</p>
+			</div>
+		{:else}
+			<div class="flex flex-row justify-between">
+				<div
+					class="flex gap-4 w-full h-[152px] overflow-hidden relative"
+				>
+					<div class="w-1/2 h-full overflow-hidden rounded-xl">
+						{#if file.blobUrl}
+							<img
+								class="object-cover w-full h-full"
+								src={file.blobUrl}
+								alt={file.name}
+							/>
+						{:else}
+							<div
+								class="w-full h-full flex items-center justify-center text-black"
+								style="background: var({isAudio
+									? '--bg-gradient-purple-alt'
+									: isVideo
+										? '--bg-gradient-red-alt'
+										: '--bg-gradient-blue-alt'})"
+							>
+								{#if isAudio}
+									<FileMusicIcon size="56" />
+								{:else if isVideo}
+									<FileVideo2 size="56" />
+								{:else}
+									<ImageOffIcon size="56" />
+								{/if}
+							</div>
+						{/if}
+					</div>
+				</div>
+				<div
+					class="absolute top-16 right-0 mr-4 pl-2 h-[calc(100%-83px)] w-[calc(50%-38px)] pr-4 pb-1 flex items-center justify-center aspect-square"
+				>
+					<div
+						class="w-[122px] h-fit flex flex-col gap-2 items-center justify-center"
+					>
+						<Dropdown
+							options={file.converter?.supportedFormats || []}
+							bind:selected={file.to}
+							onselect={() => file.result && (file.result = null)}
+						/>
+						<div class="w-full flex items-center justify-between">
+							<button
+								class="btn p-0 w-14 h-14 text-black {isAudio
+									? 'bg-accent-purple'
+									: isVideo
+										? 'bg-accent-red'
+										: 'bg-accent-blue'}"
+								disabled={!files.ready}
+								onclick={file.convert}
+							>
+								<RotateCwIcon size="24" />
+							</button>
+							<button
+								class="btn p-0 w-14 h-14"
+								onclick={file.download}
+								disabled={!file.result}
+							>
+								<DownloadIcon size="24" />
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		{/if}
+	</Panel>
+{/snippet}
+
+<div class="flex flex-col justify-center items-center gap-8 -mt-4 px-4 md:p-0">
+	<div class="max-w-[778px] w-full">
+		<ConversionPanel />
+	</div>
+
+	<div
+		class="w-full max-w-[778px] grid grid-cols-1 md:grid-cols-2 auto-rows-[240px] gap-4 md:p-0"
+	>
+		{#each files.files as file, i (file.id)}
+			{#if files.files.length >= 2 && i === 1}
+				<Uploader
+					class="w-full h-full col-start-1 row-start-1 md:col-start-2"
+				/>
+			{/if}
+			{@render fileItem(file, i)}
+			{#if files.files.length < 2}
+				<Uploader class="w-full h-full" />
+			{/if}
+		{/each}
+		{#if files.files.length === 0}
+			<Uploader class="w-full h-full col-span-2" />
+		{/if}
+	</div>
 </div>
-
-<style>
-	@keyframes initial-transition {
-		0% {
-			transform: translateY(50px);
-			filter: blur(16px);
-			opacity: 0;
-		}
-
-		100% {
-			transform: translateY(0);
-			filter: blur(0);
-			opacity: 1;
-		}
-	}
-
-	.initial-fade {
-		animation: initial-transition 600ms var(--delay) var(--transition);
-		opacity: 0;
-	}
-
-	.initial-fade.finished {
-		animation: none;
-		opacity: 1 !important;
-	}
-
-	@keyframes processing {
-		0% {
-			transform: scale(1);
-			filter: blur(0px);
-			animation-timing-function: ease-in-out;
-		}
-
-		50% {
-			transform: scale(1.05);
-			filter: blur(4px);
-			animation-timing-function: ease-in-out;
-		}
-
-		100% {
-			transform: scale(1);
-			filter: blur(0px);
-			animation-timing-function: ease-in-out;
-		}
-	}
-
-	.processing {
-		animation: processing 2000ms infinite;
-		pointer-events: none;
-	}
-
-	.file-list {
-		transition:
-			filter 500ms var(--transition),
-			transform 500ms var(--transition);
-	}
-</style>

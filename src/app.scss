@@ -2,15 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url(@fontsource/lexend/400.css);
-@import url(@fontsource/lexend/500.css);
-@import url(@fontsource/azeret-mono/600.css);
+@import url(@fontsource/radio-canada-big/600.css);
+@import url("$lib/assets/style/host-grotesk.css");
 
 :root {
-	--font-body: "Lexend", system-ui, -apple-system, BlinkMacSystemFont,
+	--font-body: "Host Grotesk", system-ui, -apple-system, BlinkMacSystemFont,
 		"Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
 		"Helvetica Neue", sans-serif;
-	--font-display: "Azeret Mono", var(--font-body);
+	--font-display: "Radio Canada Big", var(--font-body);
 	--transition: linear(
 		0,
 		0.006,
@@ -30,28 +29,171 @@
 }
 
 @mixin light {
-	--accent-bg: hsl(303, 73%, 81%);
-	--accent-fg: hsl(0, 0, 10%);
-	--bg: hsl(0, 0%, 100%);
-	--bg-transparent: hsla(0, 0%, 100%, 0.6);
-	--fg: hsl(0, 0%, 10%);
-	--fg-muted: hsl(0, 0%, 50%);
-	--fg-muted-alt: hsl(0, 0%, 75%);
-	--fg-highlight: hsl(303, 61%, 47%);
-	--fg-failure: hsl(0, 67%, 49%);
-	color-scheme: light;
+	// general
+	--accent-pink: hsl(302, 100%, 76%);
+	--accent-pink-alt: hsl(302, 100%, 50%);
+	--accent-pink-muted: hsl(302, 98%, 42%);
+	--accent-red: hsl(348, 100%, 80%);
+	--accent-red-alt: hsl(348, 100%, 50%);
+	--accent-purple: hsl(264, 100%, 81%);
+	--accent-purple-alt: hsl(264, 100%, 50%);
+	--accent-blue: hsl(220, 100%, 78%);
+	--accent-blue-alt: hsl(220, 100%, 50%);
+	--accent: var(--accent-pink);
+	--accent-alt: var(--accent-pink-alt);
+
+	// foregrounds
+	--fg: hsl(0, 0%, 0%);
+	--fg-muted: hsla(0, 0%, 0%, 0.6);
+	--fg-on-accent: hsl(0, 0%, 0%);
+	--fg-on-badge: hsl(0, 0%, 0%);
+	// readable version of the accent color
+	--fg-accent: var(--accent-pink-muted);
+	--fg-failure: var(--accent-red-alt);
+
+	// backgrounds
+	--bg: hsl(0, 0%, 95%);
+	--bg-gradient: linear-gradient(
+		to bottom,
+		var(--accent-pink),
+		hsla(303, 100%, 50%, 0) 100%
+	);
+	--bg-gradient-pink: linear-gradient(
+		to bottom,
+		var(--accent-pink),
+		hsla(303, 100%, 50%, 0) 25%
+	);
+	--bg-gradient-pink-alt: linear-gradient(
+		to top,
+		var(--accent-pink),
+		hsl(303, 100%, 91%) 100%
+	);
+	--bg-gradient-red: linear-gradient(
+		to bottom,
+		var(--accent-red),
+		hsla(348, 100%, 50%, 0) 25%
+	);
+	--bg-gradient-red-alt: linear-gradient(
+		to top,
+		var(--accent-red),
+		hsl(348, 100%, 91%) 100%
+	);
+	--bg-gradient-purple: linear-gradient(
+		to bottom,
+		var(--accent-purple),
+		hsla(264, 100%, 50%, 0) 25%
+	);
+	--bg-gradient-purple-alt: linear-gradient(
+		to top,
+		var(--accent-purple),
+		hsl(264, 100%, 91%) 100%
+	);
+	--bg-gradient-blue: linear-gradient(
+		to bottom,
+		var(--accent-blue),
+		hsla(220, 100%, 50%, 0) 25%
+	);
+	--bg-gradient-blue-alt: linear-gradient(
+		to top,
+		var(--accent-blue),
+		hsl(220, 100%, 91%) 100%
+	);
+	--bg-gradient-image: linear-gradient(
+		to bottom,
+		hsla(0, 0%, 95%, 0.5),
+		hsla(0, 0%, 95%, 1) 100%
+	);
+	--bg-panel: hsl(0, 0%, 100%);
+	--bg-panel-highlight: hsl(0, 0%, 92%);
+	--bg-separator: hsl(0, 0%, 88%);
+	--bg-button: var(--bg-panel-highlight);
+	--bg-badge: var(--accent-pink);
+	--bg-input: #e0e0e0;
+
+	--shadow-panel: 0 2px 4px 0 hsla(0, 0%, 0%, 0.15);
 }
 
 @mixin dark {
-	--accent-bg: hsl(304, 41%, 21%);
-	--accent-fg: hsl(303, 73%, 81%);
-	--bg: hsl(0, 0%, 8%);
-	--bg-transparent: hsla(0, 0%, 8%, 0.8);
-	--fg: hsl(0, 0%, 90%);
-	--fg-muted: hsl(0, 0%, 50%);
-	--fg-muted-alt: hsl(0, 0%, 25%);
-	--fg-highlight: hsl(303, 64%, 65%);
-	--fg-failure: hsl(0, 67%, 80%);
+	// general
+	--accent-pink: hsl(302, 100%, 76%);
+	--accent-pink-alt: hsl(302, 100%, 50%);
+	--accent-red: hsl(348, 100%, 80%);
+	--accent-red-alt: hsl(348, 100%, 50%);
+	--accent-purple: hsl(264, 100%, 81%);
+	--accent-purple-alt: hsl(264, 100%, 50%);
+	--accent-blue: hsl(220, 100%, 78%);
+	--accent-blue-alt: hsl(220, 100%, 50%);
+	--accent: var(--accent-pink);
+	--accent-alt: var(--accent-pink-alt);
+
+	// foregrounds
+	--fg: hsl(0, 0%, 100%);
+	--fg-muted: hsla(0, 0%, 100%, 0.65);
+	--fg-on-accent: hsl(0, 0%, 0%);
+	--fg-on-badge: hsl(0, 0%, 0%);
+	--fg-accent: var(--accent);
+	--fg-failure: var(--accent-red);
+
+	// backgrounds
+	--bg: hsl(220, 5%, 15%);
+	--bg-gradient: linear-gradient(
+		to bottom,
+		hsla(303, 100%, 50%, 0.1),
+		hsla(303, 100%, 50%, 0) 100%
+	);
+	--bg-gradient-pink: linear-gradient(
+		to bottom,
+		hsla(303, 100%, 50%, 0.1),
+		hsla(303, 100%, 50%, 0) 25%
+	);
+	--bg-gradient-pink-alt: linear-gradient(
+		to top,
+		var(--accent-pink),
+		hsl(303, 100%, 91%) 100%
+	);
+	--bg-gradient-red: linear-gradient(
+		to bottom,
+		hsla(348, 100%, 50%, 0.1),
+		hsla(348, 100%, 50%, 0) 25%
+	);
+	--bg-gradient-red-alt: linear-gradient(
+		to top,
+		var(--accent-red),
+		hsl(348, 100%, 91%) 100%
+	);
+	--bg-gradient-purple: linear-gradient(
+		to bottom,
+		hsla(264, 100%, 50%, 0.1),
+		hsla(264, 100%, 50%, 0) 25%
+	);
+	--bg-gradient-purple-alt: linear-gradient(
+		to top,
+		var(--accent-purple),
+		hsl(264, 100%, 91%) 100%
+	);
+	--bg-gradient-blue: linear-gradient(
+		to bottom,
+		hsla(220, 100%, 50%, 0.1),
+		hsla(220, 100%, 50%, 0) 25%
+	);
+	--bg-gradient-blue-alt: linear-gradient(
+		to top,
+		var(--accent-blue),
+		hsl(220, 100%, 91%) 100%
+	);
+	--bg-gradient-image: linear-gradient(
+		to bottom,
+		hsla(220, 5%, 12%, 0.5),
+		hsla(220, 5%, 12%, 1) 100%
+	);
+	--bg-panel: hsl(220, 4%, 24%);
+	--bg-panel-highlight: hsl(220, 2%, 32%);
+	--bg-separator: hsl(220, 4%, 28%);
+	--bg-button: hsl(220, 6%, 34%);
+	--bg-badge: var(--accent-pink);
+
+	--shadow-panel: 0 4px 6px 0 hsla(0, 0%, 0%, 0.15);
+
 	color-scheme: dark;
 }
 
@@ -76,8 +218,31 @@
 }
 
 body {
-	@apply text-foreground bg-background font-body overflow-x-hidden;
+	@apply text-foreground font-body font-semibold overflow-x-hidden;
 	width: 100vw;
+	background-color: var(--bg);
+	background-size: 100vw 100vh;
+}
+
+::selection,
+::-moz-selection {
+	@apply bg-accent-blue text-on-accent;
+}
+
+.hoverable {
+	@apply hover:scale-105 duration-200;
+}
+
+.hoverable-md {
+	@apply hover:scale-110 duration-200;
+}
+
+.hoverable-lg {
+	@apply hover:scale-[1.15] duration-200;
+}
+
+.selected {
+	@apply bg-accent-purple !text-black;
 }
 
 @layer components {
@@ -86,14 +251,44 @@ body {
 	}
 
 	.btn {
-		@apply font-display flex items-center justify-center overflow-hidden relative cursor-pointer px-4 border-2 border-solid bg-background border-foreground-muted-alt rounded-xl p-2 focus:!outline-none hover:scale-105 duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+		@apply bg-button flex items-center justify-center overflow-hidden relative cursor-pointer px-6 h-14 rounded-full font-medium focus:!outline-none hover:scale-105 duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none hoverable;
 		transition:
 			opacity 0.2s ease,
 			transform 0.2s ease,
 			background-color 0.2s ease;
 	}
 
-	.btn-highlight {
-		@apply bg-accent-background text-accent-foreground border-accent-background;
+	.btn.highlight {
+		@apply bg-accent text-on-accent;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply font-display font-semibold;
+	}
+
+	code {
+		@apply font-mono bg-gray-200 rounded-md px-1 dynadark:bg-panel-alt dynadark:text-white;
+	}
+
+	p a {
+		@apply text-accent underline;
+	}
+
+	input[type="text"],
+	select.dropdown {
+		@apply w-full p-3 rounded-lg bg-panel border-2 border-button pl-3 pr-[4rem];
+	}
+
+	input[type="text"]::placeholder {
+		@apply text-muted font-normal;
+	}
+
+	input[type="text"]:focus {
+		@apply outline outline-accent outline-2;
 	}
 }

@@ -1,9 +1,10 @@
-import { VertFile } from "$lib/types";
-import { Converter } from "./converter.svelte";
-import VipsWorker from "$lib/workers/vips?worker&url";
 import { browser } from "$app/environment";
-import type { WorkerMessage, OmitBetterStrict } from "$lib/types";
-import { log } from "$lib/logger";
+import { error, log } from "$lib/logger";
+import { addToast } from "$lib/store/ToastProvider";
+import type { OmitBetterStrict, WorkerMessage } from "$lib/types";
+import { VertFile } from "$lib/types";
+import VipsWorker from "$lib/workers/vips?worker&url";
+import { Converter } from "./converter.svelte";
 
 export class VipsConverter extends Converter {
 	private worker: Worker = browser
@@ -44,7 +45,15 @@ export class VipsConverter extends Converter {
 		this.worker.onmessage = (e) => {
 			const message: WorkerMessage = e.data;
 			log(["converters", this.name], `received message ${message.type}`);
-			if (message.type === "loaded") this.ready = true;
+            if (message.type === "loaded") {
+                this.ready = true;
+            } else if (message.type === "error") {
+                error(["converters", this.name], `error in worker: ${message.error}`);
+				addToast("error", `Error in VIPS worker, some features may not work.`);
+				throw new Error(message.error);
+			} else {
+				error(["converters", this.name], `unknown message type: ${message.type}`);
+			}
 		};
 	}
 
@@ -103,7 +112,7 @@ export class VipsConverter extends Converter {
 			try {
 				this.worker.postMessage(msg);
 			} catch (e) {
-				console.error(e);
+				error(["converters", this.name], e);
 			}
 		});
 	}

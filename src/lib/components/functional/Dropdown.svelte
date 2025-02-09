@@ -1,17 +1,24 @@
 <script lang="ts">
-	import { blur, duration, flip, transition } from "$lib/animation";
+	import { duration, fade, transition } from "$lib/animation";
 	import { ChevronDown } from "lucide-svelte";
 	import { onMount } from "svelte";
 	import { quintOut } from "svelte/easing";
-	import { fade } from "svelte/transition";
 
 	type Props = {
 		options: string[];
 		selected?: string;
 		onselect?: (option: string) => void;
+		disabled?: boolean;
+		settingsStyle?: boolean;
 	};
 
-	let { options, selected = $bindable(), onselect }: Props = $props();
+	let {
+		options,
+		selected = $bindable(options[0]),
+		onselect,
+		disabled,
+		settingsStyle,
+	}: Props = $props();
 
 	let open = $state(false);
 	let hover = $state(false);
@@ -31,10 +38,6 @@
 		toggle();
 	};
 
-	$effect(() => {
-		selected = selected || options[0];
-	});
-
 	onMount(() => {
 		const click = (e: MouseEvent) => {
 			if (dropdown && !dropdown.contains(e.target as Node)) {
@@ -47,46 +50,44 @@
 	});
 </script>
 
-<div class="relative w-full min-w-fit" bind:this={dropdown}>
+<div
+	class="relative w-full min-w-fit {settingsStyle
+		? 'font-normal'
+		: 'text-xl font-medium'} text-center"
+	bind:this={dropdown}
+>
 	<button
-		class="font-display w-full min-w-fit justify-between overflow-hidden relative cursor-pointer px-3 border-2 border-solid flex items-center bg-background border-foreground-muted-alt rounded-xl p-2 focus:!outline-none"
+		class="font-display w-full {settingsStyle
+			? 'justify-between'
+			: 'justify-center'} overflow-hidden relative cursor-pointer {settingsStyle
+			? 'px-4'
+			: 'px-3'} py-3.5 bg-button {disabled
+			? 'opacity-50'
+			: ''} flex items-center {settingsStyle
+			? 'rounded-xl'
+			: 'rounded-full'} focus:!outline-none"
 		onclick={toggle}
 		onmouseenter={() => (hover = true)}
 		onmouseleave={() => (hover = false)}
+		{disabled}
 	>
 		<!-- <p>{selected}</p> -->
-		<div
-			class="grid grid-cols-1 grid-rows-1 w-fit text-left flex-grow-0 pr-12"
-		>
+		<div class="grid grid-cols-1 grid-rows-1 w-fit flex-grow-0">
 			{#key selected}
 				<p
-					in:blur={{
+					in:fade={{
 						duration,
 						easing: quintOut,
-						blurMultiplier: 6,
-						scale: {
-							start: 0.9,
-							end: 1,
-						},
-						y: {
-							start: isUp ? -50 : 50,
-							end: 0,
-						},
 					}}
-					out:blur={{
+					out:fade={{
 						duration,
 						easing: quintOut,
-						blurMultiplier: 6,
-						scale: {
-							start: 1,
-							end: 0.9,
-						},
-						y: {
-							start: 0,
-							end: isUp ? 50 : -50,
-						},
 					}}
-					class="col-start-1 row-start-1 text-left"
+					class="col-start-1 row-start-1 {settingsStyle
+						? 'text-left'
+						: 'text-center'} font-body {settingsStyle
+						? 'font-normal'
+						: 'font-medium'}"
 				>
 					{selected}
 				</p>
@@ -108,26 +109,16 @@
 	</button>
 	{#if open}
 		<div
-			style={hover ? "will-change: opacity, blur, transform" : ""}
-			transition:blur={{
+			style={hover ? "will-change: opacity, fade, transform" : ""}
+			transition:fade={{
 				duration,
 				easing: quintOut,
-				blurMultiplier: 6,
-				scale: {
-					start: 0.9,
-					end: 1,
-				},
-				y: {
-					start: -10,
-					end: 0,
-				},
-				origin: "top center",
 			}}
-			class="w-full shadow-xl shadow-black/25 absolute overflow-hidden top-full mt-1 left-0 z-50 bg-background border-2 border-solid border-foreground-muted-alt rounded-xl"
+			class="w-full shadow-xl bg-panel-alt shadow-black/25 absolute overflow-hidden top-full mt-1 left-0 z-50 bg-background rounded-xl max-h-[30vh] overflow-y-auto"
 		>
 			{#each options as option}
 				<button
-					class="w-full p-2 px-4 text-left hover:bg-foreground-muted-alt brightness-125"
+					class="w-full p-2 px-4 text-left hover:bg-panel"
 					onclick={() => select(option)}
 				>
 					{option}

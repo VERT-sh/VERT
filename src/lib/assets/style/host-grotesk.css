@@ -1,0 +1,42 @@
+@font-face {
+	font-family: "Host Grotesk";
+	font-style: normal;
+	font-weight: 400;
+	src: url("$lib/assets/font/HostGrotesk-Regular.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Host Grotesk";
+	font-style: italic;
+	font-weight: 400;
+	src: url("$lib/assets/font/HostGrotesk-Italic.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Host Grotesk";
+	font-style: normal;
+	font-weight: 500;
+	src: url("$lib/assets/font/HostGrotesk-Medium.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Host Grotesk";
+	font-style: italic;
+	font-weight: 500;
+	src: url("$lib/assets/font/HostGrotesk-MediumItalic.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Host Grotesk";
+	font-style: normal;
+	font-weight: 600;
+	src: url("$lib/assets/font/HostGrotesk-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Host Grotesk";
+	font-style: italic;
+	font-weight: 600;
+	src: url("$lib/assets/font/HostGrotesk-SemiBoldItalic.woff2")
+		format("woff2");
+}

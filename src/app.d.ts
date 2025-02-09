@@ -1,3 +1,5 @@
+import "@poppanator/sveltekit-svg/dist/svg";
+
 type EventPayload = {
 	readonly n: string;
 	readonly u: Location["href"];

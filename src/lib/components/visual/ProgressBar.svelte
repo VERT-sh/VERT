@@ -12,11 +12,9 @@
 	);
 </script>
 
-<div
-	class="w-full h-1 dynadark:bg-foreground-muted-alt bg-foreground-muted rounded-full overflow-hidden relative"
->
+<div class="w-full h-1 bg-panel-alt rounded-full overflow-hidden relative">
 	<div
-		class="h-full bg-accent-background dynadark:bg-accent-foreground absolute left-0 top-0"
+		class="h-full bg-accent absolute left-0 top-0"
 		class:percentless-animation={progress === null}
 		style={percent
 			? `width: ${percent}%; transition: 500ms linear width;`

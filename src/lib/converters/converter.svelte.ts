@@ -28,4 +28,8 @@ export class Converter {
 	): Promise<VertFile> {
 		throw new Error("Not implemented");
 	}
+
+	public async valid(): Promise<boolean> {
+		return true;
+	}
 }

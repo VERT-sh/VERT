@@ -1,10 +1,44 @@
 <!doctype html>
-<html lang="en" class="%theme%">
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.webp" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		%sveltekit.head%
+		<script>
+			(function () {
+				// Apply theme before DOM is loaded
+				let theme = localStorage.getItem("theme");
+				const prefersDark = window.matchMedia(
+					"(prefers-color-scheme: dark)",
+				).matches;
+				console.log(
+					`Theme: ${theme || "N/A"}, prefers dark: ${prefersDark}`,
+				);
+
+				if (theme !== "light" && theme !== "dark") {
+					console.log("Invalid theme, setting to default");
+					if (!theme) {
+						console.log("First time visitor, setting theme");
+						// first time visitor
+						window.addEventListener("load", () => {
+							window.plausible("Theme set", {
+								props: {
+									theme: prefersDark ? "dark" : "light",
+								},
+							});
+						});
+					}
+
+					// invalid theme or first time visitor, set to default
+					theme = prefersDark ? "dark" : "light";
+					localStorage.setItem("theme", theme);
+				}
+
+				console.log(`Applying theme: ${theme}`);
+				document.documentElement.classList.add(theme);
+			})();
+		</script>
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>

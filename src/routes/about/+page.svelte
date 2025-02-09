@@ -1,159 +1,132 @@
 <script lang="ts">
+	import { error, log } from "$lib/logger";
+	import * as About from "$lib/sections/about";
+	import { InfoIcon } from "lucide-svelte";
+	import { onMount } from "svelte";
 	import avatarNullptr from "$lib/assets/avatars/nullptr.jpg";
 	import avatarRealmy from "$lib/assets/avatars/realmy.jpg";
+	import avatarJovannMC from "$lib/assets/avatars/jovannmc.jpg";
+	import { GITHUB_API_URL } from "$lib/consts";
+	import { addToast } from "$lib/store/ToastProvider";
 
-	const multiplier = 50;
+	/* interface Donator {
+		name: string;
+		amount?: string | number;
+		avatar: string;
+	} */
 
-	const credits = [
+	interface Contributor {
+		name: string;
+		github: string;
+		avatar: string;
+		role?: string;
+	}
+
+	// const donors: Donator[] = [];
+
+	const mainContribs: Contributor[] = [
 		{
 			name: "nullptr",
+			github: "https://github.com/not-nullptr",
+			role: "Lead developer; conversion backend, UI implementation",
 			avatar: avatarNullptr,
-			url: "https://nullp.tr",
-			description: "conversion backend, UI, animations, promotion",
 		},
 		{
 			name: "Realmy",
+			github: "https://github.com/RealmyTheMan",
+			role: "Lead designer; logo and branding, user interface design",
 			avatar: avatarRealmy,
-			url: "https://realmy.net",
-			description: "idea, UI, branding, operational costs",
+		},
+		{
+			name: "JovannMC",
+			github: "https://github.com/JovannMC",
+			role: "Developer; UI implementation",
+			avatar: avatarJovannMC,
 		},
 	];
+
+	let ghContribs: Contributor[] = [];
+
+	onMount(async () => {
+		// Check if the data is already in sessionStorage
+		const cachedContribs = sessionStorage.getItem("ghContribs");
+		if (cachedContribs) {
+			ghContribs = JSON.parse(cachedContribs);
+			log(["about"], "loaded GitHub contributors from cache");
+			return;
+		}
+
+		// Fetch GitHub contributors
+		try {
+			const response = await fetch(`${GITHUB_API_URL}/contributors`);
+			if (!response.ok) {
+				addToast("error", "Error fetching GitHub contributors");
+				throw new Error(`HTTP error, status: ${response.status}`);
+			}
+			const allContribs = await response.json();
+
+			// Filter out main contributors
+			const mainContribNames = mainContribs.map((contrib) =>
+				contrib.github.split("/").pop(),
+			);
+			const filteredContribs = allContribs.filter(
+				(contrib: { login: string }) =>
+					!mainContribNames.includes(contrib.login),
+			);
+
+			// Fetch and cache avatar images as Base64
+			const fetchAvatar = async (url: string) => {
+				const res = await fetch(url);
+				const blob = await res.blob();
+				return new Promise<string>((resolve, reject) => {
+					const reader = new FileReader();
+					reader.onloadend = () => resolve(reader.result as string);
+					reader.onerror = reject;
+					reader.readAsDataURL(blob);
+				});
+			};
+
+			ghContribs = await Promise.all(
+				filteredContribs.map(
+					async (contrib: {
+						login: string;
+						avatar_url: string;
+						html_url: string;
+					}) => ({
+						name: contrib.login,
+						avatar: await fetchAvatar(contrib.avatar_url),
+						github: contrib.html_url,
+					}),
+				),
+			);
+
+			// Cache the data in sessionStorage
+			sessionStorage.setItem("ghContribs", JSON.stringify(ghContribs));
+		} catch (e) {
+			error(["general"], `Error fetching GitHub contributors: ${e}`);
+		}
+	});
 </script>
 
-<svelte:head>
-	<title>About VERT</title>
-	<meta name="title" content="About VERT — VERT.sh" />
-	<meta property="og:title" content="About VERT — VERT.sh" />
-	<meta property="twitter:title" content="About VERT — VERT.sh" />
-</svelte:head>
-
-<div class="text-lg mx-auto max-w-screen-md">
-	<h1
-		class="font-display text-3xl text-transition"
-		style="--delay: {0 * multiplier}ms"
-	>
-		⁉️ about VERT
+<div class="flex flex-col h-full items-center">
+	<h1 class="hidden md:block text-[40px] tracking-tight leading-[72px] mb-6">
+		<InfoIcon size="40" class="inline-block -mt-2 mr-2" />
+		About
 	</h1>
-	<p class="mt-6 text-transition" style="--delay: {1 * multiplier}ms">
-		You know what sucks? File converters! They're usually riddled with ads,
-		and take an ungodly amount of time to complete. <b
-			>So we made a better one!</b
-		>
-	</p>
-	<p class="mt-4 text-transition" style="--delay: {2 * multiplier}ms">
-		VERT is a file converter that's open source, completely ad free, and
-		much much faster than you're used to. All the converting is done on your
-		device, which makes it both private and very speedy. And it of course
-		has a beautiful UI! ✨
-	</p>
 
-	<h2
-		class="font-display text-3xl mt-12 text-transition"
-		style="--delay: {3 * multiplier}ms"
+	<div
+		class="w-full max-w-[1280px] flex flex-col md:flex-row gap-4 p-4 md:px-4 md:py-0"
 	>
-		🖼️ supported formats
-	</h2>
-	<p class="mt-6 text-transition" style="--delay: {4 * multiplier}ms">
-		As of right now, VERT supports image and audio conversion of most
-		popular formats. We'll add support for more formats in the future!
-	</p>
+		<!-- Why VERT? & Credits -->
+		<div class="flex flex-col gap-4 flex-1">
+			<About.Why />
+		</div>
 
-	<h2
-		class="font-display text-3xl mt-12 text-transition"
-		style="--delay: {5 * multiplier}ms"
-	>
-		🔗 resources
-	</h2>
-	<ul class="list-disc list-inside mt-6">
-		<li class="text-transition" style="--delay: {6 * multiplier}ms">
-			<a
-				href="https://github.com/not-nullptr/VERT"
-				class="text-foreground-highlight hover:underline">Source code</a
-			> (hosted on GitHub, licensed under AGPL-3.0)
-		</li>
-
-		<li class="text-transition" style="--delay: {7 * multiplier}ms">
-			<a
-				href="https://discord.gg/8XXZ7TFFrK"
-				class="text-foreground-highlight hover:underline"
-				>Discord server</a
-			> (for chit-chat, suggestions, and support)
-		</li>
-	</ul>
-
-	<h2
-		class="font-display text-3xl mt-12 text-transition"
-		style="--delay: {8 * multiplier}ms"
-	>
-		🎨 credits
-	</h2>
-	<div class="flex gap-4 mt-8">
-		{#each credits as credit, i}
-			<div class="hover:scale-105 w-56 transition-transform">
-				<div
-					class="border-2 credit-transition border-solid border-foreground-muted-alt rounded-2xl overflow-hidden"
-					style="--delay: {i * 50 + multiplier * 9}ms;"
-				>
-					<a class="w-48" href={credit.url} target="_blank">
-						<img src={credit.avatar} alt="{credit.name}'s avatar" />
-						<div class="text-center py-4 px-2">
-							<p class="font-display text-xl">{credit.name}</p>
-							<p class="text-sm text-foreground-muted mt-2">
-								{credit.description}
-							</p>
-						</div>
-					</a>
-				</div>
-			</div>
-		{/each}
+		<!-- Resources & Donate to VERT -->
+		<div class="flex flex-col gap-4 flex-1">
+			<About.Resources />
+			<About.Credits {mainContribs} {ghContribs} />
+			<!-- <About.Donate /> -->
+		</div>
 	</div>
-
-	<p
-		class="text-foreground-muted text-base mt-10 text-transition"
-		style="--delay: {10 * multiplier}ms"
-	>
-		(obviously inspired by <a
-			href="https://cobalt.tools"
-			class="hover:underline">cobalt.tools</a
-		>)
-	</p>
 </div>
-
-<style>
-	@keyframes credit-transition {
-		from {
-			opacity: 0;
-			transform: translateX(60px);
-			filter: blur(18px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-			filter: blur(0);
-		}
-	}
-
-	@keyframes text-transition {
-		from {
-			opacity: 0;
-			transform: translateY(60px);
-			filter: blur(18px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-			filter: blur(0);
-		}
-	}
-
-	.credit-transition {
-		animation: credit-transition 750ms var(--transition) var(--delay)
-			forwards;
-		opacity: 0;
-	}
-
-	.text-transition {
-		animation: text-transition 750ms var(--transition) var(--delay) forwards;
-		opacity: 0;
-	}
-</style>

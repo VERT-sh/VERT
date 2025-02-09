@@ -1,121 +1,78 @@
 <script lang="ts">
-	import { Upload } from "lucide-svelte";
+	import { UploadIcon } from "lucide-svelte";
+	import Panel from "../visual/Panel.svelte";
 	import clsx from "clsx";
 	import { onMount } from "svelte";
+	import { files } from "$lib/store/index.svelte";
+	import { converters } from "$lib/converters";
+	import { goto } from "$app/navigation";
 
-	let fileList = $state<FileList>();
-	let dragBtn = $state<HTMLButtonElement>();
+	type Props = {
+		class?: string;
+	};
 
-	interface Props {
-		files: File[] | undefined;
-		onupload?: () => void;
-		isMobile: boolean;
-		acceptedFormats?: string[];
-	}
+	const { class: classList }: Props = $props();
 
-	$effect(() => {
-		if (!fileList) return;
-		files = Array.from(fileList);
-	});
+	let uploaderButton = $state<HTMLButtonElement>();
 
-	let fileInput = $state<HTMLInputElement>();
-	let dragOver = $state(false);
-
-	let { files = $bindable(), onupload, isMobile, acceptedFormats }: Props = $props();
-
-	function upload() {
-		if (!fileInput) return;
-		fileInput.click();
-	}
+	const uploadFiles = async () => {
+		const input = document.createElement("input");
+		input.type = "file";
+		input.multiple = true;
+		// filter converters to ones where await converter.valid() is true
+		const filteredConverters = (
+			await Promise.all(
+				converters.map(async (c) => {
+					if (await c.valid()) return c;
+				}),
+			)
+		).filter((c) => typeof c !== "undefined");
+		input.accept = filteredConverters
+			.map((c) => c.supportedFormats.join(","))
+			.join(",");
+		input.onchange = (e) => {
+			const oldLength = files.files.length;
+			files.add(input.files);
+			if (oldLength !== files.files.length) goto("/convert");
+		};
+		input.click();
+	};
 
 	onMount(() => {
-		const handler = (e: Event) => e.preventDefault();
-		if (!dragBtn) return;
-		dragBtn.addEventListener("dragenter", handler);
-		dragBtn.addEventListener("dragstart", handler);
-		dragBtn.addEventListener("dragend", handler);
-		dragBtn.addEventListener("dragleave", handler);
-		dragBtn.addEventListener("dragover", handler);
-		dragBtn.addEventListener("drag", handler);
-		dragBtn.addEventListener("drop", handler);
+		const handler = (e: Event) => {
+			e.preventDefault();
+			return false;
+		};
+
+		uploaderButton?.addEventListener("dragover", handler);
+		uploaderButton?.addEventListener("dragenter", handler);
+		uploaderButton?.addEventListener("dragleave", handler);
+		uploaderButton?.addEventListener("drop", handler);
 
 		return () => {
-			if (!dragBtn) return;
-			dragBtn.removeEventListener("dragenter", handler);
-			dragBtn.removeEventListener("dragstart", handler);
-			dragBtn.removeEventListener("dragend", handler);
-			dragBtn.removeEventListener("dragleave", handler);
-			dragBtn.removeEventListener("dragover", handler);
-			dragBtn.removeEventListener("drag", handler);
-			dragBtn.removeEventListener("drop", handler);
+			uploaderButton?.removeEventListener("dragover", handler);
+			uploaderButton?.removeEventListener("dragenter", handler);
+			uploaderButton?.removeEventListener("dragleave", handler);
+			uploaderButton?.removeEventListener("drop", handler);
 		};
 	});
-
-	function drop(event: DragEvent) {
-		event.preventDefault();
-		dragOver = false;
-		if (!event.dataTransfer) return;
-		if (!files) files = Array.from(event.dataTransfer.files);
-		else files.push(...Array.from(event.dataTransfer.files));
-		onupload?.();
-		return true;
-	}
-
-	function addFiles() {
-		if (!fileInput) return;
-		if (!fileInput.files) return;
-		if (!files) files = Array.from(fileInput.files);
-		else files.push(...Array.from(fileInput.files));
-		onupload?.();
-	}
 </script>
 
 <button
-	bind:this={dragBtn}
-	onclick={upload}
-	ondragover={() => (dragOver = true)}
-	ondragleave={() => (dragOver = false)}
-	class={clsx(
-		"file-uploader",
-		"w-full h-80 flex items-center justify-center cursor-pointer",
-		"border-2 border-solid border-foreground-muted-alt rounded-2xl",
-		"hover:scale-95 hover:opacity-70 transition-all duration-150 ease-out",
-		{
-			"scale-95 opacity-70 blur-xs": dragOver,
-		},
-	)}
-	class:_drag-over={dragOver}
-	ondrop={drop}
+	onclick={uploadFiles}
+	bind:this={uploaderButton}
+	class={clsx(`hover:scale-105 active:scale-100 duration-200 ${classList}`)}
 >
-	<div
-		class="file-uploader-center flex items-center justify-center flex-col transition-all duration-150 ease-out px-8"
+	<Panel
+		class="flex justify-center items-center w-full h-full flex-col pointer-events-none"
 	>
 		<div
-			class="size-16 rounded-full text-accent-foreground bg-accent-background flex items-center justify-center"
+			class="w-16 h-16 bg-accent rounded-full flex items-center justify-center p-4"
 		>
-			<Upload class="size-8" />
+			<UploadIcon class="w-full h-full text-on-accent" />
 		</div>
-		<h2 class="font-display text-2xl mt-6">
-			{isMobile ? "Tap" : "Drop or click"} to upload files
+		<h2 class="text-center text-2xl font-semibold mt-4">
+			Drop or click to upload
 		</h2>
-		<p class="text-foreground-muted mt-4">
-			All processing is done on your device. No file or size limit.
-		</p>
-	</div>
+	</Panel>
 </button>
-
-<input
-	type="file"
-	class="hidden"
-	bind:this={fileInput}
-	onchange={addFiles}
-	accept={acceptedFormats?.join(",") ?? "*"}
-	multiple
-/>
-
-<style>
-	.file-uploader:hover .file-uploader-center,
-	.file-uploader._drag-over .file-uploader-center {
-		@apply scale-105;
-	}
-</style>

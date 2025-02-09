@@ -2,7 +2,8 @@ import { VertFile } from "$lib/types";
 import { Converter } from "./converter.svelte";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { browser } from "$app/environment";
-import { log } from "$lib/logger";
+import { error, log } from "$lib/logger";
+import { addToast } from "$lib/store/ToastProvider";
 
 export class FFmpegConverter extends Converter {
 	private ffmpeg: FFmpeg = null!;
@@ -30,17 +31,25 @@ export class FFmpegConverter extends Converter {
 		super();
 		log(["converters", this.name], `created converter`);
 		if (!browser) return;
-		this.ffmpeg = new FFmpeg();
-		(async () => {
-			const baseURL =
-				"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm";
-			await this.ffmpeg.load({
-				coreURL: `${baseURL}/ffmpeg-core.js`,
-				wasmURL: `${baseURL}/ffmpeg-core.wasm`,
-			});
-			// this is just to cache the wasm and js for when we actually use it. we're not using this ffmpeg instance
-			this.ready = true;
-		})();
+		try {
+			this.ffmpeg = new FFmpeg();
+			(async () => {
+				const baseURL =
+					"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm";
+				await this.ffmpeg.load({
+					coreURL: `${baseURL}/ffmpeg-core.js`,
+					wasmURL: `${baseURL}/ffmpeg-core.wasm`,
+				});
+				// this is just to cache the wasm and js for when we actually use it. we're not using this ffmpeg instance
+				this.ready = true;
+			})();
+		} catch (err) {
+			error(["converters", this.name], `error loading ffmpeg: ${err}`);
+			addToast(
+				"error",
+				`Error loading ffmpeg, some features may not work.`,
+			);
+		}
 	}
 
 	public async convert(input: VertFile, to: string): Promise<VertFile> {
