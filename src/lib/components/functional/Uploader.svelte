@@ -3,7 +3,7 @@
 	import Panel from "../visual/Panel.svelte";
 	import clsx from "clsx";
 	import { onMount } from "svelte";
-	import { files } from "$lib/store/index.svelte";
+	import { effects, files } from "$lib/store/index.svelte";
 	import { converters } from "$lib/converters";
 	import { goto } from "$app/navigation";
 
@@ -61,7 +61,7 @@
 <button
 	onclick={uploadFiles}
 	bind:this={uploaderButton}
-	class={clsx(`hover:scale-105 active:scale-100 duration-200 ${classList}`)}
+	class={clsx(`hover:scale-105 active:scale-100 ${$effects ? "" : "!scale-100"} duration-200 ${classList}`)}
 >
 	<Panel
 		class="flex justify-center items-center w-full h-full flex-col pointer-events-none"

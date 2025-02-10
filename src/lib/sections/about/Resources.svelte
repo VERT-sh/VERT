@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import { DISCORD_URL, GITHUB_URL_VERT } from "$lib/consts";
+	import { effects } from "$lib/store/index.svelte";
 	import { GithubIcon, LinkIcon, MessageCircleMoreIcon } from "lucide-svelte";
 </script>
 
@@ -18,7 +19,7 @@
 			href={DISCORD_URL}
 			target="_blank"
 			rel="noopener noreferrer"
-			class="btn flex-1 gap-2 p-4 rounded-full bg-button text-black dynadark:text-white flex items-center justify-center"
+			class="btn {$effects ? "" : "!scale-100"} flex-1 gap-2 p-4 rounded-full bg-button text-black dynadark:text-white flex items-center justify-center"
 		>
 			<MessageCircleMoreIcon size="24" class="inline-block mr-2" />
 			Discord
@@ -27,7 +28,7 @@
 			href={GITHUB_URL_VERT}
 			target="_blank"
 			rel="noopener noreferrer"
-			class="btn flex-1 gap-2 p-4 rounded-full bg-button text-black dynadark:text-white flex items-center justify-center"
+			class="btn {$effects ? "" : "!scale-100"} flex-1 gap-2 p-4 rounded-full bg-button text-black dynadark:text-white flex items-center justify-center"
 		>
 			<GithubIcon size="24" class="inline-block mr-2" />
 			Source

@@ -10,7 +10,18 @@
 	// -- JovannMC
 
 	import Uploader from "$lib/components/functional/Uploader.svelte";
+	import { converters } from "$lib/converters";
 	import { AudioLines, Check, Film, Image } from "lucide-svelte";
+
+	const getSupportedFormats = (name: string) =>
+		converters.find((c) => c.name === name)?.supportedFormats.join(", ") ||
+		"none";
+
+	const supportedFormats = {
+		images: getSupportedFormats("libvips"),
+		audio: getSupportedFormats("ffmpeg"),
+		video: getSupportedFormats("vertd"),
+	};
 </script>
 
 <div class="max-w-6xl w-full mx-auto px-6 md:px-8">
@@ -40,7 +51,7 @@
 	<hr />
 
 	<div class="mt-10 md:mt-16">
-		<h2 class="text-center text-4xl">VERT Supports...</h2>
+		<h2 class="text-center text-4xl">VERT supports...</h2>
 
 		<div class="grid gap-4 md:grid-cols-3 mt-8">
 			<div class="file-category-card">
@@ -51,7 +62,13 @@
 					<span>Images</span>
 				</div>
 
-				<p>Animated images are not supported (yet).</p>
+				<div class="flex flex-col text-center justify-center">
+					<p>Animated images are not supported (yet).</p>
+					<p>
+						<b>Supported formats:</b>
+						{supportedFormats.images}
+					</p>
+				</div>
 			</div>
 
 			<div class="file-category-card">
@@ -62,9 +79,15 @@
 					<span>Audio</span>
 				</div>
 
-				<p class="flex items-center justify-center gap-2">
-					<Check size="20" /> Fully supported
-				</p>
+				<div class="flex flex-col text-center justify-between">
+					<p class="flex items-center justify-center gap-2">
+						<Check size="20" /> Fully supported
+					</p>
+					<p>
+						<b>Supported formats:</b>
+						{supportedFormats.audio}
+					</p>
+				</div>
 			</div>
 
 			<div class="file-category-card">
@@ -74,13 +97,16 @@
 					</div>
 					<span>Video *</span>
 				</div>
-				<p>
-					Video requires special setup. <a
-						target="_blank"
-						href="https://github.com/VERT-sh/VERT/wiki/How-to-convert-video-with-VERT"
-						>Learn more</a
-					>
-				</p>
+				<div class="flex flex-col text-center justify-between">
+					<p>
+						Video requires special setup. <a
+							target="_blank"
+							href="https://github.com/VERT-sh/VERT/wiki/How-to-convert-video-with-VERT"
+							>Learn more</a
+						>.
+					</p>
+					<p><b>Supported formats:</b> {supportedFormats.video}</p>
+				</div>
 			</div>
 		</div>
 	</div>

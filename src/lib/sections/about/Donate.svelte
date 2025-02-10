@@ -1,6 +1,7 @@
 <script lang="ts">
 	import FancyInput from "$lib/components/functional/FancyInput.svelte";
 	import Panel from "$lib/components/visual/Panel.svelte";
+	import { effects } from "$lib/store/index.svelte";
 	import {
 		CalendarHeartIcon,
 		HandCoinsIcon,
@@ -41,29 +42,29 @@
 	<div class="flex flex-col gap-3 w-full">
 		<div class="flex gap-3 w-full">
 			<button
-				class="btn flex-1 p-4 rounded-lg bg-accent-red text-black flex items-center justify-center"
+				class="btn {$effects ? "" : "!scale-100"} flex-1 p-4 rounded-lg bg-accent-red text-black flex items-center justify-center"
 			>
 				<HandCoinsIcon size="24" class="inline-block mr-2" />
 				One-time
 			</button>
 
 			<button
-				class="btn flex-1 p-4 rounded-lg bg-button text-black dynadark:text-white flex items-center justify-center"
+				class="btn {$effects ? "" : "!scale-100"} flex-1 p-4 rounded-lg bg-button text-black dynadark:text-white flex items-center justify-center"
 			>
 				<CalendarHeartIcon size="24" class="inline-block mr-2" />
 				Monthly
 			</button>
 		</div>
 		<div class="flex gap-3 w-full">
-			<button class="btn bg-accent-red text-black p-4 rounded-lg flex-1"
+			<button class="btn {$effects ? "" : "!scale-100"} bg-accent-red text-black p-4 rounded-lg flex-1"
 				>$1 USD</button
 			>
 			<button
-				class="btn bg-button text-black dynadark:text-white p-4 rounded-lg flex-1"
+				class="btn {$effects ? "" : "!scale-100"} bg-button text-black dynadark:text-white p-4 rounded-lg flex-1"
 				>$5 USD</button
 			>
 			<button
-				class="btn bg-button text-black dynadark:text-white p-4 rounded-lg flex-1"
+				class="btn {$effects ? "" : "!scale-100"} bg-button text-black dynadark:text-white p-4 rounded-lg flex-1"
 				>$10 USD</button
 			>
 			<!-- <div class="relative flex items-center flex-[2]">
@@ -86,7 +87,7 @@
 		</p>
 
 		<button
-			class="btn flex-1 p-3 rounded-3xl bg-accent-red text-black flex items-center justify-center"
+			class="btn {$effects ? "" : "!scale-100"} flex-1 p-3 rounded-3xl bg-accent-red text-black flex items-center justify-center"
 		>
 			<WalletIcon size="24" class="inline-block mr-2" />
 			Pay now

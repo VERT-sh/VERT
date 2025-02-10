@@ -32,16 +32,6 @@ function addToast(
 		exit: 500,
 	};
 
-	// if "disappearing" not set, default error/warning to infinite duration
-	if (disappearing === undefined) {
-		switch (type) {
-			case "error":
-			case "warning":
-				durations.stay = 86400000; // 24h cause why not
-				break;
-		}
-	}
-
 	const newToast: Toast = {
 		id,
 		type,

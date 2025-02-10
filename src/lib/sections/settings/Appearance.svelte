@@ -55,6 +55,11 @@
 		if (effectsUnsubscribe) effectsUnsubscribe();
 		if (themeUnsubscribe) themeUnsubscribe();
 	});
+
+	$effect(() => {
+        updateEffectsClasses($effects);
+        updateThemeClasses($theme);
+    });
 </script>
 
 <Panel class="flex flex-col gap-8 p-6">
@@ -80,7 +85,7 @@
 						<button
 							bind:this={lightElement}
 							onclick={() => setTheme("light")}
-							class="btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+							class="btn {$effects ? "" : "!scale-100"} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
 						>
 							<SunIcon size="24" class="inline-block mr-2" />
 							Light
@@ -89,7 +94,7 @@
 						<button
 							bind:this={darkElement}
 							onclick={() => setTheme("dark")}
-							class="btn flex-1 p-4 rounded-lg text-black flex items-center justify-center"
+							class="btn {$effects ? "" : "!scale-100"} flex-1 p-4 rounded-lg text-black flex items-center justify-center"
 						>
 							<MoonIcon size="24" class="inline-block mr-2" />
 							Dark
@@ -110,7 +115,7 @@
 						<button
 							bind:this={enableEffectsElement}
 							onclick={() => setEffects(true)}
-							class="btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+							class="btn {$effects ? "" : "!scale-100"} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
 						>
 							<PlayIcon size="24" class="inline-block mr-2" />
 							Enable
@@ -119,7 +124,7 @@
 						<button
 							bind:this={disableEffectsElement}
 							onclick={() => setEffects(false)}
-							class="btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+							class="btn {$effects ? "" : "!scale-100"} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
 						>
 							<PauseIcon size="24" class="inline-block mr-2" />
 							Disable

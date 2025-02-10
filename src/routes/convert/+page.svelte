@@ -4,10 +4,13 @@
 	import Uploader from "$lib/components/functional/Uploader.svelte";
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import ProgressBar from "$lib/components/visual/ProgressBar.svelte";
+	import { converters } from "$lib/converters";
 	import {
+		effects,
 		files,
 		gradientColor,
 		showGradient,
+		vertdLoaded,
 	} from "$lib/store/index.svelte";
 	import { VertFile } from "$lib/types";
 	import {
@@ -24,12 +27,6 @@
 	} from "lucide-svelte";
 
 	$effect(() => {
-		if (files.files.length === 1 && files.files[0].blobUrl) {
-			showGradient.set(false);
-		} else {
-			showGradient.set(true);
-		}
-
 		// Set gradient color depending on the file types
 		// TODO: if more file types added, add a "fileType" property to the file object
 		const allAudio = files.files.every(
@@ -43,6 +40,12 @@
 		const allVideos = files.files.every(
 			(file) => file.converter?.name === "vertd",
 		);
+
+		if (files.files.length === 1 && files.files[0].blobUrl && !allVideos) {
+			showGradient.set(false);
+		} else {
+			showGradient.set(true);
+		}
 
 		if (
 			files.files.length === 0 ||
@@ -95,12 +98,38 @@
 			</button>
 		</div>
 		{#if !file.converter}
+			{#if file.name.startsWith("vertd")}
+				<div
+					class="h-full flex flex-col text-center justify-center text-failure"
+				>
+					<p class="font-body font-bold">
+						We can't convert this file.
+					</p>
+					<p class="font-normal">
+						what are you doing..? you're supposed to run the vertd
+						server!
+					</p>
+				</div>
+			{:else}
+				<div
+					class="h-full flex flex-col text-center justify-center text-failure"
+				>
+					<p class="font-body font-bold">
+						We can't convert this file.
+					</p>
+					<p class="font-normal">
+						Only image, video, and audio files are supported
+					</p>
+				</div>
+			{/if}
+		{:else if isVideo && !$vertdLoaded}
 			<div
 				class="h-full flex flex-col text-center justify-center text-failure"
 			>
 				<p class="font-body font-bold">We can't convert this file.</p>
 				<p class="font-normal">
-					Only image, video, and audio files are supported
+					Could not find the vertd instance to start video conversion.
+					Are you sure the instance URL is set correctly?
 				</p>
 			</div>
 		{:else}
@@ -148,7 +177,9 @@
 						/>
 						<div class="w-full flex items-center justify-between">
 							<button
-								class="btn p-0 w-14 h-14 text-black {isAudio
+								class="btn {$effects
+									? ''
+									: '!scale-100'} p-0 w-14 h-14 text-black {isAudio
 									? 'bg-accent-purple'
 									: isVideo
 										? 'bg-accent-red'
@@ -159,7 +190,9 @@
 								<RotateCwIcon size="24" />
 							</button>
 							<button
-								class="btn p-0 w-14 h-14"
+								class="btn {$effects
+									? ''
+									: '!scale-100'} p-0 w-14 h-14"
 								onclick={file.download}
 								disabled={!file.result}
 							>

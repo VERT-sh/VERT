@@ -1,22 +1,23 @@
 <script lang="ts">
-	type Props = {
-		class: string;
-		items: { [name: string]: string };
-	};
+	import { GITHUB_URL_VERT, DISCORD_URL } from "$lib/consts";
 
-	const { class: classList, items }: Props = $props();
+	const items = Object.entries({
+		//"Privacy policy": "#",
+		"Source code": GITHUB_URL_VERT,
+		"Discord server": DISCORD_URL,
+	});
 
 	const year = new Date().getFullYear();
-
-	const links = $derived(Object.entries(items));
 </script>
 
-<footer class={classList}>
+<footer
+	class="hidden md:block w-full h-14 border-t border-separator fixed bottom-0 mt-12"
+>
 	<div
 		class="w-full h-full flex items-center justify-center text-muted gap-3 relative"
 	>
 		<p>© {year} VERT.</p>
-		{#each links as [name, url] (name)}
+		{#each items as [name, url] (name)}
 			<!-- bullet point -->
 			<p>•</p>
 			<a

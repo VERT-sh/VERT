@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { files } from "$lib/store/index.svelte";
+	import { effects, files } from "$lib/store/index.svelte";
 	import { FolderArchiveIcon, RefreshCw } from "lucide-svelte";
 	import Panel from "../visual/Panel.svelte";
 	import Dropdown from "./Dropdown.svelte";
@@ -11,14 +11,14 @@
 	<div class="flex items-center flex-col md:flex-row gap-2.5 max-md:w-full">
 		<button
 			onclick={() => files.convertAll()}
-			class="btn highlight flex gap-3 max-md:w-full"
+			class="btn {$effects ? "" : "!scale-100"} highlight flex gap-3 max-md:w-full"
 			disabled={!files.ready}
 		>
 			<RefreshCw size="24" />
 			<p>Convert all</p>
 		</button>
 		<button
-			class="btn flex gap-3 max-md:w-full"
+			class="btn {$effects ? "" : "!scale-100"} flex gap-3 max-md:w-full"
 			disabled={!files.ready || !files.results}
 			onclick={() => files.downloadAll()}
 		>

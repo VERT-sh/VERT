@@ -5,6 +5,7 @@
 	import type { ISettings } from "./index.svelte";
 	import clsx from "clsx";
 	import Dropdown from "$lib/components/functional/Dropdown.svelte";
+	import { vertdLoaded } from "$lib/store/index.svelte";
 
 	let vertdCommit = $state<string | null>(null);
 	let abortController: AbortController | null = null;
@@ -12,7 +13,7 @@
 	const { settings }: { settings: ISettings } = $props();
 
 	$effect(() => {
-		if (settings.vertdURL) {
+		if (settings.vertdURL) {			
 			if (abortController) abortController.abort();
 			abortController = new AbortController();
 			const { signal } = abortController;
@@ -21,17 +22,23 @@
 			fetch(`${settings.vertdURL}/api/version`, { signal })
 				.then((res) => {
 					if (!res.ok) throw new Error("bad response");
+					vertdLoaded.set(false);
 					return res.json();
 				})
 				.then((data) => {
 					vertdCommit = data.data;
+					vertdLoaded.set(true);
 				})
 				.catch((err) => {
-					if (err.name !== "AbortError") vertdCommit = null;
+					if (err.name !== "AbortError") {
+						vertdCommit = null;
+						vertdLoaded.set(false);
+					}
 				});
 		} else {
 			if (abortController) abortController.abort();
 			vertdCommit = null;
+			vertdLoaded.set(false);
 		}
 
 		return () => {
@@ -48,7 +55,7 @@
 				class="inline-block -mt-1 mr-2 bg-accent-red p-2 rounded-full overflow-visible"
 				color="black"
 			/>
-			Converting Video
+			Video conversion
 		</h2>
 		<p
 			class={clsx("text-sm font-normal", {

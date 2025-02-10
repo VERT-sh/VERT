@@ -2,24 +2,56 @@
 	import { browser } from "$app/environment";
 	import { page } from "$app/state";
 	import { duration, fade } from "$lib/animation";
-	import { effects, setTheme } from "$lib/store/index.svelte";
+	import { effects, files, goingLeft, setTheme } from "$lib/store/index.svelte";
 	import clsx from "clsx";
-	import { MoonIcon, SunIcon } from "lucide-svelte";
+	import {
+		InfoIcon,
+		MoonIcon,
+		RefreshCw,
+		SettingsIcon,
+		SunIcon,
+		UploadIcon,
+	} from "lucide-svelte";
 	import { quintOut } from "svelte/easing";
-	import Panel from "../visual/Panel.svelte";
-	import Logo from "../visual/svg/Logo.svelte";
+	import Panel from "../../visual/Panel.svelte";
+	import Logo from "../../visual/svg/Logo.svelte";
+	import { beforeNavigate } from "$app/navigation";
 
-	type Props = {
-		items: {
+	const items = $derived<
+		{
 			name: string;
 			url: string;
 			activeMatch: (pathname: string) => boolean;
 			icon: any;
 			badge?: number;
-		}[];
-	};
-
-	let { items }: Props = $props();
+		}[]
+	>([
+		{
+			name: "Upload",
+			url: "/",
+			activeMatch: (pathname) => pathname === "/",
+			icon: UploadIcon,
+		},
+		{
+			name: "Convert",
+			url: "/convert",
+			activeMatch: (pathname) => pathname === "/convert",
+			icon: RefreshCw,
+			badge: files.files.length,
+		},
+		{
+			name: "Settings",
+			url: "/settings",
+			activeMatch: (pathname) => pathname.startsWith("/settings"),
+			icon: SettingsIcon,
+		},
+		{
+			name: "About",
+			url: "/about",
+			activeMatch: (pathname) => pathname.startsWith("/about"),
+			icon: InfoIcon,
+		},
+	]);
 
 	let links = $state<HTMLAnchorElement[]>([]);
 	let container = $state<HTMLDivElement>();
@@ -33,6 +65,20 @@
 	const selectedIndex = $derived(
 		items.findIndex((i) => i.activeMatch(page.url.pathname)),
 	);
+
+	beforeNavigate((e) => {
+		const oldIndex = items.findIndex((i) =>
+			i.activeMatch(e.from?.url.pathname || ""),
+		);
+		const newIndex = items.findIndex((i) =>
+			i.activeMatch(e.to?.url.pathname || ""),
+		);
+		if (newIndex < oldIndex) {
+			goingLeft.set(true)
+		} else {
+			goingLeft.set(false)
+		}
+	});
 </script>
 
 {#snippet link(item: (typeof items)[0], index: number)}
