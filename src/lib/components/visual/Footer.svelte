@@ -30,7 +30,7 @@
 	</div>
 
 	<div
-		class="absolute bottom-0 left-0 w-full h-24 -z-10"
+		class="absolute bottom-0 left-0 w-full h-24 -z-10 pointer-events-none"
 		style="background: linear-gradient(to bottom, transparent, var(--bg) 100%)"
 	></div>
 </footer>

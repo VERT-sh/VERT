@@ -10,78 +10,96 @@
 	// -- JovannMC
 
 	import Uploader from "$lib/components/functional/Uploader.svelte";
+	import { AudioLines, Check, Film, Image } from "lucide-svelte";
 </script>
 
-<div
-	class="w-screen px-2 md:px-8 h-full flex items-start justify-center overflow-hidden max-h-screen"
->
-	<div class="content w-screen flex items-center justify-center flex-grow">
-		<div class="max-w-5xl w-full">
-			<div
-				class="flex items-center h-auto gap-12 md:gap-24 md:flex-row flex-col"
-			>
-				<div class="flex-grow w-full text-center md:text-left">
-					<h1
-						class="text-4xl px-12 md:p-0 md:text-6xl flex-wrap tracking-tight leading-tight md:leading-[72px] mb-4 md:mb-6"
-					>
-						The file converter you'll love.
-					</h1>
-					<p
-						class="font-normal px-5 md:p-0 text-lg md:text-xl text-black text-muted dynadark:text-muted"
-					>
-						All processing is done on your device. No file size
-						limit, no ads, and completely open source.
-					</p>
+<div class="max-w-6xl w-full mx-auto px-6 md:px-8">
+	<div class="flex items-center justify-center pb-10 md:py-16">
+		<div
+			class="flex items-center h-auto gap-12 md:gap-24 md:flex-row flex-col"
+		>
+			<div class="flex-grow w-full text-center md:text-left">
+				<h1
+					class="text-4xl px-12 md:p-0 md:text-6xl flex-wrap tracking-tight leading-tight md:leading-[72px] mb-4 md:mb-6"
+				>
+					The file converter you'll love.
+				</h1>
+				<p
+					class="font-normal px-5 md:p-0 text-lg md:text-xl text-black text-muted dynadark:text-muted"
+				>
+					All processing is done on your device. No file size limit,
+					no ads, and completely open source.
+				</p>
+			</div>
+			<div class="flex-grow w-full h-72">
+				<Uploader class="w-full h-full" />
+			</div>
+		</div>
+	</div>
+
+	<hr />
+
+	<div class="mt-10 md:mt-16">
+		<h2 class="text-center text-4xl">VERT Supports...</h2>
+
+		<div class="grid gap-4 md:grid-cols-3 mt-8">
+			<div class="file-category-card">
+				<div class="file-category-card-inner">
+					<div class="icon-container bg-accent-blue">
+						<Image size="20" />
+					</div>
+					<span>Images</span>
 				</div>
-				<div class="flex-grow w-11/12 md:w-full h-72">
-					<Uploader class="w-full h-full" />
+
+				<p>Animated images are not supported (yet).</p>
+			</div>
+
+			<div class="file-category-card">
+				<div class="file-category-card-inner">
+					<div class="icon-container bg-accent-purple">
+						<AudioLines size="20" />
+					</div>
+					<span>Audio</span>
 				</div>
+
+				<p class="flex items-center justify-center gap-2">
+					<Check size="20" /> Fully supported
+				</p>
+			</div>
+
+			<div class="file-category-card">
+				<div class="file-category-card-inner">
+					<div class="icon-container bg-accent-red">
+						<Film size="20" />
+					</div>
+					<span>Video *</span>
+				</div>
+				<p>
+					Video requires special setup. <a
+						target="_blank"
+						href="https://github.com/VERT-sh/VERT/wiki/How-to-convert-video-with-VERT"
+						>Learn more</a
+					>
+				</p>
 			</div>
 		</div>
 	</div>
 </div>
 
 <style>
-	/* Centers content on most screen sizes, excluding mobile */
-	@media screen and (min-width: 768px) {
-		.content {
-			padding-top: 10vh;
-			padding-bottom: 10vh;
-		}
+	.file-category-card {
+		@apply bg-panel rounded-2xl p-5 shadow-panel;
 	}
 
-	@media screen and (min-width: 768px) and (min-height: 576px) {
-		.content {
-			padding-top: 15vh;
-			padding-bottom: 15vh;
-		}
+	.file-category-card p {
+		@apply font-normal text-center text-sm mt-4;
 	}
 
-	@media screen and (min-width: 768px) and (min-height: 720px) {
-		.content {
-			padding-top: 20vh;
-			padding-bottom: 20vh;
-		}
+	.file-category-card-inner {
+		@apply flex items-center justify-center gap-3 text-xl;
 	}
 
-	@media screen and (min-width: 768px) and (min-height: 1080px) {
-		.content {
-			padding-top: 25vh;
-			padding-bottom: 25vh;
-		}
-	}
-
-	@media screen and (min-width: 768px) and (min-height: 1440px) {
-		.content {
-			padding-top: 30vh;
-			padding-bottom: 30vh;
-		}
-	}
-
-	@media screen and (min-width: 768px) and (min-height: 2160px) {
-		.content {
-			padding-top: 35vh;
-			padding-bottom: 35vh;
-		}
+	.icon-container {
+		@apply p-2 rounded-full text-on-accent;
 	}
 </style>

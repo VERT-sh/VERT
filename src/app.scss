@@ -105,7 +105,7 @@
 	);
 	--bg-panel: hsl(0, 0%, 100%);
 	--bg-panel-highlight: hsl(0, 0%, 92%);
-	--bg-separator: hsl(0, 0%, 88%);
+	--bg-separator: hsla(0, 0%, 0%, 0.2);
 	--bg-button: var(--bg-panel-highlight);
 	--bg-badge: var(--accent-pink);
 	--bg-input: #e0e0e0;
@@ -290,5 +290,9 @@ body {
 
 	input[type="text"]:focus {
 		@apply outline outline-accent outline-2;
+	}
+	
+	hr {
+		@apply border-separator;
 	}
 }
