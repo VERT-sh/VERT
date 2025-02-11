@@ -1,6 +1,7 @@
 services:
   vert:
     container_name: vert
+    image: VERT-sh/vert:latest # will build under this name
     build:
       context: .
       args:
