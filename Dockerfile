@@ -2,13 +2,16 @@ FROM oven/bun AS builder
 
 WORKDIR /app
 
+ARG PUB_ENV
 ARG PUB_HOSTNAME
 ARG PUB_PLAUSIBLE_URL
 
+ENV PUB_ENV=${PUB_ENV}
 ENV PUB_HOSTNAME=${PUB_HOSTNAME}
 ENV PUB_PLAUSIBLE_URL=${PUB_PLAUSIBLE_URL}
 
 COPY package.json ./
+COPY patches/ ./patches
 
 RUN bun install
 
@@ -16,12 +19,8 @@ COPY . ./
 
 RUN bun run build
 
-FROM oven/bun:alpine
+FROM nginx:stable-alpine
 
-WORKDIR /app
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=builder /app/build ./
-
-EXPOSE 3000
-
-CMD [ "bun", "run", "start" ]
+COPY --from=builder /app/build /usr/share/nginx/html
