@@ -56,7 +56,7 @@ This will build the site to the `build` folder. You can then start the server wi
 
 Clone the repository, then build a Docker image with:
 ```shell
-$ docker build -t not-nullptr/vert \
+$ docker build -t VERT-sh/vert \
 	--build-arg PUB_ENV=production \
 	--build-arg PUB_HOSTNAME=vert.sh \
 	--build-arg PUB_PLAUSIBLE_URL=https://plausible.example.com .
