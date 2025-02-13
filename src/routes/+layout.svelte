@@ -64,7 +64,7 @@
 	/>
 	<meta
 		name="description"
-		content="With VERT you can convert image and audio files to and from PNG, JPG, WEBP, MP3, WAV, FLAC, and more. No ads, no tracking, open source, and all processing is done on your device."
+		content="With VERT you can quickly convert any image, video and audio file. No ads, no tracking, open source, and all processing is done on your device."
 	/>
 	<meta property="og:type" content="website" />
 	<meta
@@ -73,7 +73,7 @@
 	/>
 	<meta
 		property="og:description"
-		content="With VERT you can convert image and audio files to and from PNG, JPG, WEBP, MP3, WAV, FLAC, and more. No ads, no tracking, open source, and all processing is done on your device."
+		content="With VERT you can quickly convert any image, video and audio file. No ads, no tracking, open source, and all processing is done on your device."
 	/>
 	<meta property="og:image" content={featuredImage} />
 	<meta property="twitter:card" content="summary_large_image" />
@@ -83,15 +83,15 @@
 	/>
 	<meta
 		property="twitter:description"
-		content="With VERT you can convert image and audio files to and from PNG, JPG, WEBP, MP3, WAV, FLAC, and more. No ads, no tracking, open source, and all processing is done on your device."
+		content="With VERT you can quickly convert any image, video and audio file. No ads, no tracking, open source, and all processing is done on your device."
 	/>
 	<meta property="twitter:image" content={featuredImage} />
+	<link rel="manifest" href="/manifest.json" />
 	{#if PUB_PLAUSIBLE_URL}<script
 			defer
 			data-domain={PUB_HOSTNAME || "vert.sh"}
 			src="{PUB_PLAUSIBLE_URL}/js/script.pageview-props.tagged-events.js"
 		></script>{/if}
-	<script src="/coi-serviceworker.min.js"></script>
 </svelte:head>
 
 <!-- FIXME: if user resizes between desktop/mobile, highlight of page disappears (only shows on original size) -->

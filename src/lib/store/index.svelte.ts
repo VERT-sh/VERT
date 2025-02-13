@@ -173,7 +173,7 @@ class Files {
 			const file = files.files[i];
 			const result = file.result;
 			if (!result) {
-				console.error("No result found");
+				error(["files"], "No result found");
 				continue;
 			}
 			dlFiles.push({
@@ -215,6 +215,16 @@ export function setTheme(themeTo: "light" | "dark") {
 	});
 	log(["theme"], `set to ${themeTo}`);
 	theme.set(themeTo);
+
+	// Lock dark reader if it's set to dark mode
+	if (themeTo === "dark") {
+		const lock = document.createElement('meta');
+		lock.name = 'darkreader-lock';
+		document.head.appendChild(lock);
+	} else {
+		const lock = document.querySelector('meta[name="darkreader-lock"]');
+		if (lock) lock.remove();
+	}
 }
 
 export function setEffects(effectsEnabled: boolean) {

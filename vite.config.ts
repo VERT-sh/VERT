@@ -1,5 +1,6 @@
 import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 import svg from "@poppanator/sveltekit-svg";
 
 export default defineConfig({
@@ -8,7 +9,7 @@ export default defineConfig({
 		{
 			name: "vips-request-middleware",
 			configureServer(server) {
-				server.middlewares.use((req, res, next) => {
+				server.middlewares.use((_req, res, next) => {
 					res.setHeader(
 						"Cross-Origin-Embedder-Policy",
 						"require-corp",
@@ -30,6 +31,14 @@ export default defineConfig({
 					{ name: "removeAttrs", params: { attrs: "(fill|stroke)" } },
 				],
 			},
+		}),
+		viteStaticCopy({
+			targets: [
+				{
+					src: "_headers",
+					dest: "",
+				},
+			],
 		}),
 	],
 	optimizeDeps: {

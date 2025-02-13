@@ -4,7 +4,6 @@
 	import Uploader from "$lib/components/functional/Uploader.svelte";
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import ProgressBar from "$lib/components/visual/ProgressBar.svelte";
-	import { converters } from "$lib/converters";
 	import {
 		effects,
 		files,
@@ -12,6 +11,7 @@
 		showGradient,
 		vertdLoaded,
 	} from "$lib/store/index.svelte";
+	import { addToast } from "$lib/store/ToastProvider";
 	import { VertFile } from "$lib/types";
 	import {
 		AudioLines,
@@ -25,6 +25,18 @@
 		RotateCwIcon,
 		XIcon,
 	} from "lucide-svelte";
+
+	const handleSelect = (option: string, file: VertFile) => {
+		file.result = null;
+		switch (option) {
+			case ".webp":
+			case ".gif":
+				addToast(
+					"warning",
+					`Converting this file to "${option}" may take some time if animated.`,
+				);
+		}
+	};
 
 	$effect(() => {
 		// Set gradient color depending on the file types
@@ -173,7 +185,7 @@
 						<Dropdown
 							options={file.converter?.supportedFormats || []}
 							bind:selected={file.to}
-							onselect={() => file.result && (file.result = null)}
+							onselect={(option) => handleSelect(option, file)}
 						/>
 						<div class="w-full flex items-center justify-between">
 							<button
