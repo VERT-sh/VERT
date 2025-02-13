@@ -120,6 +120,7 @@
 		<!-- Why VERT? & Credits -->
 		<div class="flex flex-col gap-4 flex-1">
 			<About.Why />
+			<About.Vertd />
 		</div>
 
 		<!-- Resources & Donate to VERT -->
