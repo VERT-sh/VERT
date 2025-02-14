@@ -45,6 +45,7 @@
 		"clsx": "^2.1.1",
 		"jsmediatags": "^3.9.7",
 		"lucide-svelte": "^0.475.0",
+		"vite-plugin-static-copy": "^2.2.0",
 		"wasm-vips": "^0.0.11"
 	},
 	"patchedDependencies": {

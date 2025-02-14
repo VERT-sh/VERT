@@ -33,6 +33,9 @@ export class VipsConverter extends Converter {
 		".tif",
 		".tiff",
 		".jfif",
+		//".heif", HEIF files that are encoded like HEIC files (and HEIC files in general) aren't supported due to https://github.com/kleisauke/wasm-vips/issues/3
+		".avif",
+		".jxl",
 	];
 
 	public readonly reportsProgress = false;
@@ -51,8 +54,6 @@ export class VipsConverter extends Converter {
                 error(["converters", this.name], `error in worker: ${message.error}`);
 				addToast("error", `Error in VIPS worker, some features may not work.`);
 				throw new Error(message.error);
-			} else {
-				error(["converters", this.name], `unknown message type: ${message.type}`);
 			}
 		};
 	}

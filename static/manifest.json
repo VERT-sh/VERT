@@ -1,0 +1,21 @@
+{
+	"name": "VERT",
+	"short_name": "VERT",
+	"description": "The file converter you'll love",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#F2ABEE",
+	"icons": [
+		{
+			"src": "lettermark.jpg",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "lettermark.jpg",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	]
+}
