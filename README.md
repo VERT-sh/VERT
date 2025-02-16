@@ -44,13 +44,16 @@ This will start a development server. Open your browser and navigate to `http://
 Before building for production, make sure you create a `.env` file in the root of the project with the following content:
 
 ```sh
-PUB_HOSTNAME=vert.sh # change to your domain
+PUB_HOSTNAME=example.com # change to your domain, only gets used for Plausible (for now)
 PUB_PLAUSIBLE_URL=https://plausible.example.com # can be empty if not using Plausible
+PUB_ENV=production # "production", "development" or "nightly"
 ```
 
 To build the project for production, run `bun run build`
 
-This will build the site to the `build` folder. You can then start the server with `bun ./build/index.js` and navigate to `http://localhost:3000` to see the application.
+This will build the site to the `build` folder. You should then use a web server like [nginx](https://nginx.org) to serve the files inside that folder.
+
+If using nginx, you can use the [nginx.conf](./nginx.conf) file as a starting point. Make sure you keep [cross-origin isolation](https://web.dev/articles/cross-origin-isolation-guide) enabled.
 
 ### With Docker
 
