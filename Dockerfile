@@ -11,7 +11,6 @@ ENV PUB_HOSTNAME=${PUB_HOSTNAME}
 ENV PUB_PLAUSIBLE_URL=${PUB_PLAUSIBLE_URL}
 
 COPY package.json ./
-COPY patches/ ./patches
 
 RUN bun install
 
