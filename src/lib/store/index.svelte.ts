@@ -1,8 +1,7 @@
 import { converters } from "$lib/converters";
 import { error, log } from "$lib/logger";
 import { VertFile } from "$lib/types";
-import jsmediatags from "jsmediatags";
-import type { TagType } from "jsmediatags/types";
+import { parseBlob, selectCover } from "music-metadata";
 import { writable } from "svelte/store";
 import { addDialog } from "./DialogProvider";
 
@@ -33,22 +32,17 @@ class Files {
 
 		try {
 			if (isAudio) {
-				// try to get the thumbnail from the audio via jsmmediatags
-				const tags = await new Promise<TagType>((resolve, reject) => {
-					jsmediatags.read(file.file, {
-						onSuccess: (tag) => resolve(tag),
-						onError: (error) => reject(error),
-					});
-				});
-				if (tags.tags.picture) {
+				// try to get the thumbnail from the audio via music-metadata
+				const {common} = await parseBlob(file.file);
+				const cover = selectCover(common.picture);
+				if (cover) {
 					const blob = new Blob(
-						[new Uint8Array(tags.tags.picture.data)],
+						[cover.data],
 						{
-							type: tags.tags.picture.format,
+							type: cover.format,
 						},
 					);
-					const url = URL.createObjectURL(blob);
-					file.blobUrl = url;
+					file.blobUrl = URL.createObjectURL(blob);
 				}
 			} else if (isVideo) {
 				// video
