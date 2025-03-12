@@ -1,7 +1,7 @@
 import { converters } from "$lib/converters";
 import { error, log } from "$lib/logger";
 import { VertFile } from "$lib/types";
-import { parseBuffer, selectCover } from "music-metadata";
+import { parseBlob, selectCover } from "music-metadata";
 import { writable } from "svelte/store";
 import { addDialog } from "./DialogProvider";
 
@@ -33,7 +33,7 @@ class Files {
 		try {
 			if (isAudio) {
 				// try to get the thumbnail from the audio via music-metadata
-				const {common} = await parseBuffer(new Uint8Array(await file.file.arrayBuffer()));
+				const {common} = await parseBlob(file.file, {skipPostHeaders: true});
 				const cover = selectCover(common.picture);
 				if (cover) {
 					const blob = new Blob(
