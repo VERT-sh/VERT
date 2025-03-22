@@ -1,3 +1,4 @@
+import { PUB_VERTD_URL } from "$env/static/public";
 import type { ConversionSpeed } from "$lib/converters/vertd.svelte";
 
 export { default as Appearance } from "./Appearance.svelte";
@@ -18,7 +19,7 @@ export class Settings {
 	public settings: ISettings = $state({
 		filenameFormat: "VERT_%name%",
 		plausible: true,
-		vertdURL: "https://vertd.vert.sh",
+		vertdURL: PUB_VERTD_URL,
 		vertdSpeed: "slow",
 	});
 

@@ -60,33 +60,26 @@ export type ConversionSpeed =
 	| "fast"
 	| "ultraFast";
 
+interface HelloMessage {
+	type: "hello";
+	auth: string;
+}
+
 interface StartJobMessage {
 	type: "startJob";
-	data: {
-		token: string;
-		jobId: string;
-		to: string;
-		speed: ConversionSpeed;
-	};
+	to: string;
+	speed: ConversionSpeed;
 }
 
 interface ErrorMessage {
 	type: "error";
-	data: {
-		message: string;
-	};
+	message: string;
 }
 
-interface ProgressMessage {
-	type: "progressUpdate";
-	data: ProgressData;
-}
+type ProgressMessage = ProgressData;
 
 interface CompletedMessage {
 	type: "jobFinished";
-	data: {
-		jobId: string;
-	};
 }
 
 interface FpsProgress {
@@ -102,6 +95,7 @@ interface FrameProgress {
 type ProgressData = FpsProgress | FrameProgress;
 
 type VertdMessage =
+	| HelloMessage
 	| StartJobMessage
 	| ErrorMessage
 	| ProgressMessage
@@ -127,6 +121,17 @@ const uploadFile = async (file: VertFile): Promise<UploadResponse> => {
 	const apiUrl = Settings.instance.settings.vertdURL;
 	const formData = new FormData();
 	formData.append("file", file.file, file.name);
+	formData.append(
+		"json",
+		new Blob(
+			[
+				JSON.stringify({
+					jobType: "conversion",
+				}),
+			],
+			{ type: "application/json" },
+		),
+	);
 	const xhr = new XMLHttpRequest();
 	xhr.open("POST", `${apiUrl}/api/upload`, true);
 
@@ -236,14 +241,16 @@ export class VertdConverter extends Converter {
 			ws.onopen = () => {
 				const speed = Settings.instance.settings.vertdSpeed;
 				this.log("opened ws connection to vertd");
+				const hello: HelloMessage = {
+					type: "hello",
+					auth: uploadRes.auth,
+				};
+				ws.send(JSON.stringify(hello));
+				this.log("sent hello message");
 				const msg: StartJobMessage = {
 					type: "startJob",
-					data: {
-						jobId: uploadRes.id,
-						token: uploadRes.auth,
-						to,
-						speed,
-					},
+					to,
+					speed,
 				};
 				ws.send(JSON.stringify(msg));
 				this.log("sent startJob message");
@@ -253,12 +260,20 @@ export class VertdConverter extends Converter {
 				const msg: VertdMessage = JSON.parse(e.data);
 				this.log(`received message ${msg.type}`);
 				switch (msg.type) {
-					case "progressUpdate": {
-						const data = msg.data;
-						if (data.type !== "frame") break;
-						const frame = data.data;
+					// case "progressUpdate": {
+					// 	const data = msg.data;
+					// 	if (data.type !== "frame") break;
+					// 	const frame = data.data;
+					// 	input.progress = progressEstimate(
+					// 		frame / uploadRes.totalFrames,
+					// 		"convert",
+					// 	);
+					// 	break;
+					// }
+
+					case "frame": {
 						input.progress = progressEstimate(
-							frame / uploadRes.totalFrames,
+							msg.data / uploadRes.totalFrames,
 							"convert",
 						);
 						break;
@@ -267,7 +282,7 @@ export class VertdConverter extends Converter {
 					case "jobFinished": {
 						this.log("job finished");
 						ws.close();
-						const url = `${apiUrl}/api/download/${msg.data.jobId}/${uploadRes.auth}`;
+						const url = `${apiUrl}/api/download/${uploadRes.auth}`;
 						this.log(`downloading from ${url}`);
 						// const res = await fetch(url).then((res) => res.blob());
 						const res = await downloadFile(url, input);
@@ -276,8 +291,8 @@ export class VertdConverter extends Converter {
 					}
 
 					case "error": {
-						this.log(`error: ${msg.data.message}`);
-						reject(msg.data.message);
+						this.log(`error: ${msg.message}`);
+						reject(msg.message);
 					}
 				}
 			};

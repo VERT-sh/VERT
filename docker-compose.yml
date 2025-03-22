@@ -6,6 +6,7 @@ services:
       - PUB_HOSTNAME=${PUB_HOSTNAME:-vert.sh}
       - PUB_PLAUSIBLE_URL=${PUB_PLAUSIBLE_URL:-https://plausible.example.com}
       - PUB_ENV=${PUB_ENV:-production}
+      - PUB_VERTD_URL=${PUB_VERTD_URL:-https://vertd.vert.sh}
       - PORT=${PORT:-3000}
     build:
       context: .
@@ -13,6 +14,7 @@ services:
         PUB_HOSTNAME: ${PUB_HOSTNAME:-vert.sh}
         PUB_PLAUSIBLE_URL: ${PUB_PLAUSIBLE_URL:-https://plausible.example.com}
         PUB_ENV: ${PUB_ENV:-production}
+        PUB_VERTD_URL: ${PUB_VERTD_URL:-https://vertd.vert.sh}
     restart: unless-stopped
     ports:
       - ${PORT:-3000}:80
