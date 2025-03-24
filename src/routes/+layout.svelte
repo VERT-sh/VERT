@@ -18,7 +18,7 @@
 	} from "$lib/store/index.svelte";
 	import "../app.scss";
 
-	let { children } = $props();
+	let { children, data } = $props();
 	let enablePlausible = $state(false);
 
 	let scrollPositions = new Map<string, number>();
@@ -114,6 +114,13 @@
 			data-domain={PUB_HOSTNAME || "vert.sh"}
 			src="{PUB_PLAUSIBLE_URL}/js/script.js"
 		></script>
+	{/if}
+	{#if data.isAprilFools}
+		<style>
+			* {
+				font-family: "Comic Sans MS", "Comic Sans", cursive !important;
+			}
+		</style>
 	{/if}
 </svelte:head>
 

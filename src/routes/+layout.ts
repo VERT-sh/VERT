@@ -1,7 +1,7 @@
 import { browser } from "$app/environment";
 
 export const load = ({ data }) => {
-	if (!browser) return;
+	if (!browser) return data;
 	window.plausible =
 		window.plausible ||
 		((_, opts) => {
@@ -9,6 +9,7 @@ export const load = ({ data }) => {
 				status: 200,
 			});
 		});
+
 	return data;
 };
 
