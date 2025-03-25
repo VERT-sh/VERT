@@ -33,7 +33,6 @@ export class VipsConverter extends Converter {
 		".tif",
 		".tiff",
 		".jfif",
-		".avif",
 	];
 
 	public readonly reportsProgress = false;
