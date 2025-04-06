@@ -17,6 +17,7 @@
 		vertdLoaded,
 	} from "$lib/store/index.svelte";
 	import "../app.scss";
+	import { browser } from "$app/environment";
 
 	let { children, data } = $props();
 	let enablePlausible = $state(false);
@@ -73,6 +74,10 @@
 		// Enable plausible if enabled
 		enablePlausible =
 			!!PUB_PLAUSIBLE_URL && Settings.instance.settings.plausible;
+		if (!enablePlausible && browser) {
+			// reset pushState on opt-out so that plausible stops firing events on page navigation
+			history.pushState = History.prototype.pushState;
+		}
 	});
 </script>
 
