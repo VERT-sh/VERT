@@ -70,7 +70,7 @@ You can then run it by using:
 $ docker run --restart unless-stopped -p 3000:3000 -d --name "vert" VERT-sh/vert
 ```
 
-We also have a `docker-compose.yml` file available. Use `docker compose up` if you want to start the stack, or `docker compose down` to bring it down. You can pass `--build` to `docker compose up` to rebuild the Docker image (useful if you've changed any of the environment variables) as well as `-d` to start it in dettached mode. You can read more about Docker Compose in general [here](https://docs.docker.com/compose/intro/compose-application-model/).
+We also have a `docker-compose.yml` file available. Use `docker compose up` if you want to start the stack, or `docker compose down` to bring it down. You can pass `--build` to `docker compose up` to rebuild the Docker image (useful if you've changed any of the environment variables) as well as `-d` to start it in detached mode. You can read more about Docker Compose in general [here](https://docs.docker.com/compose/intro/compose-application-model/).
 
 ## License
 
