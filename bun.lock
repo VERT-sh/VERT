@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "unnamed-file-converter",
+      "name": "VERT",
       "dependencies": {
         "@bjorn3/browser_wasi_shim": "^0.4.1",
         "@ffmpeg/ffmpeg": "^0.12.15",
