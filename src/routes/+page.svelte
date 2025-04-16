@@ -3,7 +3,7 @@
 	import { converters } from "$lib/converters";
 	import { vertdLoaded } from "$lib/store/index.svelte";
 	import clsx from "clsx";
-	import { AudioLines, BookText, Check, Film, Image } from "lucide-svelte";
+	import { AudioLines, BookText, Check, Film, Image, Type } from "lucide-svelte";
 
 	const { data } = $props();
 
@@ -37,6 +37,11 @@
 			ready: converters.find((c) => c.name === "pandoc")?.ready || false,
 			formats: getSupportedFormats("pandoc"),
 			icon: BookText,
+		},
+		Fonts: {
+			ready: converters.find((c) => c.name === "fontconverter")?.ready || false,
+			formats: getSupportedFormats("fontconverter"),
+			icon: Type,
 		},
 		Video: {
 			ready:
@@ -89,6 +94,7 @@
 								"bg-accent-purple": key === "Audio",
 								"bg-accent-green": key === "Documents",
 								"bg-accent-red": key === "Video",
+								"bg-accent-pink": key === "Fonts"
 							})}
 						>
 							<Icon size="20" />
