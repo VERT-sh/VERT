@@ -1,5 +1,10 @@
 node_modules
 
+# SSL
+*.crt
+*.key
+*.pem
+
 # Output
 .output
 .vercel
