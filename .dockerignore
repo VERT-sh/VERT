@@ -6,6 +6,7 @@ dist/
 .output/
 .vercel/
 .vscode/
+ssl/
 
 LICENSE
 README.md
@@ -19,3 +20,9 @@ docker-compose.yml
 
 .DS_Store
 Thumbs.db
+
+*.crt
+*.key
+*.pem
+
+setup-self-signed.sh
