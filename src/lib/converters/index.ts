@@ -42,7 +42,7 @@ categories.image.formats =
 	converters
 		.find((c) => c.name === "libvips")
 		?.formatStrings((f) => f.toSupported)
-		.filter((f) => f !== ".webp" && f !== ".gif") || [];
+		.filter((f) => f !== ".gif") || [];
 categories.docs.formats =
 	converters
 		.find((c) => c.name === "pandoc")
