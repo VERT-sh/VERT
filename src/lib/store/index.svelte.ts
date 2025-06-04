@@ -3,9 +3,9 @@ import { converters } from "$lib/converters";
 import { error, log } from "$lib/logger";
 import { VertFile } from "$lib/types";
 import { parseBlob, selectCover } from "music-metadata";
+import PQueue from "p-queue";
 import { writable } from "svelte/store";
 import { addDialog } from "./DialogProvider";
-import PQueue from "p-queue";
 
 class Files {
 	public files = $state<VertFile[]>([]);
@@ -18,7 +18,7 @@ class Files {
 		this.files.length === 0
 			? false
 			: this.requiredConverters.every((f) => f?.ready) &&
-					this.files.every((f) => !f.processing),
+			this.files.every((f) => !f.processing),
 	);
 	public results = $derived(
 		this.files.length === 0 ? false : this.files.every((f) => f.result),

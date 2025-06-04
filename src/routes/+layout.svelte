@@ -16,9 +16,11 @@
 		dropping,
 		vertdLoaded,
 	} from "$lib/store/index.svelte";
+	import { language } from "$lib/store/language";
 	import "$lib/css/app.scss";
 	import { browser } from "$app/environment";
 	import { page } from "$app/state";
+	import type { Locales } from "$lib/types/locales.js";
 
 	let { children, data } = $props();
 	let enablePlausible = $state(false);
@@ -65,6 +67,8 @@
 		theme.set(
 			(localStorage.getItem("theme") as "light" | "dark") || "light",
 		);
+
+		language.set((localStorage.getItem("language") as Locales) || "en");
 
 		Settings.instance.load();
 
