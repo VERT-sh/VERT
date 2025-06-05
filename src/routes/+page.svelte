@@ -97,7 +97,7 @@
 		<div class="flex gap-4 mt-8 md:flex-row flex-col">
 			{#each Object.entries(status) as [key, s]}
 				{@const Icon = s.icon}
-				<div class="file-category-card w-full flex flex-col">
+				<div class="file-category-card">
 					<div class="file-category-card-inner">
 						<div
 							class={clsx("icon-container", {
@@ -112,15 +112,19 @@
 						<span>{key}</span>
 					</div>
 
-					<div class="file-category-card-content flex-grow">
+					<div class="file-category-card-content">
 						{#if key === "Video"}
-							<p>
-								Video uploads to a server for processing by
-								default, learn how to set it up locally <a
-									target="_blank"
+							<p
+								class="flex items-center justify-center gap-2 h-full"
+							>
+								<Check size="20" />
+								<a
+									class="underline text-foreground"
 									href="https://github.com/VERT-sh/VERT/wiki/How-to-convert-video-with-VERT"
-									>here</a
-								>.
+									target="_blank"
+									rel="noopener noreferrer"
+									>Server supported</a
+								>
 							</p>
 						{:else}
 							<p
@@ -163,6 +167,11 @@
 							</span>
 						</p>
 					</div>
+					<!-- Blur at the bottom of the card -->
+					<div
+						class="absolute bottom-0 left-0 w-full h-24 z-10 pointer-events-none"
+						style="background: linear-gradient(to bottom, transparent, var(--bg) 100%)"
+					></div>
 				</div>
 			{/each}
 		</div>
@@ -171,7 +180,7 @@
 
 <style>
 	.file-category-card {
-		@apply bg-panel rounded-2xl p-5 shadow-panel;
+		@apply relative bg-panel h-[250px] w-full flex flex-col rounded-2xl p-5 shadow-panel;
 	}
 
 	.file-category-card p {
@@ -183,7 +192,10 @@
 	}
 
 	.file-category-card-content {
-		@apply flex flex-col text-center justify-between;
+		@apply flex flex-col text-center overflow-y-auto gap-2;
+		scrollbar-width: thin;
+		scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+		scrollbar-gutter: auto;
 	}
 
 	.icon-container {
