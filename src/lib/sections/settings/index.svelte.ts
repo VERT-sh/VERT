@@ -5,6 +5,7 @@ export { default as Appearance } from "./Appearance.svelte";
 export { default as Conversion } from "./Conversion.svelte";
 export { default as Vertd } from "./Vertd.svelte";
 export { default as Privacy } from "./Privacy.svelte";
+export { default as Language } from "./Language.svelte";
 
 export interface ISettings {
 	filenameFormat: string;

@@ -63,6 +63,7 @@
 		</div>
 
 		<div class="flex flex-col gap-4 flex-1">
+			<Settings.Language />
 			<Settings.Appearance />
 			{#if PUB_PLAUSIBLE_URL}
 				<Settings.Privacy {settings} />
