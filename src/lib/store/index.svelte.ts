@@ -242,7 +242,7 @@ class Files {
 		const url = URL.createObjectURL(blob);
 
 		const settings = JSON.parse(localStorage.getItem("settings") ?? "{}");
-		const filenameFormat = settings.filenameFormat ?? "VERT_%name%";
+		const filenameFormat = settings.filenameFormat || "VERT_%name%";
 
 		const format = (name: string) => {
 			const date = new Date().toISOString();
