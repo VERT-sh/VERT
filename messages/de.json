@@ -1,0 +1,205 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"navbar": {
+		"upload": "Hochladen",
+		"convert": "Konvertieren",
+		"settings": "Einstellungen",
+		"about": "Über",
+		"toggle_theme": "Theme wechseln"
+	},
+	"footer": {
+		"copyright": "© {year} VERT.",
+		"source_code": "Quellcode",
+		"discord_server": "Discord-Server"
+	},
+	"upload": {
+		"title": "Der Dateikonverter, den du lieben wirst.",
+		"subtitle": "Die Verarbeitung aller Bild-, Audio- und Dokumentdateien findet auf deinem Gerät statt. Videos werden auf unseren blitzschnellen Servern konvertiert. Kein Dateigrößenlimit, keine Werbung und vollständig Open-Source.",
+		"uploader": {
+			"text": "Dateien hier ablegen oder klicken zum {action}",
+			"convert": "Konvertieren",
+			"jpegify": "Jpegifizieren"
+		},
+		"cards": {
+			"title": "VERT unterstützt...",
+			"images": "Bilder",
+			"audio": "Audio",
+			"documents": "Dokumente",
+			"video": "Video",
+			"video_server_processing": "Server-unterstützt",
+			"local_supported": "Lokal unterstützt",
+			"status": {
+				"text": "<b>Status:</b> {status}",
+				"ready": "bereit",
+				"not_ready": "nicht bereit"
+			},
+			"supported_formats": "Unterstützte Formate:"
+		},
+		"tooltip": {
+			"partial_support": "Dieses Format kann nur als {direction} konvertiert werden.",
+			"direction_input": "Input (von)",
+			"direction_output": "Output (nach)",
+			"video_server_processing": "Videos werden standardmäßig zur Verarbeitung auf einen Server hochgeladen. Lerne hier, wie du es lokal einrichten kannst."
+		}
+	},
+	"convert": {
+		"panel": {
+			"convert_all": "Alle konvertieren",
+			"download_all": "Alle als .zip herunterladen",
+			"remove_all": "Alle Dateien entfernen",
+			"set_all_to": "Alle konvertieren nach",
+			"na": "N/V"
+		},
+		"dropdown": {
+			"audio": "Audio",
+			"video": "Video",
+			"doc": "Dokument",
+			"image": "Bild",
+			"placeholder": "Format suchen"
+		},
+		"tooltips": {
+			"unknown_file": "Unbekannter Dateityp",
+			"audio_file": "Audiodatei",
+			"video_file": "Videodatei",
+			"document_file": "Dokumentdatei",
+			"image_file": "Bilddatei",
+			"convert_file": "Diese Datei konvertieren",
+			"download_file": "Diese Datei herunterladen"
+		},
+		"errors": {
+			"cant_convert": "Wir können diese Datei nicht konvertieren.",
+			"vertd_server": "Was machst du da..? Du sollst den vertd-Server ausführen!",
+			"unsupported_format": "Es werden nur Bild-, Video-, Audio- und Dokumentdateien unterstützt.",
+			"vertd_not_found": "Konnte die vertd-Instanz nicht finden, um die Videokonvertierung zu starten. Bist du sicher, dass die Instanz-URL korrekt eingestellt ist?"
+		}
+	},
+	"settings": {
+		"title": "Einstellungen",
+		"errors": {
+			"save_failed": "Speichern der Einstellungen fehlgeschlagen!"
+		},
+		"appearance": {
+			"title": "Erscheinungsbild",
+			"brightness_theme": "Bildschirmmodus",
+			"brightness_description": "Möchtest du einen sonnigen Blendeffekt oder eine ruhige, einsame Nacht?",
+			"light": "Hell",
+			"dark": "Dunkel",
+			"effect_settings": "Effekteinstellungen",
+			"effect_description": "Möchtest du schicke Effekte oder eine eher statische Erfahrung?",
+			"enable": "Aktivieren",
+			"disable": "Deaktivieren"
+		},
+		"conversion": {
+			"title": "Konvertierung",
+			"filename_format": "Dateinamensformat",
+			"filename_description": "Dies bestimmt den Namen der Datei beim Herunterladen, <b>ohne die Dateierweiterung.</b> Du kannst die folgenden Vorlagen in das Format einfügen, die durch die entsprechenden Informationen ersetzt werden: <b>%name%</b> für den ursprünglichen Dateinamen, <b>%extension%</b> für die ursprüngliche Dateierweiterung und <b>%date%</b> für das Datum, an dem die Datei konvertiert wurde.",
+			"placeholder": "VERT_%name%",
+			"quality": "Konvertierungsqualität",
+			"quality_description": "Dies ändert die Standard-Ausgabequalität der konvertierten Dateien (in ihrer Kategorie). Höhere Werte können zu längeren Konvertierungszeiten und größeren Dateigrößen führen.",
+			"quality_video": "Dies ändert die Standard-Ausgabequalität der konvertierten Videodateien. Höhere Werte können zu längeren Konvertierungszeiten und größeren Dateigrößen führen.",
+			"quality_audio": "Audio (kbps)",
+			"quality_images": "Bild (%)",
+			"rate": "Abtastrate (Hz)"
+		},
+		"vertd": {
+			"title": "Videokonvertierung",
+			"status": "Status:",
+			"loading": "lädt...",
+			"available": "verfügbar, Commit-ID {commitId}",
+			"unavailable": "nicht verfügbar (ist die URL korrekt?)",
+			"description": "Das <code>vertd</code>-Projekt ist ein Server-Wrapper für FFmpeg. Dies ermöglicht es dir, Videos bequem über die Weboberfläche von VERT zu konvertieren und dabei die Leistung deiner GPU zu nutzen, um dies so schnell wie möglich zu tun.",
+			"hosting_info": "Wir hosten eine öffentliche Instanz für deine Bequemlichkeit, aber es ist ziemlich einfach, eine eigene auf deinem PC oder Server zu hosten, wenn du weißt, was du tust. Du kannst die Server-Binärdateien [vertd_link]hier[/vertd_link] herunterladen - der Einrichtungsprozess wird in Zukunft einfacher werden, also bleib dran!",
+			"instance_url": "Instanz-URL",
+			"url_placeholder": "Beispiel: http://localhost:24153",
+			"conversion_speed": "Konvertierungsgeschwindigkeit",
+			"speed_description": "Dies beschreibt den Kompromiss zwischen Geschwindigkeit und Qualität. Schnellere Geschwindigkeiten führen zu geringerer Qualität, erledigen die Aufgabe aber schneller.",
+			"speeds": {
+				"very_slow": "Sehr langsam",
+				"slower": "Langsamer",
+				"slow": "Langsam",
+				"medium": "Mittel",
+				"fast": "Schnell",
+				"ultra_fast": "Ultraschnell"
+			}
+		},
+		"privacy": {
+			"title": "Datenschutz",
+			"plausible_title": "Plausible Analytics",
+			"plausible_description": "Wir verwenden [plausible_link]Plausible[/plausible_link], ein datenschutzorientiertes Analysetool, um vollständig anonyme Statistiken zu sammeln. Alle Daten werden anonymisiert und aggregiert, und es werden niemals identifizierbare Informationen gesendet oder gespeichert. Du kannst die Analysen [analytics_link]hier[/analytics_link] einsehen und dich unten abmelden.",
+			"opt_in": "Anmelden",
+			"opt_out": "Abmelden"
+		},
+		"language": {
+			"title": "Sprache",
+			"description": "Wähle deine bevorzugte Sprache für die VERT-Oberfläche."
+		}
+	},
+	"about": {
+		"title": "Über",
+		"why": {
+			"title": "Warum VERT?",
+			"description": "<b>Dateikonverter haben uns schon immer enttäuscht.</b> Sie sind hässlich, voller Werbung und vor allem langsam. Wir haben beschlossen, dieses Problem ein für alle Mal zu lösen, indem wir eine Alternative schaffen, die all diese Probleme und noch mehr löst.<br/><br/>Alle Nicht-Videodateien werden vollständig auf dem Gerät konvertiert; das bedeutet, es gibt keine Verzögerung beim Senden und Empfangen der Dateien von einem Server, und wir können niemals die von dir konvertierten Dateien einsehen.<br/><br/>Videodateien werden auf unseren blitzschnellen RTX 4000 Ada Server hochgeladen. Deine Videos bleiben dort für eine Stunde, wenn du sie nicht konvertierst. Wenn du die Datei konvertierst, bleibt das Video für eine Stunde auf dem Server oder bis es heruntergeladen wird. Anschließend wird die Datei von unserem Server gelöscht."
+		},
+		"sponsors": {
+			"title": "Sponsoren",
+			"description": "Möchtest du uns unterstützen? Kontaktiere einen Entwickler auf dem [discord_link]Discord[/discord_link]-Server oder sende eine E-Mail an",
+			"email_copied": "E-Mail in die Zwischenablage kopiert!"
+		},
+		"resources": {
+			"title": "Ressourcen",
+			"discord": "Discord",
+			"source": "Quelle",
+			"email": "E-Mail"
+		},
+		"donate": {
+			"title": "An VERT spenden",
+			"description": "Mit deiner Unterstützung können wir VERT weiter pflegen und verbessern.",
+			"one_time": "Einmalig",
+			"monthly": "Monatlich",
+			"custom": "Benutzerdefiniert",
+			"pay_now": "Jetzt bezahlen",
+			"donate_amount": "${amount} USD spenden",
+			"thank_you": "Vielen Dank für deine Spende!",
+			"payment_failed": "Zahlung fehlgeschlagen: {message}{period} Dir wurde nichts berechnet.",
+			"donation_error": "Bei der Verarbeitung deiner Spende ist ein Fehler aufgetreten. Bitte versuche es später erneut.",
+			"payment_error": "Fehler beim Abrufen der Zahlungsdetails. Bitte versuche es später erneut."
+		},
+		"credits": {
+			"title": "Mitwirkende",
+			"contact_team": "Wenn du das Entwicklungsteam kontaktieren möchtest, verwende bitte die E-Mail-Adresse auf der Karte „Ressourcen“.",
+			"notable_contributors": "Besonders erwähnenswerte Mitwirkende",
+			"notable_description": "Wir möchten diesen Personen für ihre wichtigen Beiträge zu VERT danken.",
+			"github_contributors": "GitHub-Mitwirkende",
+			"github_description": "Ein großes [jpegify_link]Dankeschön[/jpegify_link] an all diese Leute für ihre Hilfe! [github_link]Möchtest du auch helfen?[/github_link]",
+			"no_contributors": "Scheint, als hätte noch niemand beigetragen... [contribute_link]sei der Erste, der beiträgt![/contribute_link]",
+			"libraries": "Bibliotheken",
+			"libraries_description": "Ein großes Dankeschön an FFmpeg (Audio, Video), ImageMagick (Bilder) und Pandoc (Dokumente) für die Pflege solch exzellenter Bibliotheken über so viele Jahre. VERT verlässt sich auf sie, um dir deine Konvertierungen zu ermöglichen.",
+			"roles": {
+				"lead_developer": "Hauptentwickler; Konvertierungs-Backend, UI-Implementierung",
+				"developer": "Entwickler; UI-Implementierung",
+				"designer": "Designer; UX, Branding, Marketing",
+				"docker_ci": "Pflege von Docker & CI-Unterstützung",
+				"former_cofounder": "Ehemaliger Mitbegründer & Designer"
+			}
+		},
+		"errors": {
+			"github_contributors": "Fehler beim Abrufen der GitHub-Mitwirkenden"
+		}
+	},
+	"workers": {
+		"errors": {
+			"general": "Fehler beim Konvertieren von {file}: {message}",
+			"magick": "Fehler im Magick-Worker, die Bildkonvertierung funktioniert möglicherweise nicht wie erwartet.",
+			"ffmpeg": "Fehler beim Laden von ffmpeg, einige Funktionen sind möglicherweise nicht verfügbar.",
+			"no_audio": "Kein Audiostream gefunden.",
+			"invalid_rate": "Ungültige Abtastrate angegeben: {rate}Hz"
+		}
+	},
+	"jpegify": {
+		"title": "GEHEIMES JPEGIFIZIEREN!!!",
+		"subtitle": "(psst... sag es niemandem!)",
+		"button": "JPEGIFIZIEREN {compression}%!!!",
+		"download": "Herunterladen",
+		"delete": "Löschen"
+	}
+}

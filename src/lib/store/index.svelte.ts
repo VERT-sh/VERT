@@ -299,6 +299,7 @@ export const locale = writable(getLocale());
 export const availableLocales = {
 	"en": "English",
 	"es": "Español",
+	"de": "Deutsch",
 }
 
 export function updateLocale(newLocale: string) {
