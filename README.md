@@ -7,6 +7,10 @@ VERT is a file conversion utility that uses WebAssembly to convert files on your
 
 VERT is built in Svelte and TypeScript.
 
+## Screenshot
+
+<img src="/docs/screenshot.png" alt="Screenshot of the VERT homepage">
+
 ## Features
 
 - Convert files directly on your device using WebAssembly *
