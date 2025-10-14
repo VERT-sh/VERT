@@ -1,8 +1,6 @@
 <script lang="ts">
 	import Toast from "$lib/components/visual/Toast.svelte";
 	import { ToastManager } from "$lib/toast/index.svelte";
-
-	$inspect(ToastManager.toasts);
 </script>
 
 <div
