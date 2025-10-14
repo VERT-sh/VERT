@@ -9,10 +9,10 @@
 	import avatarRealmy from "$lib/assets/avatars/realmy.jpg";
 	import avatarAzurejelly from "$lib/assets/avatars/azurejelly.jpg";
 	import { GITHUB_API_URL } from "$lib/consts";
-	import { addToast } from "$lib/store/ToastProvider";
 	import { dev } from "$app/environment";
 	import { page } from "$app/state";
 	import { m } from "$lib/paraglide/messages";
+	import { ToastManager } from "$lib/toast/index.svelte";
 	// import { dev } from "$app/environment";
 	// import { page } from "$app/state";
 
@@ -81,7 +81,10 @@
 		try {
 			const response = await fetch(`${GITHUB_API_URL}/contributors`);
 			if (!response.ok) {
-				addToast("error", m["about.errors.github_contributors"]());
+				ToastManager.add({
+					type: "error",
+					message: m["about.errors.github_contributors"](),
+				});
 				throw new Error(`HTTP error, status: ${response.status}`);
 			}
 			const allContribs = await response.json();

@@ -22,7 +22,6 @@
 	import FancyInput from "$lib/components/functional/FancyInput.svelte";
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import { effects } from "$lib/store/index.svelte";
-	import { addToast } from "$lib/store/ToastProvider";
 	import {
 		loadStripe,
 		type Stripe,
@@ -39,6 +38,7 @@
 	import { Elements, PaymentElement } from "svelte-stripe";
 	import { quintOut } from "svelte/easing";
 	import { m } from "$lib/paraglide/messages";
+	import { ToastManager } from "$lib/toast/index.svelte";
 
 	let amount = $state(1);
 	let customAmount = $state("");
@@ -67,7 +67,10 @@
 
 		if (!res.ok) {
 			paymentState = "prepay";
-			addToast("error", m["about.donate.payment_error"]());
+			ToastManager.add({
+				type: "error",
+				message: m["about.donate.payment_error"](),
+			});
 			return;
 		}
 
@@ -97,13 +100,13 @@
 		const submitResult = await elements.submit();
 		if (submitResult.error) {
 			const period = submitResult.error.message?.endsWith(".") ? "" : ".";
-			addToast(
-				"error",
-				m["about.donate.payment_failed"]({
+			ToastManager.add({
+				type: "error",
+				message: m["about.donate.payment_failed"]({
 					message: submitResult.error.message || "",
 					period,
 				}),
-			);
+			});
 			enablePay = true;
 			return;
 		}
@@ -119,15 +122,18 @@
 
 		if (res.error) {
 			const period = res.error.message?.endsWith(".") ? "" : ".";
-			addToast(
-				"error",
-				m["about.donate.payment_failed"]({
+			ToastManager.add({
+				type: "error",
+				message: m["about.donate.payment_failed"]({
 					message: res.error.message || "",
 					period,
 				}),
-			);
+			});
 		} else {
-			addToast("success", m["about.donate.thank_you"]());
+			ToastManager.add({
+				type: "info",
+				message: m["about.donate.thank_you"](),
+			});
 		}
 
 		paymentState = "prepay";
@@ -146,10 +152,16 @@
 		if (status) {
 			switch (status) {
 				case "succeeded":
-					addToast("success", m["about.donate.thank_you"]());
+					ToastManager.add({
+						type: "success",
+						message: m["about.donate.thank_you"](),
+					});
 					break;
 				default:
-					addToast("error", m["about.donate.donation_error"]());
+					ToastManager.add({
+						type: "error",
+						message: m["about.donate.donation_error"](),
+					});
 			}
 
 			goto("/about");

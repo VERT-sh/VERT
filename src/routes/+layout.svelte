@@ -24,6 +24,8 @@
 	import { initStores as initAnimStores } from "$lib/animation/index.js";
 	import { locales, localizeHref } from "$lib/paraglide/runtime";
 	import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte.js";
+	import { ToastManager } from "$lib/toast/index.svelte.js";
+	import VertdError from "$lib/components/functional/VertdError.svelte";
 
 	let { children, data } = $props();
 	let enablePlausible = $state(false);

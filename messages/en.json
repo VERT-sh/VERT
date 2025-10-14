@@ -79,6 +79,11 @@
 		"errors": {
 			"cant_convert": "We can't convert this file.",
 			"vertd_server": "what are you doing..? you're supposed to run the vertd server!",
+			"vertd_generic_body": "An error occurred whilst whilst trying convert your video. Would you like to submit this video to the developers to help fix this bug? Only your video file will be sent. No identifiers will be uploaded.",
+			"vertd_generic_title": "Video conversion error",
+			"vertd_generic_yes": "Submit video",
+			"vertd_generic_no": "Don't submit",
+			"vertd_failed_to_keep": "Failed to keep the video on the server: {error}",
 			"unsupported_format": "Only image, video, audio, and document files are supported",
 			"vertd_not_found": "Could not find the vertd instance to start video conversion. Are you sure the instance URL is set correctly?",
 			"worker_downloading": "The {type} converter is currently being initialized, please wait a few moments.",
@@ -167,7 +172,8 @@
 			"loading_cache": "Loading...",
 			"total_size": "Total Size",
 			"files_cached_label": "Files Cached",
-			"cache_cleared": "Cache cleared successfully!"
+			"cache_cleared": "Cache cleared successfully!",
+			"cache_clear_error": "Failed to clear cache."
 		},
 		"language": {
 			"title": "Language",

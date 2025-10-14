@@ -1,3 +1,4 @@
+import VertdErrorComponent from "$lib/components/functional/VertdError.svelte";
 import { error, log } from "$lib/logger";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte";
@@ -25,19 +26,45 @@ interface UploadResponse {
 	totalFrames: number;
 }
 
-interface RouteMap {
-	"/api/upload": UploadResponse;
-	"/api/version": string;
+interface RouteRequestMap {
+	"/api/keep": {
+		id: string;
+		token: string;
+	};
 }
 
-const vertdFetch = async <U extends keyof RouteMap>(
-	url: U,
-	options: RequestInit,
-): Promise<RouteMap[U]> => {
+interface RouteResponseMap {
+	"/api/upload": UploadResponse;
+	"/api/version": string;
+	"/api/keep": void;
+}
+
+export const vertdFetch: {
+	<U extends keyof RouteRequestMap>(
+		url: U,
+		options: RequestInit,
+		body: RouteRequestMap[U],
+	): Promise<RouteResponseMap[U]>;
+	<U extends Exclude<keyof RouteResponseMap, keyof RouteRequestMap>>(
+		url: U,
+		options: RequestInit,
+	): Promise<RouteResponseMap[U]>;
+} = async (url: any, options: RequestInit, body?: any) => {
 	const domain = await VertdInstance.instance.url();
-	const res = await fetch(`${domain}${url}`, options);
+
+	// if there is a body, insert a Content-Type: application/json header
+	if (body) {
+		options.headers = {
+			"Content-Type": "application/json",
+			...(options.headers || {}),
+		};
+		options.body = JSON.stringify(body);
+	}
+
+	const res = await fetch(domain + url, options);
+
 	const text = await res.text();
-	let json: VertdResponse<RouteMap[U]> = null!;
+	let json = null;
 	try {
 		json = JSON.parse(text);
 	} catch {
@@ -48,7 +75,7 @@ const vertdFetch = async <U extends keyof RouteMap>(
 		throw new Error(json.data);
 	}
 
-	return json.data as RouteMap[U];
+	return json.data;
 };
 
 // ws types
@@ -345,7 +372,13 @@ export class VertdConverter extends Converter {
 					case "error": {
 						this.log(`error: ${msg.data.message}`);
 						this.activeConversions.delete(input.id);
-						reject(msg.data.message);
+						reject({
+							component: VertdErrorComponent,
+							additional: {
+								jobId: uploadRes.id,
+								auth: uploadRes.auth,
+							},
+						});
 					}
 				}
 			};

@@ -12,9 +12,9 @@
 	import { m } from "$lib/paraglide/messages";
 	import { link } from "$lib/store/index.svelte";
 	import { swManager, type CacheInfo } from "$lib/sw/register";
-	import { addToast } from "$lib/store/ToastProvider";
 	import { onMount } from "svelte";
 	import { error } from "$lib/logger";
+	import { ToastManager } from "$lib/toast/index.svelte";
 
 	const { settings = $bindable() }: { settings: ISettings } = $props();
 
@@ -50,10 +50,16 @@
 			await swManager.clearCache();
 			cacheInfo = null;
 			await loadCacheInfo();
-			addToast("success", m["settings.privacy.cache_cleared"]());
+			ToastManager.add({
+				type: "success",
+				message: m["settings.privacy.cache_cleared"](),
+			});
 		} catch (err) {
 			error(["privacy", "cache"], "Failed to clear cache:", err);
-			addToast("error", "Failed to clear cache");
+			ToastManager.add({
+				type: "error",
+				message: m["settings.privacy.cache_clear_error"](),
+			});
 		} finally {
 			isLoadingCache = false;
 		}

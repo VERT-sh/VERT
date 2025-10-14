@@ -4,9 +4,9 @@
 	import HotMilk from "$lib/assets/hotmilk.svg?component";
 	import { DISCORD_URL } from "$lib/consts";
 	import { error } from "$lib/logger";
-	import { addToast } from "$lib/store/ToastProvider";
 	import { m } from "$lib/paraglide/messages";
 	import { link } from "$lib/store/index.svelte";
+	import { ToastManager } from "$lib/toast/index.svelte";
 
 	let copied = false;
 	let timeoutId: number | undefined;
@@ -15,7 +15,10 @@
 		try {
 			navigator.clipboard.writeText("hello@vert.sh");
 			copied = true;
-			addToast("success", m["about.sponsors.email_copied"]());
+			ToastManager.add({
+				type: "success",
+				message: m["about.sponsors.email_copied"](),
+			});
 
 			if (timeoutId) clearTimeout(timeoutId);
 			timeoutId = setTimeout(() => (copied = false), 2000);

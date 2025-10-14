@@ -3,9 +3,9 @@ import { Converter, FormatInfo } from "./converter.svelte";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { browser } from "$app/environment";
 import { error, log } from "$lib/logger";
-import { addToast } from "$lib/store/ToastProvider";
 import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
+import { ToastManager } from "$lib/toast/index.svelte";
 
 // TODO: differentiate in UI? (not native formats)
 const videoFormats = [
@@ -98,7 +98,10 @@ export class FFmpegConverter extends Converter {
 		} catch (err) {
 			error(["converters", this.name], `error loading ffmpeg: ${err}`);
 			this.status = "error";
-			addToast("error", m["workers.errors.ffmpeg"]());
+			ToastManager.add({
+				type: "error",
+				message: m["workers.errors.ffmpeg"](),
+			});
 		}
 	}
 

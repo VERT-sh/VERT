@@ -1,13 +1,13 @@
 import { browser } from "$app/environment";
 import { error, log } from "$lib/logger";
 import { m } from "$lib/paraglide/messages";
-import { addToast } from "$lib/store/ToastProvider";
 import { VertFile, type WorkerMessage } from "$lib/types";
 import MagickWorker from "$lib/workers/magick?worker&url";
 import { Converter, FormatInfo } from "./converter.svelte";
 import { imageFormats } from "./magick-automated";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";
+import { ToastManager } from "$lib/toast/index.svelte";
 
 export class MagickConverter extends Converter {
 	public name = "imagemagick";
@@ -104,7 +104,11 @@ export class MagickConverter extends Converter {
 				["converters", this.name],
 				`Failed to load ImageMagick WASM: ${err}`,
 			);
-			addToast("error", m["workers.errors.magick"]());
+
+			ToastManager.add({
+				type: "error",
+				message: m["workers.errors.magick"](),
+			});
 		}
 	}
 

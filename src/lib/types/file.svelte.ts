@@ -2,7 +2,8 @@ import { byNative, converters } from "$lib/converters";
 import type { Converter } from "$lib/converters/converter.svelte";
 import { error } from "$lib/logger";
 import { m } from "$lib/paraglide/messages";
-import { addToast } from "$lib/store/ToastProvider";
+import { ToastManager } from "$lib/toast/index.svelte";
+import type { Component } from "svelte";
 
 export class VertFile {
 	public id: string = Math.random().toString(36).slice(2, 8);
@@ -93,15 +94,7 @@ export class VertFile {
 			this.result = res;
 		} catch (err) {
 			if (!this.cancelled) {
-				const castedErr = err as Error;
-				error(["files"], castedErr.message);
-				addToast(
-					"error",
-					m["workers.errors.general"]({
-						file: this.file.name,
-						message: castedErr.message || castedErr,
-					}),
-				);
+				this.toastErr(err);
 			}
 			this.result = null;
 		}
@@ -119,15 +112,51 @@ export class VertFile {
 			this.processing = false;
 			this.result = null;
 		} catch (err) {
-			const castedErr = err as Error;
-			error(["files"], castedErr.message);
-			addToast(
-				"error",
-				m["workers.errors.cancel"]({
+			this.toastErr(err);
+		}
+	}
+
+	private toastErr(err: unknown) {
+		type ToastMsg = {
+			component: Component;
+			additional: unknown;
+		};
+
+		const castedErr = err as Error | string | ToastMsg;
+		let toastMsg: string | ToastMsg = "";
+		if (typeof castedErr === "string") {
+			toastMsg = castedErr;
+		} else if (castedErr instanceof Error) {
+			toastMsg = castedErr.message;
+		} else {
+			toastMsg = castedErr;
+		}
+
+		// ToastManager.add({
+		// 	type: "error",
+		// 	message:
+		// 		typeof toastMsg === "string"
+		// 			? m["workers.errors.general"]({
+		// 					file: this.file.name,
+		// 					message: toastMsg,
+		// 				})
+		// 			: toastMsg,
+		// });
+
+		if (typeof toastMsg === "string") {
+			ToastManager.add({
+				type: "error",
+				message: m["workers.errors.general"]({
 					file: this.file.name,
-					message: castedErr.message || castedErr,
+					message: toastMsg,
 				}),
-			);
+			});
+		} else {
+			ToastManager.add({
+				type: "error",
+				message: toastMsg.component,
+				additional: toastMsg.additional,
+			});
 		}
 	}
 
