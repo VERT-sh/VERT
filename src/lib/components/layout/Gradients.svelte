@@ -46,8 +46,8 @@
 	const color = $derived(
 		Object.values(colors).find((p) => p.matcher(page.url.pathname)) || {
 			matcher: () => false,
-			color: "transparent",
-			at: 0,
+			color: "var(--bg-gradient-from)",
+			at: 100,
 		},
 	);
 
@@ -64,9 +64,14 @@
 	const maskImage = $derived(
 		`linear-gradient(to top, transparent ${100 - at.current}%, black 100%)`,
 	);
+
+	const showLogo = $derived(
+		page.url.pathname === "/" ||
+			/^[\w-]+-[\w-]+$/.test(page.url.pathname.replace(/^\/|\/$/g, "")),
+	);
 </script>
 
-{#if page.url.pathname === "/"}
+{#if showLogo}
 	<div
 		class="fixed -z-30 top-0 left-0 w-screen h-screen flex items-center justify-center overflow-hidden"
 		transition:fade={{

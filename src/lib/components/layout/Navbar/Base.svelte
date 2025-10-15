@@ -37,7 +37,9 @@
 		{
 			name: m["navbar.upload"](),
 			url: "/",
-			activeMatch: (pathname) => pathname === "/",
+			activeMatch: (pathname) =>
+				pathname === "/" ||
+				/^[\w-]+-[\w-]+$/.test(pathname.replace(/^\/|\/$/g, "")),
 			icon: UploadIcon,
 		},
 		{
