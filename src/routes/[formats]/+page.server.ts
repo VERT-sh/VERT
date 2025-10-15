@@ -1,46 +1,114 @@
 import { converters } from "$lib/converters";
 import type { EntryGenerator } from "./$types";
 
-// generate conversion pairs at build time (e.g. mkv-mp4) for SEO
+// only generate slugs for popular formats
+// vert is static, so we can't generate all possible combinations
+const VIDEO_FORMATS = [
+	"mp4",
+	"mkv",
+	"avi",
+	"mov",
+	"webm",
+	"flv",
+	"wmv",
+	"mpg",
+	"3gp",
+];
+
+const AUDIO_FORMATS = [
+	"mp3",
+	"wav",
+	"flac",
+	"m4a",
+	"ogg",
+	"aiff",
+	"wma",
+	"opus",
+];
+
+const IMAGE_FORMATS = [
+	"png",
+	"jpg",
+	"jpeg",
+	"jfif",
+	"webp",
+	"jxl",
+	"psd",
+	"ico",
+	"icns",
+	"ppm",
+	"gif",
+	"svg",
+	"bmp",
+	"tiff",
+	"heic",
+	"heif",
+	"avif",
+];
+
+const DOCUMENT_FORMATS = [
+	"docx",
+	"doc",
+	"md",
+	"rtf",
+	"odt",
+	"html",
+	"csv",
+	"tsv",
+	"rst",
+	"epub",
+	"docbook",
+];
+
+const POPULAR_FORMATS = [
+	...VIDEO_FORMATS,
+	...AUDIO_FORMATS,
+	...IMAGE_FORMATS,
+	...DOCUMENT_FORMATS,
+];
+
 export const entries: EntryGenerator = () => {
 	const seenPairs = new Set<string>();
 
-	const addPair = (
-		fromName: string,
-		fromSupported: boolean,
-		toName: string,
-		toSupported: boolean,
-	) => {
-		if (!fromSupported || !toSupported || fromName === toName) return;
+	// this would be unnecessary, but certain formats can only be converted one-way (so avoid generating them)
+	// e.g. heic -> jpg works, but not jpg -> heic
+	const canConvert = (from: string, to: string): boolean => {
+		const fromFormat = `.${from}`;
+		const toFormat = `.${to}`;
 
-		const from = fromName.replace(".", "").toLowerCase();
-		const to = toName.replace(".", "").toLowerCase();
-		const slug = `${from}-${to}`;
+		// check if any converter supports this conversion
+		for (const converter of converters) {
+			let from = false;
+			let to = false;
 
-		if (!seenPairs.has(slug)) seenPairs.add(slug);
+			for (const f of converter.supportedFormats) {
+				if (f.name === fromFormat && f.fromSupported) from = true;
+				if (f.name === toFormat && f.toSupported) to = true;
+			}
+
+			if (from && to) return true;
+		}
+
+		return false;
 	};
 
-	// check all conversions (same converter and cross-converter)
-	for (const fromConverter of converters) {
-		for (const toConverter of converters) {
-			const sameConverter = fromConverter.name === toConverter.name;
+	// generate all combinations from the formats list
+	for (const fromFormat of POPULAR_FORMATS) {
+		for (const toFormat of POPULAR_FORMATS) {
+			if (fromFormat === toFormat) continue;
 
-			for (const fromFormat of fromConverter.supportedFormats) {
-				for (const toFormat of toConverter.supportedFormats) {
-					// skip if same converter and same format, or if different converter but formats are the same
-					if (sameConverter && fromFormat.name === toFormat.name)
-						continue;
-					if (!sameConverter && fromFormat.name === toFormat.name)
-						continue;
+			// exclude video <-> audio conversions
+			const fromVideo = VIDEO_FORMATS.includes(fromFormat);
+			const toVideo = VIDEO_FORMATS.includes(toFormat);
+			const fromAudio = AUDIO_FORMATS.includes(fromFormat);
+			const toAudio = AUDIO_FORMATS.includes(toFormat);
 
-					addPair(
-						fromFormat.name,
-						fromFormat.fromSupported,
-						toFormat.name,
-						toFormat.toSupported,
-					);
-				}
-			}
+			if ((fromVideo && toAudio) || (fromAudio && toVideo)) continue;
+
+			if (!canConvert(fromFormat, toFormat)) continue;
+
+			const slug = `${fromFormat}-${toFormat}`;
+			if (!seenPairs.has(slug)) seenPairs.add(slug);
 		}
 	}
 
