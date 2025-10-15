@@ -23,7 +23,6 @@ const AUDIO_FORMATS = [
 	"ogg",
 	"aiff",
 	"wma",
-	"opus",
 ];
 
 const IMAGE_FORMATS = [
