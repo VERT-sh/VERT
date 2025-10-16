@@ -55,7 +55,8 @@ export class VertdInstance {
 
 		// if custom vertd url and no saved setting, default to the custom url
 		if (!ls) {
-			const isCustomUrl = PUB_VERTD_URL !== "https://vertd.vert.sh";
+			const isCustomUrl =
+				PUB_VERTD_URL && PUB_VERTD_URL !== "https://vertd.vert.sh";
 			if (isCustomUrl) {
 				this.inner = { type: "custom" };
 				return;
