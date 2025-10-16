@@ -10,7 +10,8 @@
 	"footer": {
 		"copyright": "© {year} VERT.",
 		"source_code": "Source code",
-		"discord_server": "Discord server"
+		"discord_server": "Discord server",
+		"privacy_policy": "Privacy policy"
 	},
 	"upload": {
 		"title": "The file converter you'll love.",
@@ -248,5 +249,8 @@
 		"button": "JPEGIFY {compression}%!!!",
 		"download": "Download",
 		"delete": "Delete"
+	},
+	"privacy": {
+		"title": "Privacy Policy"
 	}
 }

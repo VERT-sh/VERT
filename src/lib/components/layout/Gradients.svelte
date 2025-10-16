@@ -41,6 +41,11 @@
 			color: "var(--bg-gradient-red-from)",
 			at: 100,
 		},
+		{
+			matcher: (path) => path === "/privacy/",
+			color: "var(--bg-gradient-red-from)",
+			at: 100,
+		},
 	]);
 
 	const color = $derived(
