@@ -21,7 +21,9 @@
 				videos) happen locally on your browser. Videos are deleted after
 				being downloaded, or an hour, unless explicitly given permission
 				by you to be stored; it will only be used for the purpose of
-				troubleshooting.
+				troubleshooting. VERT self-hosts a Coolify instance for hosting
+				the website and vertd (for video conversion), and a Plausible
+				instance for completely anonymous and aggregated analytics.
 				<br />
 				<br />
 				Note this may only apply to the official VERT instance at
@@ -103,7 +105,7 @@
 					href="mailto:hello@vert.sh"
 					class="underline">hello@vert.sh</a
 				>. If you are using a third-party instance of VERT, please
-                contact the hoster of that instance instead.
+				contact the hoster of that instance instead.
 			</p>
 
 			<p class="text-sm text-muted mt-6">Last updated: 2025-10-16</p>
