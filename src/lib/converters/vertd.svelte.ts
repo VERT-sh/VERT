@@ -377,6 +377,9 @@ export class VertdConverter extends Converter {
 							additional: {
 								jobId: uploadRes.id,
 								auth: uploadRes.auth,
+								from: input.from,
+								to: to,
+								errorMessage: msg.data.message,
 							},
 						});
 					}

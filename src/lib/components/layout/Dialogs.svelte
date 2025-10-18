@@ -26,9 +26,9 @@
 			easing: quintOut,
 		}}
 	>
-		{#each dialogList as { id, title, message, buttons, type }, i}
+		{#each dialogList as dialog, i}
 			{#if i === 0}
-				<Dialog {id} {title} {message} {buttons} {type} />
+				<Dialog {...dialog} />
 			{/if}
 		{/each}
 	</div>

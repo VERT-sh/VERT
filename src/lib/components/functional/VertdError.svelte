@@ -2,6 +2,10 @@
 	export interface VertdErrorProps {
 		jobId: string;
 		auth: string;
+		from?: string;
+		to?: string;
+		errorMessage?: string;
+		fileName?: string;
 	}
 </script>
 
@@ -10,6 +14,8 @@
 
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager, type ToastProps } from "$lib/toast/index.svelte";
+	import { addDialog } from "$lib/store/DialogProvider";
+	import VertdErrorDetails from "./VertdErrorDetails.svelte";
 
 	const toast: ToastProps<VertdErrorProps> = $props();
 
@@ -52,22 +58,50 @@
 
 		ToastManager.remove(toast.id);
 	};
+
+	const showDetails = () => {
+		addDialog(
+			m["convert.errors.vertd_details"](),
+			VertdErrorDetails as any,
+			[
+				{
+					text: "Close",
+					action: () => {},
+				},
+			],
+			"info",
+			{
+				jobId: toast.additional.jobId || "Unknown",
+				from: toast.additional.from || "Unknown",
+				to: toast.additional.to || "Unknown",
+				errorMessage: toast.additional.errorMessage || "Unknown error",
+			},
+		);
+	};
 </script>
 
 <div class="flex flex-col gap-4">
 	<p class="text-black">{m["convert.errors.vertd_generic_body"]()}</p>
-	<div class="flex gap-4">
+	<div class="flex flex-col gap-2">
 		<button
-			onclick={submit}
-			class="btn rounded-lg h-fit py-2 w-full bg-accent-red-alt text-white"
+			onclick={showDetails}
+			class="btn rounded-lg h-fit py-2 w-full bg-accent-blue text-black"
 			disabled={submitting}
-			>{m["convert.errors.vertd_generic_yes"]()}</button
+			>View Details Submitted</button
 		>
-		<button
-			onclick={remove}
-			class="btn rounded-lg h-fit py-2 w-full"
-			disabled={submitting}
-			>{m["convert.errors.vertd_generic_no"]()}</button
-		>
+		<div class="flex gap-4">
+			<button
+				onclick={submit}
+				class="btn rounded-lg h-fit py-2 w-full bg-accent-red-alt text-white"
+				disabled={submitting}
+				>{m["convert.errors.vertd_generic_yes"]()}</button
+			>
+			<button
+				onclick={remove}
+				class="btn rounded-lg h-fit py-2 w-full"
+				disabled={submitting}
+				>{m["convert.errors.vertd_generic_no"]()}</button
+			>
+		</div>
 	</div>
 </div>

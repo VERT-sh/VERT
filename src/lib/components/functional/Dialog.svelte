@@ -3,19 +3,13 @@
 	import { removeDialog } from "$lib/store/DialogProvider";
 	import { BanIcon, CheckIcon, InfoIcon, TriangleAlert } from "lucide-svelte";
 	import { quintOut } from "svelte/easing";
+	import type { Dialog as DialogType } from "$lib/store/DialogProvider";
 
-	type Props = {
-		id: number;
-		title: string;
-		message: string;
-		buttons: {
-			text: string;
-			action: () => void;
-		}[];
-		type: "success" | "error" | "info" | "warning";
-	};
+	type Props = DialogType;
 
-	let { id, title, message, buttons, type }: Props = $props();
+	let props: Props = $props();
+	const { id, title, message, buttons, type } = props;
+	const additional = "additional" in props ? props.additional : undefined;
 
 	const colors = {
 		success: "purple",
@@ -59,7 +53,14 @@
 		</div>
 	</div>
 	<div class="flex flex-col gap-1 w-full">
-		<p class="text-sm font-normal text-muted">{message}</p>
+		{#if typeof message === "string"}
+			<p class="text-sm font-normal text-muted whitespace-pre-wrap">{message}</p>
+		{:else}
+			{@const MessageComponent = message}
+			<div class="text-sm font-normal text-muted">
+				<MessageComponent {id} {title} {type} {buttons} {additional} />
+			</div>
+		{/if}
 	</div>
 	<div class="flex flex-row items-center gap-4 w-full">
 		{#each buttons as { text, action }, i}
