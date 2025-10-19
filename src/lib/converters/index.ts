@@ -5,12 +5,28 @@ import { PandocConverter } from "./pandoc.svelte";
 import { VertdConverter } from "./vertd.svelte";
 import { MagickConverter } from "./magick.svelte";
 
-export const converters = [
-	new MagickConverter(),
-	new FFmpegConverter(),
-	new VertdConverter(),
-	new PandocConverter(),
-];
+// export const converters = [
+// 	new MagickConverter(),
+// 	new FFmpegConverter(),
+// 	new VertdConverter(),
+// 	new PandocConverter(),
+// ];
+
+const getConverters = (): Converter[] => {
+	const converters: Converter[] = [
+		new MagickConverter(),
+		new FFmpegConverter(),
+	];
+
+	if (PUB_DISABLE_ALL_EXTERNAL_REQUESTS !== "true") {
+		converters.push(new VertdConverter());
+	}
+
+	converters.push(new PandocConverter());
+	return converters;
+};
+
+export const converters = getConverters();
 
 export function getConverterByFormat(format: string) {
 	for (const converter of converters) {
