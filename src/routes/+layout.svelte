@@ -143,6 +143,7 @@
 	/>
 	<meta property="twitter:image" content={featuredImage} />
 	<link rel="manifest" href="/manifest.json" />
+	<link rel="canonical" href="https://vert.sh/" />
 	{#if enablePlausible}
 		<script
 			defer

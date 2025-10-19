@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# language urls (doesn't actually change language when visiting)
+# should prob be auto-generated?
+Disallow: /es/
+Disallow: /fr/
+Disallow: /de/
+Disallow: /it/
+Disallow: /hr/
+Disallow: /tr/
+Disallow: /ja/
+Disallow: /el/
+
+Sitemap: https://vert.sh/sitemap.xml
