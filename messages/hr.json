@@ -17,8 +17,7 @@
 		"subtitle": "Cijelokupna obrada slika, zvuka i dokumenata se odvija na vašem uređaju. Videozapisi se pretvaraju na našim izrazito brzim serverima. Nema nikakvih ograničenja veličine niti reklama i potpuno je open source.",
 		"uploader": {
 			"text": "Ubaci ili klikni da {action}",
-			"convert": "pretvori",
-			"jpegify": "jpegiraj"
+			"convert": "pretvori"
 		},
 		"cards": {
 			"title": "VERT podržava...",
@@ -190,7 +189,7 @@
 			"notable_contributors": "Značajni suradnici",
 			"notable_description": "Želimo zahvaliti ovim ljudima za njihove ogromne doprinose VERTu.",
 			"github_contributors": "GitHub suradnici",
-			"github_description": "Velike [jpegify_link]zahvale[/jpegify_link] svim ovim ljudima koji su nam pomogli! [github_link]Želiš nam i ti pomoći?[/github_link]",
+			"github_description": "Velike zahvale svim ovim ljudima koji su nam pomogli! [github_link]Želiš nam i ti pomoći?[/github_link]",
 			"no_contributors": "Čini se kako nitko nije još doprinio... [contribute_link]budite prvi koji će doprinjeti![/contribute_link]",
 			"libraries": "Biblioteke",
 			"libraries_description": "Velike zahvale prema FFmpeg (audio, video), ImageMagick (slike) i Pandoc (dokumenti) što su održavali tako odlične biblioteke svih ovih godina. VERT se oslanja na njih da bi Vam pružili pretvorbu.",
@@ -214,12 +213,5 @@
 			"no_audio": "Nije pronađen audio.",
 			"invalid_rate": "Upisan nevažeći sample rate: {rate}Hz!"
 		}
-	},
-	"jpegify": {
-		"title": "TAJNI JPEGIFY!!!",
-		"subtitle": "(shhhh... nemoj reći nikome!)",
-		"button": "JPEGIRAJ {compression}%!!!",
-		"download": "Preuzmi",
-		"delete": "Obriši"
 	}
 }

@@ -17,8 +17,7 @@
 		"subtitle": "すべての画像・音声・ドキュメント処理はデバイス上で行われます。動画は超高速サーバーで変換されます。ファイルサイズ制限なし、広告なし、完全オープンソース。",
 		"uploader": {
 			"text": "ドロップまたはクリックして{action}",
-			"convert": "変換",
-			"jpegify": "JPEG化"
+			"convert": "変換"
 		},
 		"cards": {
 			"title": "VERTがサポートしている形式",
@@ -210,7 +209,7 @@
 			"notable_contributors": "特筆すべき貢献者",
 			"notable_description": "VERTに大きく貢献してくださった方々に感謝します。",
 			"github_contributors": "GitHubの貢献者",
-			"github_description": "多くの方々に[jpegify_link]感謝[/jpegify_link]します！[github_link]あなたも参加してみませんか？[/github_link]",
+			"github_description": "多くの方々に感謝します！[github_link]あなたも参加してみませんか？[/github_link]",
 			"no_contributors": "まだ誰も貢献していないようです… [contribute_link]最初の貢献者になりましょう！[/contribute_link]",
 			"libraries": "ライブラリ",
 			"libraries_description": "長年にわたり優れたライブラリを提供してくれているFFmpeg（音声・動画）、ImageMagick（画像）、Pandoc（ドキュメント）に感謝します。VERTはこれらに依存して動作しています。",
@@ -235,12 +234,5 @@
 			"no_audio": "音声ストリームが見つかりません。",
 			"invalid_rate": "無効なサンプリングレートが指定されました: {rate}Hz"
 		}
-	},
-	"jpegify": {
-		"title": "秘密のJPEGIFY!!!",
-		"subtitle": "（しっ…誰にも言わないで！）",
-		"button": "JPEGIFY {compression}%!!!",
-		"download": "ダウンロード",
-		"delete": "削除"
 	}
 }

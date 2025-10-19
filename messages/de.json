@@ -17,8 +17,7 @@
 		"subtitle": "Die Verarbeitung aller Bild-, Audio- und Dokumentdateien findet auf deinem Gerät statt. Videos werden auf unseren blitzschnellen Servern konvertiert. Kein Dateigrößenlimit, keine Werbung und vollständig Open-Source.",
 		"uploader": {
 			"text": "Dateien hier ablegen oder klicken zum {action}",
-			"convert": "Konvertieren",
-			"jpegify": "Jpegifizieren"
+			"convert": "Konvertieren"
 		},
 		"cards": {
 			"title": "VERT unterstützt...",
@@ -190,7 +189,7 @@
 			"notable_contributors": "Besonders erwähnenswerte Mitwirkende",
 			"notable_description": "Wir möchten diesen Personen für ihre wichtigen Beiträge zu VERT danken.",
 			"github_contributors": "GitHub-Mitwirkende",
-			"github_description": "Ein großes [jpegify_link]Dankeschön[/jpegify_link] an all diese Leute für ihre Hilfe! [github_link]Möchtest du auch helfen?[/github_link]",
+			"github_description": "Ein großes Dankeschön an all diese Leute für ihre Hilfe! [github_link]Möchtest du auch helfen?[/github_link]",
 			"no_contributors": "Scheint, als hätte noch niemand beigetragen... [contribute_link]sei der Erste, der beiträgt![/contribute_link]",
 			"libraries": "Bibliotheken",
 			"libraries_description": "Ein großes Dankeschön an FFmpeg (Audio, Video), ImageMagick (Bilder) und Pandoc (Dokumente) für die Pflege solch exzellenter Bibliotheken über so viele Jahre. VERT verlässt sich auf sie, um dir deine Konvertierungen zu ermöglichen.",
@@ -215,12 +214,5 @@
 			"no_audio": "Kein Audiostream gefunden.",
 			"invalid_rate": "Ungültige Abtastrate angegeben: {rate}Hz"
 		}
-	},
-	"jpegify": {
-		"title": "GEHEIMES JPEGIFIZIEREN!!!",
-		"subtitle": "(psst... sag es niemandem!)",
-		"button": "JPEGIFIZIEREN {compression}%!!!",
-		"download": "Herunterladen",
-		"delete": "Löschen"
 	}
 }

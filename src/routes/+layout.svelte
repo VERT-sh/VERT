@@ -46,13 +46,9 @@
 	const dropFiles = (e: DragEvent) => {
 		e.preventDefault();
 		dropping.set(false);
-		if (page.url.pathname !== "/jpegify/") {
-			const oldLength = files.files.length;
-			files.add(e.dataTransfer?.files);
-			if (oldLength !== files.files.length) goto("/convert");
-		} else {
-			files.add(e.dataTransfer?.files);
-		}
+		const oldLength = files.files.length;
+		files.add(e.dataTransfer?.files);
+		if (oldLength !== files.files.length) goto("/convert");
 	};
 
 	const handleDrag = (e: DragEvent, drag: boolean) => {
@@ -64,14 +60,9 @@
 		const clipboardData = e.clipboardData;
 		if (!clipboardData || !clipboardData.files.length) return;
 		e.preventDefault();
-
-		if (page.url.pathname !== "/jpegify/") {
-			const oldLength = files.files.length;
-			files.add(clipboardData.files);
-			if (oldLength !== files.files.length) goto("/convert");
-		} else {
-			files.add(clipboardData.files);
-		}
+		const oldLength = files.files.length;
+		files.add(clipboardData.files);
+		if (oldLength !== files.files.length) goto("/convert");
 	};
 
 	onMount(() => {
@@ -128,7 +119,7 @@
 		name="description"
 		content="With VERT you can quickly convert any image, video and audio file. No ads, no tracking, open source, and all processing (other than video) is done on your device."
 	/>
-	<meta property="og:url" content="https://vert.sh">
+	<meta property="og:url" content="https://vert.sh" />
 	<meta property="og:type" content="website" />
 	<meta
 		property="og:title"
@@ -139,9 +130,9 @@
 		content="With VERT you can quickly convert any image, video and audio file. No ads, no tracking, open source, and all processing (other than video) is done on your device."
 	/>
 	<meta property="og:image" content={featuredImage} />
-	<meta name="twitter:card" content="summary_large_image">
-	<meta property="twitter:domain" content="vert.sh">
-	<meta property="twitter:url" content="https://vert.sh">
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta property="twitter:domain" content="vert.sh" />
+	<meta property="twitter:url" content="https://vert.sh" />
 	<meta
 		property="twitter:title"
 		content="{VERT_NAME} — Free, fast, and awesome file converter"

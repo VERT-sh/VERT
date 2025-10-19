@@ -18,8 +18,7 @@
 		"subtitle": "All image, audio, and document processing is done on your device. Videos are converted on our lightning-fast servers. No file size limit, no ads, and completely open source.",
 		"uploader": {
 			"text": "Drop or click to {action}",
-			"convert": "convert",
-			"jpegify": "jpegify"
+			"convert": "convert"
 		},
 		"cards": {
 			"title": "VERT supports...",
@@ -225,7 +224,7 @@
 			"notable_contributors": "Notable contributors",
 			"notable_description": "We'd like to thank these people for their major contributions to VERT.",
 			"github_contributors": "GitHub contributors",
-			"github_description": "Big [jpegify_link]thanks[/jpegify_link] to all these people for helping out! [github_link]Want to help too?[/github_link]",
+			"github_description": "Big thanks to all these people for helping out! [github_link]Want to help too?[/github_link]",
 			"no_contributors": "Seems like no one has contributed yet... [contribute_link]be the first to contribute![/contribute_link]",
 			"libraries": "Libraries",
 			"libraries_description": "A big thanks to FFmpeg (audio, video), ImageMagick (images) and Pandoc (documents) for maintaining such excellent libraries for so many years. VERT relies on them to provide you with your conversions.",
@@ -250,13 +249,6 @@
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz"
 		}
-	},
-	"jpegify": {
-		"title": "SECRET JPEGIFY!!!",
-		"subtitle": "(shh... don't tell anyone!)",
-		"button": "JPEGIFY {compression}%!!!",
-		"download": "Download",
-		"delete": "Delete"
 	},
 	"privacy": {
 		"title": "Privacy Policy"

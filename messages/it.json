@@ -17,8 +17,7 @@
 		"subtitle": "Tutta l'elaborazione di immagini, audio e documenti avviene sul tuo dispositivo. I video sono convertiti sui nostri server velocissimi. Nessun limite di dimensione, nessuna pubblicità e completamente open source.",
 		"uploader": {
 			"text": "Trascina o clicca per {action}",
-			"convert": "convertire",
-			"jpegify": "jpegificare"
+			"convert": "convertire"
 		},
 		"cards": {
 			"title": "VERT supporta...",
@@ -216,7 +215,7 @@
 			"notable_contributors": "Contributori di rilievo",
 			"notable_description": "Vorremmo ringraziare queste persone per i loro importanti contributi a VERT.",
 			"github_contributors": "Contributori GitHub",
-			"github_description": "Un grande [jpegify_link]grazie[/jpegify_link] a tutte queste persone per aver dato una mano! [github_link]Vuoi aiutare anche tu?[/github_link]",
+			"github_description": "Un grande grazie a tutte queste persone per aver dato una mano! [github_link]Vuoi aiutare anche tu?[/github_link]",
 			"no_contributors": "Sembra che nessuno abbia ancora contribuito... [contribute_link]sii il primo a contribuire![/contribute_link]",
 			"libraries": "Librerie",
 			"libraries_description": "Un grande ringraziamento a FFmpeg (audio, video), ImageMagick (immagini) e Pandoc (documenti) per aver mantenuto librerie così eccellenti per così tanti anni. VERT si affida a loro per fornirti le tue conversioni.",
@@ -241,12 +240,5 @@
 			"no_audio": "Nessuno *stream* audio trovato.",
 			"invalid_rate": "Frequenza di campionamento specificata non valida: {rate}Hz"
 		}
-	},
-	"jpegify": {
-		"title": "JPEGIFY SEGRETO!!!",
-		"subtitle": "(shh... non dirlo a nessuno!)",
-		"button": "JPEGIFY {compression}%!!!",
-		"download": "Scarica",
-		"delete": "Elimina"
 	}
 }

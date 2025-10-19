@@ -11,10 +11,9 @@
 
 	type Props = {
 		class?: string;
-		jpegify?: boolean;
 	};
 
-	const { class: classList, jpegify }: Props = $props();
+	const { class: classList }: Props = $props();
 
 	let uploaderButton = $state<HTMLButtonElement>();
 	let fileInput = $state<HTMLInputElement>();
@@ -43,13 +42,9 @@
 
 	const handleFileChange = (e: Event) => {
 		if (!fileInput) return;
-		if (page.url.pathname !== "/jpegify/") {
-			const oldLength = files.files.length;
-			files.add(fileInput.files);
-			if (oldLength !== files.files.length) goto("/convert");
-		} else {
-			files.add(fileInput.files);
-		}
+		const oldLength = files.files.length;
+		files.add(fileInput.files);
+		if (oldLength !== files.files.length) goto("/convert");
 	};
 
 	onMount(() => {
@@ -100,9 +95,7 @@
 		</div>
 		<h2 class="text-center text-2xl font-semibold mt-4">
 			{m["upload.uploader.text"]({
-				action: jpegify
-					? m["upload.uploader.jpegify"]()
-					: m["upload.uploader.convert"](),
+				action: m["upload.uploader.convert"]()
 			})}
 		</h2>
 	</Panel>

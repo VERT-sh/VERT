@@ -94,30 +94,34 @@
 			<div class="flex flex-col gap-1">
 				<h2 class="text-base font-bold">
 					{m["about.credits.github_contributors"]()}
-			</h2>
+				</h2>
+				{#if ghContribs && ghContribs.length > 0}
+					<p class="text-base text-muted font-normal">
+						{@html sanitize(
+							link(
+								"github_link",
+								m["about.credits.github_description"](),
+								GITHUB_URL_VERT,
+								true,
+								"text-blue-500 font-normal hover:underline",
+							),
+						)}
+					</p>
+				{:else}
+					<p class="text-base text-muted font-normal italic">
+						{@html sanitize(
+							link(
+								"contribute_link",
+								m["about.credits.no_contributors"](),
+								GITHUB_URL_VERT,
+								true,
+								"text-blue-500 font-normal hover:underline",
+							),
+						)}
+					</p>
+				{/if}
+			</div>
 			{#if ghContribs && ghContribs.length > 0}
-				<p class="text-base text-muted font-normal">
-					{@html sanitize(link(
-						["jpegify_link", "github_link"],
-						m["about.credits.github_description"](),
-						["/jpegify", GITHUB_URL_VERT],
-						[false, true],
-						[
-							"text-black dynadark:text-white",
-							"text-blue-500 font-normal hover:underline",
-						],
-					))}
-				</p>
-			{:else}
-				<p class="text-base text-muted font-normal italic">
-					{@html sanitize(link(
-						"contribute_link",
-						m["about.credits.no_contributors"](),
-						GITHUB_URL_VERT,
-					))}
-				</p>
-			{/if}
-		</div>			{#if ghContribs && ghContribs.length > 0}
 				<div class="flex flex-row flex-wrap gap-2">
 					{#each ghContribs as contrib}
 						{@const { name, github, avatar } = contrib}
