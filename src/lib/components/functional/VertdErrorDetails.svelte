@@ -26,7 +26,9 @@
 	</p>
 	<p>
 		<span class="text-black dynadark:text-white">
-			{@html m["convert.errors.vertd_details_from"]({ from: additional.from })}
+			{@html m["convert.errors.vertd_details_from"]({
+				from: additional.from,
+			})}
 		</span>
 	</p>
 	<p>
@@ -34,19 +36,30 @@
 			{@html m["convert.errors.vertd_details_to"]({ to: additional.to })}
 		</span>
 	</p>
-    <p>
-        <span class="text-black dynadark:text-white">
-            {@html link(
-                ["view_link"],
-                m["convert.errors.vertd_details_error_message"](),
-                [
-                    URL.createObjectURL(
-                        new Blob([additional.errorMessage], { type: "text/plain" })
-                    )
-                ],
-                [true],
-                ["text-blue-500 font-normal hover:underline"]
-            )}
-        </span>
-    </p>
+	<p>
+		<span class="text-black dynadark:text-white">
+			{@html link(
+				["view_link"],
+				m["convert.errors.vertd_details_error_message"](),
+				[
+					URL.createObjectURL(
+						new Blob([additional.errorMessage], {
+							type: "text/plain",
+						}),
+					),
+				],
+				[true],
+				["text-blue-500 font-normal hover:underline"],
+			)}
+		</span>
+	</p>
+	<p>
+		{@html link(
+			["privacy_link"],
+			m["convert.errors.vertd_details_footer"](),
+			"/privacy",
+			[true],
+            ["text-blue-500 font-normal hover:underline"],
+		)}
+	</p>
 </div>
