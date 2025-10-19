@@ -87,7 +87,7 @@
 			onclick={showDetails}
 			class="btn rounded-lg h-fit py-2 w-full bg-accent-blue text-black"
 			disabled={submitting}
-			>View Details Submitted</button
+			>{m["convert.errors.vertd_generic_view"]()}</button
 		>
 		<div class="flex gap-4">
 			<button
