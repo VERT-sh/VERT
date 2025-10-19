@@ -384,6 +384,6 @@ export function sanitize(
 			a: ["href", "target", "rel", "class"],
 			"*": ["class"],
 		},
-		allowedSchemes: ["http", "https", "mailto"],
+		allowedSchemes: ["http", "https", "mailto", "blob"],
 	});
 }
