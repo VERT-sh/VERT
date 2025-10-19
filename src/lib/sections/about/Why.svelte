@@ -2,6 +2,7 @@
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import { MessageCircleQuestionIcon } from "lucide-svelte";
 	import { m } from "$lib/paraglide/messages";
+	import { sanitize } from "$lib/store/index.svelte";
 </script>
 
 <Panel class="flex flex-col gap-3 p-6">
@@ -14,6 +15,6 @@
 		{m["about.why.title"]()}
 	</h2>
 	<p class="text-lg font-normal">
-		{@html m["about.why.description"]()}
+		{@html sanitize(m["about.why.description"]())}
 	</p>
 </Panel>

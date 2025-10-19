@@ -18,6 +18,7 @@
 		"@sveltejs/kit": "^2.42.2",
 		"@sveltejs/vite-plugin-svelte": "^4.0.4",
 		"@types/eslint": "^9.6.1",
+		"@types/sanitize-html": "^2.16.0",
 		"autoprefixer": "^10.4.21",
 		"css-select": "5.1.0",
 		"eslint": "^9.36.0",
@@ -54,6 +55,7 @@
 		"overlayscrollbars-svelte": "^0.5.5",
 		"p-queue": "^8.1.1",
 		"riff-file": "^1.0.3",
+		"sanitize-html": "^2.17.0",
 		"svelte-stripe": "^1.4.0",
 		"vert-wasm": "^0.0.2",
 		"vite-plugin-wasm": "^3.5.0"

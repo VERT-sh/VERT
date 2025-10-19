@@ -11,6 +11,7 @@
 	import "overlayscrollbars/overlayscrollbars.css";
 	import { onMount } from "svelte";
 	import type { WorkerStatus } from "$lib/converters/converter.svelte";
+	import { sanitize } from "$lib/store/index.svelte";
 
 	const getSupportedFormats = (name: string) =>
 		converters
@@ -215,9 +216,9 @@
 										</p>
 									{/if}
 									<p>
-										{@html m["upload.cards.status.text"]({
+										{@html sanitize(m["upload.cards.status.text"]({
 											status: getStatusText(s.status),
-										})}
+										}))}
 									</p>
 									<div
 										class="flex flex-col items-center relative"

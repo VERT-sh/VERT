@@ -10,7 +10,7 @@
 	import type { ISettings } from "./index.svelte";
 	import { effects } from "$lib/store/index.svelte";
 	import { m } from "$lib/paraglide/messages";
-	import { link } from "$lib/store/index.svelte";
+	import { link, sanitize } from "$lib/store/index.svelte";
 	import { swManager, type CacheInfo } from "$lib/sw/register";
 	import { onMount } from "svelte";
 	import { error } from "$lib/logger";
@@ -87,14 +87,14 @@
 						{m["settings.privacy.plausible_title"]()}
 					</p>
 					<p class="text-sm text-muted font-normal">
-						{@html link(
+						{@html sanitize(link(
 							["plausible_link", "analytics_link"],
 							m["settings.privacy.plausible_description"](),
 							[
 								"https://plausible.io/privacy-focused-web-analytics",
 								"https://ats.vert.sh/vert.sh",
 							],
-						)}
+						))}
 					</p>
 				</div>
 				<div class="flex flex-col gap-3 w-full">

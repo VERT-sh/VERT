@@ -8,6 +8,7 @@ import { addDialog } from "./DialogProvider";
 import PQueue from "p-queue";
 import { getLocale, setLocale } from "$lib/paraglide/runtime";
 import { m } from "$lib/paraglide/messages";
+import sanitizeHtml from "sanitize-html";
 
 class Files {
 	public files = $state<VertFile[]>([]);
@@ -371,4 +372,18 @@ export function link(
 	});
 
 	return result;
+}
+
+export function sanitize(
+	html: string,
+	allowedTags: string[] = ["a", "b", "code", "br"],
+): string {
+	return sanitizeHtml(html, {
+		allowedTags: allowedTags,
+		allowedAttributes: {
+			a: ["href", "target", "rel", "class"],
+			"*": ["class"],
+		},
+		allowedSchemes: ["http", "https", "mailto"],
+	});
 }

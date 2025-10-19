@@ -5,7 +5,7 @@
 	import { DISCORD_URL } from "$lib/consts";
 	import { error } from "$lib/logger";
 	import { m } from "$lib/paraglide/messages";
-	import { link } from "$lib/store/index.svelte";
+	import { link, sanitize } from "$lib/store/index.svelte";
 	import { ToastManager } from "$lib/toast/index.svelte";
 
 	let copied = false;
@@ -48,11 +48,11 @@
 			</a>
 		</div>
 		<p class="text-muted">
-			{@html link(
+			{@html sanitize(link(
 				"discord_link",
 				m["about.sponsors.description"](),
 				DISCORD_URL,
-			)}
+			))}
 			<span class="inline-block mx-[2px] relative top-[2px]">
 				<button
 					id="email"

@@ -7,7 +7,7 @@
 	import Dropdown from "$lib/components/functional/Dropdown.svelte";
 	import { vertdLoaded } from "$lib/store/index.svelte";
 	import { m } from "$lib/paraglide/messages";
-	import { link } from "$lib/store/index.svelte";
+	import { link, sanitize } from "$lib/store/index.svelte";
 	import { VertdInstance, type VertdInner } from "./vertdSettings.svelte";
 
 	let vertdCommit = $state<string | null>(null);
@@ -73,14 +73,14 @@
 		<div class="flex flex-col gap-8">
 			<div class="flex flex-col gap-4">
 				<p class="text-sm text-muted font-normal">
-					{@html m["settings.vertd.description"]()}
+					{@html sanitize(m["settings.vertd.description"]())}
 				</p>
 				<p class="text-sm text-muted font-normal">
-					{@html link(
+					{@html sanitize(link(
 						"vertd_link",
 						m["settings.vertd.hosting_info"](),
 						GITHUB_URL_VERTD,
-					)}
+					))}
 				</p>
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
