@@ -7,6 +7,7 @@
 	import { onMount } from "svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager } from "$lib/toast/index.svelte";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/consts";
 
 	let settings = $state(Settings.Settings.instance.settings);
 
@@ -63,12 +64,14 @@
 	>
 		<div class="flex flex-col gap-4 flex-1">
 			<Settings.Conversion bind:settings />
-			<Settings.Vertd bind:settings />
+			{#if !DISABLE_ALL_EXTERNAL_REQUESTS}
+				<Settings.Vertd bind:settings />
+			{/if}
 		</div>
 
 		<div class="flex flex-col gap-4 flex-1">
 			<Settings.Appearance />
-			{#if PUB_PLAUSIBLE_URL}
+			{#if PUB_PLAUSIBLE_URL && !DISABLE_ALL_EXTERNAL_REQUESTS}
 				<Settings.Privacy bind:settings />
 			{/if}
 		</div>

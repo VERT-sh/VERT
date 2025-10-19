@@ -3,7 +3,7 @@
 	import { goto, beforeNavigate, afterNavigate } from "$app/navigation";
 
 	import { PUB_PLAUSIBLE_URL, PUB_HOSTNAME } from "$env/static/public";
-	import { VERT_NAME } from "$lib/consts";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/consts";
 	import * as Layout from "$lib/components/layout";
 	import * as Navbar from "$lib/components/layout/Navbar";
 	import featuredImage from "$lib/assets/VERT_Feature.webp";
@@ -94,12 +94,14 @@
 
 		Settings.instance.load();
 
-		VertdInstance.instance
-			.url()
-			.then((u) => fetch(`${u}/api/version`))
-			.then((res) => {
-				if (res.ok) $vertdLoaded = true;
-			});
+		if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
+			VertdInstance.instance
+				.url()
+				.then((u) => fetch(`${u}/api/version`))
+				.then((res) => {
+					if (res.ok) $vertdLoaded = true;
+				});
+		}
 
 		return () => {
 			window.removeEventListener("paste", handlePaste);
@@ -109,7 +111,9 @@
 
 	$effect(() => {
 		enablePlausible =
-			!!PUB_PLAUSIBLE_URL && Settings.instance.settings.plausible;
+			!!PUB_PLAUSIBLE_URL &&
+			Settings.instance.settings.plausible &&
+			!DISABLE_ALL_EXTERNAL_REQUESTS;
 		if (!enablePlausible && browser) {
 			// reset pushState on opt-out so that plausible stops firing events on page navigation
 			history.pushState = History.prototype.pushState;
@@ -128,7 +132,7 @@
 		name="description"
 		content="With VERT you can quickly convert any image, video and audio file. No ads, no tracking, open source, and all processing (other than video) is done on your device."
 	/>
-	<meta property="og:url" content="https://vert.sh">
+	<meta property="og:url" content="https://vert.sh" />
 	<meta property="og:type" content="website" />
 	<meta
 		property="og:title"
@@ -139,9 +143,9 @@
 		content="With VERT you can quickly convert any image, video and audio file. No ads, no tracking, open source, and all processing (other than video) is done on your device."
 	/>
 	<meta property="og:image" content={featuredImage} />
-	<meta name="twitter:card" content="summary_large_image">
-	<meta property="twitter:domain" content="vert.sh">
-	<meta property="twitter:url" content="https://vert.sh">
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta property="twitter:domain" content="vert.sh" />
+	<meta property="twitter:url" content="https://vert.sh" />
 	<meta
 		property="twitter:title"
 		content="{VERT_NAME} — Free, fast, and awesome file converter"

@@ -1,7 +1,10 @@
 <script lang="ts">
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import { HeartHandshakeIcon } from "lucide-svelte";
-	import { GITHUB_URL_VERT } from "$lib/consts";
+	import {
+		DISABLE_ALL_EXTERNAL_REQUESTS,
+		GITHUB_URL_VERT,
+	} from "$lib/consts";
 	import { m } from "$lib/paraglide/messages";
 	import { link } from "$lib/store/index.svelte";
 
@@ -90,48 +93,50 @@
 		</div>
 
 		<!-- GitHub contributors -->
-		<div class="flex flex-col gap-4">
-			<div class="flex flex-col gap-1">
-				<h2 class="text-base font-bold">
-					{m["about.credits.github_contributors"]()}
-				</h2>
-				{#if ghContribs && ghContribs.length > 0}
-					<p class="text-base text-muted font-normal">
-						{@html link(
-							["jpegify_link", "github_link"],
-							m["about.credits.github_description"](),
-							["/jpegify", GITHUB_URL_VERT],
-							[false, true],
-							[
-								"text-black dynadark:text-white",
-								"text-blue-500 font-normal hover:underline",
-							],
-						)}
-					</p>
-				{:else}
-					<p class="text-base text-muted font-normal italic">
-						{@html link(
-							"contribute_link",
-							m["about.credits.no_contributors"](),
-							GITHUB_URL_VERT,
-						)}
-					</p>
-				{/if}
-			</div>
-
-			{#if ghContribs && ghContribs.length > 0}
-				<div class="flex flex-row flex-wrap gap-2">
-					{#each ghContribs as contrib}
-						{@const { name, github, avatar } = contrib}
-						{@render contributor(name, github, avatar)}
-					{/each}
+		{#if !DISABLE_ALL_EXTERNAL_REQUESTS}
+			<div class="flex flex-col gap-4">
+				<div class="flex flex-col gap-1">
+					<h2 class="text-base font-bold">
+						{m["about.credits.github_contributors"]()}
+					</h2>
+					{#if ghContribs && ghContribs.length > 0}
+						<p class="text-base text-muted font-normal">
+							{@html link(
+								["jpegify_link", "github_link"],
+								m["about.credits.github_description"](),
+								["/jpegify", GITHUB_URL_VERT],
+								[false, true],
+								[
+									"text-black dynadark:text-white",
+									"text-blue-500 font-normal hover:underline",
+								],
+							)}
+						</p>
+					{:else}
+						<p class="text-base text-muted font-normal italic">
+							{@html link(
+								"contribute_link",
+								m["about.credits.no_contributors"](),
+								GITHUB_URL_VERT,
+							)}
+						</p>
+					{/if}
 				</div>
-			{/if}
 
-			<h2 class="mt-2 -mb-2">{m["about.credits.libraries"]()}</h2>
-			<p class="font-normal">
-				{m["about.credits.libraries_description"]()}
-			</p>
-		</div>
+				{#if ghContribs && ghContribs.length > 0}
+					<div class="flex flex-row flex-wrap gap-2">
+						{#each ghContribs as contrib}
+							{@const { name, github, avatar } = contrib}
+							{@render contributor(name, github, avatar)}
+						{/each}
+					</div>
+				{/if}
+
+				<h2 class="mt-2 -mb-2">{m["about.credits.libraries"]()}</h2>
+				<p class="font-normal">
+					{m["about.credits.libraries_description"]()}
+				</p>
+			</div>
+		{/if}
 	</div></Panel
 >

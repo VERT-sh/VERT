@@ -11,6 +11,7 @@
 	import "overlayscrollbars/overlayscrollbars.css";
 	import { onMount } from "svelte";
 	import type { WorkerStatus } from "$lib/converters/converter.svelte";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/consts";
 
 	const getSupportedFormats = (name: string) =>
 		converters
@@ -28,37 +29,51 @@
 			title: string;
 			status: WorkerStatus;
 		};
-	} = $derived({
-		Images: {
-			formats: getSupportedFormats("imagemagick"),
-			icon: Image,
-			title: m["upload.cards.images"](),
-			status:
-				converters.find((c) => c.name === "imagemagick")?.status ||
-				"not-ready",
-		},
-		Audio: {
-			formats: getSupportedFormats("ffmpeg"),
-			icon: AudioLines,
-			title: m["upload.cards.audio"](),
-			status:
-				converters.find((c) => c.name === "ffmpeg")?.status ||
-				"not-ready",
-		},
-		Documents: {
-			formats: getSupportedFormats("pandoc"),
-			icon: BookText,
-			title: m["upload.cards.documents"](),
-			status:
-				converters.find((c) => c.name === "pandoc")?.status ||
-				"not-ready",
-		},
-		Video: {
-			formats: getSupportedFormats("vertd"),
-			icon: Film,
-			title: m["upload.cards.video"](),
-			status: $vertdLoaded === true ? "ready" : "not-ready", // not using converter.status for this
-		},
+	} = $derived.by(() => {
+		const output: {
+			[key: string]: {
+				formats: string;
+				icon: typeof Image;
+				title: string;
+				status: WorkerStatus;
+			};
+		} = {
+			Images: {
+				formats: getSupportedFormats("imagemagick"),
+				icon: Image,
+				title: m["upload.cards.images"](),
+				status:
+					converters.find((c) => c.name === "imagemagick")?.status ||
+					"not-ready",
+			},
+			Audio: {
+				formats: getSupportedFormats("ffmpeg"),
+				icon: AudioLines,
+				title: m["upload.cards.audio"](),
+				status:
+					converters.find((c) => c.name === "ffmpeg")?.status ||
+					"not-ready",
+			},
+			Documents: {
+				formats: getSupportedFormats("pandoc"),
+				icon: BookText,
+				title: m["upload.cards.documents"](),
+				status:
+					converters.find((c) => c.name === "pandoc")?.status ||
+					"not-ready",
+			},
+		};
+
+		if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
+			output.Video = {
+				formats: getSupportedFormats("vertd"),
+				icon: Film,
+				title: m["upload.cards.video"](),
+				status: $vertdLoaded === true ? "ready" : "not-ready", // not using converter.status for this
+			};
+		}
+
+		return output;
 	});
 
 	const getTooltip = (format: string) => {

@@ -4,13 +4,7 @@ import { FFmpegConverter } from "./ffmpeg.svelte";
 import { PandocConverter } from "./pandoc.svelte";
 import { VertdConverter } from "./vertd.svelte";
 import { MagickConverter } from "./magick.svelte";
-
-// export const converters = [
-// 	new MagickConverter(),
-// 	new FFmpegConverter(),
-// 	new VertdConverter(),
-// 	new PandocConverter(),
-// ];
+import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/consts";
 
 const getConverters = (): Converter[] => {
 	const converters: Converter[] = [
@@ -18,7 +12,7 @@ const getConverters = (): Converter[] => {
 		new FFmpegConverter(),
 	];
 
-	if (PUB_DISABLE_ALL_EXTERNAL_REQUESTS !== "true") {
+	if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
 		converters.push(new VertdConverter());
 	}
 
