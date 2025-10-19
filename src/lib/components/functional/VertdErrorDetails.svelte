@@ -49,7 +49,7 @@
 					),
 				],
 				[true],
-				["text-blue-500 font-normal hover:underline"],
+				["text-blue-500 font-normal"],
 			))}
 		</span>
 	</p>
@@ -59,7 +59,6 @@
 			m["convert.errors.vertd_details_footer"](),
 			"/privacy",
 			[true],
-            ["text-blue-500 font-normal hover:underline"],
 		))}
 	</p>
 </div>

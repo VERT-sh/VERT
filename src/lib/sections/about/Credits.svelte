@@ -103,7 +103,6 @@
 								m["about.credits.github_description"](),
 								GITHUB_URL_VERT,
 								true,
-								"text-blue-500 font-normal hover:underline",
 							),
 						)}
 					</p>
@@ -115,7 +114,6 @@
 								m["about.credits.no_contributors"](),
 								GITHUB_URL_VERT,
 								true,
-								"text-blue-500 font-normal hover:underline",
 							),
 						)}
 					</p>

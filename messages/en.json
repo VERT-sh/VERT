@@ -251,6 +251,37 @@
 		}
 	},
 	"privacy": {
-		"title": "Privacy Policy"
+		"title": "Privacy Policy",
+		"summary": {
+			"title": "Summary",
+			"description": "VERT's privacy policy is very simple: we do not collect or store any data on you at all. We don't use cookies or trackers, analytics are completely private, and all conversions (except videos) happen locally on your browser. Videos are deleted after being downloaded, or an hour, unless explicitly given permission by you to be stored; it will only be used for the purpose of troubleshooting. VERT self-hosts a Coolify instance for hosting the website and vertd (for video conversion), and a Plausible instance for completely anonymous and aggregated analytics.<br/><br/>Note this may only apply to the official VERT instance at [vert_link]vert.sh[/vert_link]; third-party instances may handle your data differently."
+		},
+		"conversions": {
+			"title": "Conversions",
+			"description": "Most conversions (images, documents, audio) happen entirely locally on your device using WebAssembly versions of the relevant tools (e.g. ImageMagick, Pandoc, FFmpeg). This means your files never leave your device and we will never have access to them.<br/><br/>Video conversions are performed on our servers because they require more processing power and cannot be done very quickly on the browser yet. Videos you convert with VERT are deleted after being downloaded, or after one hour, unless you explicitly give permission for us to store them longer purely for troubleshooting purposes."
+		},
+		"conversion_errors": {
+			"title": "Conversion Errors",
+			"description": "When a video conversion fails, we may collect some anonymous data to help us diagnose the issue. This data may include:",
+			"list_job_id": "The job ID, which is the anonymized file name",
+			"list_format_from": "The format you converted from",
+			"list_format_to": "The format you converted to",
+			"list_stderr": "The FFmpeg stderr output of your job (error message)",
+			"list_video": "The actual video file (if given explicit permission)",
+			"footer": "This information is used solely for the purpose of diagnosing conversion issues. The actual video file will only ever be collected if you give us permission to do so, where it will only be used for troubleshooting."
+		},
+		"analytics": {
+			"title": "Analytics",
+			"description": "We self-host a Plausible instance for completely anonymous and aggregated analytics. Plausible does not use cookies and complies with all major privacy regulations (GDPR/CCPA/PECR). You can opt out of analytics in the \"Privacy & data\" section in [settings_link]settings[/settings_link] and read more about Plausible's privacy practices [plausible_link]here[/plausible_link]."
+		},
+		"local_storage": {
+			"title": "Local Storage",
+			"description": "We use your browser's local storage to save your settings, and your browser's session storage to temporarily store the GitHub contributors list for the \"About\" section to reduce repeated GitHub API requests. No personal data is stored or transmitted.<br/><br/>The WebAssembly versions of the conversion tools we use (FFmpeg, ImageMagick, Pandoc) are also stored locally on your browser when you first visit the website, so you don't need to redownload them each visit. No personal data is stored or transmitted. You may view or delete this data at any time in the \"Privacy & data\" section in [settings_link]settings[/settings_link]."
+		},
+		"contact": {
+			"title": "Contact",
+			"description": "For questions, email us at: [email_link]hello@vert.sh[/email_link]. If you are using a third-party instance of VERT, please contact the hoster of that instance instead."
+		},
+		"last_updated": "Last updated: 2025-10-19"
 	}
 }
