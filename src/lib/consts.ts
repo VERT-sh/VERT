@@ -12,6 +12,6 @@ export const VERT_NAME =
 			: "VERT.sh";
 export const CONTACT_EMAIL = "hello@vert.sh";
 
-// i'm not entirely sure this should be in consts.ts, but is is technically a constant as .env is static for VERT
+// i'm not entirely sure this should be in consts.ts, but it is technically a constant as .env is static for VERT
 export const DISABLE_ALL_EXTERNAL_REQUESTS =
 	PUB_DISABLE_ALL_EXTERNAL_REQUESTS === "true";
