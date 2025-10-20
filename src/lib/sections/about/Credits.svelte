@@ -101,61 +101,43 @@
 					</h2>
 					{#if ghContribs && ghContribs.length > 0}
 						<p class="text-base text-muted font-normal">
-							{@html link(
-								"github_link",
-								m["about.credits.github_description"](),
-								GITHUB_URL_VERT,
-								true
+							{@html sanitize(
+								link(
+									"github_link",
+									m["about.credits.github_description"](),
+									GITHUB_URL_VERT,
+									true,
+								),
 							)}
 						</p>
 					{:else}
 						<p class="text-base text-muted font-normal italic">
-							{@html link(
-								"contribute_link",
-								m["about.credits.no_contributors"](),
-								GITHUB_URL_VERT,
+							{@html sanitize(
+								link(
+									"contribute_link",
+									m["about.credits.no_contributors"](),
+									GITHUB_URL_VERT,
+									true,
+								),
 							)}
 						</p>
 					{/if}
 				</div>
 
 				{#if ghContribs && ghContribs.length > 0}
-					<p class="text-base text-muted font-normal">
-						{@html sanitize(
-							link(
-								"github_link",
-								m["about.credits.github_description"](),
-								GITHUB_URL_VERT,
-								true,
-							),
-						)}
-					</p>
-				{:else}
-					<p class="text-base text-muted font-normal italic">
-						{@html sanitize(
-							link(
-								"contribute_link",
-								m["about.credits.no_contributors"](),
-								GITHUB_URL_VERT,
-								true,
-							),
-						)}
-					</p>
+					<div class="flex flex-row flex-wrap gap-2">
+						{#each ghContribs as contrib}
+							{@const { name, github, avatar } = contrib}
+							{@render contributor(name, github, avatar)}
+						{/each}
+					</div>
 				{/if}
 			</div>
-			{#if ghContribs && ghContribs.length > 0}
-				<div class="flex flex-row flex-wrap gap-2">
-					{#each ghContribs as contrib}
-						{@const { name, github, avatar } = contrib}
-						{@render contributor(name, github, avatar)}
-					{/each}
-				</div>
-			{/if}
 
 			<h2 class="mt-2 -mb-2">{m["about.credits.libraries"]()}</h2>
 			<p class="font-normal">
 				{m["about.credits.libraries_description"]()}
 			</p>
-		</div>
-	</div></Panel
->
+		{/if}
+	</div>
+</Panel>
