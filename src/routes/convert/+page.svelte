@@ -216,161 +216,180 @@
 					</p>
 				</div>
 			{/if}
-		{:else if currentConverter.status === "downloading"}
-			<div
-				class="h-full flex flex-col text-center justify-center text-failure"
-			>
-				<p class="font-body font-bold">
-					{m["convert.errors.cant_convert"]()}
-				</p>
-				<p class="font-normal">
-					{m["convert.errors.worker_downloading"]({
-						type: isAudio
-							? m["convert.errors.audio"]()
-							: isVideo
-								? "Video"
-								: isDocument
-									? m["convert.errors.doc"]()
-									: m["convert.errors.image"](),
-					})}
-				</p>
-			</div>
-		{:else if currentConverter.status === "error"}
-			<div
-				class="h-full flex flex-col text-center justify-center text-failure"
-			>
-				<p class="font-body font-bold">
-					{m["convert.errors.cant_convert"]()}
-				</p>
-				<p class="font-normal">
-					{m["convert.errors.worker_error"]({
-						type: isAudio
-							? m["convert.errors.audio"]()
-							: isVideo
-								? "Video"
-								: isDocument
-									? m["convert.errors.doc"]()
-									: m["convert.errors.image"](),
-					})}
-				</p>
-			</div>
-		{:else if currentConverter.status === "not-ready"}
-			<div
-				class="h-full flex flex-col text-center justify-center text-failure"
-			>
-				<p class="font-body font-bold">
-					{m["convert.errors.cant_convert"]()}
-				</p>
-				<p class="font-normal">
-					{m["convert.errors.worker_timeout"]({
-						type: isAudio
-							? m["convert.errors.audio"]()
-							: isVideo
-								? "Video"
-								: isDocument
-									? m["convert.errors.doc"]()
-									: m["convert.errors.image"](),
-					})}
-				</p>
-			</div>
-		{:else if isVideo && !$vertdLoaded && !isAudio && !isImage && !isDocument}
-			<div
-				class="h-full flex flex-col text-center justify-center text-failure"
-			>
-				<p class="font-body font-bold">
-					{m["convert.errors.cant_convert"]()}
-				</p>
-				<p class="font-normal">
-					{m["convert.errors.vertd_not_found"]()}
-				</p>
-			</div>
 		{:else}
-			<div class="flex flex-row justify-between">
+			{@const formatInfo = currentConverter.supportedFormats.find(
+				(f) => f.name === file.from,
+			)}
+			{#if formatInfo && !formatInfo.fromSupported}
 				<div
-					class="flex gap-4 w-full h-[152px] overflow-hidden relative"
+					class="h-full flex flex-col text-center justify-center text-failure"
 				>
-					<div class="w-1/2 h-full overflow-hidden rounded-xl">
-						{#if file.blobUrl}
-							<img
-								class="object-cover w-full h-full"
-								src={file.blobUrl}
-								alt={file.name}
-							/>
-						{:else}
-							<div
-								class="w-full h-full flex items-center justify-center text-black"
-								style="background: var({isAudio
-									? '--bg-gradient-purple-alt'
-									: isVideo
-										? '--bg-gradient-red-alt'
-										: isDocument
-											? '--bg-gradient-green-alt'
-											: '--bg-gradient-blue-alt'})"
-							>
-								{#if isAudio}
-									<FileMusicIcon size="56" />
-								{:else if isVideo}
-									<FileVideo2 size="56" />
-								{:else if isDocument}
-									<BookText size="56" />
-								{:else}
-									<ImageOffIcon size="56" />
-								{/if}
-							</div>
-						{/if}
-					</div>
+					<p class="font-body font-bold">
+						{m["convert.errors.cant_convert"]()}
+					</p>
+					<p class="font-normal">
+						{m["convert.errors.format_output_only"]()}
+					</p>
 				</div>
+			{:else if currentConverter.status === "downloading"}
 				<div
-					class="absolute top-16 right-0 mr-4 pl-2 h-[calc(100%-83px)] w-[calc(50%-38px)] pr-4 pb-1 flex items-center justify-center aspect-square"
+					class="h-full flex flex-col text-center justify-center text-failure"
 				>
+					<p class="font-body font-bold">
+						{m["convert.errors.cant_convert"]()}
+					</p>
+					<p class="font-normal">
+						{m["convert.errors.worker_downloading"]({
+							type: isAudio
+								? m["convert.errors.audio"]()
+								: isVideo
+									? "Video"
+									: isDocument
+										? m["convert.errors.doc"]()
+										: m["convert.errors.image"](),
+						})}
+					</p>
+				</div>
+			{:else if currentConverter.status === "error"}
+				<div
+					class="h-full flex flex-col text-center justify-center text-failure"
+				>
+					<p class="font-body font-bold">
+						{m["convert.errors.cant_convert"]()}
+					</p>
+					<p class="font-normal">
+						{m["convert.errors.worker_error"]({
+							type: isAudio
+								? m["convert.errors.audio"]()
+								: isVideo
+									? "Video"
+									: isDocument
+										? m["convert.errors.doc"]()
+										: m["convert.errors.image"](),
+						})}
+					</p>
+				</div>
+			{:else if currentConverter.status === "not-ready"}
+				<div
+					class="h-full flex flex-col text-center justify-center text-failure"
+				>
+					<p class="font-body font-bold">
+						{m["convert.errors.cant_convert"]()}
+					</p>
+					<p class="font-normal">
+						{m["convert.errors.worker_timeout"]({
+							type: isAudio
+								? m["convert.errors.audio"]()
+								: isVideo
+									? "Video"
+									: isDocument
+										? m["convert.errors.doc"]()
+										: m["convert.errors.image"](),
+						})}
+					</p>
+				</div>
+			{:else if isVideo && !$vertdLoaded && !isAudio && !isImage && !isDocument}
+				<div
+					class="h-full flex flex-col text-center justify-center text-failure"
+				>
+					<p class="font-body font-bold">
+						{m["convert.errors.cant_convert"]()}
+					</p>
+					<p class="font-normal">
+						{m["convert.errors.vertd_not_found"]()}
+					</p>
+				</div>
+			{:else}
+				<div class="flex flex-row justify-between">
 					<div
-						class="w-[122px] h-fit flex flex-col gap-2 items-center justify-center"
+						class="flex gap-4 w-full h-[152px] overflow-hidden relative"
 					>
-						<FormatDropdown
-							{categories}
-							from={file.from}
-							bind:selected={file.to}
-							onselect={(option) => handleSelect(option, file)}
-						/>
-						<div class="w-full flex items-center justify-between">
-							<Tooltip
-								text={m["convert.tooltips.convert_file"]()}
-								position="bottom"
-							>
-								<button
-									class="btn {$effects
-										? ''
-										: '!scale-100'} p-0 w-14 h-14 text-black {isAudio
-										? 'bg-accent-purple'
+						<div class="w-1/2 h-full overflow-hidden rounded-xl">
+							{#if file.blobUrl}
+								<img
+									class="object-cover w-full h-full"
+									src={file.blobUrl}
+									alt={file.name}
+								/>
+							{:else}
+								<div
+									class="w-full h-full flex items-center justify-center text-black"
+									style="background: var({isAudio
+										? '--bg-gradient-purple-alt'
 										: isVideo
-											? 'bg-accent-red'
+											? '--bg-gradient-red-alt'
 											: isDocument
-												? 'bg-accent-green'
-												: 'bg-accent-blue'}"
-									disabled={!files.ready}
-									onclick={() => file.convert()}
+												? '--bg-gradient-green-alt'
+												: '--bg-gradient-blue-alt'})"
 								>
-									<RotateCwIcon size="24" />
-								</button>
-							</Tooltip>
-							<Tooltip
-								text={m["convert.tooltips.download_file"]()}
-								position="bottom"
+									{#if isAudio}
+										<FileMusicIcon size="56" />
+									{:else if isVideo}
+										<FileVideo2 size="56" />
+									{:else if isDocument}
+										<BookText size="56" />
+									{:else}
+										<ImageOffIcon size="56" />
+									{/if}
+								</div>
+							{/if}
+						</div>
+					</div>
+					<div
+						class="absolute top-16 right-0 mr-4 pl-2 h-[calc(100%-83px)] w-[calc(50%-38px)] pr-4 pb-1 flex items-center justify-center aspect-square"
+					>
+						<div
+							class="w-[122px] h-fit flex flex-col gap-2 items-center justify-center"
+						>
+							<FormatDropdown
+								{categories}
+								from={file.from}
+								bind:selected={file.to}
+								onselect={(option) =>
+									handleSelect(option, file)}
+							/>
+							<div
+								class="w-full flex items-center justify-between"
 							>
-								<button
-									class="btn {$effects
-										? ''
-										: '!scale-100'} p-0 w-14 h-14"
-									onclick={file.download}
-									disabled={!file.result}
+								<Tooltip
+									text={m["convert.tooltips.convert_file"]()}
+									position="bottom"
 								>
-									<DownloadIcon size="24" />
-								</button>
-							</Tooltip>
+									<button
+										class="btn {$effects
+											? ''
+											: '!scale-100'} p-0 w-14 h-14 text-black {isAudio
+											? 'bg-accent-purple'
+											: isVideo
+												? 'bg-accent-red'
+												: isDocument
+													? 'bg-accent-green'
+													: 'bg-accent-blue'}"
+										disabled={!files.ready}
+										onclick={() => file.convert()}
+									>
+										<RotateCwIcon size="24" />
+									</button>
+								</Tooltip>
+								<Tooltip
+									text={m["convert.tooltips.download_file"]()}
+									position="bottom"
+								>
+									<button
+										class="btn {$effects
+											? ''
+											: '!scale-100'} p-0 w-14 h-14"
+										onclick={file.download}
+										disabled={!file.result}
+									>
+										<DownloadIcon size="24" />
+									</button>
+								</Tooltip>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+			{/if}
 		{/if}
 	</Panel>
 {/snippet}

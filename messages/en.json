@@ -94,6 +94,7 @@
 			"vertd_details_error_message": "<b>Error message:</b> [view_link]View error logs[/view_link]",
 			"vertd_details_close": "Close",
 			"unsupported_format": "Only image, video, audio, and document files are supported",
+			"format_output_only": "This format can currently only be used as output (converted to), not as input.",
 			"vertd_not_found": "Could not find the vertd instance to start video conversion. Are you sure the instance URL is set correctly?",
 			"worker_downloading": "The {type} converter is currently being initialized, please wait a few moments.",
 			"worker_error": "The {type} converter had an error during initialization, please try again later.",
