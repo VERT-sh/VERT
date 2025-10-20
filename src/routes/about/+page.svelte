@@ -8,7 +8,7 @@
 	import avatarJovannMC from "$lib/assets/avatars/jovannmc.jpg";
 	import avatarRealmy from "$lib/assets/avatars/realmy.jpg";
 	import avatarAzurejelly from "$lib/assets/avatars/azurejelly.jpg";
-	import { GITHUB_API_URL } from "$lib/consts";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS, GITHUB_API_URL } from "$lib/consts";
 	import { dev } from "$app/environment";
 	import { page } from "$app/state";
 	import { m } from "$lib/paraglide/messages";
@@ -70,6 +70,10 @@
 	let ghContribs: Contributor[] = [];
 
 	onMount(async () => {
+		if (DISABLE_ALL_EXTERNAL_REQUESTS) {
+			return;
+		}
+
 		// Check if the data is already in sessionStorage
 		const cachedContribs = sessionStorage.getItem("ghContribs");
 		if (cachedContribs) {
@@ -134,7 +138,9 @@
 		}
 	});
 
-	const donationsEnabled = dev || page.url.origin.endsWith("//vert.sh");
+	const donationsEnabled =
+		(dev || page.url.origin.endsWith("//vert.sh")) &&
+		!DISABLE_ALL_EXTERNAL_REQUESTS;
 </script>
 
 <div class="flex flex-col h-full items-center">

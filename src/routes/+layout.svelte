@@ -3,7 +3,7 @@
 	import { goto, beforeNavigate, afterNavigate } from "$app/navigation";
 
 	import { PUB_PLAUSIBLE_URL, PUB_HOSTNAME } from "$env/static/public";
-	import { VERT_NAME } from "$lib/consts";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/consts";
 	import * as Layout from "$lib/components/layout";
 	import * as Navbar from "$lib/components/layout/Navbar";
 	import featuredImage from "$lib/assets/VERT_Feature.webp";
@@ -85,12 +85,14 @@
 
 		Settings.instance.load();
 
-		VertdInstance.instance
-			.url()
-			.then((u) => fetch(`${u}/api/version`))
-			.then((res) => {
-				if (res.ok) $vertdLoaded = true;
-			});
+		if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
+			VertdInstance.instance
+				.url()
+				.then((u) => fetch(`${u}/api/version`))
+				.then((res) => {
+					if (res.ok) $vertdLoaded = true;
+				});
+		}
 
 		return () => {
 			window.removeEventListener("paste", handlePaste);
@@ -100,7 +102,9 @@
 
 	$effect(() => {
 		enablePlausible =
-			!!PUB_PLAUSIBLE_URL && Settings.instance.settings.plausible;
+			!!PUB_PLAUSIBLE_URL &&
+			Settings.instance.settings.plausible &&
+			!DISABLE_ALL_EXTERNAL_REQUESTS;
 		if (!enablePlausible && browser) {
 			// reset pushState on opt-out so that plausible stops firing events on page navigation
 			history.pushState = History.prototype.pushState;

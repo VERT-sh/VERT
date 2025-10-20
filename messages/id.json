@@ -1,0 +1,252 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"navbar": {
+		"upload": "Unggah",
+		"convert": "Konversi",
+		"settings": "Pengaturan",
+		"about": "Tentang",
+		"toggle_theme": "Ganti Tema"
+	},
+	"footer": {
+		"copyright": "© {year} VERT.",
+		"source_code": "Kode sumber",
+		"discord_server": "Peladen Discord"
+	},
+	"upload": {
+		"title": "Konverter berkas andalanmu.",
+		"subtitle": "Semua gambar, audio, dan pemrosesan dokumen dilakukan pada perangkatmu. Video dikonversi pada peladen kilat kami. Tidak ada batas ukuran berkas, tidak ada iklan, dan benar-benar sumber terbuka.",
+		"uploader": {
+			"text": "Jatuhkan dan klik untuk {action}",
+			"convert": "Konversi",
+			"jpegify": "jpegify"
+		},
+		"cards": {
+			"title": "Dapat Ditangani VERT ...",
+			"images": "Gambar",
+			"audio": "Audio",
+			"documents": "Dokumen",
+			"video": "Video",
+			"video_server_processing": "Proses di Server",
+			"local_supported": "Proses di Lokal",
+			"status": {
+				"text": "<b>Status:</b> {status}",
+				"ready": "siap",
+				"not_ready": "belum siap",
+				"not_initialized": "tidak terinisialisasi",
+				"downloading": "mengunduh...",
+				"initializing": "menginisialisasi...",
+				"unknown": "status tidak diketahui"
+			},
+			"supported_formats": "Format yang didukung:"
+		},
+		"tooltip": {
+			"partial_support": "Format ini hanya dapat dikonversi ke {direction}.",
+			"direction_input": "sumber asal (dari)",
+			"direction_output": "target (ke)",
+			"video_server_processing": "Video upload ke server untuk diproses secara baku, belajar bagaimana mengaturnya di sini."
+		}
+	},
+	"convert": {
+		"external_warning": {
+			"title": "Peringatan server eksternal",
+			"text": "Jika kamu memilih untuk mengonversi ke format video, berkas tersebut akan diunggah ke server eksternal untuk dikonversi. Apakah kamu ingin melanjutkan?",
+			"yes": "Ya",
+			"no": "Tidak"
+		},
+		"panel": {
+			"convert_all": "Konversi semua",
+			"download_all": "Unduh semua sebagai .zip",
+			"remove_all": "Hapus semua berkas",
+			"set_all_to": "Atur semua ke",
+			"na": "N/A"
+		},
+		"dropdown": {
+			"audio": "Audio",
+			"video": "Video",
+			"doc": "Dokumen",
+			"image": "Gambar",
+			"placeholder": "Cari format"
+		},
+		"tooltips": {
+			"unknown_file": "Jenis berkas tidak diketahui",
+			"audio_file": "Berkas audio",
+			"video_file": "Berkas video",
+			"document_file": "Berkas dokumen",
+			"image_file": "Berkas gambar",
+			"convert_file": "Konversi berkas ini",
+			"download_file": "Unduh berkas ini"
+		},
+		"errors": {
+			"cant_convert": "Kami tidak dapat mengonversi berkas ini.",
+			"vertd_server": "apa yang kamu lakukan..? kamu seharusnya menjalankan peladen vertd!",
+			"vertd_generic_body": "Terjadi galat saat mencoba mengonversi video kamu. Apakah kamu ingin mengirimkan video ini ke pengembang untuk membantu memperbaiki kutu ini? Hanya berkas video kamu yang akan dikirim. Tidak ada data identifikasi yang diunggah.",
+			"vertd_generic_title": "Konversi video galat",
+			"vertd_generic_yes": "Kirim video",
+			"vertd_generic_no": "Jangan kirim",
+			"vertd_failed_to_keep": "Gagal menyimpan video di peladen: {error}",
+			"unsupported_format": "Hanya berkas gambar, video, audio, dan dokumen yang didukung",
+			"vertd_not_found": "Tidak dapat menemukan layanan vertd untuk memulai konversi video. Apakah URL layanan sudah diatur dengan benar?",
+			"worker_downloading": "Konverter {type} sedang diinisialisasi, harap tunggu beberapa saat.",
+			"worker_error": "Konverter {type} mengalami kesalahan saat inisialisasi, coba lagi nanti.",
+			"worker_timeout": "Konverter {type} memerlukan waktu lebih lama dari perkiraan untuk inisialisasi, harap tunggu beberapa saat lagi atau segarkan halaman.",
+			"audio": "audio",
+			"doc": "dokumen",
+			"image": "gambar"
+		}
+	},
+	"settings": {
+		"title": "Pengaturan",
+		"errors": {
+			"save_failed": "Gagal menyimpan pengaturan!"
+		},
+		"appearance": {
+			"title": "Tampilan",
+			"brightness_theme": "Tema kecerahan",
+			"brightness_description": "Ingin suasana terang benderang, atau malam yang sunyi?",
+			"light": "Terang",
+			"dark": "Gelap",
+			"effect_settings": "Pengaturan efek",
+			"effect_description": "Ingin efek keren, atau tampilan yang lebih sederhana?",
+			"enable": "Aktifkan",
+			"disable": "Nonaktifkan"
+		},
+		"conversion": {
+			"title": "Konversi",
+			"advanced_settings": "Pengaturan lanjutan",
+			"filename_format": "Format nama berkas",
+			"filename_description": "Ini akan menentukan nama berkas saat diunduh, <b>tidak termasuk ekstensi berkas.</b> Kamu dapat menggunakan template berikut dalam format, yang akan diganti dengan informasi terkait: <b>%name%</b> untuk nama berkas asli, <b>%extension%</b> untuk ekstensi berkas asli, dan <b>%date%</b> untuk tanggal saat berkas dikonversi.",
+			"placeholder": "VERT_%name%",
+			"default_format": "Format konversi baku",
+			"default_format_description": "Ini akan mengubah format baku yang dipilih saat kamu mengunggah berkas dengan tipe tersebut.",
+			"default_format_image": "Gambar",
+			"default_format_video": "Video",
+			"default_format_audio": "Audio",
+			"default_format_document": "Dokumen",
+			"metadata": "Metadata berkas",
+			"metadata_description": "Menentukan apakah metadata (EXIF, info lagu, dll.) dari berkas asli akan dipertahankan di berkas hasil konversi.",
+			"keep": "Pertahankan",
+			"remove": "Hapus",
+			"quality": "Kualitas konversi",
+			"quality_description": "Mengubah kualitas keluaran baku berkas hasil konversi. Nilai yang lebih tinggi dapat menghasilkan waktu konversi dan ukuran berkas yang lebih besar.",
+			"quality_video": "Mengubah kualitas keluaran baku berkas video hasil konversi. Nilai yang lebih tinggi dapat memperpanjang waktu dan ukuran berkas.",
+			"quality_audio": "Audio (kbps)",
+			"quality_images": "Gambar (%)",
+			"rate": "Laju sampel (Hz)"
+		},
+		"vertd": {
+			"title": "Konversi video",
+			"status": "status:",
+			"loading": "memuat...",
+			"available": "tersedia, commit id {commitId}",
+			"unavailable": "tidak tersedia (apakah URL sudah benar?)",
+			"description": "Proyek <code>vertd</code> adalah server wrapper untuk FFmpeg. Ini memungkinkan kamu mengonversi video melalui antarmuka web VERT, sambil memanfaatkan kekuatan GPU untuk mempercepat proses.",
+			"hosting_info": "Kami menyediakan instance publik untuk kemudahanmu, tetapi kamu juga bisa dengan mudah meng-host sendiri di PC atau server jika tahu caranya. Kamu dapat mengunduh binary server [vertd_link]di sini[/vertd_link] - proses penyiapan akan semakin mudah di masa depan, jadi tetap pantau!",
+			"instance": "Instance",
+			"url_placeholder": "Contoh: http://localhost:24153",
+			"conversion_speed": "Kecepatan konversi",
+			"speed_description": "Menjelaskan kompromi antara kecepatan dan kualitas. Kecepatan lebih tinggi menghasilkan kualitas lebih rendah, tetapi proses lebih cepat.",
+			"speeds": {
+				"very_slow": "Sangat Lambat",
+				"slower": "Agak Lambat",
+				"slow": "Lambat",
+				"medium": "Sedang",
+				"fast": "Cepat",
+				"ultra_fast": "Sangat Cepat"
+			},
+			"auto_instance": "Otomatis (disarankan)",
+			"eu_instance": "Falkenstein, Jerman",
+			"us_instance": "Washington, AS",
+			"custom_instance": "Kustom"
+		},
+		"privacy": {
+			"title": "Privasi & data",
+			"plausible_title": "Analitik Plausible",
+			"plausible_description": "Kami menggunakan [plausible_link]Plausible[/plausible_link], alat analitik yang berfokus pada privasi, untuk mengumpulkan statistik anonim sepenuhnya. Semua data dianonimkan dan diagregasi, tanpa informasi yang dapat diidentifikasi. Kamu dapat melihat analitiknya [analytics_link]di sini[/analytics_link] dan memilih untuk keluar di bawah.",
+			"opt_in": "Ikut serta",
+			"opt_out": "Tidak ikut",
+			"cache_title": "Manajemen cache",
+			"cache_description": "Kami menyimpan berkas konverter di browser agar kamu tidak perlu mengunduh ulang setiap kali, meningkatkan performa dan menghemat data.",
+			"refresh_cache": "Segarkan cache",
+			"clear_cache": "Hapus cache",
+			"files_cached": "{size} ({count} berkas)",
+			"loading_cache": "Memuat...",
+			"total_size": "Total Ukuran",
+			"files_cached_label": "File Tersimpan",
+			"cache_cleared": "Cache berhasil dihapus!",
+			"cache_clear_error": "Gagal menghapus cache."
+		},
+		"language": {
+			"title": "Bahasa",
+			"description": "Pilih bahasa pilihanmu untuk antarmuka VERT."
+		}
+	},
+	"about": {
+		"title": "Tentang",
+		"why": {
+			"title": "Mengapa VERT?",
+			"description": "<b>Konverter berkas selalu mengecewakan kami.</b> Mereka jelek, penuh iklan, dan yang paling penting; lambat. Kami memutuskan untuk menyelesaikan masalah ini sekali untuk selamanya dengan membuat alternatif yang memperbaiki semua masalah itu, dan lebih banyak lagi.<br/><br/>Semua berkas non-video dikonversi sepenuhnya di perangkat; artinya tidak ada jeda antara pengiriman dan penerimaan berkas, dan kami tidak pernah melihat berkas yang kamu konversi.<br/><br/>File video diunggah ke server RTX 4000 Ada super cepat kami. Videomu akan tetap di sana selama satu jam jika tidak dikonversi. Jika dikonversi, video akan bertahan satu jam atau hingga diunduh. Setelah itu, berkas akan dihapus dari server kami."
+		},
+		"sponsors": {
+			"title": "Sponsor",
+			"description": "Ingin mendukung kami? Hubungi pengembang di server [discord_link]Discord[/discord_link], atau kirim email ke",
+			"email_copied": "Email disalin ke clipboard!"
+		},
+		"resources": {
+			"title": "Sumber daya",
+			"discord": "Discord",
+			"source": "Sumber",
+			"email": "Email"
+		},
+		"donate": {
+			"title": "Donasi untuk VERT",
+			"description": "Dengan dukunganmu, kami dapat terus memelihara dan meningkatkan VERT.",
+			"one_time": "Sekali",
+			"monthly": "Bulanan",
+			"custom": "Kustom",
+			"pay_now": "Bayar sekarang",
+			"donate_amount": "Donasi ${amount} USD",
+			"thank_you": "Terima kasih atas donasimu!",
+			"payment_failed": "Pembayaran gagal: {message}{period} Kamu tidak dikenai biaya.",
+			"donation_error": "Terjadi kesalahan saat memproses donasi. Coba lagi nanti.",
+			"payment_error": "Kesalahan mengambil detail pembayaran. Coba lagi nanti."
+		},
+		"credits": {
+			"title": "Kredit",
+			"contact_team": "Jika kamu ingin menghubungi tim pengembang, gunakan email yang ada di kartu \"Sumber Daya\".",
+			"notable_contributors": "Kontributor penting",
+			"notable_description": "Kami ingin berterima kasih kepada orang-orang ini atas kontribusi besar mereka untuk VERT.",
+			"github_contributors": "Kontributor GitHub",
+			"github_description": "[jpegify_link]Terima kasih[/jpegify_link] banyak kepada semua orang yang telah membantu! [github_link]Ingin membantu juga?[/github_link]",
+			"no_contributors": "Sepertinya belum ada yang berkontribusi... [contribute_link]jadilah yang pertama berkontribusi![/contribute_link]",
+			"libraries": "Pustaka",
+			"libraries_description": "Terima kasih besar kepada FFmpeg (audio, video), ImageMagick (gambar), dan Pandoc (dokumen) atas pemeliharaannya selama bertahun-tahun. VERT bergantung pada mereka untuk menyediakan konversi berkas.",
+			"roles": {
+				"lead_developer": "Pengembang utama; backend konversi, implementasi UI",
+				"developer": "Pengembang; implementasi UI",
+				"designer": "Desainer; UX, branding, pemasaran",
+				"docker_ci": "Pemeliharaan Docker & CI",
+				"former_cofounder": "Mantan co-founder & desainer"
+			}
+		},
+		"errors": {
+			"github_contributors": "Kesalahan mengambil kontributor GitHub"
+		}
+	},
+	"workers": {
+		"errors": {
+			"general": "Kesalahan mengonversi {file}: {message}",
+			"cancel": "Kesalahan membatalkan konversi untuk {file}: {message}",
+			"magick": "Kesalahan di worker Magick, konversi gambar mungkin tidak berfungsi dengan benar.",
+			"ffmpeg": "Kesalahan memuat ffmpeg, beberapa fitur mungkin tidak berfungsi.",
+			"no_audio": "Tidak ditemukan aliran audio.",
+			"invalid_rate": "Laju sampel tidak valid: {rate}Hz"
+		}
+	},
+	"jpegify": {
+		"title": "JPEGIFY RAHASIA!!!",
+		"subtitle": "(psst... jangan beri tahu siapa pun!)",
+		"button": "JPEGIFY {compression}%!!!",
+		"download": "Unduh",
+		"delete": "Hapus"
+	}
+}

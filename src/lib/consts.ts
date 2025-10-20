@@ -1,4 +1,4 @@
-import { PUB_ENV } from "$env/static/public";
+import { PUB_DISABLE_ALL_EXTERNAL_REQUESTS, PUB_ENV } from "$env/static/public";
 
 export const GITHUB_URL_VERT = "https://github.com/VERT-sh/VERT";
 export const GITHUB_URL_VERTD = "https://github.com/VERT-sh/vertd";
@@ -11,3 +11,7 @@ export const VERT_NAME =
 			? "VERT Nightly"
 			: "VERT.sh";
 export const CONTACT_EMAIL = "hello@vert.sh";
+
+// i'm not entirely sure this should be in consts.ts, but it is technically a constant as .env is static for VERT
+export const DISABLE_ALL_EXTERNAL_REQUESTS =
+	PUB_DISABLE_ALL_EXTERNAL_REQUESTS === "true";
