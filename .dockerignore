@@ -1,12 +1,21 @@
+# Node.js dependencies
 node_modules/
+
+# Git metadata
 .git/
+
+# Build output folders
 build/
 dist/
 .svelte-kit/
 .output/
 .vercel/
-.vscode/
 
+# IDE/editor configs
+.vscode/
+.idea/
+
+# Project metadata and config files not needed in build
 LICENSE
 README.md
 Dockerfile
@@ -14,8 +23,11 @@ docker-compose.yml
 .npmrc
 .prettier*
 .gitignore
-.env.*
-.env
 
+# Environment files (to avoid leaking secrets)
+.env
+.env.*
+
+# Operating system files
 .DS_Store
 Thumbs.db
