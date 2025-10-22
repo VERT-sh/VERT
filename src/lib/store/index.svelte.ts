@@ -329,6 +329,8 @@ export const availableLocales = {
 	tr: "Türkçe",
 	ja: "日本語",
 	el: "Ελληνικά",
+	"zh-Hans": "简体中文",
+	"zh-Hant": "繁體中文",
 };
 
 export function updateLocale(newLocale: string) {

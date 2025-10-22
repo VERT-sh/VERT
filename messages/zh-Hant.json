@@ -1,0 +1,289 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"navbar": {
+		"upload": "上傳",
+		"convert": "轉換",
+		"settings": "設定",
+		"about": "關於",
+		"toggle_theme": "切換主題"
+	},
+	"footer": {
+		"copyright": "© {year} VERT.",
+		"source_code": "原始碼",
+		"discord_server": "Discord 伺服器",
+		"privacy_policy": "隱私權政策"
+	},
+	"upload": {
+		"title": "你一定會喜歡的檔案轉換工具。",
+		"subtitle": "所有圖片、音訊和文件處理都在你的裝置上進行。影片透過超快速伺服器轉換。無檔案大小限制，無廣告，完全開源。",
+		"uploader": {
+			"text": "拖放或點擊以{action}",
+			"convert": "轉換"
+		},
+		"cards": {
+			"title": "VERT 支援...",
+			"images": "圖片",
+			"audio": "音訊",
+			"documents": "文件",
+			"video": "影片",
+			"video_server_processing": "伺服器支援",
+			"local_supported": "本機支援",
+			"status": {
+				"text": "<b>狀態：</b>{status}",
+				"ready": "就緒",
+				"not_ready": "未就緒",
+				"not_initialized": "未初始化",
+				"downloading": "下載中...",
+				"initializing": "初始化中...",
+				"unknown": "未知狀態"
+			},
+			"supported_formats": "支援的格式："
+		},
+		"tooltip": {
+			"partial_support": "此格式僅可作為{direction}進行轉換。",
+			"direction_input": "輸入（來源）",
+			"direction_output": "輸出（目標）",
+			"video_server_processing": "影片預設上傳到伺服器進行處理，點擊這裡了解如何在本機設定。"
+		}
+	},
+	"convert": {
+		"external_warning": {
+			"title": "外部伺服器警告",
+			"text": "如果你選擇轉換為影片格式，這些檔案將被上傳到外部伺服器進行轉換。是否繼續？",
+			"yes": "是",
+			"no": "否"
+		},
+		"panel": {
+			"convert_all": "全部轉換",
+			"download_all": "下載全部為 .zip",
+			"remove_all": "刪除所有檔案",
+			"set_all_to": "全部設定為",
+			"na": "不適用"
+		},
+		"dropdown": {
+			"audio": "音訊",
+			"video": "影片",
+			"doc": "文件",
+			"image": "圖片",
+			"placeholder": "搜尋格式"
+		},
+		"tooltips": {
+			"unknown_file": "未知檔案類型",
+			"audio_file": "音訊檔案",
+			"video_file": "影片檔案",
+			"document_file": "文件檔案",
+			"image_file": "圖片檔案",
+			"convert_file": "轉換此檔案",
+			"download_file": "下載此檔案"
+		},
+		"errors": {
+			"cant_convert": "無法轉換此檔案。",
+			"vertd_server": "你在做什麼...？你應該執行 vertd 伺服器！",
+			"vertd_generic_view": "檢視錯誤詳情",
+			"vertd_generic_body": "嘗試轉換影片時發生錯誤。你想將此影片提交給開發者以協助修復此錯誤嗎？只會傳送你的影片檔案，不會上傳任何識別碼。",
+			"vertd_generic_title": "影片轉換錯誤",
+			"vertd_generic_yes": "提交影片",
+			"vertd_generic_no": "不提交",
+			"vertd_failed_to_keep": "無法在伺服器上保留影片：{error}",
+			"vertd_details": "檢視錯誤詳情",
+			"vertd_details_body": "如果你按下提交，<b>你的影片也會被附加</b>在錯誤日誌旁邊，日誌會自動報告給我們審核。以下資訊是我們自動接收的日誌：",
+			"vertd_details_footer": "此資訊僅用於故障排除，絕不會被分享。檢視我們的[privacy_link]隱私權政策[/privacy_link]以了解更多詳情。",
+			"vertd_details_job_id": "<b>任務 ID：</b>{jobId}",
+			"vertd_details_from": "<b>來源格式：</b>{from}",
+			"vertd_details_to": "<b>目標格式：</b>{to}",
+			"vertd_details_error_message": "<b>錯誤訊息：</b>[view_link]檢視錯誤日誌[/view_link]",
+			"vertd_details_close": "關閉",
+			"unsupported_format": "僅支援圖片、影片、音訊和文件檔案",
+			"format_output_only": "此格式目前只能用作輸出（轉換目標），不能用作輸入。",
+			"vertd_not_found": "未找到 vertd 執行個體來開始影片轉換。請確保執行個體 URL 設定正確。",
+			"worker_downloading": "{type}轉換器正在初始化，請稍候。",
+			"worker_error": "{type}轉換器初始化時出錯，請稍後重試。",
+			"worker_timeout": "{type}轉換器初始化時間超出預期，請再等待一會兒或重新整理頁面。",
+			"audio": "音訊",
+			"doc": "文件",
+			"image": "圖片"
+		}
+	},
+	"settings": {
+		"title": "設定",
+		"errors": {
+			"save_failed": "儲存設定失敗！"
+		},
+		"appearance": {
+			"title": "外觀",
+			"brightness_theme": "亮度主題",
+			"brightness_description": "想要陽光明媚的閃光彈，還是寧靜孤獨的夜晚？",
+			"light": "淺色",
+			"dark": "深色",
+			"effect_settings": "效果設定",
+			"effect_description": "你想要華麗的效果，還是更靜態的體驗？",
+			"enable": "啟用",
+			"disable": "停用"
+		},
+		"conversion": {
+			"title": "轉換",
+			"advanced_settings": "進階設定",
+			"filename_format": "檔案名稱格式",
+			"filename_description": "這將決定下載時的檔案名稱，<b>不包括副檔名。</b>你可以在格式中使用以下範本，它們將被替換為相關資訊：<b>%name%</b>表示原始檔案名稱，<b>%extension%</b>表示原始副檔名，<b>%date%</b>表示檔案轉換時的日期字串。",
+			"placeholder": "VERT_%name%",
+			"default_format": "預設轉換格式",
+			"default_format_description": "這將更改上傳此檔案類型時自動選擇的預設格式。",
+			"default_format_image": "圖片",
+			"default_format_video": "影片",
+			"default_format_audio": "音訊",
+			"default_format_document": "文件",
+			"metadata": "檔案中繼資料",
+			"metadata_description": "這將更改轉換後的檔案是否保留原始檔案的中繼資料（EXIF、歌曲資訊等）。",
+			"keep": "保留",
+			"remove": "移除",
+			"quality": "轉換品質",
+			"quality_description": "更改輸出檔案的品質。值越高，處理時間和檔案大小越大。",
+			"quality_video": "更改影片轉換的品質。品質越高，轉換時間和檔案大小越大。",
+			"quality_audio": "音訊（kbps）",
+			"quality_images": "圖片（%）",
+			"rate": "取樣率（Hz）"
+		},
+		"vertd": {
+			"title": "影片轉換",
+			"status": "狀態：",
+			"loading": "載入中...",
+			"available": "可用（提交 ID {commitId}）",
+			"unavailable": "不可用（URL 正確嗎？）",
+			"description": "<code>vertd</code>專案是 FFmpeg 的伺服器包裝器。這允許你透過 VERT 網頁介面方便地轉換影片，同時仍能利用 GPU 的強大效能以儘可能快的速度完成轉換。",
+			"hosting_info": "我們為你提供了一個公共執行個體以方便使用，但如果你知道如何操作，在自己的電腦或伺服器上託管也很容易。你可以在[vertd_link]這裡[/vertd_link]下載伺服器二進位檔案 - 設定程序將來會變得更簡單，敬請期待！",
+			"instance": "執行個體",
+			"url_placeholder": "例如：http://localhost:24153",
+			"conversion_speed": "轉換速度",
+			"speed_description": "這描述了速度和品質之間的權衡。速度越快品質越低，但完成工作的速度更快。",
+			"speeds": {
+				"very_slow": "非常慢",
+				"slower": "較慢",
+				"slow": "慢",
+				"medium": "中等",
+				"fast": "快",
+				"ultra_fast": "超快"
+			},
+			"auto_instance": "自動（建議）",
+			"eu_instance": "德國法爾肯施泰因",
+			"us_instance": "美國華盛頓",
+			"custom_instance": "自訂"
+		},
+		"privacy": {
+			"title": "隱私權與資料",
+			"plausible_title": "Plausible 分析",
+			"plausible_description": "我們使用[plausible_link]Plausible[/plausible_link]，一個注重隱私權的分析工具，來收集完全匿名的統計資料。所有資料都是匿名和彙總的，不會傳送或儲存任何可識別資訊。你可以在[analytics_link]這裡[/analytics_link]檢視分析資料，並在下方選擇退出。",
+			"opt_in": "選擇加入",
+			"opt_out": "選擇退出",
+			"cache_title": "快取管理",
+			"cache_description": "我們在瀏覽器中快取轉換器檔案，這樣你就不必每次都重新下載，從而提高效能並減少資料使用。",
+			"refresh_cache": "重新整理快取",
+			"clear_cache": "清除快取",
+			"files_cached": "{size}（{count}個檔案）",
+			"loading_cache": "載入中...",
+			"total_size": "總大小",
+			"files_cached_label": "已快取檔案",
+			"cache_cleared": "快取已成功清除！",
+			"cache_clear_error": "清除快取失敗。"
+		},
+		"language": {
+			"title": "語言",
+			"description": "選擇 VERT 介面的偏好語言。"
+		}
+	},
+	"about": {
+		"title": "關於",
+		"why": {
+			"title": "為什麼選擇 VERT？",
+			"description": "<b>檔案轉換器一直讓我們失望。</b>它們很醜陋，充滿廣告，最重要的是；很慢。我們決定透過製作一個解決所有這些問題的替代方案，一勞永逸地解決這個問題。<br/><br/>所有非影片檔案都完全在裝置上轉換；這意味著不需要在伺服器之間傳送和接收檔案的延遲，而且我們永遠不會窺探你轉換的檔案。<br/><br/>影片檔案會上傳到我們超快速的 RTX 4000 Ada 伺服器。如果你不轉換影片，它們會在伺服器上保留一小時。如果你轉換檔案，影片將在伺服器上保留一小時，或直到下載完成。然後檔案將從我們的伺服器中刪除。"
+		},
+		"sponsors": {
+			"title": "贊助商",
+			"description": "想支援我們嗎？請在[discord_link]Discord[/discord_link]伺服器上聯絡開發者，或傳送電子郵件至",
+			"email_copied": "電子郵件已複製到剪貼簿！"
+		},
+		"resources": {
+			"title": "資源",
+			"discord": "Discord",
+			"source": "原始碼",
+			"email": "電子郵件"
+		},
+		"donate": {
+			"title": "捐贈給 VERT",
+			"description": "有了你的支援，我們可以繼續維護和改進 VERT。",
+			"one_time": "一次性",
+			"monthly": "每月",
+			"custom": "自訂",
+			"pay_now": "立即付款",
+			"donate_amount": "捐贈 ${amount} 美元",
+			"thank_you": "感謝你的捐贈！",
+			"payment_failed": "付款失敗：{message}{period}你未被收費。",
+			"donation_error": "處理捐贈時出錯。請稍後重試。",
+			"payment_error": "取得付款詳情時出錯。請稍後重試。"
+		},
+		"credits": {
+			"title": "致謝",
+			"contact_team": "如果你想聯絡開發團隊，請使用「資源」卡片上的電子郵件。",
+			"notable_contributors": "傑出貢獻者",
+			"notable_description": "我們要感謝這些人對 VERT 的重大貢獻。",
+			"github_contributors": "GitHub 貢獻者",
+			"github_description": "非常感謝所有這些人的協助！[github_link]也想幫忙嗎？[/github_link]",
+			"no_contributors": "似乎還沒有人貢獻……[contribute_link]成為第一個貢獻者！[/contribute_link]",
+			"libraries": "程式庫",
+			"libraries_description": "非常感謝 FFmpeg（音訊、影片）、ImageMagick（圖片）和 Pandoc（文件）多年來維護如此出色的程式庫。VERT 依賴它們為你提供轉換服務。",
+			"roles": {
+				"lead_developer": "首席開發者；轉換後端、UI 實作",
+				"developer": "開發者；UI 實作",
+				"designer": "設計師；使用者體驗、品牌、行銷",
+				"docker_ci": "維護 Docker 和 CI 支援",
+				"former_cofounder": "前共同創辦人和設計師"
+			}
+		},
+		"errors": {
+			"github_contributors": "取得 GitHub 貢獻者時出錯"
+		}
+	},
+	"workers": {
+		"errors": {
+			"general": "轉換 {file} 時出錯：{message}",
+			"cancel": "取消轉換 {file} 時出錯：{message}",
+			"magick": "Magick worker 出錯，圖片轉換可能無法正常運作。",
+			"ffmpeg": "載入 ffmpeg 時出錯，某些功能可能無法運作。",
+			"no_audio": "未找到音訊串流。",
+			"invalid_rate": "指定的取樣率無效：{rate}Hz"
+		}
+	},
+	"privacy": {
+		"title": "隱私權政策",
+		"summary": {
+			"title": "摘要",
+			"description": "VERT 的隱私權政策非常簡單：我們根本不收集或儲存你的任何資料。我們不使用 cookie 或追蹤器，分析是完全私密的，所有轉換（影片除外）都在你的瀏覽器本機進行。影片在下載後或一小時後刪除，除非你明確授權儲存；它只會用於故障排除。VERT 自託管 Coolify 執行個體用於託管網站和 vertd（用於影片轉換），以及用於完全匿名和彙總分析的 Plausible 執行個體。<br/><br/>請注意，這可能僅適用於[vert_link]vert.sh[/vert_link]的官方 VERT 執行個體；第三方執行個體可能以不同方式處理你的資料。"
+		},
+		"conversions": {
+			"title": "轉換",
+			"description": "大多數轉換（圖片、文件、音訊）完全在你的裝置上本機使用相關工具的 WebAssembly 版本（例如 ImageMagick、Pandoc、FFmpeg）進行。這意味著你的檔案永遠不會離開你的裝置，我們也永遠無法存取它們。<br/><br/>影片轉換在我們的伺服器上進行，因為它們需要更多的處理能力，並且目前無法在瀏覽器上非常快速地完成。你使用 VERT 轉換的影片在下載後或一小時後刪除，除非你明確授權我們將它們儲存更長時間，純粹用於故障排除。"
+		},
+		"conversion_errors": {
+			"title": "轉換錯誤",
+			"description": "當影片轉換失敗時，我們可能會收集一些匿名資料以協助我們診斷問題。這些資料可能包括：",
+			"list_job_id": "任務 ID，即匿名化的檔案名稱",
+			"list_format_from": "你轉換的來源格式",
+			"list_format_to": "你轉換的目標格式",
+			"list_stderr": "你任務的 FFmpeg stderr 輸出（錯誤訊息）",
+			"list_video": "實際影片檔案（如果明確授權）",
+			"footer": "此資訊僅用於診斷轉換問題。只有在你明確授權的情況下，才會收集實際影片檔案，並且僅用於故障排除。"
+		},
+		"analytics": {
+			"title": "分析",
+			"description": "我們自託管 Plausible 執行個體用於完全匿名和彙總的分析。Plausible 不使用 cookie，並符合所有主要隱私權法規（GDPR/CCPA/PECR）。你可以在[settings_link]設定[/settings_link]的「隱私權與資料」部分選擇退出分析，並在[plausible_link]這裡[/plausible_link]閱讀更多關於 Plausible 隱私權實務的資訊。"
+		},
+		"local_storage": {
+			"title": "本機儲存",
+			"description": "我們使用瀏覽器的本機儲存來儲存你的設定，使用瀏覽器的工作階段儲存來暫時儲存「關於」部分的 GitHub 貢獻者清單，以減少重複的 GitHub API 請求。不會儲存或傳輸任何個人資料。<br/><br/>我們使用的轉換工具的 WebAssembly 版本（FFmpeg、ImageMagick、Pandoc）也會在你首次造訪網站時本機儲存在瀏覽器中，這樣你就不需要每次造訪時都重新下載它們。不會儲存或傳輸任何個人資料。你可以隨時在[settings_link]設定[/settings_link]的「隱私權與資料」部分檢視或刪除這些資料。"
+		},
+		"contact": {
+			"title": "聯絡",
+			"description": "如有問題，請傳送電子郵件至：[email_link]hello@vert.sh[/email_link]。如果你使用的是第三方 VERT 執行個體，請聯絡該執行個體的託管者。"
+		},
+		"last_updated": "最後更新：2025-10-19"
+	}
+}
