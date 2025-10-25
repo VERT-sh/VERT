@@ -81,13 +81,35 @@ export class VertdInstance {
 	}
 
 	public async url() {
+		const reachable = async (url: string) => {
+			try {
+				const res = await fetch(url + "/api/version", {
+					method: "GET",
+					cache: "no-store",
+				});
+				return res.ok;
+			} catch {
+				return false;
+			}
+		};
+
 		switch (this.inner.type) {
 			case "auto": {
-				if (!this.cachedIp) {
-					this.cachedIp = await ip();
+				if (!this.cachedIp) this.cachedIp = await ip();
+				const ipInfo = this.cachedIp;
+				const primary = this.geographicallyOptimalInstance(ipInfo);
+
+				// try primary (closest) first
+				if (await reachable(primary)) return primary;
+
+				// fall back to other locations
+				for (const location of LOCATIONS) {
+					if (location.url === primary) continue;
+					if (await reachable(location.url)) return location.url;
 				}
 
-				return this.geographicallyOptimalInstance(this.cachedIp);
+				// if none are reachable, fall back to custom
+				return Settings.instance.settings.vertdURL;
 			}
 
 			case "eu": {
