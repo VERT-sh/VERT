@@ -9,6 +9,7 @@ import PQueue from "p-queue";
 import { getLocale, setLocale } from "$lib/paraglide/runtime";
 import { m } from "$lib/paraglide/messages";
 import sanitizeHtml from "sanitize-html";
+import { unzip } from "fflate";
 
 class Files {
 	public files = $state<VertFile[]>([]);
@@ -140,11 +141,70 @@ class Files {
 	}
 
 	private _warningShown = false;
-	private _add(file: VertFile | File) {
+	private async _handleZipFile(file: File): Promise<void> {
+		try {
+			log(["files"], `extracting zip file: ${file.name}`);
+			const arrayBuffer = await file.arrayBuffer();
+			const uint8Array = new Uint8Array(arrayBuffer);
+
+			return new Promise((resolve, reject) => {
+				unzip(uint8Array, (err, unzipped) => {
+					if (err) {
+						error(
+							["files"],
+							`failed to extract zip: ${err.message}`,
+						);
+						reject(err);
+						return;
+					}
+
+					log(
+						["files"],
+						`extracted ${Object.keys(unzipped).length} files from zip`,
+					);
+
+					for (const [filename, data] of Object.entries(unzipped)) {
+						if (
+							filename.startsWith(".") ||
+							filename.includes("/__MACOSX/") ||
+							filename.endsWith("/")
+						)
+							continue;
+
+						const buffer = Array.from(data);
+						const extractedFile = new File(
+							[new Uint8Array(buffer)],
+							filename,
+							{ type: "application/octet-stream" },
+						);
+						this._add(extractedFile);
+					}
+
+					resolve();
+				});
+			});
+		} catch (e) {
+			error(["files"], `error processing zip file: ${e}`);
+		}
+	}
+
+	private async _add(file: VertFile | File) {
 		if (file instanceof VertFile) {
 			this.files.push(file);
 			this._addThumbnail(file);
 		} else {
+			// if zip, extract and add contents
+			const isZip =
+				file.name.toLowerCase().endsWith(".zip") ||
+				file.type === "application/zip" ||
+				file.type === "application/x-zip-compressed";
+
+			if (isZip) {
+				await this._handleZipFile(file);
+				return;
+			}
+
+			// regular files
 			const format = "." + file.name.split(".").pop()?.toLowerCase();
 			if (!format) {
 				log(["files"], `no extension found for ${file.name}`);

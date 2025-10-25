@@ -15,6 +15,7 @@
         "byte-data": "^19.0.1",
         "client-zip": "^2.5.0",
         "clsx": "^2.1.1",
+        "fflate": "^0.8.2",
         "lucide-svelte": "^0.544.0",
         "music-metadata": "^11.9.0",
         "overlayscrollbars": "^2.12.0",
