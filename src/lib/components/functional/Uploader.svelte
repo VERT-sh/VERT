@@ -18,23 +18,6 @@
 	let uploaderButton = $state<HTMLButtonElement>();
 	let fileInput = $state<HTMLInputElement>();
 
-	let acceptedTypes = $state<string>();
-
-	const setupFileInput = async () => {
-		if (!fileInput) return;
-
-		const filteredConverters = (
-			await Promise.all(
-				converters.map(async (c) => {
-					if (await c.valid()) return c;
-				}),
-			)
-		).filter((c) => typeof c !== "undefined");
-		acceptedTypes = filteredConverters
-			.map((c) => c.formatStrings((f) => f.fromSupported).join(","))
-			.join(",");
-	};
-
 	const uploadFiles = async () => {
 		if (!fileInput) return;
 		fileInput.click();
@@ -58,8 +41,6 @@
 		uploaderButton?.addEventListener("dragleave", handler);
 		uploaderButton?.addEventListener("drop", handler);
 
-		void setupFileInput();
-
 		return () => {
 			uploaderButton?.removeEventListener("dragover", handler);
 			uploaderButton?.removeEventListener("dragenter", handler);
@@ -75,7 +56,6 @@
 	multiple
 	class="hidden"
 	onchange={handleFileChange}
-	accept={acceptedTypes}
 />
 
 <button
