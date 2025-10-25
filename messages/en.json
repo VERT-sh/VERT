@@ -47,6 +47,11 @@
 		}
 	},
 	"convert": {
+		"zip_file": {
+			"extracting": "Detected ZIP archive: {filename}",
+			"extracted": "Extracted {extract_count} files from {filename}. {ignore_count} items were ignored.",
+			"extract_error": "Error extracting {filename}: {error}"
+		},
 		"external_warning": {
 			"title": "External server warning",
 			"text": "If you choose to convert into a video format, those files will be uploaded to an external server to be converted. Do you want to continue?",
@@ -247,7 +252,8 @@
 			"general": "Error converting {file}: {message}",
 			"cancel": "Error canceling conversion for {file}: {message}",
 			"magick": "Error in Magick worker, image conversion may not work as expected.",
-			"ffmpeg": "Error loading ffmpeg, some features may not work.",
+			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
+			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz"
 		}

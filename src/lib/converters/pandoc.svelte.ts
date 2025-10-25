@@ -26,9 +26,13 @@ export class PandocConverter extends Converter {
 				this.status = "ready";
 			} catch (err) {
 				this.status = "error";
+				error(
+					["converters", this.name],
+					`Failed to load Pandoc worker: ${err}`,
+				);
 				ToastManager.add({
 					type: "error",
-					message: `Failed to load Pandoc worker: ${err}`, // TODO: i18n
+					message: m["workers.errors.pandoc"](),
 				});
 			}
 		})();

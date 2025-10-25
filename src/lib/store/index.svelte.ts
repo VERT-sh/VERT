@@ -10,6 +10,7 @@ import { getLocale, setLocale } from "$lib/paraglide/runtime";
 import { m } from "$lib/paraglide/messages";
 import sanitizeHtml from "sanitize-html";
 import { unzip } from "fflate";
+import { ToastManager } from "$lib/toast/index.svelte";
 
 class Files {
 	public files = $state<VertFile[]>([]);
@@ -144,6 +145,12 @@ class Files {
 	private async _handleZipFile(file: File): Promise<void> {
 		try {
 			log(["files"], `extracting zip file: ${file.name}`);
+			ToastManager.add({
+				type: "info",
+				message: m["convert.zip_file.extracting"]({
+					filename: file.name,
+				}),
+			});
 			const arrayBuffer = await file.arrayBuffer();
 			const uint8Array = new Uint8Array(arrayBuffer);
 
@@ -158,18 +165,20 @@ class Files {
 						return;
 					}
 
-					log(
-						["files"],
-						`extracted ${Object.keys(unzipped).length} files from zip`,
-					);
+					const itemCount = Object.keys(unzipped).length;
+					let ignoreCount = 0;
+
+					log(["files"], `extracted ${itemCount} files from zip`);
 
 					for (const [filename, data] of Object.entries(unzipped)) {
 						if (
 							filename.startsWith(".") ||
 							filename.includes("/__MACOSX/") ||
 							filename.endsWith("/")
-						)
+						) {
+							ignoreCount++;
 							continue;
+						}
 
 						const buffer = Array.from(data);
 						const extractedFile = new File(
@@ -179,6 +188,15 @@ class Files {
 						);
 						this._add(extractedFile);
 					}
+
+					ToastManager.add({
+						type: "success",
+						message: m["convert.zip_file.extracted"]({
+							filename: file.name,
+							extract_count: itemCount - ignoreCount,
+							ignore_count: ignoreCount,
+						}),
+					});
 
 					resolve();
 				});
@@ -200,8 +218,20 @@ class Files {
 				file.type === "application/x-zip-compressed";
 
 			if (isZip) {
-				await this._handleZipFile(file);
-				return;
+				try {
+					await this._handleZipFile(file);
+					return;
+				} catch (err) {
+					error(["files"], `error extracting zip file: ${err}`);
+					ToastManager.add({
+						type: "error",
+						message: m["convert.zip_file.extract_error"]({
+							filename: file.name,
+							error: String(err),
+						}),
+					});
+					return;
+				}
 			}
 
 			// regular files
