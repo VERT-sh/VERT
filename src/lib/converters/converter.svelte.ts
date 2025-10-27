@@ -38,7 +38,7 @@ export class Converter {
 	public status: WorkerStatus = $state("not-ready");
 	public readonly reportsProgress: boolean = false;
 
-	private timeoutId?: number;
+	private timeoutId?: NodeJS.Timeout;
 
 	constructor(public readonly timeout: number = 10) {
 		this.startTimeout();

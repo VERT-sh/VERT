@@ -17,7 +17,7 @@
 	></div>
 {/if}
 
-<style>
+<style lang="postcss">
 	.dragoverlay {
 		animation: dragoverlay-animation 3s infinite linear;
 	}
