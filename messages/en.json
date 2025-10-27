@@ -52,6 +52,7 @@
 			"extracted": "Extracted {extract_count} files from {filename}. {ignore_count} items were ignored.",
 			"extract_error": "Error extracting {filename}: {error}"
 		},
+		"large_file_warning": "Due to browser / device limitations, video to audio conversion is disabled for this file as it is larger than {limit}GB. We recommend using Firefox or Safari for files of this size since they have less limitations.",
 		"external_warning": {
 			"title": "External server warning",
 			"text": "If you choose to convert into a video format, those files will be uploaded to an external server to be converted. Do you want to continue?",
@@ -255,7 +256,8 @@
 			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
 			"no_audio": "No audio stream found.",
-			"invalid_rate": "Invalid sample rate specified: {rate}Hz"
+			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
+			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
 		}
 	},
 	"privacy": {

@@ -1,9 +1,9 @@
 import { byNative, converters } from "$lib/converters";
 import type { Converter } from "$lib/converters/converter.svelte";
-import { error } from "$lib/logger";
 import { m } from "$lib/paraglide/messages";
 import { ToastManager } from "$lib/toast/index.svelte";
 import type { Component } from "svelte";
+import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
 
 export class VertFile {
 	public id: string = Math.random().toString(36).slice(2, 8);
@@ -61,6 +61,17 @@ export class VertFile {
 			return true;
 		});
 		return converter;
+	}
+
+	public isLarge(): boolean {
+		return this.file.size > MAX_ARRAY_BUFFER_SIZE;
+	}
+
+	public supportsStreaming(): boolean {
+		// only vertd (video/gif -> video/gif) supports streaming
+		// rest of converters need entire file in memory, limited by ArrayBuffer limits
+		const converter = this.findConverter();
+		return converter?.name === "vertd";
 	}
 
 	constructor(file: File, to: string, blobUrl?: string) {
