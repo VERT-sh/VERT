@@ -16,6 +16,7 @@
 	import { error } from "$lib/logger";
 	import { ToastManager } from "$lib/toast/index.svelte";
 	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/consts";
+	import { addDialog } from "$lib/store/DialogProvider";
 
 	const { settings = $bindable() }: { settings: ISettings } = $props();
 
@@ -64,6 +65,57 @@
 		} finally {
 			isLoadingCache = false;
 		}
+	}
+
+	async function clearAllData() {
+		if (isLoadingCache) return;
+
+		addDialog(
+			m["settings.privacy.clear_all_data_confirm_title"](),
+			m["settings.privacy.clear_all_data_confirm"](),
+			[
+				{
+					text: m["settings.privacy.clear_all_data_cancel"](),
+					action: () => {},
+				},
+				{
+					text: m["settings.privacy.clear_all_data"](),
+					action: async () => {
+						isLoadingCache = true;
+						try {
+							await swManager.clearCache();
+							localStorage.clear();
+							sessionStorage.clear();
+
+							ToastManager.add({
+								type: "success",
+								message:
+									m["settings.privacy.all_data_cleared"](),
+							});
+
+							setTimeout(() => {
+								window.location.href = "/";
+							}, 1500);
+						} catch (err) {
+							error(
+								["privacy", "data"],
+								`Failed to clear all data: ${err}`,
+							);
+							ToastManager.add({
+								type: "error",
+								message:
+									m[
+										"settings.privacy.all_data_clear_error"
+									](),
+							});
+						} finally {
+							isLoadingCache = false;
+						}
+					},
+				},
+			],
+			"warning",
+		);
 	}
 
 	onMount(() => {
@@ -194,6 +246,28 @@
 						{m["settings.privacy.clear_cache"]()}
 					</button>
 				</div>
+			</div>
+
+			<div class="flex flex-col gap-4">
+				<div class="flex flex-col gap-2">
+					<p class="text-base font-bold">
+						{m["settings.privacy.site_data_title"]()}
+					</p>
+					<p class="text-sm text-muted font-normal">
+						{m["settings.privacy.site_data_description"]()}
+					</p>
+				</div>
+
+				<button
+					onclick={clearAllData}
+					class="btn {$effects
+						? ''
+						: '!scale-100'} w-full p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+					disabled={isLoadingCache}
+				>
+					<Trash2Icon size="24" class="inline-block mr-2" />
+					{m["settings.privacy.clear_all_data"]()}
+				</button>
 			</div>
 		</div>
 	</div></Panel

@@ -189,7 +189,15 @@
 			"total_size": "Total Size",
 			"files_cached_label": "Files Cached",
 			"cache_cleared": "Cache cleared successfully!",
-			"cache_clear_error": "Failed to clear cache."
+			"cache_clear_error": "Failed to clear cache.",
+			"site_data_title": "Site data management",
+			"site_data_description": "Clear all site data including settings and cached files, resetting VERT to its default state and reloading the page.",
+			"clear_all_data": "Clear all site data",
+			"clear_all_data_confirm_title": "Clear all site data?",
+			"clear_all_data_confirm": "This will reset all settings & cache, then reload the page. This action cannot be undone.",
+			"clear_all_data_cancel": "Cancel",
+			"all_data_cleared": "All site data cleared! Reloading page...",
+			"all_data_clear_error": "Failed to clear all site data."
 		},
 		"language": {
 			"title": "Language",
