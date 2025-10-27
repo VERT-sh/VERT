@@ -418,6 +418,7 @@ export const availableLocales = {
 	id: "Bahasa Indonesia",
 	tr: "Türkçe",
 	ja: "日本語",
+	ko: "한국어",
 	el: "Ελληνικά",
 	"zh-Hans": "简体中文",
 	"zh-Hant": "繁體中文",
