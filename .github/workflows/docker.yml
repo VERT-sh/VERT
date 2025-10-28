@@ -8,12 +8,14 @@ on:
             - "src/**"
             - "static/**"
             - "Dockerfile"
+            - ".dockerignore"
     pull_request:
         branches: ["main"]
         paths:
             - "src/**"
             - "static/**"
             - "Dockerfile"
+            - ".dockerignore"
     workflow_dispatch:
 
 jobs:
