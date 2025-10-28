@@ -47,6 +47,12 @@
 		}
 	},
 	"convert": {
+		"zip_file": {
+			"extracting": "检测到 ZIP 压缩包：{filename}",
+			"extracted": "从 {filename} 中提取了 {extract_count} 个文件。{ignore_count} 个项目被忽略。",
+			"extract_error": "提取 {filename} 时出错：{error}"
+		},
+		"large_file_warning": "由于浏览器/设备限制，此文件大于 {limit}GB，视频转音频功能已禁用。我们建议使用 Firefox 或 Safari 处理此大小的文件，因为它们的限制较少。",
 		"external_warning": {
 			"title": "外部服务器警告",
 			"text": "如果你选择转换为视频格式，这些文件将被上传到外部服务器进行转换。是否继续？",
@@ -183,7 +189,15 @@
 			"total_size": "总大小",
 			"files_cached_label": "已缓存文件",
 			"cache_cleared": "缓存已成功清除！",
-			"cache_clear_error": "清除缓存失败。"
+			"cache_clear_error": "清除缓存失败。",
+			"site_data_title": "网站数据管理",
+			"site_data_description": "清除所有网站数据，包括设置和缓存文件，将 VERT 重置为默认状态并重新加载页面。",
+			"clear_all_data": "清除所有网站数据",
+			"clear_all_data_confirm_title": "清除所有网站数据？",
+			"clear_all_data_confirm": "这将重置所有设置和缓存，然后重新加载页面。此操作无法撤消。",
+			"clear_all_data_cancel": "取消",
+			"all_data_cleared": "所有网站数据已清除！正在重新加载页面...",
+			"all_data_clear_error": "清除所有网站数据失败。"
 		},
 		"language": {
 			"title": "语言",
@@ -248,8 +262,10 @@
 			"cancel": "取消转换 {file} 时出错：{message}",
 			"magick": "Magick worker 出错，图片转换可能无法正常工作。",
 			"ffmpeg": "加载 ffmpeg 时出错，某些功能可能无法工作。",
+			"pandoc": "加载 Pandoc worker 时出错，文档转换可能无法正常工作。",
 			"no_audio": "未找到音频流。",
-			"invalid_rate": "指定的采样率无效：{rate}Hz"
+			"invalid_rate": "指定的采样率无效：{rate}Hz",
+			"file_too_large": "此文件超过 {limit}GB 浏览器/设备限制。请尝试使用 Firefox 或 Safari 转换此大文件，它们通常具有更高的限制。"
 		}
 	},
 	"privacy": {
