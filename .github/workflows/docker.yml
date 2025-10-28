@@ -7,11 +7,13 @@ on:
         paths:
             - "src/**"
             - "static/**"
+            - "Dockerfile"
     pull_request:
         branches: ["main"]
         paths:
             - "src/**"
             - "static/**"
+            - "Dockerfile"
     workflow_dispatch:
 
 jobs:
