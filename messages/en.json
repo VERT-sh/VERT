@@ -274,11 +274,15 @@
 		"title": "Privacy Policy",
 		"summary": {
 			"title": "Summary",
-			"description": "VERT's privacy policy is very simple: we do not collect or store any data on you at all. We don't use cookies or trackers, analytics are completely private, and all conversions (except videos) happen locally on your browser. Videos are deleted after being downloaded, or an hour, unless explicitly given permission by you to be stored; it will only be used for the purpose of troubleshooting. VERT self-hosts a Coolify instance for hosting the website and vertd (for video conversion), and a Plausible instance for completely anonymous and aggregated analytics.<br/><br/>Note this may only apply to the official VERT instance at [vert_link]vert.sh[/vert_link]; third-party instances may handle your data differently."
+			"description": "VERT's privacy policy is very simple: we do not collect or store any data on you at all. We don't use cookies or trackers, analytics are completely private, and all conversions (except videos) happen locally on your browser. Videos are deleted after being downloaded, or an hour, unless explicitly given permission by you to be stored; it will only be used for the purpose of troubleshooting. VERT self-hosts a Coolify instance for hosting the website and vertd (for video conversion), and a Plausible instance for completely anonymous and aggregated analytics. We use Stripe to process donations, which may collect some data used for fraud prevention.<br/><br/>Note this may only apply to the official VERT instance at [vert_link]vert.sh[/vert_link]; third-party instances may handle your data differently."
 		},
 		"conversions": {
 			"title": "Conversions",
 			"description": "Most conversions (images, documents, audio) happen entirely locally on your device using WebAssembly versions of the relevant tools (e.g. ImageMagick, Pandoc, FFmpeg). This means your files never leave your device and we will never have access to them.<br/><br/>Video conversions are performed on our servers because they require more processing power and cannot be done very quickly on the browser yet. Videos you convert with VERT are deleted after being downloaded, or after one hour, unless you explicitly give permission for us to store them longer purely for troubleshooting purposes."
+		},
+		"donations": {
+			"title": "Donations",
+			"description": "We use Stripe on the [about_link]about[/about_link] page to collect donations. Stripe may collect certain information about the payment and device for fraud prevention as described in [stripe_link]their documentation on advanced fraud detection[/stripe_link]. External network requests to Stripe are deferred, and are only made after you click the button to pay."
 		},
 		"conversion_errors": {
 			"title": "Conversion Errors",
@@ -302,6 +306,6 @@
 			"title": "Contact",
 			"description": "For questions, email us at: [email_link]hello@vert.sh[/email_link]. If you are using a third-party instance of VERT, please contact the hoster of that instance instead."
 		},
-		"last_updated": "Last updated: 2025-10-19"
+		"last_updated": "Last updated: 2025-10-29"
 	}
 }
