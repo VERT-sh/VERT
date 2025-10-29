@@ -8,20 +8,20 @@
 
 <script lang="ts">
 	import { goto } from "$app/navigation";
-
 	import { page } from "$app/state";
-
-	import {
-		PUB_DONATION_URL,
-		PUB_HOSTNAME,
-		PUB_STRIPE_KEY,
-	} from "$env/static/public";
+	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$env/static/public";
+	const OFFICIAL_DONATION_URL = "https://donations.vert.sh";
+	const OFFICIAL_STRIPE_KEY =
+		"pk_live_51RDVmAGSxPVad6bQwzVNnbc28nlmzA30krLWk1fefCMpUPiSRPkavMMbGqa8A3lUaOCMlsUEVy2CWDYg0ip3aPpL00ZJlsMkf2";
+	const isOfficial =
+		PUB_DONATION_URL === OFFICIAL_DONATION_URL &&
+		PUB_STRIPE_KEY === OFFICIAL_STRIPE_KEY;
 
 	// import { PUB_STRIPE_KEY, PUB_DONATION_API } from "$env/static/public";
 	import { fade } from "$lib/animation";
 	import FancyInput from "$lib/components/functional/FancyInput.svelte";
 	import Panel from "$lib/components/visual/Panel.svelte";
-	import { effects } from "$lib/store/index.svelte";
+	import { effects, link, sanitize } from "$lib/store/index.svelte";
 	import {
 		loadStripe,
 		type Stripe,
@@ -39,6 +39,7 @@
 	import { quintOut } from "svelte/easing";
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager } from "$lib/toast/index.svelte";
+	import { log } from "$lib/logger";
 
 	let amount = $state(1);
 	let customAmount = $state("");
@@ -90,6 +91,18 @@
 
 	onMount(async () => {
 		stripe = await loadStripe(PUB_STRIPE_KEY);
+
+		if (!isOfficial) {
+			log(
+				["about", "donate"],
+				"donations are being sent to an unofficial VERT instance - PUB_DONATION_URL and/or PUB_STRIPE_KEY have been changed.",
+			);
+		} else {
+			log(
+				["about", "donate"],
+				"donations are being sent to the official VERT instance.",
+			);
+		}
 	});
 
 	const donate = async () => {
@@ -328,4 +341,20 @@
 			</div>
 		</div>
 	</div>
+
+	<p class="text-sm font-normal text-muted">
+		{#if isOfficial}
+			{m["about.donate.donation_notice_official"]()}
+		{:else}
+			{@html sanitize(
+				link(
+					"official_link",
+					m["about.donate.donation_notice_unofficial"](),
+					"https://vert.sh",
+					true,
+					"",
+				),
+			)}
+		{/if}
+	</p>
 </Panel>

@@ -232,7 +232,9 @@
 			"thank_you": "Thank you for your donation!",
 			"payment_failed": "Payment failed: {message}{period} You have not been charged.",
 			"donation_error": "An error occurred while processing your donation. Please try again later.",
-			"payment_error": "Error fetching payment details. Please try again later."
+			"payment_error": "Error fetching payment details. Please try again later.",
+			"donation_notice_official": "Your donations here go to the official VERT instance (vert.sh), and helps to support the development of the project.",
+			"donation_notice_unofficial": "Your donations here go to the operator of this VERT instance. If you wish to support the official VERT developers, please visit [official_link]vert.sh[/official_link] instead."
 		},
 		"credits": {
 			"title": "Credits",
