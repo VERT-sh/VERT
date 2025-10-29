@@ -22,11 +22,8 @@
 	import FancyInput from "$lib/components/functional/FancyInput.svelte";
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import { effects, link, sanitize } from "$lib/store/index.svelte";
-	import {
-		loadStripe,
-		type Stripe,
-		type StripeElements,
-	} from "@stripe/stripe-js";
+	import { loadStripe } from "@stripe/stripe-js/pure";
+	import { type Stripe, type StripeElements } from "@stripe/stripe-js";
 	import clsx from "clsx";
 	import {
 		CalendarHeartIcon,
@@ -60,6 +57,9 @@
 
 	const paymentClick = async () => {
 		if (paymentState !== "prepay") return;
+
+		if (!stripe) stripe = await loadStripe(PUB_STRIPE_KEY);
+
 		paymentState = "fetching";
 		const res = await fetch(`${PUB_DONATION_URL}/billing`, {
 			method: "POST",
@@ -90,8 +90,6 @@
 	const transition = "cubic-bezier(0.23, 1, 0.320, 1)";
 
 	onMount(async () => {
-		stripe = await loadStripe(PUB_STRIPE_KEY);
-
 		if (!isOfficial) {
 			log(
 				["about", "donate"],
