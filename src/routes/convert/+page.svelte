@@ -5,7 +5,7 @@
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import ProgressBar from "$lib/components/visual/ProgressBar.svelte";
 	import Tooltip from "$lib/components/visual/Tooltip.svelte";
-	import { categories, converters, byNative } from "$lib/converters";
+	import { categories, converters } from "$lib/converters";
 	import {
 		effects,
 		files,
@@ -29,6 +29,8 @@
 	} from "lucide-svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { Settings } from "$lib/sections/settings/index.svelte";
+	import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
+	import { GB } from "$lib/consts";
 
 	let processedFileIds = $state(new Set<string>());
 
@@ -220,6 +222,7 @@
 			{@const formatInfo = currentConverter.supportedFormats.find(
 				(f) => f.name === file.from,
 			)}
+			{@const isLarge = file.isLarge()}
 			{#if formatInfo && !formatInfo.fromSupported}
 				<div
 					class="h-full flex flex-col text-center justify-center text-failure"
@@ -229,6 +232,19 @@
 					</p>
 					<p class="font-normal">
 						{m["convert.errors.format_output_only"]()}
+					</p>
+				</div>
+			{:else if isLarge && !file.supportsStreaming()}
+				<div
+					class="h-full flex flex-col text-center justify-center text-failure"
+				>
+					<p class="font-body font-bold">
+						{m["convert.errors.cant_convert"]()}
+					</p>
+					<p class="font-normal">
+						{m["workers.errors.file_too_large"]({
+							limit: (MAX_ARRAY_BUFFER_SIZE / GB).toFixed(2),
+						})}
 					</p>
 				</div>
 			{:else if currentConverter.status === "downloading"}
@@ -347,6 +363,7 @@
 								bind:selected={file.to}
 								onselect={(option) =>
 									handleSelect(option, file)}
+								{file}
 							/>
 							<div
 								class="w-full flex items-center justify-between"

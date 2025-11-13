@@ -9,7 +9,7 @@
 
 	let { children, text, className, position = "top" }: Props = $props();
 	let showTooltip = $state(false);
-	let timeout: number = 0;
+	let timeout: NodeJS.Timeout | null = null;
 	let triggerElement: HTMLElement;
 	let tooltipElement = $state<HTMLElement>();
 	let tooltipPosition = $state({ x: 0, y: 0 });
@@ -51,7 +51,7 @@
 
 	function hide() {
 		showTooltip = false;
-		clearTimeout(timeout);
+		if (timeout) clearTimeout(timeout);
 	}
 
 	$effect(() => {
@@ -94,7 +94,7 @@
 	</span>
 {/if}
 
-<style>
+<style lang="postcss">
 	.tooltip {
 		--border-size: 1px;
 		@apply fixed bg-panel-alt text-foreground border border-stone-400 dynadark:border-white drop-shadow-lg text-xs rounded-full pointer-events-none z-[999] max-w-xs break-words whitespace-normal;

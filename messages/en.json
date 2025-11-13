@@ -52,6 +52,7 @@
 			"extracted": "Extracted {extract_count} files from {filename}. {ignore_count} items were ignored.",
 			"extract_error": "Error extracting {filename}: {error}"
 		},
+		"large_file_warning": "Due to browser / device limitations, video to audio conversion is disabled for this file as it is larger than {limit}GB. We recommend using Firefox or Safari for files of this size since they have less limitations.",
 		"external_warning": {
 			"title": "External server warning",
 			"text": "If you choose to convert into a video format, those files will be uploaded to an external server to be converted. Do you want to continue?",
@@ -189,7 +190,15 @@
 			"total_size": "Total Size",
 			"files_cached_label": "Files Cached",
 			"cache_cleared": "Cache cleared successfully!",
-			"cache_clear_error": "Failed to clear cache."
+			"cache_clear_error": "Failed to clear cache.",
+			"site_data_title": "Site data management",
+			"site_data_description": "Clear all site data including settings and cached files, resetting VERT to its default state and reloading the page.",
+			"clear_all_data": "Clear all site data",
+			"clear_all_data_confirm_title": "Clear all site data?",
+			"clear_all_data_confirm": "This will reset all settings & cache, then reload the page. This action cannot be undone.",
+			"clear_all_data_cancel": "Cancel",
+			"all_data_cleared": "All site data cleared! Reloading page...",
+			"all_data_clear_error": "Failed to clear all site data."
 		},
 		"language": {
 			"title": "Language",
@@ -224,7 +233,9 @@
 			"thank_you": "Thank you for your donation!",
 			"payment_failed": "Payment failed: {message}{period} You have not been charged.",
 			"donation_error": "An error occurred while processing your donation. Please try again later.",
-			"payment_error": "Error fetching payment details. Please try again later."
+			"payment_error": "Error fetching payment details. Please try again later.",
+			"donation_notice_official": "Your donations here go to the official VERT instance (vert.sh), and helps to support the development of the project.",
+			"donation_notice_unofficial": "Your donations here go to the operator of this VERT instance. If you wish to support the official VERT developers, please visit [official_link]vert.sh[/official_link] instead."
 		},
 		"credits": {
 			"title": "Credits",
@@ -256,18 +267,23 @@
 			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
 			"no_audio": "No audio stream found.",
-			"invalid_rate": "Invalid sample rate specified: {rate}Hz"
+			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
+			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
 		}
 	},
 	"privacy": {
 		"title": "Privacy Policy",
 		"summary": {
 			"title": "Summary",
-			"description": "VERT's privacy policy is very simple: we do not collect or store any data on you at all. We don't use cookies or trackers, analytics are completely private, and all conversions (except videos) happen locally on your browser. Videos are deleted after being downloaded, or an hour, unless explicitly given permission by you to be stored; it will only be used for the purpose of troubleshooting. VERT self-hosts a Coolify instance for hosting the website and vertd (for video conversion), and a Plausible instance for completely anonymous and aggregated analytics.<br/><br/>Note this may only apply to the official VERT instance at [vert_link]vert.sh[/vert_link]; third-party instances may handle your data differently."
+			"description": "VERT's privacy policy is very simple: we do not collect or store any data on you at all. We don't use cookies or trackers, analytics are completely private, and all conversions (except videos) happen locally on your browser. Videos are deleted after being downloaded, or an hour, unless explicitly given permission by you to be stored; it will only be used for the purpose of troubleshooting. VERT self-hosts a Coolify instance for hosting the website and vertd (for video conversion), and a Plausible instance for completely anonymous and aggregated analytics. We use Stripe to process donations, which may collect some data used for fraud prevention.<br/><br/>Note this may only apply to the official VERT instance at [vert_link]vert.sh[/vert_link]; third-party instances may handle your data differently."
 		},
 		"conversions": {
 			"title": "Conversions",
 			"description": "Most conversions (images, documents, audio) happen entirely locally on your device using WebAssembly versions of the relevant tools (e.g. ImageMagick, Pandoc, FFmpeg). This means your files never leave your device and we will never have access to them.<br/><br/>Video conversions are performed on our servers because they require more processing power and cannot be done very quickly on the browser yet. Videos you convert with VERT are deleted after being downloaded, or after one hour, unless you explicitly give permission for us to store them longer purely for troubleshooting purposes."
+		},
+		"donations": {
+			"title": "Donations",
+			"description": "We use Stripe on the [about_link]about[/about_link] page to collect donations. Stripe may collect certain information about the payment and device for fraud prevention as described in [stripe_link]their documentation on advanced fraud detection[/stripe_link]. External network requests to Stripe are deferred, and are only made after you click the button to pay."
 		},
 		"conversion_errors": {
 			"title": "Conversion Errors",
@@ -291,6 +307,6 @@
 			"title": "Contact",
 			"description": "For questions, email us at: [email_link]hello@vert.sh[/email_link]. If you are using a third-party instance of VERT, please contact the hoster of that instance instead."
 		},
-		"last_updated": "Last updated: 2025-10-19"
+		"last_updated": "Last updated: 2025-10-29"
 	}
 }

@@ -293,7 +293,7 @@
 	</div>
 </div>
 
-<style>
+<style lang="postcss">
 	.file-category-card {
 		@apply bg-panel rounded-2xl p-5 shadow-panel relative;
 	}

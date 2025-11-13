@@ -232,7 +232,7 @@
 			"magick": "Magick işlemi sırasında hata oluştu, görsel dönüştürme işlemi beklendiği gibi çalışmayabilir.",
 			"ffmpeg": "ffmpeg yüklenirken hata oluştu, bazı özellikler çalışmayabilir.",
 			"no_audio": "Ses akışı bulunamadı.",
-			"invalid_rate": "Geçersiz örnekleme hızı: {hız}Hz"
+			"invalid_rate": "Geçersiz örnekleme hızı: {rate}Hz"
 		}
 	}
 }

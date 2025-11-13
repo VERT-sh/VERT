@@ -228,7 +228,7 @@ async function pandoc(
 		);
 		if (folders.length > 0) {
 			const file = new File(
-				[out_file.data],
+				[new Uint8Array(Array.from(out_file.data))],
 				`${in_name.split(".").slice(0, -1).join(".")}${out_ext}`,
 			);
 			const filteredMap = new Map<string, PandocFsEntry>();
@@ -279,7 +279,7 @@ const pandocToFiles = (entries: PandocEntries, parent = ""): File[] => {
 			const nestedFiles = pandocToFiles(entry.entries, fullPath);
 			flattened.push(...nestedFiles);
 		} else {
-			const file = new File([entry.data], fullPath);
+			const file = new File([new Uint8Array(Array.from(entry.data))], fullPath);
 			flattened.push(file);
 		}
 	}

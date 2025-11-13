@@ -7,6 +7,7 @@
 	import { ChevronDown, SearchIcon } from "lucide-svelte";
 	import { onMount } from "svelte";
 	import { quintOut } from "svelte/easing";
+	import type { VertFile } from "$lib/types";
 
 	type Props = {
 		categories: Categories;
@@ -15,6 +16,7 @@
 		onselect?: (option: string) => void;
 		disabled?: boolean;
 		dropdownSize?: "default" | "large" | "small";
+		file?: VertFile;
 	};
 
 	let {
@@ -24,6 +26,7 @@
 		onselect,
 		disabled,
 		dropdownSize = "default",
+		file,
 	}: Props = $props();
 	let open = $state(false);
 	let dropdown = $state<HTMLDivElement>();
@@ -66,6 +69,15 @@
 				categories[rootCategory!]?.canConvertTo?.includes(cat),
 		);
 		if (from === ".gif") finalCategories.push("video");
+
+		// filter out categories that can't handle large files (due to browser/device limitations)
+		if (file && file.isLarge()) {
+			// if file is large video, disable audio conversion
+			if (rootCategory === "video")
+				finalCategories = finalCategories.filter(
+					(cat) => cat !== "audio",
+				);
+		}
 
 		return finalCategories;
 	});

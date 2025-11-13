@@ -9,7 +9,7 @@
 	import { ToastManager } from "$lib/toast/index.svelte";
 
 	let copied = false;
-	let timeoutId: number | undefined;
+	let timeoutId: NodeJS.Timeout | null = null;
 
 	function copyToClipboard() {
 		try {
@@ -73,7 +73,7 @@
 	</div>
 </Panel>
 
-<style>
+<style lang="postcss">
 	#email {
 		@apply font-mono bg-gray-200 rounded-md px-1 text-inherit no-underline dynadark:bg-panel-alt dynadark:text-white;
 	}
