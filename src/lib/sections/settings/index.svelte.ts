@@ -28,6 +28,7 @@ export interface ISettings {
 	ffmpegQuality: ConversionBitrate; // audio (or audio <-> video)
 	ffmpegSampleRate: string; // audio (or audio <-> video)
 	ffmpegCustomSampleRate: number; // audio (or audio <-> video) - only used when ffmpegSampleRate is "custom"
+	vertdBlockedHashes: Map<string, Date[]>; // hashes of files blocked from vertd conversion
 }
 
 export class Settings {
@@ -50,6 +51,7 @@ export class Settings {
 		ffmpegQuality: "auto",
 		ffmpegSampleRate: "auto",
 		ffmpegCustomSampleRate: 44100,
+		vertdBlockedHashes: new Map<string, Date[]>(),
 	});
 
 	public save() {
@@ -62,6 +64,14 @@ export class Settings {
 		const ls = localStorage.getItem("settings");
 		if (!ls) return;
 		const settings: ISettings = JSON.parse(ls);
+		const vertdBlockedHashes = new Map<string, Date[]>(
+			Object.entries(
+				settings.vertdBlockedHashes || this.settings.vertdBlockedHashes,
+			),
+		);
+
+		settings.vertdBlockedHashes = vertdBlockedHashes;
+
 		this.settings = {
 			...this.settings,
 			...settings,

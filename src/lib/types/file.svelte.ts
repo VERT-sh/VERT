@@ -1,6 +1,5 @@
 import { byNative, converters } from "$lib/converters";
 import type { Converter } from "$lib/converters/converter.svelte";
-import { error } from "$lib/logger";
 import { m } from "$lib/paraglide/messages";
 import { ToastManager } from "$lib/toast/index.svelte";
 import type { Component } from "svelte";
@@ -195,6 +194,40 @@ export class VertFile {
 		a.click();
 		URL.revokeObjectURL(blob);
 		a.remove();
+	}
+
+	public hash(): Promise<string> {
+		const stream = this.file.stream();
+		const hashes = new Set<string>();
+		const reader = stream.getReader();
+		return new Promise<string>((resolve, reject) => {
+			function processChunk() {
+				reader.read().then(({ done, value }) => {
+					if (done) {
+						const combinedHash = Array.from(hashes).sort().join("");
+						resolve(combinedHash);
+						return;
+					}
+
+					crypto.subtle
+						.digest("SHA-256", value)
+						.then((hashBuffer) => {
+							const hashArray = Array.from(
+								new Uint8Array(hashBuffer),
+							);
+							const hashHex = hashArray
+								.map((b) => b.toString(16).padStart(2, "0"))
+								.join("");
+							hashes.add(hashHex);
+							processChunk();
+						})
+						.catch((err) => {
+							reject(err);
+						});
+				});
+			}
+			processChunk();
+		});
 	}
 }
 

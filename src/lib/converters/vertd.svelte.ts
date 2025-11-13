@@ -1,21 +1,10 @@
 import VertdErrorComponent from "$lib/components/functional/VertdError.svelte";
 import { error, log } from "$lib/logger";
+import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte";
 import { VertFile } from "$lib/types";
 import { Converter, FormatInfo } from "./converter.svelte";
-
-interface VertdError {
-	type: "error";
-	data: string;
-}
-
-interface VertdSuccess<T> {
-	type: "success";
-	data: T;
-}
-
-type VertdResponse<T> = VertdError | VertdSuccess<T>;
 
 interface UploadResponse {
 	id: string;
@@ -49,6 +38,7 @@ export const vertdFetch: {
 		url: U,
 		options: RequestInit,
 	): Promise<RouteResponseMap[U]>;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 } = async (url: any, options: RequestInit, body?: any) => {
 	const domain = await VertdInstance.instance.url();
 
@@ -298,8 +288,49 @@ export class VertdConverter extends Converter {
 		this.status = "ready";
 	}
 
+	private blocked(hash: string): boolean {
+		const blockedHashes = Settings.instance.settings.vertdBlockedHashes;
+
+		const now = new Date();
+		const dates = blockedHashes.get(hash) || [];
+		const filteredDates = dates.filter(
+			(date) => now.getTime() - date.getTime() < 60 * 60 * 1000,
+		);
+
+		if (filteredDates.length === 0) {
+			blockedHashes.delete(hash);
+			return false;
+		}
+
+		blockedHashes.set(hash, filteredDates);
+
+		Settings.instance.save();
+
+		return filteredDates.length >= 3;
+	}
+
+	private failure(hash: string): void {
+		const blockedHashes = Settings.instance.settings.vertdBlockedHashes;
+		const now = new Date();
+		const dates = blockedHashes.get(hash) || [];
+		dates.push(now);
+		blockedHashes.set(hash, dates);
+		Settings.instance.save();
+	}
+
 	public async convert(input: VertFile, to: string): Promise<VertFile> {
 		if (to.startsWith(".")) to = to.slice(1);
+
+		const hash = await input.hash();
+
+		if (this.blocked(hash)) {
+			this.log(`conversion blocked for file ${input.name}`);
+			throw new Error(
+				m["convert.errors.vertd_ratelimit"]({
+					filename: input.name,
+				}),
+			);
+		}
 
 		const uploadRes = await uploadFile(input);
 		const apiUrl = await VertdInstance.instance.url();
@@ -372,6 +403,8 @@ export class VertdConverter extends Converter {
 					case "error": {
 						this.log(`error: ${msg.data.message}`);
 						this.activeConversions.delete(input.id);
+						this.failure(hash);
+
 						reject({
 							component: VertdErrorComponent,
 							additional: {
