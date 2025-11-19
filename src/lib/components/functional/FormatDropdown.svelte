@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { duration, fade, transition } from "$lib/animation";
 	import { m } from "$lib/paraglide/messages";
-	import { isMobile, files } from "$lib/store/index.svelte";
+	import { isMobile, files, dropdownStates } from "$lib/store/index.svelte";
 	import type { Categories } from "$lib/types";
 	import clsx from "clsx";
 	import { ChevronDown, SearchIcon } from "lucide-svelte";
@@ -166,6 +166,14 @@
 	const selectOption = (option: string) => {
 		selected = option;
 		open = false;
+
+		// save user's selection to dropdownStates for this session
+		if (file) {
+			dropdownStates.update((states) => {
+				const updated = { ...states, [file.name]: option };
+				return updated;
+			});
+		}
 
 		// find the category of this option if it's not in the current category
 		if (

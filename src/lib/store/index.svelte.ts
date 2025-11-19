@@ -417,6 +417,7 @@ export const gradientColor = writable("");
 export const goingLeft = writable(false);
 export const dropping = writable(false);
 export const vertdLoaded = writable(false);
+export const dropdownStates = writable<Record<string, string>>({});
 
 export const isMobile = writable(false);
 export const effects = writable(true);

@@ -12,6 +12,7 @@
 		gradientColor,
 		showGradient,
 		vertdLoaded,
+		dropdownStates,
 	} from "$lib/store/index.svelte";
 	import { VertFile } from "$lib/types";
 	import {
@@ -31,6 +32,7 @@
 	import { Settings } from "$lib/sections/settings/index.svelte";
 	import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
 	import { GB } from "$lib/consts";
+	import { log } from "$lib/logger";
 
 	let processedFileIds = $state(new Set<string>());
 
@@ -58,8 +60,16 @@
 
 			let targetFormat: string | undefined;
 
-			// use default format if enabled
-			if (settings.useDefaultFormat) {
+			// restore saved format (if navigated back to page for example)
+			const savedFormat = $dropdownStates[file.name];
+			if (
+				savedFormat &&
+				savedFormat !== file.from &&
+				categories[category]?.formats.includes(savedFormat)
+			) {
+				targetFormat = savedFormat;
+			} else if (settings.useDefaultFormat) {
+				// else use default format if enabled
 				let defaultFormat: string | undefined;
 				const df = settings.defaultFormat;
 				if (category === "image") defaultFormat = df.image;
@@ -76,7 +86,7 @@
 				}
 			}
 
-			// else use first available format (or if default format is same as input)
+			// or use first available format (or if default format is same as input)
 			if (!targetFormat) {
 				const firstDiff = categories[category]?.formats.find(
 					(f) => f !== file.from,
