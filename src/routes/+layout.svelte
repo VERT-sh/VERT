@@ -20,9 +20,7 @@
 	} from "$lib/store/index.svelte";
 	import "$lib/css/app.scss";
 	import { browser } from "$app/environment";
-	import { page } from "$app/state";
 	import { initStores as initAnimStores } from "$lib/animation/index.js";
-	import { locales, localizeHref } from "$lib/paraglide/runtime";
 	import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte.js";
 
 	let { children, data } = $props();

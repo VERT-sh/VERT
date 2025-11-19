@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { error, log } from "$lib/logger";
+	import { error } from "$lib/logger";
 	import * as About from "$lib/sections/about";
 	import { InfoIcon } from "lucide-svelte";
 	import { onMount } from "svelte";

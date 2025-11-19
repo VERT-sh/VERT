@@ -398,14 +398,23 @@ export class FFmpegConverter extends Converter {
 			// detect sample rate of original file and use
 			if (isLosslessToLossy) {
 				// use safe default
-				sampleRateArgs = ["-ar", "44100"];
+				const defaultRate = to === ".opus" ? "48000" : "44100";
 				log(
 					["converters", this.name],
-					`converting from lossless to lossy, using default sample rate: 44100Hz`,
+					`converting from lossless to lossy, using default sample rate: ${defaultRate}Hz`,
 				);
+				sampleRateArgs = ["-ar", defaultRate];
 			} else {
-				const inputSampleRate =
-					await this.detectAudioSampleRate(ffmpeg);
+				let inputSampleRate = await this.detectAudioSampleRate(ffmpeg);
+				if (to === ".opus" && inputSampleRate === 44100) {
+					// special case: opus does not support 44100Hz which is more common - adjust to 48000Hz
+					log(
+						["converters", this.name],
+						"conversion to opus with 44100Hz sample rate detected, adjusting to 48000Hz",
+					);
+					inputSampleRate = 48000;
+				}
+
 				sampleRateArgs = inputSampleRate
 					? ["-ar", inputSampleRate.toString()]
 					: [];
