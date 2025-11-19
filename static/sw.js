@@ -1,4 +1,4 @@
-const CACHE_NAME = "vert-wasm-cache-v1";
+const CACHE_NAME = "vert-wasm-cache-v2"; // updated when workers update
 
 const WASM_FILES = [
 	"/pandoc.wasm",
