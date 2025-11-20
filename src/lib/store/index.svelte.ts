@@ -350,13 +350,15 @@ class Files {
 		for (let i = 0; i < files.files.length; i++) {
 			const file = files.files[i];
 			const result = file.result;
-			let to = file.to;
-			if (!to.startsWith(".")) to = `.${to}`;
 
 			if (!result) {
 				error(["files"], "No result found");
 				continue;
 			}
+
+			let to = result.to;
+			if (!to.startsWith(".")) to = `.${to}`;
+
 			dlFiles.push({
 				name: file.file.name.replace(/\.[^/.]+$/, "") + to,
 				lastModified: Date.now(),
