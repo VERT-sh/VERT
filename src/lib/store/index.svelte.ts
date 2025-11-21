@@ -146,7 +146,7 @@ class Files {
 			log(["files"], `extracting zip file: ${file.name}`);
 			ToastManager.add({
 				type: "info",
-				message: m["convert.zip_file.extracting"]({
+				message: m["convert.archive_file.extracting"]({
 					filename: file.name,
 				}),
 			});
@@ -208,8 +208,8 @@ class Files {
 
 				ToastManager.add({
 					type: "success",
-					message: m["convert.zip_file.detected"]({
-						type: m[`convert.zip_file.${type}`](),
+					message: m["convert.archive_file.detected"]({
+						type: m[`convert.archive_file.${type}`](),
 						filename: file.name,
 					}),
 				});
@@ -225,7 +225,7 @@ class Files {
 
 				ToastManager.add({
 					type: "success",
-					message: m["convert.zip_file.extracted"]({
+					message: m["convert.archive_file.extracted"]({
 						filename: file.name,
 						extract_count: entries.length,
 						ignore_count: 0,
@@ -258,7 +258,7 @@ class Files {
 					error(["files"], `error extracting zip file: ${err}`);
 					ToastManager.add({
 						type: "error",
-						message: m["convert.zip_file.extract_error"]({
+						message: m["convert.archive_file.extract_error"]({
 							filename: file.name,
 							error: String(err),
 						}),

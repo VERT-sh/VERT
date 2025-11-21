@@ -47,7 +47,7 @@
 		}
 	},
 	"convert": {
-		"zip_file": {
+		"archive_file": {
 			"extracting": "ZIP파일 감지됨: {filename}",
 			"extracted": "{filename}압축 파일에서 {extract_count}개의 파일을 풀었습니다. {ignore_count}개 항목은 무시되었습니다.",
 			"extract_error": "{filename}압축 파일 풀던 중 오류 발생: {error}"

@@ -47,7 +47,7 @@
 		}
 	},
 	"convert": {
-		"zip_file": {
+		"archive_file": {
 			"extracting": "偵測到 ZIP 壓縮檔：{filename}",
 			"extracted": "從 {filename} 中提取了 {extract_count} 個檔案。{ignore_count} 個項目被忽略。",
 			"extract_error": "提取 {filename} 時出錯：{error}"

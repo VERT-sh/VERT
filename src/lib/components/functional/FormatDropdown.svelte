@@ -7,7 +7,8 @@
 	import { ChevronDown, SearchIcon } from "lucide-svelte";
 	import { onMount } from "svelte";
 	import { quintOut } from "svelte/easing";
-	import type { VertFile } from "$lib/types";
+	import { VertFile } from "$lib/types";
+	import { log, error } from "$lib/util/logger";
 
 	type Props = {
 		categories: Categories;
@@ -276,6 +277,33 @@
 		}, 0); // let dropdown open first
 	};
 
+	const extract = async () => {
+		// extract all files in zip, then add all extracted files to files store
+		if (!file) return;
+		const { extractZip } = await import("$lib/util/zip");
+		const extractedFiles = await extractZip(file.file);
+
+		if (!Array.isArray(extractedFiles) || extractedFiles.length === 0)
+			return;
+
+		const newFiles = extractedFiles
+			.map(({ filename, data }) => {
+				try {
+					const f = new File([new Uint8Array(data)], filename, {
+						type: "application/octet-stream",
+					});
+					const ext = filename.split(".").pop() ?? "";
+					return new VertFile(f, ext);
+				} catch (err) {
+					return null;
+				}
+			})
+			.filter(Boolean);
+
+		files.files = files.files.filter((f) => f !== file);
+		newFiles.forEach((f) => files.add(f));
+	};
+
 	onMount(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (dropdown && !dropdown.contains(e.target as Node)) {
@@ -439,6 +467,18 @@
 					</div>
 				{/if}
 			</div>
+			<!-- format options -->
+			<!-- TODO: extract zip, image sequence & fps -->
+			{#if file?.name.toLowerCase().endsWith(".zip")}
+				<div class="border-t border-separator text-base p-2">
+					<button
+						class="w-full p-2 text-center rounded-lg bg-accent text-black"
+						onclick={() => extract()}
+					>
+						{m["convert.archive_file.extract"]()}
+					</button>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>

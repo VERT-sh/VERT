@@ -47,8 +47,9 @@
 		}
 	},
 	"convert": {
-		"zip_file": {
-			"extracting": "Detected ZIP archive: {filename}",
+		"archive_file": {
+			"extract": "Extract archive",
+			"extracting": "Detected archive: {filename}",
 			"extracted": "Extracted {extract_count} files from {filename}. {ignore_count} items were ignored.",
 			"detected": "Detected {type} files in {filename}.",
 			"audio": "audio",

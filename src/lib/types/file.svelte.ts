@@ -86,7 +86,7 @@ export class VertFile {
 			`${file.name.split(".").slice(0, -1).join(".")}.${ext?.toLowerCase()}`,
 		);
 		this.file = newFile;
-		this.to = to;
+		this.to = to.startsWith(".") ? to : `.${to}`;
 		this.converters = converters.filter((c) =>
 			c.formatStrings().includes(this.from),
 		);
