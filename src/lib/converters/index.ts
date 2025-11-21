@@ -4,7 +4,7 @@ import { FFmpegConverter } from "./ffmpeg.svelte";
 import { PandocConverter } from "./pandoc.svelte";
 import { VertdConverter } from "./vertd.svelte";
 import { MagickConverter } from "./magick.svelte";
-import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/consts";
+import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
 
 const getConverters = (): Converter[] => {
 	const converters: Converter[] = [

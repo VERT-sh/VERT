@@ -4,7 +4,7 @@
 	import {
 		DISABLE_ALL_EXTERNAL_REQUESTS,
 		GITHUB_URL_VERT,
-	} from "$lib/consts";
+	} from "$lib/util/consts";
 	import { m } from "$lib/paraglide/messages";
 	import { link, sanitize } from "$lib/store/index.svelte";
 

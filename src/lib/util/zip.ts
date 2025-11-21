@@ -1,4 +1,4 @@
-import { error, log } from "$lib/logger";
+import { error, log } from "$lib/util/logger";
 import { unzip } from "fflate";
 import { downloadZip } from "client-zip";
 

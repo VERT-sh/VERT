@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Panel from "$lib/components/visual/Panel.svelte";
-	import { CONTACT_EMAIL, DISCORD_URL, GITHUB_URL_VERT } from "$lib/consts";
+	import { CONTACT_EMAIL, DISCORD_URL, GITHUB_URL_VERT } from "$lib/util/consts";
 	import { effects } from "$lib/store/index.svelte";
 	import {
 		GithubIcon,

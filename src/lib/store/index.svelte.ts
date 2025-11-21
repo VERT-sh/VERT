@@ -1,6 +1,6 @@
 import { browser } from "$app/environment";
 import { byNative, converters } from "$lib/converters";
-import { error, log } from "$lib/logger";
+import { error, log } from "$lib/util/logger";
 import { VertFile } from "$lib/types";
 import { parseBlob, selectCover } from "music-metadata";
 import { writable } from "svelte/store";
@@ -9,8 +9,8 @@ import PQueue from "p-queue";
 import { getLocale, setLocale } from "$lib/paraglide/runtime";
 import { m } from "$lib/paraglide/messages";
 import sanitizeHtml from "sanitize-html";
-import { ToastManager } from "$lib/toast/index.svelte";
-import { GB } from "$lib/consts";
+import { ToastManager } from "$lib/util/toast.svelte";
+import { GB } from "$lib/util/consts";
 
 class Files {
 	public files = $state<VertFile[]>([]);
@@ -151,7 +151,7 @@ class Files {
 				}),
 			});
 
-			const { extractZip } = await import("$lib/zip");
+			const { extractZip } = await import("$lib/util/zip");
 			const entries = await extractZip(file);
 
 			const totalEntries = entries.length;

@@ -1,7 +1,7 @@
 import { byNative, converters } from "$lib/converters";
 import type { Converter } from "$lib/converters/converter.svelte";
 import { m } from "$lib/paraglide/messages";
-import { ToastManager } from "$lib/toast/index.svelte";
+import { ToastManager } from "$lib/util/toast.svelte";
 import type { Component } from "svelte";
 import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
 
@@ -121,7 +121,7 @@ export class VertFile {
 	}
 
 	private async convertZip(converter: Converter): Promise<VertFile> {
-		const { extractZip, createZip } = await import("$lib/zip");
+		const { extractZip, createZip } = await import("$lib/util/zip");
 
 		const entries = await extractZip(this.file);
 		const totalFiles = entries.length;

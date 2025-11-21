@@ -11,11 +11,11 @@
 	import { effects } from "$lib/store/index.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { link, sanitize } from "$lib/store/index.svelte";
-	import { swManager, type CacheInfo } from "$lib/sw/register";
+	import { swManager, type CacheInfo } from "$lib/util/sw";
 	import { onMount } from "svelte";
-	import { error } from "$lib/logger";
-	import { ToastManager } from "$lib/toast/index.svelte";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/consts";
+	import { error } from "$lib/util/logger";
+	import { ToastManager } from "$lib/util/toast.svelte";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
 	import { addDialog } from "$lib/store/DialogProvider";
 
 	const { settings = $bindable() }: { settings: ISettings } = $props();

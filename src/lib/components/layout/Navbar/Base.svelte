@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from "$app/environment";
 	import { page } from "$app/state";
-	import { duration, fade } from "$lib/animation";
+	import { duration, fade } from "$lib/util/animation";
 	import {
 		effects,
 		files,

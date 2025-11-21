@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Panel from "$lib/components/visual/Panel.svelte";
-	import { GITHUB_URL_VERTD } from "$lib/consts";
+	import { GITHUB_URL_VERTD } from "$lib/util/consts";
 	import { ServerIcon } from "lucide-svelte";
 	import type { ISettings } from "./index.svelte";
 	import clsx from "clsx";

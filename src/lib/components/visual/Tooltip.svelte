@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade } from "$lib/animation";
+	import { fade } from "$lib/util/animation";
 	interface Props {
 		children: () => any;
 		text: string;

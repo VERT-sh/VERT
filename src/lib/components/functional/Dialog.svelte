@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { duration, fade, fly } from "$lib/animation";
+	import { duration, fade, fly } from "$lib/util/animation";
 	import { removeDialog } from "$lib/store/DialogProvider";
 	import { BanIcon, CheckIcon, InfoIcon, TriangleAlert } from "lucide-svelte";
 	import { quintOut } from "svelte/easing";

@@ -2,11 +2,11 @@
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import { PiggyBankIcon, CopyIcon, CheckIcon } from "lucide-svelte";
 	import HotMilk from "$lib/assets/hotmilk.svg?component";
-	import { DISCORD_URL } from "$lib/consts";
-	import { error } from "$lib/logger";
+	import { DISCORD_URL } from "$lib/util/consts";
+	import { error } from "$lib/util/logger";
 	import { m } from "$lib/paraglide/messages";
 	import { link, sanitize } from "$lib/store/index.svelte";
-	import { ToastManager } from "$lib/toast/index.svelte";
+	import { ToastManager } from "$lib/util/toast.svelte";
 
 	let copied = false;
 	let timeoutId: NodeJS.Timeout | null = null;

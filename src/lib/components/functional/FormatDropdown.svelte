@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { duration, fade, transition } from "$lib/animation";
+	import { duration, fade, transition } from "$lib/util/animation";
 	import { m } from "$lib/paraglide/messages";
 	import { isMobile, files, dropdownStates } from "$lib/store/index.svelte";
 	import type { Categories } from "$lib/types";

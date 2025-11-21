@@ -13,7 +13,7 @@
 	import { vertdFetch } from "$lib/converters/vertd.svelte";
 
 	import { m } from "$lib/paraglide/messages";
-	import { ToastManager, type ToastProps } from "$lib/toast/index.svelte";
+	import { ToastManager, type ToastProps } from "$lib/util/toast.svelte";
 	import { addDialog } from "$lib/store/DialogProvider";
 	import VertdErrorDetails from "./VertdErrorDetails.svelte";
 

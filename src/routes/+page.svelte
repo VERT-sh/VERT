@@ -12,7 +12,7 @@
 	import { onMount } from "svelte";
 	import type { WorkerStatus } from "$lib/converters/converter.svelte";
 	import { sanitize } from "$lib/store/index.svelte";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/consts";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
 
 	const getSupportedFormats = (name: string) =>
 		converters

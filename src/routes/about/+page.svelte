@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { error } from "$lib/logger";
+	import { error } from "$lib/util/logger";
 	import * as About from "$lib/sections/about";
 	import { InfoIcon } from "lucide-svelte";
 	import { onMount } from "svelte";
@@ -9,9 +9,9 @@
 	import avatarRealmy from "$lib/assets/avatars/realmy.jpg";
 	import avatarAzurejelly from "$lib/assets/avatars/azurejelly.jpg";
 	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$env/static/public";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS, GITHUB_API_URL } from "$lib/consts";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS, GITHUB_API_URL } from "$lib/util/consts";
 	import { m } from "$lib/paraglide/messages";
-	import { ToastManager } from "$lib/toast/index.svelte";
+	import { ToastManager } from "$lib/util/toast.svelte";
 	// import { dev } from "$app/environment";
 	// import { page } from "$app/state";
 

@@ -1,4 +1,4 @@
-import { ip, type IpInfo } from "$lib/ip";
+import { ip, type IpInfo } from "$lib/util/ip";
 import { Settings } from "./index.svelte";
 import { PUB_VERTD_URL } from "$env/static/public";
 

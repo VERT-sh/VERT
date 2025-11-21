@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GITHUB_URL_VERT, DISCORD_URL } from "$lib/consts";
+	import { GITHUB_URL_VERT, DISCORD_URL } from "$lib/util/consts";
 	import { m } from "$lib/paraglide/messages";
 
 	const items = $derived([

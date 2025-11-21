@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { duration, fade } from "$lib/animation";
+	import { duration, fade } from "$lib/util/animation";
 	import { quintOut } from "svelte/easing";
 	import Dialog from "../functional/Dialog.svelte";
 	import {

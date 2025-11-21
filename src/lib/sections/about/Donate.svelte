@@ -18,7 +18,7 @@
 		PUB_STRIPE_KEY === OFFICIAL_STRIPE_KEY;
 
 	// import { PUB_STRIPE_KEY, PUB_DONATION_API } from "$env/static/public";
-	import { fade } from "$lib/animation";
+	import { fade } from "$lib/util/animation";
 	import FancyInput from "$lib/components/functional/FancyInput.svelte";
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import { effects, link, sanitize } from "$lib/store/index.svelte";
@@ -35,8 +35,8 @@
 	import { Elements, PaymentElement } from "svelte-stripe";
 	import { quintOut } from "svelte/easing";
 	import { m } from "$lib/paraglide/messages";
-	import { ToastManager } from "$lib/toast/index.svelte";
-	import { log } from "$lib/logger";
+	import { ToastManager } from "$lib/util/toast.svelte";
+	import { log } from "$lib/util/logger";
 
 	let amount = $state(1);
 	let customAmount = $state("");

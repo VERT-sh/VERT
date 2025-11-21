@@ -2,10 +2,10 @@ import { VertFile } from "$lib/types";
 import { Converter, FormatInfo } from "./converter.svelte";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { browser } from "$app/environment";
-import { error, log } from "$lib/logger";
+import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
-import { ToastManager } from "$lib/toast/index.svelte";
+import { ToastManager } from "$lib/util/toast.svelte";
 
 // TODO: differentiate in UI? (not native formats)
 const videoFormats = [
