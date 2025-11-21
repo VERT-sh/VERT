@@ -9,7 +9,6 @@ import PQueue from "p-queue";
 import { getLocale, setLocale } from "$lib/paraglide/runtime";
 import { m } from "$lib/paraglide/messages";
 import sanitizeHtml from "sanitize-html";
-import { unzip } from "fflate";
 import { ToastManager } from "$lib/toast/index.svelte";
 import { GB } from "$lib/consts";
 
@@ -142,7 +141,6 @@ class Files {
 		return url;
 	}
 
-	private _warningShown = false;
 	private async _handleZipFile(file: File): Promise<void> {
 		try {
 			log(["files"], `extracting zip file: ${file.name}`);
@@ -152,61 +150,95 @@ class Files {
 					filename: file.name,
 				}),
 			});
-			const arrayBuffer = await file.arrayBuffer();
-			const uint8Array = new Uint8Array(arrayBuffer);
 
-			return new Promise((resolve, reject) => {
-				unzip(uint8Array, (err, unzipped) => {
-					if (err) {
-						error(
-							["files"],
-							`failed to extract zip: ${err.message}`,
-						);
-						reject(err);
-						return;
-					}
+			const { extractZip } = await import("$lib/zip");
+			const entries = await extractZip(file);
 
-					const itemCount = Object.keys(unzipped).length;
-					let ignoreCount = 0;
+			const totalEntries = entries.length;
+			log(["files"], `extracted ${totalEntries} files from zip`);
 
-					log(["files"], `extracted ${itemCount} files from zip`);
+			// check if all files in zip use the same converter and are compatible
+			const convertersUsed = new Set<string>();
+			let incompatibleFiles = false;
 
-					for (const [filename, data] of Object.entries(unzipped)) {
-						if (
-							filename.startsWith(".") ||
-							filename.includes("/__MACOSX/") ||
-							filename.endsWith("/")
-						) {
-							ignoreCount++;
-							continue;
-						}
+			for (const { filename } of entries) {
+				const format = "." + filename.split(".").pop()?.toLowerCase();
+				if (!format || format === ".zip") {
+					incompatibleFiles = true;
+					continue;
+				}
 
-						const buffer = Array.from(data);
-						const extractedFile = new File(
-							[new Uint8Array(buffer)],
-							filename,
-							{ type: "application/octet-stream" },
-						);
-						this._add(extractedFile);
-					}
+				const converter = converters
+					.sort(byNative(format))
+					.find((c) => c.formatStrings().includes(format));
 
-					ToastManager.add({
-						type: "success",
-						message: m["convert.zip_file.extracted"]({
-							filename: file.name,
-							extract_count: itemCount - ignoreCount,
-							ignore_count: ignoreCount,
-						}),
-					});
+				if (converter) convertersUsed.add(converter.name);
+				else incompatibleFiles = true;
+			}
 
-					resolve();
+			const converterCount = convertersUsed.size;
+			const canConvertAsOne =
+				converterCount === 1 && !incompatibleFiles;
+
+			log(
+				["files"],
+				`extracted ${entries.length} files from zip (converters: ${converterCount}, compatible: ${canConvertAsOne})`,
+			);
+
+			// TODO: allow user to extract zip if they want to convert individuals (along with image sequence option) in dropdown
+			if (canConvertAsOne) {
+				// all files use same converter - add zip as a single VertFile file
+				const vf = new VertFile(file, ".zip");
+				vf.converters = converters.filter(
+					(c) => c.name === Array.from(convertersUsed)[0],
+				);
+
+				const converterName = vf.converters[0].name;
+				const type =
+					converterName === "imagemagick"
+						? "image"
+						: converterName === "ffmpeg"
+							? "audio"
+							: converterName === "pandoc"
+								? "doc"
+								: "video";
+
+				this.files.push(vf);
+				this._addThumbnail(vf);
+
+				ToastManager.add({
+					type: "success",
+					message: m["convert.zip_file.detected"]({
+						type: m[`convert.zip_file.${type}`](),
+						filename: file.name,
+					}),
 				});
-			});
+			} else {
+				// mixed converters/incompatible files - extract all individually
+				for (const { filename, data } of entries) {
+					this._add(
+						new File([new Uint8Array(data)], filename, {
+							type: "application/octet-stream",
+						}),
+					);
+				}
+
+				ToastManager.add({
+					type: "success",
+					message: m["convert.zip_file.extracted"]({
+						filename: file.name,
+						extract_count: entries.length,
+						ignore_count: 0,
+					}),
+				});
+			}
 		} catch (e) {
 			error(["files"], `error processing zip file: ${e}`);
+			throw e;
 		}
 	}
 
+	private _warningShown = false;
 	private async _add(file: VertFile | File) {
 		if (file instanceof VertFile) {
 			this.files.push(file);

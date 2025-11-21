@@ -127,8 +127,6 @@
 		} else showGradient.set(true);
 
 		gradientColor.set(type);
-
-		// TODO: filter out categories that cant be converted between
 	});
 </script>
 

@@ -30,6 +30,8 @@ export class VertFile {
 
 	public converters: Converter[] = [];
 
+	public isZip = $state(() => this.from === ".zip");
+
 	public findConverters(supportedFormats: string[] = [this.from]) {
 		const converter = this.converters
 			.filter((converter) =>
@@ -42,6 +44,9 @@ export class VertFile {
 	}
 
 	public findConverter() {
+		// zip will always only be added if there's one converter that supports all files - handled in store's _handleZipFile()
+		if (this.isZip()) return this.converters[0];
+
 		const converter = this.converters.find((converter) => {
 			if (
 				!converter.formatStrings().includes(this.from) ||
@@ -101,16 +106,63 @@ export class VertFile {
 		this.cancelled = false;
 		let res;
 		try {
-			res = await converter.convert(this, this.to, ...args);
+			// for zips: extract > convert each > re-zip
+			// else convert normally
+			res = this.isZip()
+				? await this.convertZip(converter)
+				: await converter.convert(this, this.to, ...args);
 			this.result = res;
 		} catch (err) {
-			if (!this.cancelled) {
-				this.toastErr(err);
-			}
+			if (!this.cancelled) this.toastErr(err);
 			this.result = null;
 		}
 		this.processing = false;
 		return res;
+	}
+
+	private async convertZip(converter: Converter): Promise<VertFile> {
+		const { extractZip, createZip } = await import("$lib/zip");
+
+		const entries = await extractZip(this.file);
+		const totalFiles = entries.length;
+		let processedFiles = 0;
+		const convertedFiles: File[] = [];
+
+		// convert all files in the zip
+		for (const { filename, data } of entries) {
+			if (this.cancelled) {
+				throw new Error("Conversion cancelled");
+			}
+
+			const file = new File([new Uint8Array(data)], filename, {
+				type: "application/octet-stream",
+			});
+			const tempVFile = new VertFile(file, this.to);
+			tempVFile.converters = [converter];
+
+			const converted = await converter.convert(tempVFile, this.to);
+
+			let outputExt = this.to;
+			if (!outputExt.startsWith(".")) outputExt = `.${outputExt}`;
+			const baseName = filename.replace(/\.[^/.]+$/, "");
+			const outputFilename = `${baseName}${outputExt}`;
+
+			convertedFiles.push(
+				new File([await converted.file.arrayBuffer()], outputFilename),
+			);
+
+			processedFiles++;
+			this.progress = Math.round((processedFiles / totalFiles) * 100); // TODO: show live progress between all files rather than per file
+		}
+
+		// return zip of converted files
+		const resultArray = await createZip(convertedFiles);
+		const outputFilename = this.file.name.replace(/\.[^/.]+$/, ".zip");
+		const resultFile = new File(
+			[new Uint8Array(resultArray)],
+			outputFilename,
+		);
+		return new VertFile(resultFile, ".zip");
 	}
 
 	public async cancel() {
