@@ -179,7 +179,7 @@
 					<ProgressBar
 						min={0}
 						max={100}
-						progress={currentConverter?.reportsProgress
+						progress={currentConverter?.reportsProgress || file.isZip()
 							? file.progress
 							: null}
 					/>

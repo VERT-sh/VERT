@@ -185,7 +185,6 @@ class Files {
 				`extracted ${entries.length} files from zip (converters: ${converterCount}, compatible: ${canConvertAsOne})`,
 			);
 
-			// TODO: allow user to extract zip if they want to convert individuals (along with image sequence option) in dropdown
 			if (canConvertAsOne) {
 				// all files use same converter - add zip as a single VertFile file
 				const vf = new VertFile(file, ".zip");

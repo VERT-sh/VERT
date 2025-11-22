@@ -122,38 +122,84 @@ export class VertFile {
 
 	private async convertZip(converter: Converter): Promise<VertFile> {
 		const { extractZip, createZip } = await import("$lib/util/zip");
+		const { default: PQueue } = await import("p-queue");
 
 		const entries = await extractZip(this.file);
 		const totalFiles = entries.length;
-		let processedFiles = 0;
+		const fileProgress: number[] = new Array(totalFiles).fill(0);
 		const convertedFiles: File[] = [];
 
+		const queue = new PQueue({ concurrency: navigator.hardwareConcurrency || 4 });
+
+		const updateProgress = () => {
+			const totalProgress = fileProgress.reduce((sum, p) => sum + p, 0);
+			this.progress = Math.round(totalProgress / totalFiles);
+		};
+
 		// convert all files in the zip
-		for (const { filename, data } of entries) {
-			if (this.cancelled) {
-				throw new Error("Conversion cancelled");
-			}
+		await queue.addAll(
+			entries.map(({ filename, data }, index) => async () => {
+				if (this.cancelled) {
+					throw new Error("Conversion cancelled");
+				}
 
-			const file = new File([new Uint8Array(data)], filename, {
-				type: "application/octet-stream",
-			});
-			const tempVFile = new VertFile(file, this.to);
-			tempVFile.converters = [converter];
+				const file = new File([new Uint8Array(data)], filename, {
+					type: "application/octet-stream",
+				});
+				const tempVFile = new VertFile(file, this.to);
+				tempVFile.converters = [converter];
 
-			const converted = await converter.convert(tempVFile, this.to);
+				if (converter.reportsProgress) {
+					// track progress of individual files
+					const progressInterval = setInterval(() => {
+						fileProgress[index] = tempVFile.progress;
+						updateProgress();
+					}, 100);
 
-			let outputExt = this.to;
-			if (!outputExt.startsWith(".")) outputExt = `.${outputExt}`;
-			const baseName = filename.replace(/\.[^/.]+$/, "");
-			const outputFilename = `${baseName}${outputExt}`;
+					try {
+						const converted = await converter.convert(
+							tempVFile,
+							this.to,
+						);
 
-			convertedFiles.push(
-				new File([await converted.file.arrayBuffer()], outputFilename),
-			);
+						let outputExt = this.to;
+						if (!outputExt.startsWith("."))
+							outputExt = `.${outputExt}`;
+						const baseName = filename.replace(/\.[^/.]+$/, "");
+						const outputFilename = `${baseName}${outputExt}`;
 
-			processedFiles++;
-			this.progress = Math.round((processedFiles / totalFiles) * 100); // TODO: show live progress between all files rather than per file
-		}
+						convertedFiles[index] = new File(
+							[await converted.file.arrayBuffer()],
+							outputFilename,
+						);
+
+						fileProgress[index] = 100;
+						updateProgress();
+					} finally {
+						clearInterval(progressInterval);
+					}
+				} else {
+					// else track progress via completions only
+					const converted = await converter.convert(
+						tempVFile,
+						this.to,
+					);
+
+					let outputExt = this.to;
+					if (!outputExt.startsWith(".")) outputExt = `.${outputExt}`;
+					const baseName = filename.replace(/\.[^/.]+$/, "");
+					const outputFilename = `${baseName}${outputExt}`;
+
+					convertedFiles[index] = new File(
+						[await converted.file.arrayBuffer()],
+						outputFilename,
+					);
+
+					fileProgress[index] = 100;
+					updateProgress();
+				}
+			}),
+		);
 
 		// return zip of converted files
 		const resultArray = await createZip(convertedFiles);
