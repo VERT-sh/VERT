@@ -54,15 +54,30 @@
 		if (timeout) clearTimeout(timeout);
 	}
 
+	function handleGlobalMouseMove(e: MouseEvent) {
+		if (!showTooltip || !triggerElement) return;
+
+		const triggerRect = triggerElement.getBoundingClientRect();
+		const isOverTrigger =
+			e.clientX >= triggerRect.left &&
+			e.clientX <= triggerRect.right &&
+			e.clientY >= triggerRect.top &&
+			e.clientY <= triggerRect.bottom;
+
+		if (!isOverTrigger) hide();
+	}
+
 	$effect(() => {
 		if (showTooltip && tooltipElement) {
 			document.body.appendChild(tooltipElement);
+			document.addEventListener("mousemove", handleGlobalMouseMove);
 		}
 
 		return () => {
 			if (tooltipElement && tooltipElement.parentNode === document.body) {
 				document.body.removeChild(tooltipElement);
 			}
+			document.removeEventListener("mousemove", handleGlobalMouseMove);
 		};
 	});
 </script>
