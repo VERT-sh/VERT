@@ -6,6 +6,7 @@
 		[m["footer.source_code"](), GITHUB_URL_VERT],
 		[m["footer.discord_server"](), DISCORD_URL],
 		[m["footer.privacy_policy"](), "/privacy"],
+		[__COMMIT_HASH__, `${GITHUB_URL_VERT}/commit/${__COMMIT_HASH__}`]
 	]);
 
 	const year = new Date().getFullYear();

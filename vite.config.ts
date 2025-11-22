@@ -3,6 +3,14 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig, type PluginOption } from "vite";
 import svg from "@poppanator/sveltekit-svg";
 import wasm from "vite-plugin-wasm";
+import { execSync } from "child_process";
+
+let commitHash = "unknown";
+try {
+	commitHash = execSync("git rev-parse --short HEAD").toString().trim();
+} catch (e) {
+	console.warn("Could not determine Git commit hash:", e);
+}
 
 export default defineConfig(({ command }) => {
 	const plugins: PluginOption[] = [
@@ -49,6 +57,9 @@ export default defineConfig(({ command }) => {
 		},
 		build: {
 			target: "esnext",
+		},
+		define: {
+			__COMMIT_HASH__: JSON.stringify(commitHash),
 		},
 	};
 });

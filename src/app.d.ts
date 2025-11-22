@@ -29,6 +29,8 @@ declare global {
 	interface Window {
 		plausible: TrackEvent;
 	}
+
+	const __COMMIT_HASH__: string;
 }
 
 /**
