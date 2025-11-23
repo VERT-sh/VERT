@@ -8,7 +8,6 @@
 	import { onMount } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
-	import { log, error } from "$lib/util/logger";
 
 	type Props = {
 		categories: Categories;
@@ -40,24 +39,46 @@
 	// initialize current category
 	$effect(() => {
 		if (currentCategory) return;
-		let foundCat: string | undefined;
 
-		if (selected) {
-			foundCat = Object.keys(categories).find((cat) =>
-				categories[cat].formats.includes(selected),
-			);
-		} else {
-			// find category based on file types
-			const fileFormats = files.files.map((f) => f.from);
-			foundCat = Object.keys(categories).find((cat) =>
-				fileFormats.some((format) =>
-					categories[cat].formats.includes(format),
-				),
-			);
-		}
+		// find the category whose formats overlap most with the converters for this file (or all files)
+		// this finds the best matching category based on the formats supported by the converters
+		const pickCategoryFromConverters = (
+			convList: VertFile["converters"],
+		) => {
+			let bestCategory: string | null = null;
+			let maxOverlap = 0;
 
-		currentCategory = foundCat || Object.keys(categories)[0] || null;
-		rootCategory = currentCategory;
+			for (const cat of Object.keys(categories)) {
+				const overlapCount = categories[cat].formats.filter((fmt) =>
+					convList.some((conv) => conv.formatStrings().includes(fmt)),
+				).length;
+
+				if (overlapCount > maxOverlap) {
+					maxOverlap = overlapCount;
+					bestCategory = cat;
+				}
+			}
+
+			return bestCategory;
+		};
+
+		// decide which converters to use to detect category:
+		// - if file provided, prefer its primary converter -- individual file dropdown
+		// - if no file provided, use all converters from all files -- "set all to" dropdown
+		const convertersToCheck = file
+			? file.findConverter()
+				? [file.findConverter()!]
+				: file.converters
+			: files.files.flatMap((f) => f.converters);
+
+		// pick the best matching category, or fall back to first category
+		// TODO: if something fails for some reason, maybe show all categories?
+		const detectedCategory =
+			pickCategoryFromConverters(convertersToCheck) ||
+			Object.keys(categories)[0];
+
+		currentCategory = detectedCategory;
+		rootCategory = detectedCategory;
 	});
 
 	// other available categories based on current category (e.g. converting between video and audio)
