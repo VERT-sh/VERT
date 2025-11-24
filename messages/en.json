@@ -77,7 +77,9 @@
 			"video": "Video",
 			"doc": "Document",
 			"image": "Image",
-			"placeholder": "Search format"
+			"placeholder": "Search format",
+			"no_formats": "No formats available",
+			"no_results": "No formats match your search"
 		},
 		"tooltips": {
 			"unknown_file": "Unknown file type",

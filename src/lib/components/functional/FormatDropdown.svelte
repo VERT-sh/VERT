@@ -483,8 +483,8 @@
 				{:else}
 					<div class="col-span-3 text-center p-4 text-muted">
 						{searchQuery
-							? "No formats match your search"
-							: "No formats available"}
+							? m["convert.dropdown.no_results"]()
+							: m["convert.dropdown.no_formats"]()}
 					</div>
 				{/if}
 			</div>
