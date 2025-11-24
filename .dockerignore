@@ -1,5 +1,4 @@
 node_modules/
-.git/
 build/
 dist/
 .svelte-kit/

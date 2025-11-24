@@ -20,6 +20,10 @@ ENV PUB_STRIPE_KEY=${PUB_STRIPE_KEY}
 
 COPY package.json ./
 
+RUN apt-get update && \
+	apt-get install -y --no-install-recommends git && \
+	rm -rf /var/lib/apt/lists/*
+
 RUN bun install
 
 COPY . ./
