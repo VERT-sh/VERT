@@ -2,11 +2,18 @@
 	import { GITHUB_URL_VERT, DISCORD_URL } from "$lib/util/consts";
 	import { m } from "$lib/paraglide/messages";
 
+	const commitHash =
+		__COMMIT_HASH__ && __COMMIT_HASH__ !== "unknown"
+			? __COMMIT_HASH__
+			: null;
+
 	const items = $derived([
 		[m["footer.source_code"](), GITHUB_URL_VERT],
 		[m["footer.discord_server"](), DISCORD_URL],
 		[m["footer.privacy_policy"](), "/privacy"],
-		[__COMMIT_HASH__, `${GITHUB_URL_VERT}/commit/${__COMMIT_HASH__}`]
+		...(commitHash
+			? [[commitHash, `${GITHUB_URL_VERT}/commit/${commitHash}`]]
+			: []),
 	]);
 
 	const year = new Date().getFullYear();
