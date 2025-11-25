@@ -100,6 +100,7 @@
 		},
 		"conversion": {
 			"title": "Conversion",
+			"advanced_settings": "Paramètres avancés",
 			"filename_format": "Format du nom de fichier",
 			"filename_description": "Cela déterminera le nom du fichier lors du téléchargement, <b>sans inclure l'extension du fichier.</b> Vous pouvez mettre les modèles suivants dans le format, qui seront remplacés par les informations pertinentes: <b>%name%</b> pour le nom du fichier d'origine, <b>%extension%</b> pour l'extension du fichier d'origine et <b>%date%</b> pour une chaîne de date indiquant quand le fichier a été converti.",
 			"placeholder": "VERT_%name%",
