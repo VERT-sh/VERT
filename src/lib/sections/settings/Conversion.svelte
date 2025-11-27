@@ -102,7 +102,7 @@
 											size="24"
 											class="inline-block mr-2"
 										/>
-										Enable
+										{m["settings.conversion.default_format_enable"]()}
 									</button>
 
 									<button
@@ -118,7 +118,7 @@
 											size="24"
 											class="inline-block mr-2"
 										/>
-										Disable
+										{m["settings.conversion.default_format_disable"]()}
 									</button>
 								</div>
 							</div>

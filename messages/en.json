@@ -142,6 +142,8 @@
 			"filename_description": "This will determine the name of the file on download, <b>not including the file extension.</b> You can put these following templates in the format, which will be replaced with the relevant information: <b>%name%</b> for the original file name, <b>%extension%</b> for the original file extension, and <b>%date%</b> for a date string of when the file was converted.",
 			"placeholder": "VERT_%name%",
 			"default_format": "Default conversion format",
+			"default_format_enable": "Enable",
+			"default_format_disable": "Disable",
 			"default_format_description": "This will change the default format selected when you upload a file of this file type.",
 			"default_format_image": "Images",
 			"default_format_video": "Videos",
