@@ -112,6 +112,7 @@ export class VertFile {
 				? await this.convertZip(converter)
 				: await converter.convert(this, this.to, ...args);
 			this.result = res;
+			this.toastSuccess();
 		} catch (err) {
 			if (!this.cancelled) this.toastErr(err);
 			this.result = null;
@@ -119,6 +120,14 @@ export class VertFile {
 		this.processing = false;
 		return res;
 	}
+
+	private toastSuccess() {
+		ToastManager.add({
+			type: "success",
+			message: `✅ ${this.file.name} converted to ${this.to.toUpperCase()} and ready to download`,
+		});
+	}
+
 
 	private async convertZip(converter: Converter): Promise<VertFile> {
 		const { extractZip, createZip } = await import("$lib/util/zip");
