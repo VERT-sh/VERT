@@ -2,6 +2,7 @@
 	import { browser } from "$app/environment";
 	import { page } from "$app/state";
 	import { duration, fade } from "$lib/util/animation";
+	import { theme } from "$lib/store/index.svelte";
 	import {
 		effects,
 		files,
@@ -10,10 +11,12 @@
 	} from "$lib/store/index.svelte";
 	import clsx from "clsx";
 	import {
+		Github,
 		InfoIcon,
 		MoonIcon,
 		RefreshCw,
 		SettingsIcon,
+		Star,
 		SunIcon,
 		UploadIcon,
 		type Icon as IconType,
@@ -25,6 +28,9 @@
 	import Tooltip from "$lib/components/visual/Tooltip.svelte";
 	import { m } from "$lib/paraglide/messages";
 
+	const fetch_data = async () => {
+		const url = "";
+	};
 	const items = $derived<
 		{
 			name: string;
@@ -169,7 +175,7 @@
 {/snippet}
 
 <div bind:this={container}>
-	<Panel class="max-w-[778px] w-screen h-20 flex items-center gap-3 relative">
+	<Panel class="max-w-[778px] w-screen h-20 flex items-center gap-2 relative">
 		{@const linkRect = linkRects.at(selectedIndex) || linkRects[0]}
 		{#if linkRect && isInitialized}
 			<div
@@ -195,7 +201,7 @@
 			{@render link(item, i)}
 		{/each}
 		<div class="w-0.5 bg-separator h-full hidden md:flex"></div>
-		<Tooltip text={m["navbar.toggle_theme"]()} position="right">
+		<Tooltip text={m["navbar.toggle_theme"]()} position="top">
 			<button
 				onclick={() => {
 					const isDark =
@@ -207,6 +213,13 @@
 				<SunIcon class="dynadark:hidden block" />
 				<MoonIcon class="dynadark:block hidden" />
 			</button>
+		</Tooltip>
+		<Tooltip text="⭐ 10.7K" position="right">
+			<a href="https://github.com/VERT-sh/VERT">
+				<div class="mr-2">
+					<Github color={$theme === "dark" ? "white" : "black"} />
+				</div>
+			</a>
 		</Tooltip>
 	</Panel>
 </div>
