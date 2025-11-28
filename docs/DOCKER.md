@@ -10,27 +10,27 @@ This file covers how to run VERT under a Docker container.
 First, clone the repository:
 
 ```shell
-$ git clone https://github.com/VERT-sh/VERT
-$ cd VERT/
+git clone https://github.com/VERT-sh/VERT
+cd VERT/
 ```
 
 Then build a Docker image with:
 
 ```shell
-$ docker build -t vert-sh/vert \
+docker build -t vert-sh/vert \
     --build-arg PUB_ENV=production \
     --build-arg PUB_HOSTNAME=vert.sh \
     --build-arg PUB_PLAUSIBLE_URL=https://plausible.example.com \
     --build-arg PUB_VERTD_URL=https://vertd.vert.sh \
     --build-arg PUB_DONATION_URL=https://donations.vert.sh \
-	--build-arg PUB_DISABLE_ALL_EXTERNAL_REQUESTS=false
+	--build-arg PUB_DISABLE_ALL_EXTERNAL_REQUESTS=false \
     --build-arg PUB_STRIPE_KEY="" .
 ```
 
 You can then run it by using:
 
 ```shell
-$ docker run -d \
+docker run -d \
     --restart unless-stopped \
     -p 3000:80 \
     --name "vert" \
@@ -50,7 +50,7 @@ We also have a [`docker-compose.yml`](/docker-compose.yml) file available. Use `
 While there's an image you can pull instead of cloning the repo and building the image yourself, you will not be able to update any of the environment variables (e.g. `PUB_PLAUSIBLE_URL`) as they're baked directly into the image and not obtained during runtime. If you're okay with this, you can simply run this command instead:
 
 ```shell
-$ docker run -d \
+docker run -d \
     --restart unless-stopped \
     -p 3000:80 \
     --name "vert" \
