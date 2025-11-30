@@ -31,6 +31,10 @@ VERT is built in Svelte and TypeScript.
 - [Using Docker](./docs/DOCKER.md)
 - [Video Conversion](./docs/VIDEO_CONVERSION.md)
 
+## Deploy
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/vert?referralCode=20H68q&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
 ## License
 
 This project is licensed under the AGPL-3.0 License, please see the [LICENSE](LICENSE) file for details.
