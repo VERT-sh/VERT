@@ -16,7 +16,6 @@
 		MoonIcon,
 		RefreshCw,
 		SettingsIcon,
-		Star,
 		SunIcon,
 		UploadIcon,
 		type Icon as IconType,
@@ -28,9 +27,7 @@
 	import Tooltip from "$lib/components/visual/Tooltip.svelte";
 	import { m } from "$lib/paraglide/messages";
 
-	const fetch_data = async () => {
-		const url = "";
-	};
+
 	const items = $derived<
 		{
 			name: string;
@@ -223,3 +220,4 @@
 		</Tooltip>
 	</Panel>
 </div>
+
