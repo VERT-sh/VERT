@@ -320,6 +320,7 @@ export class FFmpegConverter extends Converter {
 	): Promise<string[]> {
 		const inputFormat = input.from.slice(1);
 		const outputFormat = to.slice(1);
+		const m4a = isAlac || to === ".m4a";
 
 		const lossless = [
 			"flac",
@@ -340,6 +341,7 @@ export class FFmpegConverter extends Converter {
 		let audioBitrateArgs: string[] = [];
 		let sampleRateArgs: string[] = [];
 		let metadataArgs: string[] = [];
+		let m4aArgs: string[] = [];
 
 		log(["converters", this.name], `keep metadata: ${keepMetadata}`);
 		if (!keepMetadata) {
@@ -509,9 +511,12 @@ export class FFmpegConverter extends Converter {
 			`Converting audio ${input.from} to audio ${to}`,
 		);
 		const { audio: audioCodec } = getCodecs(to, isAlac);
+		if (m4a && keepMetadata) m4aArgs = ["-c:v", "copy"]; // for album art
+
 		return [
 			"-i",
 			"input",
+			...m4aArgs,
 			"-c:a",
 			audioCodec,
 			...metadataArgs,
