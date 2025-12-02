@@ -129,7 +129,9 @@ export class VertFile {
 		const fileProgress: number[] = new Array(totalFiles).fill(0);
 		const convertedFiles: File[] = [];
 
-		const queue = new PQueue({ concurrency: navigator.hardwareConcurrency || 4 });
+		const queue = new PQueue({
+			concurrency: navigator.hardwareConcurrency || 4,
+		});
 
 		const updateProgress = () => {
 			const totalProgress = fileProgress.reduce((sum, p) => sum + p, 0);
@@ -165,12 +167,10 @@ export class VertFile {
 						let outputExt = this.to;
 						if (!outputExt.startsWith("."))
 							outputExt = `.${outputExt}`;
-						const baseName = filename.replace(/\.[^/.]+$/, "");
-						const outputFilename = `${baseName}${outputExt}`;
 
 						convertedFiles[index] = new File(
 							[await converted.file.arrayBuffer()],
-							outputFilename,
+							converted.name,
 						);
 
 						fileProgress[index] = 100;
@@ -187,12 +187,10 @@ export class VertFile {
 
 					let outputExt = this.to;
 					if (!outputExt.startsWith(".")) outputExt = `.${outputExt}`;
-					const baseName = filename.replace(/\.[^/.]+$/, "");
-					const outputFilename = `${baseName}${outputExt}`;
 
 					convertedFiles[index] = new File(
 						[await converted.file.arrayBuffer()],
-						outputFilename,
+						converted.name,
 					);
 
 					fileProgress[index] = 100;
