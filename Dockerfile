@@ -32,6 +32,8 @@ RUN bun run build
 
 FROM nginx:stable-alpine
 
+RUN apk add --no-cache curl
+
 EXPOSE 80/tcp
 
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
