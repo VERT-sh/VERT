@@ -17,13 +17,13 @@ Make sure you have the following installed:
 
 First, clone the repository:
 ```sh
-$ git clone https://github.com/VERT-sh/VERT
-$ cd VERT/
+git clone https://github.com/VERT-sh/VERT
+cd VERT/
 ```
 
 Install dependencies:
 ```sh
-$ bun i
+bun i
 ```
 
 And finally, make sure you create a `.env` file in the root of the project. We've included a [`.env.example`](../.env.example) file which you can use to get started.
