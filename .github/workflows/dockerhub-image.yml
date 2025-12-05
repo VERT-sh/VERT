@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Build and Release 
 
 on:
   workflow_dispatch:
@@ -41,7 +41,6 @@ jobs:
       build_release: ${{ steps.set_env_variables.outputs.BUILD_RELEASE }}
       build_prerelease: ${{ steps.set_env_variables.outputs.BUILD_PRERELEASE }}
       release_version: ${{ steps.set_env_variables.outputs.RELEASE_VERSION }}
-
       dh_img_name: ${{ steps.set_env_variables.outputs.DH_IMG_NAME }}
 
     steps:
@@ -50,7 +49,7 @@ jobs:
         run: |
           echo "BUILDX_DRIVER=docker-container" >> $GITHUB_OUTPUT
           echo "BUILDX_VERSION=latest" >> $GITHUB_OUTPUT
-          echo "BUILDX_PLATFORMS=linux/amd64,linux/arm64" >> $GITHUB_OUTPUT
+          echo "BUILDX_PLATFORMS=linux/amd64" >> $GITHUB_OUTPUT
           echo "BUILDX_ENDPOINT=" >> $GITHUB_OUTPUT
 
           echo "DH_IMG_NAME=vert" >> $GITHUB_OUTPUT
@@ -95,7 +94,7 @@ jobs:
         name: Checkout Files
         uses: actions/checkout@v4
       - name: VERT Build and Push
-        uses: makeplane/actions/build-push@v1.0.0
+        uses: makeplane/actions/build-push@v1.1.0
         with:
           build-release: ${{ needs.release_build_setup.outputs.build_release }}
           build-prerelease: ${{ needs.release_build_setup.outputs.build_prerelease }}
