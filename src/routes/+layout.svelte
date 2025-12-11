@@ -22,6 +22,8 @@
 	import { browser } from "$app/environment";
 	import { initStores as initAnimStores } from "$lib/util/animation.js";
 	import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte.js";
+	import { ToastManager } from "$lib/util/toast.svelte.js";
+	import { m } from "$lib/paraglide/messages.js";
 
 	let { children, data } = $props();
 	let enablePlausible = $state(false);
@@ -90,6 +92,15 @@
 				.then((res) => {
 					if (res.ok) $vertdLoaded = true;
 				});
+		}
+
+		// detect if insecure context
+		if (!window.isSecureContext) {
+			ToastManager.add({
+				type: "warning",
+				message: m["toast.insecure_context"](),
+				disappearing: false,
+			});
 		}
 
 		return () => {

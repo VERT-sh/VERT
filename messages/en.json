@@ -318,5 +318,8 @@
 			"description": "For questions, email us at: [email_link]hello@vert.sh[/email_link]. If you are using a third-party instance of VERT, please contact the hoster of that instance instead."
 		},
 		"last_updated": "Last updated: 2025-10-29"
+	},
+	"toast": {
+		"insecure_context": "You are visiting VERT in an insecure context (e.g. accessing over HTTP instead of HTTPS). Some features may not work as expected."
 	}
 }
