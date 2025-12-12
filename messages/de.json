@@ -79,7 +79,7 @@
 			"image": "Bild",
 			"placeholder": "Format suchen",
 			"no_formats": "Keine Formate verfügbar",
-			"no_results": "Keine Formate entsprechen deiner Suche"
+			"no_results": "Keine Ergebnisse"
 		},
 		"tooltips": {
 			"unknown_file": "Unbekannter Dateityp",
