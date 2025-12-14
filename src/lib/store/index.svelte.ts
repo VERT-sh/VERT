@@ -444,6 +444,7 @@ export const availableLocales = {
 	fr: "Français",
 	de: "Deutsch",
 	it: "Italiano",
+	ba: "Bosanski",
 	hr: "Hrvatski",
 	id: "Bahasa Indonesia",
 	tr: "Türkçe",
