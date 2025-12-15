@@ -3,7 +3,7 @@
 	"navbar": {
 		"upload": "Hochladen",
 		"convert": "Konvertieren",
-		"settings": "Einstellungen",
+		"settings": "Optionen",
 		"about": "Über",
 		"toggle_theme": "Design wechseln"
 	},
@@ -120,7 +120,7 @@
 		}
 	},
 	"settings": {
-		"title": "Einstellungen",
+		"title": "Optionen",
 		"errors": {
 			"save_failed": "Speichern der Einstellungen fehlgeschlagen!"
 		},
