@@ -5,6 +5,7 @@ import { Settings } from "$lib/sections/settings/index.svelte";
 import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte";
 import { VertFile } from "$lib/types";
 import { Converter, FormatInfo } from "./converter.svelte";
+import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
 
 interface UploadResponse {
 	id: string;
@@ -321,15 +322,18 @@ export class VertdConverter extends Converter {
 	public async convert(input: VertFile, to: string): Promise<VertFile> {
 		if (to.startsWith(".")) to = to.slice(1);
 
-		const hash = await input.hash();
+		let hash: string;
+		if (PUB_DISABLE_FAILURE_BLOCKS === "false") {
+			hash = await input.hash();
 
-		if (this.blocked(hash)) {
-			this.log(`conversion blocked for file ${input.name}`);
-			throw new Error(
-				m["convert.errors.vertd_ratelimit"]({
-					filename: input.name,
-				}),
-			);
+			if (this.blocked(hash)) {
+				this.log(`conversion blocked for file ${input.name}`);
+				throw new Error(
+					m["convert.errors.vertd_ratelimit"]({
+						filename: input.name,
+					}),
+				);
+			}
 		}
 
 		const uploadRes = await uploadFile(input);
@@ -403,7 +407,7 @@ export class VertdConverter extends Converter {
 					case "error": {
 						this.log(`error: ${msg.data.message}`);
 						this.activeConversions.delete(input.id);
-						this.failure(hash);
+						if (hash) this.failure(hash);
 
 						reject({
 							component: VertdErrorComponent,
