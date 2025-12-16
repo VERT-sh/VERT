@@ -21,7 +21,7 @@
 				(f) =>
 					`${f.name}${f.fromSupported && f.toSupported ? "" : "*"}`,
 			)
-			.join(", ") || "none";
+			.join(" ") || "none";
 
 	const worker: {
 		[key: string]: {
@@ -135,14 +135,14 @@
 		<div
 			class="flex items-center h-auto gap-12 md:gap-24 md:flex-row flex-col"
 		>
-			<div class="flex-grow w-full md:text-left">
+			<div class="flex-grow px-6 w-full md:text-left">
 				<h1
-					class="text-4xl px-6 md:p-0 md:text-6xl flex-wrap tracking-tight leading-tight md:leading-[72px] mb-4 md:mb-6"
+					class="text-4xl md:p-0 md:text-6xl flex-wrap tracking-tight leading-tight md:leading-[72px] mb-4 md:mb-6"
 				>
 					{m["upload.title"]()}
 				</h1>
 				<p
-					class="font-normal px-6 md:p-0 text-lg md:text-xl text-black text-muted dynadark:text-muted"
+					class="font-normal md:p-0 text-lg md:text-xl text-black text-muted dynadark:text-muted"
 				>
 					{m["upload.subtitle"]()}
 				</p>
@@ -156,7 +156,7 @@
 	<hr />
 
 	<div class="mt-10 md:mt-16">
-		<h2 class="text-center text-4xl">{m["upload.cards.title"]()}</h2>
+		<h2 class="text-4xl px-1">{m["upload.cards.title"]()}</h2>
 
 		<div class="flex gap-4 mt-8 md:flex-row flex-col">
 			{#if browser}
@@ -190,13 +190,11 @@
 								defer
 							>
 								<div
-									class="flex flex-col gap-4 h-[12.25rem] relative"
+									class="flex flex-col gap-3 h-[12.25rem] relative"
 									bind:this={scrollContainers[i]}
 								>
 									{#if key === "Video"}
-										<p
-											class="flex tems-center justify-center gap-2"
-										>
+										<p class="flex gap-2">
 											<Check size="20" />
 											<Tooltip
 												text={m[
@@ -214,16 +212,14 @@
 														]()}
 													</a>
 													<span
-														class="text-red-500 -ml-0.5"
+														class="text-red-500 decoration-none -ml-0.5"
 														>*</span
 													>
 												</span>
 											</Tooltip>
 										</p>
 									{:else}
-										<p
-											class="flex tems-center justify-center gap-2"
-										>
+										<p class="flex gap-2">
 											<Check size="20" />
 											{m[
 												"upload.cards.local_supported"
@@ -231,21 +227,19 @@
 										</p>
 									{/if}
 									<p>
-										{@html sanitize(m["upload.cards.status.text"]({
-											status: getStatusText(s.status),
-										}))}
+										{@html sanitize(
+											m["upload.cards.status.text"]({
+												status: getStatusText(s.status),
+											}),
+										)}
 									</p>
-									<div
-										class="flex flex-col items-center relative"
-									>
+									<div class="flex flex-col relative">
 										<b
 											>{m[
 												"upload.cards.supported_formats"
 											]()}&nbsp;</b
 										>
-										<p
-											class="flex flex-wrap justify-center leading-tight px-2"
-										>
+										<p class="flex flex-wrap leading-tight">
 											{#each s.formats.split(", ") as format, index}
 												{@const isPartial =
 													format.endsWith("*")}
@@ -299,15 +293,15 @@
 	}
 
 	.file-category-card p {
-		@apply font-normal text-center text-sm;
+		@apply font-normal text-justify text-sm;
 	}
 
 	.file-category-card-inner {
-		@apply flex items-center justify-center gap-3 text-xl;
+		@apply flex items-center gap-3 text-xl;
 	}
 
 	.file-category-card-content {
-		@apply flex flex-col text-center justify-between;
+		@apply flex flex-col justify-between;
 	}
 
 	.icon-container {
