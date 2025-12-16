@@ -135,14 +135,14 @@
 		<div
 			class="flex items-center h-auto gap-12 md:gap-24 md:flex-row flex-col"
 		>
-			<div class="flex-grow px-6 w-full md:text-left">
+			<div class="flex-grow w-full md:text-left">
 				<h1
-					class="text-4xl md:p-0 md:text-6xl flex-wrap tracking-tight leading-tight md:leading-[72px] mb-4 md:mb-6"
+					class="text-4xl md:p-0 px-6 md:text-6xl flex-wrap tracking-tight leading-tight md:leading-[72px] mb-4 md:mb-6"
 				>
 					{m["upload.title"]()}
 				</h1>
 				<p
-					class="font-normal md:p-0 text-lg md:text-xl text-black text-muted dynadark:text-muted"
+					class="font-normal px-6 md:p-0 text-lg md:text-xl text-black text-muted dynadark:text-muted"
 				>
 					{m["upload.subtitle"]()}
 				</p>
