@@ -6,7 +6,9 @@ import wasm from "vite-plugin-wasm";
 import { execSync } from "child_process";
 
 // coollify removes the .git folder but exposes commit via SOURCE_COMMIT env variable
-let commitHash = process.env.SOURCE_COMMIT || "unknown";
+let commitHash = process.env.SOURCE_COMMIT
+	? process.env.SOURCE_COMMIT.substring(0, 7) // shorten it lol
+	: "unknown";
 
 if (commitHash === "unknown") {
 	try {
