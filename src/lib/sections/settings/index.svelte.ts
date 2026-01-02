@@ -60,21 +60,26 @@ export class Settings {
 	}
 
 	public load() {
-		VertdInstance.instance.load();
-		const ls = localStorage.getItem("settings");
-		if (!ls) return;
-		const settings: ISettings = JSON.parse(ls);
-		const vertdBlockedHashes = new Map<string, Date[]>(
-			Object.entries(
-				settings.vertdBlockedHashes || this.settings.vertdBlockedHashes,
-			),
-		);
+		try {
+			VertdInstance.instance.load();
+			const ls = localStorage.getItem("settings");
+			if (!ls) return;
+			const settings: ISettings = JSON.parse(ls);
+			const vertdBlockedHashes = new Map<string, Date[]>(
+				Object.entries(
+					settings.vertdBlockedHashes ||
+						this.settings.vertdBlockedHashes,
+				),
+			);
 
-		settings.vertdBlockedHashes = vertdBlockedHashes;
+			settings.vertdBlockedHashes = vertdBlockedHashes;
 
-		this.settings = {
-			...this.settings,
-			...settings,
-		};
+			this.settings = {
+				...this.settings,
+				...settings,
+			};
+		} catch {
+			// ignore errors, use default settings
+		}
 	}
 }

@@ -290,7 +290,15 @@ export class VertdConverter extends Converter {
 	}
 
 	private blocked(hash: string): boolean {
-		const blockedHashes = Settings.instance.settings.vertdBlockedHashes;
+		let blockedHashes = Settings.instance.settings.vertdBlockedHashes;
+
+		// ensure it's a map
+		// this might fix the "e.get" isn't a function error, but i can't reproduce it
+		if (!(blockedHashes instanceof Map) || blockedHashes === null) {
+			blockedHashes = new Map(Object.entries(blockedHashes || {}));
+			Settings.instance.settings.vertdBlockedHashes = blockedHashes;
+			Settings.instance.save();
+		}
 
 		const now = new Date();
 		const dates = blockedHashes.get(hash) || [];
@@ -311,7 +319,15 @@ export class VertdConverter extends Converter {
 	}
 
 	private failure(hash: string): void {
-		const blockedHashes = Settings.instance.settings.vertdBlockedHashes;
+		let blockedHashes = Settings.instance.settings.vertdBlockedHashes;
+
+		// same as above (blocked())
+		if (!(blockedHashes instanceof Map) || blockedHashes === null) {
+			blockedHashes = new Map(Object.entries(blockedHashes || {}));
+			Settings.instance.settings.vertdBlockedHashes = blockedHashes;
+			Settings.instance.save();
+		}
+
 		const now = new Date();
 		const dates = blockedHashes.get(hash) || [];
 		dates.push(now);
