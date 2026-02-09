@@ -6,6 +6,7 @@ import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte";
 import { VertFile } from "$lib/types";
 import { Converter, FormatInfo } from "./converter.svelte";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
+import { ToastManager } from "$lib/util/toast.svelte";
 
 interface UploadResponse {
 	id: string;
@@ -124,6 +125,13 @@ interface JobCancelledMessage {
 	};
 }
 
+interface JobRetriedMessage {
+	type: "jobRetried";
+	data: {
+		jobId: string;
+	};
+}
+
 interface FpsProgress {
 	type: "fps";
 	data: number;
@@ -142,6 +150,7 @@ type VertdMessage =
 	| ProgressMessage
 	| CancelJobMessage
 	| JobCancelledMessage
+	| JobRetriedMessage
 	| CompletedMessage;
 
 const progressEstimates = {
@@ -370,7 +379,7 @@ export class VertdConverter extends Converter {
 			ws.onopen = () => {
 				const speed = Settings.instance.settings.vertdSpeed;
 				const keepMetadata = Settings.instance.settings.metadata;
-				this.log("opened ws connection to vertd");
+				this.log(`opened ws connection to vertd for file ${input.name}`);
 				const msg: StartJobMessage = {
 					type: "startJob",
 					data: {
@@ -382,12 +391,12 @@ export class VertdConverter extends Converter {
 					},
 				};
 				ws.send(JSON.stringify(msg));
-				this.log("sent startJob message");
+				this.log(`sent startJob message for file ${input.name}`);
 			};
 
 			ws.onmessage = async (e) => {
 				const msg: VertdMessage = JSON.parse(e.data);
-				this.log(`received message ${msg.type}`);
+				this.log(`received message ${msg.type} for file ${input.name}`);
 				switch (msg.type) {
 					case "progressUpdate": {
 						const data = msg.data;
@@ -400,8 +409,19 @@ export class VertdConverter extends Converter {
 						break;
 					}
 
+					case "jobRetried": {
+						this.log(`job retrying for file ${input.name}`);
+						ToastManager.add({
+							type: "error",
+							message: m["convert.errors.vertd_retry"]({
+								filename: input.name,
+							}),
+						});
+						break;
+					}
+
 					case "jobFinished": {
-						this.log("job finished");
+						this.log(`job finished for file ${input.name}`);
 						ws.close();
 						this.activeConversions.delete(input.id);
 						const url = `${apiUrl}/api/download/${msg.data.jobId}/${uploadRes.auth}`;
@@ -467,7 +487,7 @@ export class VertdConverter extends Converter {
 				},
 			};
 			ws.send(JSON.stringify(cancelMsg));
-			this.log("sent cancelJob message");
+			this.log(`sent cancelJob message for file ${input.name}`);
 		}
 
 		ws.close();
