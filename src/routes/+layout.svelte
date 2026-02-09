@@ -6,7 +6,6 @@
 	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/util/consts.js";
 	import * as Layout from "$lib/components/layout";
 	import * as Navbar from "$lib/components/layout/Navbar";
-	import featuredImage from "$lib/assets/VERT_Feature.webp";
 	import { Settings } from "$lib/sections/settings/index.svelte";
 	import {
 		files,
@@ -144,7 +143,7 @@
 		property="og:description"
 		content="With VERT, you can quickly convert any image, video, audio, and document file. No ads, no tracking, open source, and all processing (other than video) is done on your device."
 	/>
-	<meta property="og:image" content={featuredImage} />
+	<meta property="og:image" content="https://vert.sh/VERT_Feature.webp" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta property="twitter:domain" content="vert.sh" />
 	<meta property="twitter:url" content="https://vert.sh" />
@@ -156,7 +155,7 @@
 		property="twitter:description"
 		content="With VERT, you can quickly convert any image, video, audio, and document file. No ads, no tracking, open source, and all processing (other than video) is done on your device."
 	/>
-	<meta property="twitter:image" content={featuredImage} />
+	<meta property="twitter:image" content="https://vert.sh/VERT_Feature.webp" />
 	<link rel="manifest" href="/manifest.json" />
 	<link rel="canonical" href="https://vert.sh/" />
 	{#if enablePlausible}
