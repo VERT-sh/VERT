@@ -9,9 +9,10 @@ services:
         PUB_PLAUSIBLE_URL: ${PUB_PLAUSIBLE_URL:-}
         PUB_ENV: ${PUB_ENV:-production}
         PUB_DISABLE_ALL_EXTERNAL_REQUESTS: ${PUB_DISABLE_ALL_EXTERNAL_REQUESTS:-false}
-        PUB_VERTD_URL: ${PUB_VERTD_URL:-}
+        PUB_VERTD_URL: ${PUB_VERTD_URL:-https://vertd.vert.sh}
         PUB_DONATION_URL: ${PUB_DONATION_URL:-https://donations.vert.sh}
         PUB_STRIPE_KEY: ${PUB_STRIPE_KEY:-pk_live_51RDVmAGSxPVad6bQwzVNnbc28nlmzA30krLWk1fefCMpUPiSRPkavMMbGqa8A3lUaOCMlsUEVy2CWDYg0ip3aPpL00ZJlsMkf2}
+        PUB_DISABLE_FAILURE_BLOCKS: ${PUB_DISABLE_FAILURE_BLOCKS:-false}
     restart: unless-stopped
     ports:
       - ${PORT:-3000}:80

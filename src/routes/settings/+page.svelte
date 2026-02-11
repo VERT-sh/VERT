@@ -72,6 +72,7 @@
 		</div>
 
 		<div class="flex flex-col gap-4 flex-1">
+			<!-- TODO: only hide plausible analytics, not entire section -->
 			<Settings.Appearance />
 			{#if PUB_PLAUSIBLE_URL && !DISABLE_ALL_EXTERNAL_REQUESTS}
 				<Settings.Privacy bind:settings />
