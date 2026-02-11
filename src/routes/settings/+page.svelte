@@ -66,15 +66,14 @@
 			<Settings.Conversion bind:settings />
 			{#if !DISABLE_ALL_EXTERNAL_REQUESTS}
 				<Settings.Vertd bind:settings />
-			{:else if PUB_PLAUSIBLE_URL}
+			{:else}
 				<Settings.Privacy bind:settings />
 			{/if}
 		</div>
 
 		<div class="flex flex-col gap-4 flex-1">
-			<!-- TODO: only hide plausible analytics, not entire section -->
 			<Settings.Appearance />
-			{#if PUB_PLAUSIBLE_URL && !DISABLE_ALL_EXTERNAL_REQUESTS}
+			{#if !DISABLE_ALL_EXTERNAL_REQUESTS}
 				<Settings.Privacy bind:settings />
 			{/if}
 		</div>

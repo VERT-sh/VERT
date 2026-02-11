@@ -17,6 +17,7 @@
 	import { ToastManager } from "$lib/util/toast.svelte";
 	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
 	import { addDialog } from "$lib/store/DialogProvider";
+	import { PUB_PLAUSIBLE_URL } from "$env/static/public";
 
 	const { settings = $bindable() }: { settings: ISettings } = $props();
 
@@ -134,7 +135,7 @@
 			{m["settings.privacy.title"]()}
 		</h2>
 		<div class="flex flex-col gap-8">
-			{#if !DISABLE_ALL_EXTERNAL_REQUESTS}
+			{#if !DISABLE_ALL_EXTERNAL_REQUESTS && PUB_PLAUSIBLE_URL}
 				<div class="flex flex-col gap-4">
 					<div class="flex flex-col gap-2">
 						<p class="text-base font-bold">
@@ -269,6 +270,7 @@
 					{m["settings.privacy.clear_all_data"]()}
 				</button>
 			</div>
+			
 		</div>
 	</div></Panel
 >
