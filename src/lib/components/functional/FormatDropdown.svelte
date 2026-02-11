@@ -92,7 +92,7 @@
 		);
 
 		// handle special cases
-		if (from === ".gif") finalCategories.push("video");
+		if (from === ".gif" || from === ".webp") finalCategories.push("video");
 		if (from === ".apng") {
 			//finalCategories.push("image"); // -- buggy, magick can't convert from or to apng properly
 			finalCategories = finalCategories.filter((cat) => cat !== "audio");

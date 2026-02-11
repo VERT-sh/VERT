@@ -7,6 +7,7 @@ import { VertFile } from "$lib/types";
 import { Converter, FormatInfo } from "./converter.svelte";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
 import { ToastManager } from "$lib/util/toast.svelte";
+import { converters } from "./index";
 
 interface UploadResponse {
 	id: string;
@@ -265,9 +266,7 @@ export class VertdConverter extends Converter {
 		new FormatInfo("mov", true, true),
 		new FormatInfo("gif", true, true),
 		new FormatInfo("apng", true, true),
-		// for some odd reasons, ffmpeg only supports encoding webp and not decoding -- https://trac.ffmpeg.org/ticket/4907
-		// honestly, we could probably convert webp to apng, then apng to (x) video format
-		new FormatInfo("webp", false, true), 
+		new FormatInfo("webp", true, true), 
 		new FormatInfo("mts", true, true),
 		new FormatInfo("ts", true, true),
 		new FormatInfo("m2ts", true, true),
@@ -351,9 +350,28 @@ export class VertdConverter extends Converter {
 	public async convert(input: VertFile, to: string): Promise<VertFile> {
 		if (to.startsWith(".")) to = to.slice(1);
 
+		let fileUpload = input;
+
+		// if converting animated webp to video, first convert to gif
+		// ffmpeg (in vertd) doesn't support decoding animated webp still.. while supporting encoding animated webp for some reason
+		// https://trac.ffmpeg.org/ticket/4907
+		if (input.from === ".webp") {
+			this.log(`animated webp detected, converting to gif first`);
+			const magickConverter = converters.find((c) => c.name === "imagemagick");
+			if (magickConverter) {
+				try {
+					fileUpload = await magickConverter.convert(input, ".gif", 100);
+					this.log(`successfully converted webp to gif`);
+				} catch (e) {
+					this.log(`failed to convert webp to gif: ${e}`);
+					throw e;
+				}
+			}
+		}
+
 		let hash: string;
 		if (PUB_DISABLE_FAILURE_BLOCKS === "false") {
-			hash = await input.hash();
+			hash = await fileUpload.hash();
 
 			if (this.blocked(hash)) {
 				this.log(`conversion blocked for file ${input.name}`);
@@ -365,7 +383,7 @@ export class VertdConverter extends Converter {
 			}
 		}
 
-		const uploadRes = await uploadFile(input);
+		const uploadRes = await uploadFile(fileUpload);
 		const apiUrl = await VertdInstance.instance.url();
 
 		return new Promise((resolve, reject) => {
