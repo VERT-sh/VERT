@@ -100,7 +100,7 @@
 			"vertd_generic_no": "Nie przesyłaj",
 			"vertd_failed_to_keep": "Nie udało się przechować wideo na serwerze: {error}",
 			"vertd_details": "Wyświetl szczegóły błędu",
-			"vertd_details_body": "Jeśli wciśniejsz przycisk prześlij, <b>Twoje wideo również zostanie dołączone</b> wraz z wpisem błędu, który zawsze jest do nas wysyłany do sprawdzenia. Następująca informacja jest wpisem, który automatycznie otrzymujemy:",
+			"vertd_details_body": "Jeśli wciśniesz przycisk prześlij, <b>Twoje wideo również zostanie dołączone</b> wraz z wpisem błędu, który zawsze jest do nas wysyłany do sprawdzenia. Następująca informacja jest wpisem, który automatycznie otrzymujemy:",
 			"vertd_details_footer": "Informacja ta użyta zostanie jedynie w celu rozwiązywania błędów oraz nigdy nie zostanie udostępniona. Zobacz naszą [privacy_link]politykę prywatności[/privacy_link] po więcej szczegółów.",
 			"vertd_details_job_id": "<b>Job ID:</b> {jobId}",
 			"vertd_details_from": "<b>Z formatu:</b> {from}",
@@ -139,7 +139,7 @@
 			"title": "Konwersja",
 			"advanced_settings": "Zaawansowane ustawienia",
 			"filename_format": "Format nazwy pliku",
-			"filename_description": "To ustawienie pozwoli ci określić nazwę pliku przy jego pobieraniu <b>z wyłączeniem jego rozszerzenia.</b> Możesz w formacie umieścić następujące wzorce, które następnie zostaną zamienioną na odpowiednią informację: <b>%name%</b> zostanie zamieniony na oryginalną nazwę pliku, <b>%extension%</b> zostanie zamieniony na oryginalne rozszerzenie pliku oraz <b>%date%</b> zamieniony zostanie na datę kiedy plik został przekonwertowany.",
+			"filename_description": "To ustawienie pozwoli ci określić nazwę pliku przy jego pobieraniu <b>z wyłączeniem jego rozszerzenia.</b> Możesz w formacie umieścić następujące wzorce, które następnie zostaną zamienione na odpowiednią informację: <b>%name%</b> zostanie zamieniony na oryginalną nazwę pliku, <b>%extension%</b> zostanie zamieniony na oryginalne rozszerzenie pliku oraz <b>%date%</b> zamieniony zostanie na datę kiedy plik został przekonwertowany.",
 			"placeholder": "VERT_%name%",
 			"default_format": "Domyślny format konwersji",
 			"default_format_enable": "Włączony",
@@ -322,4 +322,5 @@
 	"toast": {
 		"insecure_context": "Odwiedzasz VERT w niezabezpieczonym kontekście (np. uzyskujesz dostęp poprzez HTTP zamiast HTTPS). Niektóre funkcje mogą działać niezgodnie z oczekiwaniami."
 	}
+
 }
