@@ -265,7 +265,9 @@ export class VertdConverter extends Converter {
 		new FormatInfo("mov", true, true),
 		new FormatInfo("gif", true, true),
 		new FormatInfo("apng", true, true),
-		new FormatInfo("webp", false, true), // for some odd reasons, ffmpeg only supports encoding webp and not decoding -- https://trac.ffmpeg.org/ticket/4907
+		// for some odd reasons, ffmpeg only supports encoding webp and not decoding -- https://trac.ffmpeg.org/ticket/4907
+		// honestly, we could probably convert webp to apng, then apng to (x) video format
+		new FormatInfo("webp", false, true), 
 		new FormatInfo("mts", true, true),
 		new FormatInfo("ts", true, true),
 		new FormatInfo("m2ts", true, true),

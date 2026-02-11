@@ -126,9 +126,11 @@ class Files {
 
 		// check if completely transparent
 		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		const isTransparent = Array.from(imageData.data).every((value, index) => {
-			return (index + 1) % 4 !== 0 || value === 0;
-		});
+		const isTransparent = Array.from(imageData.data).every(
+			(value, index) => {
+				return (index + 1) % 4 !== 0 || value === 0;
+			},
+		);
 		if (isTransparent) {
 			canvas.remove();
 			return undefined;
@@ -271,7 +273,9 @@ class Files {
 			}
 			const converter = converters
 				.sort(byNative(format))
-				.find((converter) => converter.formatStrings().includes(format));
+				.find((converter) =>
+					converter.formatStrings().includes(format),
+				);
 			if (!converter) {
 				log(["files"], `no converter found for ${file.name}`);
 				this.files.push(new VertFile(file, format));
@@ -312,7 +316,10 @@ class Files {
 						action: () => {
 							this.files = [
 								...this.files.filter(
-									(f) => !f.converters.map((c) => c.name).includes("vertd"),
+									(f) =>
+										!f.converters
+											.map((c) => c.name)
+											.includes("vertd"),
 								),
 							];
 							this._warningShown = false;
@@ -321,7 +328,10 @@ class Files {
 					{
 						text: m["convert.external_warning.yes"](),
 						action: () => {
-							localStorage.setItem("acceptedExternalWarning", "true");
+							localStorage.setItem(
+								"acceptedExternalWarning",
+								"true",
+							);
 							this._warningShown = false;
 						},
 					},
@@ -337,7 +347,14 @@ class Files {
 	public add(file: VertFile[] | null | undefined): void;
 	public add(file: FileList | null | undefined): void;
 	public add(
-		file: VertFile | File | VertFile[] | File[] | FileList | null | undefined,
+		file:
+			| VertFile
+			| File
+			| VertFile[]
+			| File[]
+			| FileList
+			| null
+			| undefined,
 	) {
 		if (!file) return;
 		if (Array.isArray(file) || file instanceof FileList) {
@@ -357,11 +374,13 @@ class Files {
 	}
 
 	public async downloadAll() {
-		if (files.files.length === 0) return;
+		if (this.files.length === 0) return;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const dlFiles: any[] = [];
-		for (let i = 0; i < files.files.length; i++) {
-			const file = files.files[i];
+		const fileNames: string[] = [];
+
+		for (let i = 0; i < this.files.length; i++) {
+			const file = this.files[i];
 			const result = file.result;
 
 			if (!result) {
@@ -372,12 +391,33 @@ class Files {
 			let to = result.to;
 			if (!to.startsWith(".")) to = `.${to}`;
 
+			fileNames.push(file.file.name.replace(/\.[^/.]+$/, "") + to);
+		}
+
+		for (let i = 0; i < this.files.length; i++) {
+			const file = this.files[i];
+			const result = file.result;
+
+			if (!result) continue;
+
+			let fileName = fileNames[i];
+			
+			// check if this filename appears more than once
+			const isDuplicate = fileNames.filter((name) => name === fileName).length > 1;
+			if (isDuplicate) {
+				const nameParts = fileName.lastIndexOf(".");
+				const nameWithoutExt = fileName.substring(0, nameParts);
+				const ext = fileName.substring(nameParts);
+				fileName = `${nameWithoutExt} (${i + 1})${ext}`;
+			}
+
 			dlFiles.push({
-				name: file.file.name.replace(/\.[^/.]+$/, "") + to,
+				name: fileName,
 				lastModified: Date.now(),
 				input: await result.file.arrayBuffer(),
 			});
 		}
+
 		const { downloadZip } = await import("client-zip");
 		const blob = await downloadZip(dlFiles, "converted.zip").blob();
 		const url = URL.createObjectURL(blob);
@@ -551,7 +591,10 @@ export const getMaxArrayBufferSize = (): number => {
 	const cached = localStorage.getItem("maxArrayBufferSize");
 	if (cached) {
 		const parsed = Number(cached);
-		log(["converters"], `using cached max ArrayBuffer size: ${parsed} bytes`);
+		log(
+			["converters"],
+			`using cached max ArrayBuffer size: ${parsed} bytes`,
+		);
 		if (!isNaN(parsed) && parsed > 0) return parsed;
 	}
 
