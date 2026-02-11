@@ -314,10 +314,10 @@ export class MagickConverter extends Converter {
 		return new Promise((resolve, reject) => {
 			img.onload = () => {
 				try {
-					canvas.width = img.naturalWidth || width;
-					canvas.height = img.naturalHeight || height;
+					canvas.width = width;
+					canvas.height = height;
 
-					ctx.drawImage(img, 0, 0);
+					ctx.drawImage(img, 0, 0, width, height);
 
 					canvas.toBlob((blob) => {
 						URL.revokeObjectURL(svgUrl);
