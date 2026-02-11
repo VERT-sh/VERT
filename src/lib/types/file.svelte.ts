@@ -5,6 +5,8 @@ import { ToastManager } from "$lib/util/toast.svelte";
 import type { Component } from "svelte";
 import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
 
+const MAX_BLOB_SIZE_LIMIT = 2 * 1024 * 1024 * 1024; // 2GB
+
 export class VertFile {
 	public id: string = Math.random().toString(36).slice(2, 8);
 	public readonly file: File;
@@ -287,15 +289,48 @@ export class VertFile {
 				.replace(/%extension%/g, originalExtension);
 		};
 
-		const blob = URL.createObjectURL(
-			new Blob([await this.result.file.arrayBuffer()], {
-				// type: to.slice(1),
-				type: "application/octet-stream", // use generic type to prevent browsers changing extension
-			}),
-		);
+		const filename = `${format(filenameFormat)}${to}`;
+
+		// larger files (>2gb) requires cache API
+		// blob constructor can't use arraybuffer above 2gb
+		const useCacheApi = this.result.file.size > MAX_BLOB_SIZE_LIMIT;
+		let blob: string;
+
+		if (useCacheApi) {
+			const cache = await caches.open("vert-downloads");
+			const cacheKey = `vert-download-${Date.now()}-${filename}`;
+
+			const response = new Response(this.result.file.stream(), {
+				headers: {
+					"Content-Type": "application/octet-stream",
+					"Content-Length": this.result.file.size.toString(),
+				},
+			});
+
+			await cache.put(cacheKey, response);
+
+			const cachedResponse = await cache.match(cacheKey);
+			if (!cachedResponse)
+				throw new Error("Failed to cache file for download");
+
+			const cachedBlob = await cachedResponse.blob();
+			blob = URL.createObjectURL(cachedBlob);
+
+			setTimeout(() => {
+				cache.delete(cacheKey);
+			}, 3000);
+		} else {
+			blob = URL.createObjectURL(
+				new Blob([await this.result.file.arrayBuffer()], {
+					type: "application/octet-stream",
+				}),
+			);
+		}
+
+		// download
 		const a = document.createElement("a");
 		a.href = blob;
-		a.download = `${format(filenameFormat)}${to}`;
+		a.download = filename;
 		// force it to not open in a new tab
 		a.target = "_blank";
 		a.style.display = "none";
