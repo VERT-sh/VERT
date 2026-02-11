@@ -1,0 +1,325 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"navbar": {
+		"upload": "Prześlij",
+		"convert": "Konwertuj",
+		"settings": "Ustawienia",
+		"about": "O nas",
+		"toggle_theme": "Przełącz motyw"
+	},
+	"footer": {
+		"copyright": "© {year} VERT.",
+		"source_code": "Kod źródłowy",
+		"discord_server": "Serwer Discord",
+		"privacy_policy": "Polityka prywatności"
+	},
+	"upload": {
+		"title": "Konwerter plików, który pokochasz.",
+		"subtitle": "Wszystkie zdjęcia, pliki audio oraz dokumenty przetwarzane są na Twoim urządzeniu. Pliki wideo konwertowane są na naszych bardzo szybkich serwerach. Bez limitu rozmiaru plików, bez reklam, z otwartym kodem źródłowym.",
+		"uploader": {
+			"text": "Przeciągnij lub kliknij aby {action}",
+			"convert": "konwertować"
+		},
+		"cards": {
+			"title": "VERT wspiera...",
+			"images": "Zdjęcia",
+			"audio": "Pliki audio",
+			"documents": "Dokumenty",
+			"video": "Wideo",
+			"video_server_processing": "Wspierane serwerowo",
+			"local_supported": "Wspierane lokalnie",
+			"status": {
+				"text": "<b>Status:</b> {status}",
+				"ready": "gotowy",
+				"not_ready": "niegotowy",
+				"not_initialized": "niezainicjowany",
+				"downloading": "pobieranie...",
+				"initializing": "inicjowanie...",
+				"unknown": "nieznany status"
+			},
+			"supported_formats": "Wspierane formaty:"
+		},
+		"tooltip": {
+			"partial_support": "Ten format może zostać przekonwertowany jedynie jako {direction}.",
+			"direction_input": "wejście (z)",
+			"direction_output": "wyjście (do)",
+			"video_server_processing": "Domyślnie, w celu przetworzenia, pliki wideo przesyłane są na serwer, dowiedz się jak ustawić lokalne przetwarzanie tutaj."
+		}
+	},
+	"convert": {
+		"archive_file": {
+			"extract": "Wypakuj archiwum",
+			"extracting": "Wykryto archiwum: {filename}",
+			"extracted": "Wypakowanych plików z {filename}: {extract_count}. Zignorowanych plików: {ignore_count}.",
+			"detected": "Wykryto pliki {type} w {filename}.",
+			"audio": "audio",
+			"video": "wideo",
+			"doc": "dokumentowe",
+			"image": "zdjęciowe",
+			"extract_error": "Wystąpił błąd przy wypakowywaniu {filename}: {error}"
+		},
+		"large_file_warning": "Ze względu na przeglądarkę / ograniczenia sprzętowe, konwersja wideo do audio jest niedostępna dla tego pliku, ponieważ przekracza on limit {limit}GB. Zalecamy używanie przeglądarki Firefox bądź Safari dla plików o takich rozmiarach, gdyż przeglądarki te mają mniej ograniczeń.",
+		"external_warning": {
+			"title": "Ostrzeżenie zewnętrznego serwera",
+			"text": "Jeśli wybierzesz konwersję na format wideo, pliki te zostaną przesłane na zewnętrzny serwer w celu konwersji. Czy chcesz kontynuować?",
+			"yes": "Tak",
+			"no": "Nie"
+		},
+		"panel": {
+			"convert_all": "Konwertuj wszystko",
+			"download_all": "Pobierz wszystko jako .zip",
+			"remove_all": "Usuń wszystkie pliki",
+			"set_all_to": "Ustaw wszystkie jako",
+			"na": "Nie dotyczy"
+		},
+		"dropdown": {
+			"audio": "Audio",
+			"video": "Wideo",
+			"doc": "Dokument",
+			"image": "Zdjęcie",
+			"placeholder": "Wyszukaj format",
+			"no_formats": "Formaty niedostępne",
+			"no_results": "Nie znaleziono wyszukiwanego formatu"
+		},
+		"tooltips": {
+			"unknown_file": "Nieznany typ pliku",
+			"audio_file": "Plik audio",
+			"video_file": "Plik wideo",
+			"document_file": "Plik dokumentowy",
+			"image_file": "Plik obrazu",
+			"convert_file": "Konwertuj ten plik",
+			"download_file": "Pobierz ten plik"
+		},
+		"errors": {
+			"cant_convert": "Nie możemy przekonwertować tego pliku.",
+			"vertd_server": "co robisz..? powinieneś uruchomić serwer vertd!",
+			"vertd_generic_view": "Wyświetl szczegóły błędu",
+			"vertd_generic_body": "Wystąpił błąd podczas próby konwersji Twojego wideo. Czy chcesz przesłać to wideo deweloperom w celu pomocy naprawy tego błędu? Przesłane zostanie jedynie wideo. Żadne identyfikatory nie zostaną przesłane.",
+			"vertd_generic_title": "Błąd konwersji wideo",
+			"vertd_generic_yes": "Prześlij wideo",
+			"vertd_generic_no": "Nie przesyłaj",
+			"vertd_failed_to_keep": "Nie udało się przechować wideo na serwerze: {error}",
+			"vertd_details": "Wyświetl szczegóły błędu",
+			"vertd_details_body": "Jeśli wciśniejsz przycisk prześlij, <b>Twoje wideo również zostanie dołączone</b> wraz z wpisem błędu, który zawsze jest do nas wysyłany do sprawdzenia. Następująca informacja jest wpisem, który automatycznie otrzymujemy:",
+			"vertd_details_footer": "Informacja ta użyta zostanie jedynie w celu rozwiązywania błędów oraz nigdy nie zostanie udostępniona. Zobacz naszą [privacy_link]politykę prywatności[/privacy_link] po więcej szczegółów.",
+			"vertd_details_job_id": "<b>Job ID:</b> {jobId}",
+			"vertd_details_from": "<b>Z formatu:</b> {from}",
+			"vertd_details_to": "<b>Do formatu:</b> {to}",
+			"vertd_details_error_message": "<b>Wiadomość błędu:</b> [view_link]Wyświetl wpis błędu[/view_link]",
+			"vertd_details_close": "Zamknij",
+			"vertd_ratelimit": "Nie udało się przekonwertować Twojego wideo '{filename}' kilkukrotnie. Aby zapobiec przeciążeniom serwera, dalsze próby konwersji tego pliku zostały chwilowo zablokowane. Spróbuj ponownie później.",
+			"unsupported_format": "Wspierane są jedynie pliki obrazów, wideo, audio oraz dokumentów",
+			"format_output_only": "Obecnie, ten format może być używany jedynie jako wyjście (konwersja do), nie jako wejście.",
+			"vertd_not_found": "Nie udało się znaleźć instancji vertd w celu uruchomienia konwersji wideo. Czy jesteś pewny, że instancja URL jest ustawiona poprawnie?",
+			"worker_downloading": "Konwerter {type} jest obecnie inicjowany, proszę czekać.",
+			"worker_error": "Konwerter {type} napotkał błąd podczas inicjacji, spróbuj ponownie później.",
+			"worker_timeout": "Konwerter {type} inicjowany jest dłużej niż oczekiwano, proszę odczekać kilka chwil lub odświeżyć stronę.",
+			"audio": "audio",
+			"doc": "dokumentów",
+			"image": "zdjęciowy"
+		}
+	},
+	"settings": {
+		"title": "Ustawienia",
+		"errors": {
+			"save_failed": "Nie udało się zapisać ustawień!"
+		},
+		"appearance": {
+			"title": "Wygląd",
+			"brightness_theme": "Motyw jasności",
+			"brightness_description": "Wolisz motyw jasny jak słońce, czy ciemny jak cicha, spokojna noc?",
+			"light": "Jasny",
+			"dark": "Ciemny",
+			"effect_settings": "Ustawienia efektów",
+			"effect_description": "Chciałbyś włączyć szalone efekty, czy preferujesz bardziej statyczne doświadczenie?",
+			"enable": "Włącz",
+			"disable": "Wyłącz"
+		},
+		"conversion": {
+			"title": "Konwersja",
+			"advanced_settings": "Zaawansowane ustawienia",
+			"filename_format": "Format nazwy pliku",
+			"filename_description": "To ustawienie pozwoli ci określić nazwę pliku przy jego pobieraniu <b>z wyłączeniem jego rozszerzenia.</b> Możesz w formacie umieścić następujące wzorce, które następnie zostaną zamienioną na odpowiednią informację: <b>%name%</b> zostanie zamieniony na oryginalną nazwę pliku, <b>%extension%</b> zostanie zamieniony na oryginalne rozszerzenie pliku oraz <b>%date%</b> zamieniony zostanie na datę kiedy plik został przekonwertowany.",
+			"placeholder": "VERT_%name%",
+			"default_format": "Domyślny format konwersji",
+			"default_format_enable": "Włączony",
+			"default_format_disable": "Wyłączony",
+			"default_format_description": "To ustawienie zmieni domyślnie wybrany format przy przesyłaniu pliku danego typu.",
+			"default_format_image": "Zdjęcia",
+			"default_format_video": "Wideo",
+			"default_format_audio": "Audio",
+			"default_format_document": "Dokumenty",
+			"metadata": "Metadane pliku",
+			"metadata_description": "To ustawienie pozwola ci ustalić czy metadane (EXIF, informacje o piosence, itp.) oryginalnego pliku zostaną zachowane w przekonwertowanym pliku.",
+			"keep": "Zachowaj",
+			"remove": "Usuń",
+			"quality": "Jakość konwersji",
+			"quality_description": "To ustawienie pozwala ustalić domyślną jakość wyjściową przekonwertowanego pliku (w danej kategorii). Wyższe wartości mogą skutkować dłuższym czasem konwersji oraz większym rozmiarem pliku.",
+			"quality_video": "To ustawienie pozwala ustalić domyślną jakość wyjściową przekonwertowanego pliku wideo. Wyższe wartości mogą skutkować dłuższym czasem konwersji oraz większym rozmiarem pliku.",
+			"quality_audio": "Audio (kbps)",
+			"quality_images": "Zdjęcia (%)",
+			"rate": "Częstotliwość próbkowania (Hz)"
+		},
+		"vertd": {
+			"title": "Konwersja wideo",
+			"status": "status:",
+			"loading": "ładowanie...",
+			"available": "dostępna, commit id {commitId}",
+			"unavailable": "niedostępna (czy url jest poprawny?)",
+			"description": "Projekt <code>vertd</code> jest serwerową nakładką na FFmpeg. To pozwala ci konwertować wideo za pomocą interfejsu sieciowego VERT, nadal będąc w stanie wykorzystywać moc swojego procesora graficznego (GPU) w celu jak najszybszej konwersji.",
+			"hosting_info": "Dla Twojej wygody hostujemy publiczną instancję, jednak ustawienie hosta na Twoim własnym komputerze lub serwerze jest stosunkowo proste jeśli wiesz co robisz. Możesz pobrać binaria serwera [vertd_link]tutaj[/vertd_link] - w przyszłości proces tej konfiguracji będzie łatwiejszy, więc czekajcie na więcej informacji!",
+			"instance": "Instancja",
+			"url_placeholder": "Przykładowo: http://localhost:24153",
+			"conversion_speed": "Prędkość konwersji",
+			"speed_description": "To opisuje kompromis pomiędzy prędkością a jakością. Większa prędkość może skutkować niższą jakością, ale wykona swoje zadanie szybciej",
+			"speeds": {
+				"very_slow": "Najwolniejsza",
+				"slower": "Wolniejsza",
+				"slow": "Wolna",
+				"medium": "Średnia",
+				"fast": "Szybka",
+				"ultra_fast": "Ultra szybka"
+			},
+			"auto_instance": "Auto (zalecana)",
+			"eu_instance": "Falkenstein, Niemcy",
+			"us_instance": "Washington, USA",
+			"custom_instance": "Własna"
+		},
+		"privacy": {
+			"title": "Prywatność i dane",
+			"plausible_title": "Analityka Plausible",
+			"plausible_description": "Używamy [plausible_link]Plausible[/plausible_link], skupionego na prywatności narzędzia analitycznego, w celu zebrania w pełni anonimowych statystyk. Wszystkie dane są anonimizowane i agregowane, a żadne wrażliwe informacje nigdy nie są przesyłane ani przechowywane. Możesz zobaczyć analitykę [analytics_link]tutaj[/analytics_link] oraz podjąć decyzję o zbieraniu danych poniżej.",
+			"opt_in": "Wyrażam zgodę",
+			"opt_out": "Rezygnuję",
+			"cache_title": "Zarządzanie pamięcią podręczną",
+			"cache_description": "W pamięci podręcznej przeglądarki przechowujemy pliki konwertera, abyś nie musiał ich ponownie pobierać za każdym razem, usprawniając wydajność i redukując wykorzystanie danych.",
+			"refresh_cache": "Odśwież pamięć podręczną",
+			"clear_cache": "Wyczyść pamięć podręczną",
+			"files_cached": "{size} ({count} plików)",
+			"loading_cache": "Ładowanie...",
+			"total_size": "Łączny rozmiar",
+			"files_cached_label": "Przechowywanych plików",
+			"cache_cleared": "Pomyślnie wyczyszczono pamięć podręczną!",
+			"cache_clear_error": "Nie udało się wyczyścić pamięci podręcznej.",
+			"site_data_title": "Zarządzanie danymi strony",
+			"site_data_description": "Wyczyść wszystkie dane strony wliczając ustawienia i przechowywane pliki, przywracając VERT do swojego domyślnego stanu oraz odświeżając stronę.",
+			"clear_all_data": "Wyczyść wszystkie dane strony",
+			"clear_all_data_confirm_title": "Wyczyścić wszystkie dane strony?",
+			"clear_all_data_confirm": "To zresetuje wszystkie ustawienia i przechowywane pliki, a następnie odświeży stronę. To działanie jest nieodwracalne.",
+			"clear_all_data_cancel": "Anuluj",
+			"all_data_cleared": "Wszystkie dane strony wyczyszczone! Odświeżanie strony...",
+			"all_data_clear_error": "Nie udało się wyczyścić wszystkich danych strony."
+		},
+		"language": {
+			"title": "Język",
+			"description": "Wybierz swój preferowany język dla interfejsu VERT."
+		}
+	},
+	"about": {
+		"title": "O nas",
+		"why": {
+			"title": "Dlaczego VERT?",
+			"description": "<b>Konwertery plików od zawsze nas zawodziły.</b> Są brzydkie, przepełnione reklamami, ale przede wszystkim, powolne. Postanowiliśmy rozwiązać ten problem raz na zawsze poprzez stworzenie alternatywy, która rozwiązuje wszystkie te problemy i nie tylko.<br/><br/>Wszystkie pliki nie będące wideo są w pełni konwertowane na urządzeniu; to oznacza brak opóźnienia pomiędzy przesyłaniem a odbieraniem plików z serwera, a my nie możemy podejrzeć plików, które konwertujesz.<br/><br/>Pliki wideo przesyłane zostają na nasz bardzo szybki serwer RTX 4000 Ada. Twoje pliki wideo przechowywane są tam przez godzinę jeśli ich nie przekonwertujesz. Jeżeli je przekonwertujesz, wideo zostanie na serwerze przez godzinę lub do momentu jego pobrania. Po tym czasie, plik zostanie usunięty z naszego serwera."
+		},
+		"sponsors": {
+			"title": "Sponsorzy",
+			"description": "Chcesz nas wesprzeć? Skontaktuj się z deweloperem na serwerze [discord_link]Discord[/discord_link], lub wyślij email do",
+			"email_copied": "Email skopiowany do schowka!"
+		},
+		"resources": {
+			"title": "Zasoby",
+			"discord": "Discord",
+			"source": "Źródło",
+			"email": "Email"
+		},
+		"donate": {
+			"title": "Wesprzyj VERT",
+			"description": "Z waszym wsparciem możemy utrzymywać i rozwijać VERT.",
+			"one_time": "Jednorazowo",
+			"monthly": "Miesięcznie",
+			"custom": "Własna kwota",
+			"pay_now": "Zapłać teraz",
+			"donate_amount": "Dotacja w kwocie ${amount} USD",
+			"thank_you": "Dziękujemy za Twoje wsparcie!",
+			"payment_failed": "Płatność nieudana: {message}{period} Nie zostałeś obciążony.",
+			"donation_error": "Wystąpił błąd podczas przetwarzania Twojej dotacji. Spróbuj ponownie później.",
+			"payment_error": "Wystąpił błąd podczas pobierania danych płatności. Spróbuj ponownie później.",
+			"donation_notice_official": "Twoje dotacje trafiają do oficjalnej instancji VERT (vert.sh) i wspierają rozwój projektu.",
+			"donation_notice_unofficial": "Twoje dotacje trafiają do operatora tej instancji VERT. Jeśli chcesz wesprzeć oficjalnych deweloperów VERT, odwiedź [official_link]vert.sh[/official_link]."
+		},
+		"credits": {
+			"title": "Uznanie",
+			"contact_team": "Jeśli chcesz się skontaktować z zespołem deweloperów, proszę użyć adresu email znajdującego się w zakładce \"Zasoby\".",
+			"notable_contributors": "Znaczący kontrybutorzy",
+			"notable_description": "Chcielibyśmy podziękować tym osobom za ich wielki wkład w VERT.",
+			"github_contributors": "Kontrybutorzy GitHub",
+			"github_description": "Wielkie podziękowania dla tych wszystkich osób za pomoc! [github_link]Też chcesz pomóc?[/github_link]",
+			"no_contributors": "Wygląda na to, że jeszcze nikt nie wspomógł... [contribute_link]bądź pierwszym, który nam pomoże![/contribute_link]",
+			"libraries": "Biblioteki",
+			"libraries_description": "Wielkie podziękowania dla FFmpeg (audio, wideo), ImageMagick (zdjęcia) oraz Pandoc (dokumenty) za utrzymywanie tak wspaniałych bibliotek przez tak wiele lat. VERT opiera się na nich aby umożliwić ci Twoje konwersje.",
+			"roles": {
+				"lead_developer": "Główny deweloper; backend konwersji, implementacja UI",
+				"developer": "Deweloper; implementacja UI",
+				"designer": "Designer; UX, branding, marketing",
+				"docker_ci": "Utrzymywanie Docker oraz wsparcie CI",
+				"former_cofounder": "Były współzałożyciel oraz designer"
+			}
+		},
+		"errors": {
+			"github_contributors": "Błąd przy pobieraniu kontrybutorów GitHub"
+		}
+	},
+	"workers": {
+		"errors": {
+			"general": "Błąd przy konwertowaniu {file}: {message}",
+			"cancel": "Błąd przy anulowaniu konwersji {file}: {message}",
+			"magick": "Błąd w Magick worker, konwersja zdjęć może działać niezgodnie z oczekiwaniami.",
+			"ffmpeg": "Błąd przy wczytywaniu FFmpeg, niektóre usługi mogą działać niezgodnie z oczekiwaniami.",
+			"pandoc": "Błąd przy wczytywaniu Pandoc worker, konwersja dokumentów może działać niezgodnie z oczekiwaniami.",
+			"no_audio": "Nie odnaleziono ścieżki audio.",
+			"invalid_rate": "Wprowadzona została nieprawidłowa częstotliwość próbkowania: {rate}Hz",
+			"file_too_large": "Ten plik przekracza limit {limit}GB przeglądarki / urządzenia. Spróbuj użyć przeglądarki Firefox bądź Safari do konwersji tego dużego pliku, gdyż przeglądarki te mają mniejsze ograniczenia."
+		}
+	},
+	"privacy": {
+		"title": "Polityka Prywatności",
+		"summary": {
+			"title": "Podsumowanie",
+			"description": "Polityka prywatności VERT jest bardzo prosta: nie zbieramy ani nie przechowujemy żadnych Twoich danych. Nie używamy plików cookie ani trackerów, analityka jest w pełni prywatna a wszystkie konwersje (oprócz plików wideo) wykonywane są lokalnie w Twojej przeglądarce. Pliki wideo są usuwane po pobraniu lub po upływie godziny, chyba że wyrazisz zgodę na ich przechowanie; w takim przypadku użyte zostaną jedynie w celu rozwiązywaniu problemów. VERT samodzielnie hostuje instancję Coolify do hostowania strony internetowej oraz vertd (do konwersji wideo) oraz instancję Plausible do anonimowych i agregowanych analiz. Używamy Stripe w celu przetwarzania dotacji, który może zbierać niektóre dane w celu zabezpieczenia przed oszustwami.<br/><br/>Należy pamiętać, że dotyczy to jedynie oficjalnej instancji VERT pod adresem [vert_link]vert.sh[/vert_link]; instancje stron trzecich mogą przetwarzać Twe dane w inny sposób."
+		},
+		"conversions": {
+			"title": "Konwersje",
+			"description": "Większość konwersji (zdjęć, dokumentów, audio) wykonywane są w pełni lokalnie na Twoim urządzeniu z użyciem wersji WebAssembly odpowiednich narzędzi (np. ImageMagick, Pandoc, FFmpeg). Oznacza to, że Twoje pliki nigdy nie opuszczają Twojego urządzenia a my nigdy nie będziemy mieli do nich dostępu.<br/><br/>Konwersje wideo wykonywane są na naszych serwerach, ponieważ wymagają one więcej mocy obliczeniowej i obecnie nie mogą być wykonywane odpowiednio szybko za pomocą przeglądarki. Pliki wideo które konwertujesz są usuwane po pobraniu lub po upływie godziny, chyba że wyrazisz zgodę na ich dłuższe przechowanie jedynie w celach rozwiązywania problemów."
+		},
+		"donations": {
+			"title": "Dotacje",
+			"description": "Używamy Stripe w zakładce [about_link]O nas[/about_link] w celu zbierania dotacji. Stripe może zbierać konkretne informacje o płatności oraz urządzeniu aby zapobiegać oszustwom tak, jak jest to opisane w [stripe_link]ich dokumentacji o zaawansowanym wykrywaniu oszustw[/stripe_link]. Zewnętrzne żądania sieciowe kierowane do Stripe są opóźniane i są wysyłane dopiero po kliknięciu przycisku płatności."
+		},
+		"conversion_errors": {
+			"title": "Błędy Konwersji",
+			"description": "Gdy konwersja wideo się nie powiedzie możemy zbierać pewne anonimowe dane w celu diagnozy problemu. Te dane mogą zawierać:",
+			"list_job_id": "Job ID, czyli anonimizowana nazwa pliku",
+			"list_format_from": "Format z którego konwertowano",
+			"list_format_to": "Format na który konwertowano",
+			"list_stderr": "Wyjście FFmpeg stderr Twojego zadania (wiadomość błędu)",
+			"list_video": "Sam plik wideo (jeśli wyrażono na to zgodę)",
+			"footer": "Informacje te używane są jedynie w celu diagnozy problemu konwersji. Sam plik wideo przechowany będzie tylko i wyłącznie po wyrażeniu Twojej zgody, gdzie będzie wykorzystywany jedynie w celu naprawy problemów."
+		},
+		"analytics": {
+			"title": "Analityka",
+			"description": "Samodzielnie hostujemy instancję Plausible do kompletnie anonimowych i agregowanych analiz. Plausible nie używa plików cookie i przestrzega wszystkich regulacji prywatności (GDPR/CCPA/PECR). Możesz zrezygnować z analityki w sekcji \"Prywatność i dane\" w zakładce [settings_link]ustawienia[/settings_link] oraz przeczytać więcej na temat praktyk prywatności Plausible [plausible_link]tutaj[/plausible_link]."
+		},
+		"local_storage": {
+			"title": "Lokalna Pamięć",
+			"description": "Używamy lokalnej pamięci Twojej przeglądarki aby zapisać Twoje ustawienia oraz pamięci sesji Twojej przeglądarki aby tymczasowo przechować listę kontrybutorów GitHub w zakładce \"O nas\" aby zredukować powtarzalne zapytania API GitHub. Żadne wrażliwe dane nie są przechowywane ani przesyłane.<br/><br/>Wersje WebAssembly narzędzi, których używamy (FFmpeg, ImageMagick, Pandoc) również są przechowywane lokalnie w Twojej przeglądarce po Twoim pierwszym odwiedzeniu strony abyś nie musiał pobierać ich przy każdym odwiedzeniu strony. Żadne wrażliwe dane nie są przechowywane ani przesyłane. Możesz zobaczyć lub usunąć te dane w dowolnym momencie w sekcji \"Prywatność i dane\" w zakładce [settings_link]ustawienia[/settings_link]."
+		},
+		"contact": {
+			"title": "Kontakt",
+			"description": "W razie pytań prosimy o napisanie emaila na adres: [email_link]hello@vert.sh[/email_link]. Jeśli używasz instancji VERT stron trzecich prosimy o kontakt z właścicielem tej konkretnej instancji."
+		},
+		"last_updated": "Ostatnia aktualizacja: 2025-10-29"
+	},
+	"toast": {
+		"insecure_context": "Odwiedzasz VERT w niezabezpieczonym kontekście (np. uzyskujesz dostęp poprzez HTTP zamiast HTTPS). Niektóre funkcje mogą działać niezgodnie z oczekiwaniami."
+	}
+}
