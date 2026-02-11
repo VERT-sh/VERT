@@ -264,6 +264,8 @@ export class VertdConverter extends Converter {
 		new FormatInfo("wmv", true, true),
 		new FormatInfo("mov", true, true),
 		new FormatInfo("gif", true, true),
+		new FormatInfo("apng", true, true),
+		new FormatInfo("webp", false, true), // for some odd reasons, ffmpeg only supports encoding webp and not decoding -- https://trac.ffmpeg.org/ticket/4907
 		new FormatInfo("mts", true, true),
 		new FormatInfo("ts", true, true),
 		new FormatInfo("m2ts", true, true),
@@ -379,7 +381,9 @@ export class VertdConverter extends Converter {
 			ws.onopen = () => {
 				const speed = Settings.instance.settings.vertdSpeed;
 				const keepMetadata = Settings.instance.settings.metadata;
-				this.log(`opened ws connection to vertd for file ${input.name}`);
+				this.log(
+					`opened ws connection to vertd for file ${input.name}`,
+				);
 				const msg: StartJobMessage = {
 					type: "startJob",
 					data: {

@@ -90,7 +90,13 @@
 				cat === rootCategory ||
 				categories[rootCategory!]?.canConvertTo?.includes(cat),
 		);
+
+		// handle special cases
 		if (from === ".gif") finalCategories.push("video");
+		if (from === ".apng") {
+			//finalCategories.push("image"); // -- buggy, magick can't convert from or to apng properly
+			finalCategories = finalCategories.filter((cat) => cat !== "audio");
+		}
 
 		// filter out categories that can't handle large files (due to browser/device limitations)
 		if (file && file.isLarge()) {
