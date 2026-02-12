@@ -81,6 +81,10 @@
 			"no_formats": "No formats available",
 			"no_results": "No formats match your search"
 		},
+		"settings": {
+			"settings": "Settings",
+			"title": "File conversion settings"
+		},
 		"tooltips": {
 			"unknown_file": "Unknown file type",
 			"audio_file": "Audio file",

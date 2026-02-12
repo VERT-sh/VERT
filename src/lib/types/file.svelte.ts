@@ -97,6 +97,14 @@ export class VertFile {
 		this.blobUrl = blobUrl;
 	}
 
+	public settings() {
+		// settings modal
+		// images - quality/compression/quantize/interlace/depth-DPI, resize, crop, rotate, flip/flop, autoOrient?, color space/bit depth, transparency settings
+		// audio - bitrate, sample rate, channels, normalize, trim silence
+		// video - bitrate, fps, resolution, trim, crop, rotate, flip/flop, audio settings?
+		// common - metadata?
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
 		if (!this.converters.length) throw new Error("No converters found");
