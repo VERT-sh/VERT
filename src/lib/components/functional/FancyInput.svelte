@@ -1,40 +1,28 @@
 <script lang="ts">
-	type Props = {
-		class?: string;
-		placeholder?: string;
-		value?: string;
-		disabled?: boolean;
+	import type { HTMLInputAttributes } from "svelte/elements";
+
+	interface Props extends HTMLInputAttributes {
 		extension?: string;
 		prefix?: string;
-		type?: string;
-		min?: number;
-		max?: number;
-	};
+	}
 
 	let {
 		class: className,
-		placeholder = "",
 		value = $bindable(),
 		disabled = false,
 		extension,
 		prefix,
-		type = "text",
-		min = 0,
-		max = 100,
+		...rest
 	}: Props = $props();
 </script>
 
 <div class="relative flex w-full {className}">
 	<input
-		{type}
-		{min}
-		{max}
+		{...rest}
 		bind:value
-		{placeholder}
-		{disabled}
 		class="w-full p-3 rounded-lg bg-panel border-2 border-button
-            {prefix ? 'pl-[2rem]' : 'pl-3'} 
-            {extension ? 'pr-[4rem]' : 'pr-3'}
+			{prefix ? 'pl-[2rem]' : 'pl-3'} 
+			{extension ? 'pr-[4rem]' : 'pr-3'}
 			{disabled && 'opacity-50 cursor-not-allowed'}"
 	/>
 	{#if prefix}

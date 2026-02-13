@@ -10,6 +10,7 @@
 	import { VertFile } from "$lib/types";
 	import Modal from "./Modal.svelte";
 	import Dropdown from "./Dropdown.svelte";
+	import FancyInput from "./FancyInput.svelte";
 
 	type Props = {
 		categories: Categories;
@@ -406,7 +407,7 @@
 
 				<div class="flex flex-col gap-2">
 					<p class="text-sm font-bold">Resolution</p>
-					<input
+					<FancyInput
 						type="text"
 						placeholder="1920x1080 or smth"
 						class="rounded-lg bg-button text-foreground p-3"
@@ -415,7 +416,7 @@
 
 				<div class="flex flex-col gap-2">
 					<p class="text-sm font-bold">Frame Rate (FPS)</p>
-					<input
+					<FancyInput
 						type="number"
 						placeholder="30"
 						class="rounded-lg bg-button text-foreground p-3"
@@ -498,7 +499,7 @@
 			<!-- search box -->
 			<div class="p-3 w-full">
 				<div class="relative">
-					<input
+					<FancyInput
 						type="text"
 						placeholder={m["convert.dropdown.placeholder"]()}
 						class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground"

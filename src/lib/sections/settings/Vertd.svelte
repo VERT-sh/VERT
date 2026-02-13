@@ -9,6 +9,7 @@
 	import { m } from "$lib/paraglide/messages";
 	import { link, sanitize } from "$lib/store/index.svelte";
 	import { VertdInstance, type VertdInner } from "./vertdSettings.svelte";
+	import FancyInput from "$lib/components/functional/FancyInput.svelte";
 
 	let vertdCommit = $state<string | null>(null);
 	let abortController: AbortController | null = null;
@@ -132,7 +133,7 @@
 						settingsStyle
 					/>
 					{#if VertdInstance.instance.innerData().type === "custom"}
-						<input
+						<FancyInput
 							type="text"
 							placeholder={m["settings.vertd.url_placeholder"]()}
 							bind:value={settings.vertdURL}
