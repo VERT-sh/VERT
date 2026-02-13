@@ -8,6 +8,10 @@ import { imageFormats } from "./magick-automated";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";
 import { ToastManager } from "$lib/util/toast.svelte";
+import type {
+	SettingDefinition,
+	ConversionSettings,
+} from "$lib/types/conversion-settings";
 
 export class MagickConverter extends Converter {
 	public name = "imagemagick";
@@ -110,6 +114,81 @@ export class MagickConverter extends Converter {
 				message: m["workers.errors.magick"](),
 			});
 		}
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	public getAvailableSettings(input: VertFile): SettingDefinition[] {
+		// images - quality/compression/quantize/interlace/depth-DPI, resize, crop, rotate, flip/flop, autoOrient?, color space/bit depth, transparency settings
+		
+		const quality: SettingDefinition = {
+			key: "quality",
+			label: m["convert.settings.image.quality"](),
+			type: "number",
+			default: 100,
+			min: 0,
+			max: 100,
+		};
+
+		const depth: SettingDefinition = {
+			key: "depth",
+			label: m["convert.settings.image.depth"](),
+			type: "select",
+			default: "auto",
+			// somehow implement custom option
+			options: [
+				{ value: "auto", label: "Auto" },
+				{ value: "8", label: "8-bit" },
+				{ value: "16", label: "16-bit" },
+				{ value: "32", label: "32-bit" },
+				{ value: "custom", label: "Custom" },
+			],
+		};
+
+		const colorSpace: SettingDefinition = {
+			key: "colorSpace",
+			label: m["convert.settings.image.color_space"](),
+			type: "select",
+			default: "auto",
+			options: [
+				// what are these even lmao
+				{ value: "auto", label: "Auto" },
+				{ value: "srgb", label: "sRGB" },
+				{ value: "adobe98", label: "Adobe RGB" },
+				{ value: "prophoto", label: "ProPhoto RGB" },
+				{ value: "displayp3", label: "Display P3" },
+				{ value: "xyz", label: "CIEXYZ" },
+				{ value: "lab", label: "CIELAB" },
+				{ value: "gray", label: "Grayscale" },
+			],
+		};
+
+		// allow transparency or not
+		// TODO: disable if jpg/jpeg input/output
+		const transparency: SettingDefinition = {
+			key: "transparency",
+			label: m["convert.settings.image.transparency"](),
+			type: "boolean",
+			default: true,
+		};
+
+		const metadata: SettingDefinition = {
+			key: "metadata",
+			label: m["convert.settings.image.metadata"](),
+			type: "boolean",
+			default: true,
+		};
+
+		// resize, crop, rotate - prob want a ui
+
+		return [quality, depth, colorSpace, transparency, metadata];
+	}
+
+	public getDefaultSettings(input: VertFile): ConversionSettings {
+		const defaults: ConversionSettings = {};
+		this.getAvailableSettings(input).forEach((setting) => {
+			defaults[setting.key] = setting.default;
+		});
+		return defaults;
 	}
 
 	public async convert(

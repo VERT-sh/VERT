@@ -1,4 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { VertFile } from "$lib/types";
+import type {
+	ConversionSettings,
+	SettingDefinition,
+} from "$lib/types/conversion-settings";
 
 export type WorkerStatus = "not-ready" | "downloading" | "ready" | "error";
 
@@ -44,6 +50,27 @@ export class Converter {
 		this.startTimeout();
 	}
 
+	/**
+	 * Get available settings for this converter.
+	 * Can be overridden per converter for format-specific settings.
+	 * @param input The input file.
+	 */
+	public getAvailableSettings(input: VertFile): SettingDefinition[] {
+		return [];
+	}
+
+	/**
+	 * Get default settings for a conversion.
+	 * @param input The input file.
+	 */
+	public getDefaultSettings(input: VertFile): ConversionSettings {
+		const defaults: ConversionSettings = {};
+		this.getAvailableSettings(input).forEach((setting) => {
+			defaults[setting.key] = setting.default;
+		});
+		return defaults;
+	}
+
 	private startTimeout() {
 		this.timeoutId = setTimeout(() => {
 			if (this.status !== "ready") this.status = "not-ready";
@@ -63,11 +90,9 @@ export class Converter {
 	 * @param to The format to convert to. Includes the dot.
 	 */
 	public async convert(
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		input: VertFile,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		to: string,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+		settings?: ConversionSettings,
 		...args: any[]
 	): Promise<VertFile> {
 		throw new Error("Not implemented");
@@ -77,7 +102,6 @@ export class Converter {
 	 * Cancel the active conversion of a file.
 	 * @param input The input file.
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	public async cancel(input: VertFile): Promise<void> {
 		throw new Error("Not implemented");
 	}

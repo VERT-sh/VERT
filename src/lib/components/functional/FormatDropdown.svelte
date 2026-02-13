@@ -11,6 +11,7 @@
 	import Modal from "./Modal.svelte";
 	import Dropdown from "./Dropdown.svelte";
 	import FancyInput from "./FancyInput.svelte";
+	import SettingsModal from "./SettingsModal.svelte";
 
 	type Props = {
 		categories: Categories;
@@ -335,9 +336,9 @@
 	};
 
 	let showSettingsModal = $state(false);
+
 	const settings = () => {
 		if (!file) return;
-		// TODO: temporary - will have individual settings modals for each converter and show those instead
 		showSettingsModal = true;
 	};
 
@@ -365,66 +366,8 @@
 	});
 </script>
 
-{#if showSettingsModal}
-	<Modal
-		icon={SearchIcon}
-		title="Conversion Settings"
-		color="purple"
-		buttons={[
-			{
-				text: "Cancel",
-				action: () => (showSettingsModal = false),
-			},
-			{
-				text: "Apply",
-				action: () => (showSettingsModal = false),
-				primary: true,
-			},
-		]}
-		onclose={() => (showSettingsModal = false)}
-	>
-		<div class="flex flex-col gap-8">
-			<div class="flex flex-col gap-4">
-				<div class="flex flex-col gap-2">
-					<p class="text-base font-bold">Format Settings</p>
-					<p class="text-sm text-muted font-normal">
-						Configure conversion options for {file?.name}
-					</p>
-				</div>
-
-				<div class="flex flex-col gap-2">
-					<p class="text-sm font-bold">Example dropdown</p>
-					<Dropdown
-						options={categories[currentCategory!]?.formats || []}
-						settingsStyle
-						{selected}
-						onselect={(e) => {
-							console.log("selected format", e);
-							selected = e;
-						}}
-					/>
-				</div>
-
-				<div class="flex flex-col gap-2">
-					<p class="text-sm font-bold">Resolution</p>
-					<FancyInput
-						type="text"
-						placeholder="1920x1080 or smth"
-						class="rounded-lg bg-button text-foreground p-3"
-					/>
-				</div>
-
-				<div class="flex flex-col gap-2">
-					<p class="text-sm font-bold">Frame Rate (FPS)</p>
-					<FancyInput
-						type="number"
-						placeholder="30"
-						class="rounded-lg bg-button text-foreground p-3"
-					/>
-				</div>
-			</div>
-		</div>
-	</Modal>
+{#if showSettingsModal && file}
+	<SettingsModal {file} onclose={() => (showSettingsModal = false)} />
 {/if}
 
 <div
@@ -499,7 +442,7 @@
 			<!-- search box -->
 			<div class="p-3 w-full">
 				<div class="relative">
-					<FancyInput
+					<input
 						type="text"
 						placeholder={m["convert.dropdown.placeholder"]()}
 						class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground"
@@ -577,8 +520,7 @@
 						{m["convert.archive_file.extract"]()}
 					</button>
 				</div>
-			{/if}
-			{#if file}
+			{:else if file}
 				<div class="border-t border-separator text-base p-2">
 					<button
 						class="w-full p-2 text-center rounded-lg bg-accent text-black"

@@ -4,6 +4,10 @@ import { m } from "$lib/paraglide/messages";
 import { ToastManager } from "$lib/util/toast.svelte";
 import type { Component } from "svelte";
 import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
+import type {
+	ConversionSettings,
+	SettingDefinition,
+} from "./conversion-settings";
 
 const MAX_BLOB_SIZE_LIMIT = 2 * 1024 * 1024 * 1024; // 2GB
 
@@ -19,6 +23,7 @@ export class VertFile {
 		return this.file.name;
 	}
 
+	public conversionSettings = $state<ConversionSettings>({});
 	public progress = $state(0);
 	public result = $state<VertFile | null>(null);
 
@@ -33,6 +38,12 @@ export class VertFile {
 	public converters: Converter[] = [];
 
 	public isZip = $state(() => this.from === ".zip");
+
+	public getAvailableSettings(): SettingDefinition[] {
+		const converter = this.findConverter();
+		if (!converter) return [];
+		return converter.getAvailableSettings(this);
+	}
 
 	public findConverters(supportedFormats: string[] = [this.from]) {
 		const converter = this.converters
@@ -120,7 +131,12 @@ export class VertFile {
 			// else convert normally
 			res = this.isZip()
 				? await this.convertZip(converter)
-				: await converter.convert(this, this.to, ...args);
+				: await converter.convert(
+						this,
+						this.to,
+						this.conversionSettings,
+						...args,
+					);
 			this.result = res;
 		} catch (err) {
 			if (!this.cancelled) this.toastErr(err);

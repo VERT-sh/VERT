@@ -83,7 +83,26 @@
 		},
 		"settings": {
 			"settings": "Settings",
-			"title": "File conversion settings"
+			"title": "File conversion settings",
+			"image": {
+				"quality": "Quality",
+				"depth": "Color depth",
+				"color_space": "Color space",
+				"transparency": "Transparency",
+				"metadata": "Metadata"
+			},
+			"audio": {
+				"quality": "Quality",
+				"rate": "Sample rate",
+				"metadata": "Metadata"
+			},
+			"video": {
+				"quality": "Quality",
+				"metadata": "Metadata"
+			},
+			"document": {
+				"metadata": "Metadata"
+			}
 		},
 		"tooltips": {
 			"unknown_file": "Unknown file type",
