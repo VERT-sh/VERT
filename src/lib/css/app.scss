@@ -59,6 +59,8 @@
 	--fg-accent: var(--accent-pink-muted);
 	--fg-failure: var(--accent-red-alt);
 
+	--text-panel: hsl(0, 0%, 100%);
+
 	// backgrounds
 	--bg: hsl(0, 0%, 95%);
 
@@ -187,6 +189,8 @@
 
 	// backgrounds
 	--bg: hsl(220, 5%, 15%);
+
+	--text-panel: hsl(220, 4%, 24%);
 
 	--bg-gradient-from: hsla(303, 100%, 50%, 0.1);
 	--bg-gradient-to: hsla(303, 100%, 50%, 0);
@@ -393,16 +397,20 @@ body {
 		@apply outline outline-accent outline-2;
 	}
 
-	input[type="range"] {
-		@apply appearance-none bg-panel h-2 rounded-lg;
+	input[type="checkbox"] {
+		@apply appearance-none w-5 h-5 rounded-md bg-button border-2 border-button cursor-pointer transition-colors duration-200;
 	}
 
-	input[type="range"]::-webkit-slider-thumb {
-		@apply appearance-none w-4 h-4 bg-accent rounded-full cursor-pointer;
+	input[type="checkbox"]:hover {
+		@apply bg-button border-accent;
 	}
 
-	input[type="range"]::-moz-range-thumb {
-		@apply w-4 h-4 bg-accent rounded-full cursor-pointer;
+	input[type="checkbox"]:checked {
+		@apply bg-accent border-accent;
+	}
+
+	input[type="checkbox"]:focus {
+		@apply outline outline-accent outline-2;
 	}
 
 	hr {
