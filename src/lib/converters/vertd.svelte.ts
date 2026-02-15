@@ -422,7 +422,7 @@ export class VertdConverter extends Converter {
 		return defaults;
 	}
 
-	public async convert(input: VertFile, to: string): Promise<VertFile> {
+	public async convert(input: VertFile, to: string, settings: ConversionSettings): Promise<VertFile> {
 		if (to.startsWith(".")) to = to.slice(1);
 
 		let fileUpload = input;
@@ -440,7 +440,7 @@ export class VertdConverter extends Converter {
 					fileUpload = await magickConverter.convert(
 						input,
 						".gif",
-						input.conversionSettings,
+						settings,
 						100,
 					);
 					this.log(`successfully converted webp to gif`);

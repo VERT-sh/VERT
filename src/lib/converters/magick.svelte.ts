@@ -118,12 +118,13 @@ export class MagickConverter extends Converter {
 
 	public async getAvailableSettings(): Promise<SettingDefinition[]> {
 		// images - quality/compression/quantize/interlace/depth-DPI, resize, crop, rotate, flip/flop, autoOrient?, color space/bit depth, transparency settings
-		
+		const global = Settings.instance.settings;
+
 		const quality: SettingDefinition = {
 			key: "quality",
 			label: m["convert.settings.image.quality"](),
 			type: "number",
-			default: 100,
+			default: global.magickQuality ?? 100,
 			min: 0,
 			max: 100,
 		};
@@ -152,6 +153,7 @@ export class MagickConverter extends Converter {
 				// what are these even lmao
 				{ value: "auto", label: "Auto" },
 				{ value: "srgb", label: "sRGB" },
+				{ value: "cmyk", label: "CMYK" },
 				{ value: "adobe98", label: "Adobe RGB" },
 				{ value: "prophoto", label: "ProPhoto RGB" },
 				{ value: "displayp3", label: "Display P3" },
@@ -174,7 +176,7 @@ export class MagickConverter extends Converter {
 			key: "metadata",
 			label: m["convert.settings.common.metadata"](),
 			type: "boolean",
-			default: true,
+			default: global.metadata ?? true,
 		};
 
 		// resize, crop, rotate - prob want a ui
@@ -194,17 +196,10 @@ export class MagickConverter extends Converter {
 	public async convert(
 		input: VertFile,
 		to: string,
+		settings: ConversionSettings,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		...args: any[]
 	): Promise<VertFile> {
-		let compression: number | undefined = args.at(0);
-		if (!compression) {
-			compression = Settings.instance.settings.magickQuality ?? 100;
-			log(
-				["converters", this.name],
-				`using user setting for quality: ${compression}%`,
-			);
-		}
 		log(["converters", this.name], `converting ${input.name} to ${to}`);
 
 		// handle converting from SVG manually because magick-wasm doesn't support it
@@ -216,7 +211,7 @@ export class MagickConverter extends Converter {
 					input.to,
 				);
 				if (to === ".png") return pngFile; // if target is png, return it directly
-				return await this.convert(pngFile, to, ...args); // otherwise, recursively convert png to user's target format
+				return await this.convert(pngFile, to, settings, ...args); // otherwise, recursively convert png to user's target format
 			} catch (err) {
 				error(
 					["converters", this.name],
@@ -270,9 +265,11 @@ export class MagickConverter extends Converter {
 			]);
 
 			// every other format handled by magick worker
-			const keepMetadata: boolean =
-				Settings.instance.settings.metadata ?? true;
-			log(["converters", this.name], `keep metadata: ${keepMetadata}`);
+			const conversionSettings = JSON.stringify(
+				Object.keys(settings).length > 0
+					? settings // user-provided settings
+					: await this.getDefaultSettings(), // use defaults if not provided
+			);
 			const convertMsg: WorkerMessage = {
 				type: "convert",
 				id: input.id,
@@ -283,8 +280,7 @@ export class MagickConverter extends Converter {
 					to: input.to,
 				},
 				to,
-				compression,
-				keepMetadata,
+				conversionSettings,
 			};
 			worker.postMessage(convertMsg);
 

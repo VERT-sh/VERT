@@ -93,7 +93,7 @@ export class Converter {
 	public async convert(
 		input: VertFile,
 		to: string,
-		settings?: ConversionSettings,
+		settings: ConversionSettings,
 		...args: any[]
 	): Promise<VertFile> {
 		throw new Error("Not implemented");

@@ -10,7 +10,7 @@ export interface SettingDefinition {
     min?: number;
     max?: number;
     step?: number;
-    options?: Array<{ value: string; label: string }>; // for select types
+    options?: Array<{ value: any; label: string }>; // for select types
     description?: string;
 }
 

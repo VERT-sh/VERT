@@ -188,6 +188,7 @@ export class VertFile {
 						const converted = await converter.convert(
 							tempVFile,
 							this.to,
+							this.conversionSettings,
 						);
 
 						let outputExt = this.to;
@@ -209,6 +210,7 @@ export class VertFile {
 					const converted = await converter.convert(
 						tempVFile,
 						this.to,
+						this.conversionSettings,
 					);
 
 					let outputExt = this.to;

@@ -85,6 +85,7 @@
 			"settings": "Settings",
 			"title": "File conversion settings",
 			"description": "Change the conversion settings for <b>{filename}</b>, which is using <b>{converter}</b>. These settings may not be available for all formats.",
+			"none": "No settings available for this format.",
 			"image": {
 				"quality": "Quality",
 				"depth": "Color depth",

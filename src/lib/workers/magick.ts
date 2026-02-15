@@ -1,15 +1,20 @@
 import {
+	ColorSpace,
 	initializeImageMagick,
+	MagickColor,
 	MagickFormat,
 	MagickImage,
 	MagickImageCollection,
 	MagickReadSettings,
+	AlphaAction,
 	type IMagickImage,
 } from "@imagemagick/magick-wasm";
 import { makeZip } from "client-zip";
 import { parseAni } from "$lib/util/parse/ani";
 import { parseIcns } from "vert-wasm";
 import type { WorkerMessage } from "$lib/types";
+import type { ConversionSettings } from "$lib/types/conversion-settings";
+import { log } from "$lib/util/logger";
 
 let magickInitialized = false;
 
@@ -44,9 +49,6 @@ const handleMessage = async (
 				return { type: "error", error: "magick-wasm not initialized" };
 			}
 
-			const compression: number | undefined =
-				message.compression ?? undefined;
-			const keepMetadata: boolean = message.keepMetadata ?? true;
 			if (!message.to.startsWith(".")) message.to = `.${message.to}`;
 			message.to = message.to.toLowerCase();
 			if (message.to === ".jfif") message.to = ".jpeg";
@@ -55,6 +57,10 @@ const handleMessage = async (
 			if (from === ".jfif") from = ".jpeg";
 			if (from === ".fit") from = ".fits";
 
+			console.log(JSON.stringify(message, null, 2));
+			const conversionSettings = JSON.parse(
+				message.conversionSettings || "{}",
+			) as ConversionSettings;
 			const buffer = await message.input.file.arrayBuffer();
 
 			// special ico handling to split them all into separate images
@@ -90,8 +96,7 @@ const handleMessage = async (
 						const output = await magickConvert(
 							img,
 							message.to,
-							keepMetadata,
-							compression,
+							conversionSettings,
 						);
 						convertedImgs[i] = output;
 					}),
@@ -133,8 +138,7 @@ const handleMessage = async (
 									}),
 								),
 								message.to,
-								keepMetadata,
-								compression,
+								conversionSettings,
 							);
 							files.push(
 								new File(
@@ -184,8 +188,7 @@ const handleMessage = async (
 							const converted = await magickConvert(
 								img,
 								message.to,
-								keepMetadata,
-								compression,
+								conversionSettings,
 							);
 							outputs.push(converted);
 							break;
@@ -251,8 +254,7 @@ const handleMessage = async (
 			const converted = await magickConvert(
 				img,
 				message.to,
-				keepMetadata,
-				compression,
+				conversionSettings,
 			);
 
 			return {
@@ -287,8 +289,7 @@ const readToEnd = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
 const magickConvert = async (
 	img: IMagickImage,
 	to: string,
-	keepMetadata: boolean,
-	compression?: number,
+	conversionSettings: ConversionSettings,
 ) => {
 	let fmt = to.slice(1).toUpperCase();
 	if (fmt === "JFIF") fmt = "JPEG";
@@ -310,10 +311,56 @@ const magickConvert = async (
 
 	const result = await new Promise<Uint8Array>((resolve, reject) => {
 		try {
-			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
-			if (compression) img.quality = compression;
-			if (!keepMetadata) img.strip();
+			// quality, depth, colorSpace, transparency, metadata
+			const quality = conversionSettings.quality as number;
+			const bitDepth = conversionSettings.depth as number;
+			const colorSpace = conversionSettings.colorSpace as string;
+			const transparency = conversionSettings.transparency as boolean;
+			const metadata = conversionSettings.metadata as boolean;
 
+			if (quality) img.quality = quality;
+			if (bitDepth) img.depth = bitDepth;
+			if (!metadata) img.strip();
+			if (colorSpace) {
+				switch (colorSpace) {
+					case "srgb":
+						img.colorSpace = ColorSpace.sRGB;
+						break;
+					case "cmyk":
+						img.colorSpace = ColorSpace.CMYK;
+						break;
+					case "adobe98":
+						img.colorSpace = ColorSpace.Adobe98;
+						break;
+					case "prophoto":
+						img.colorSpace = ColorSpace.ProPhoto;
+						break;
+					case "displayp3":
+						img.colorSpace = ColorSpace.DisplayP3;
+						break;
+					case "xyz":
+						img.colorSpace = ColorSpace.XYZ;
+						break;
+					case "lab":
+						img.colorSpace = ColorSpace.Lab;
+						break;
+					case "gray":
+						img.colorSpace = ColorSpace.Gray;
+						break;
+					// auto is default so do nothing
+				}
+			}
+			if (!transparency) {
+				img.backgroundColor = new MagickColor(0, 0, 0, 255); // TODO: probably make it an option to set the bg colour
+				img.alpha(AlphaAction.Remove);
+			}
+
+			log(
+				["workers", "imagemagick"],
+				`Converting to ${fmt} with settings: ${JSON.stringify(conversionSettings)}`,
+			);
+
+			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
 			img.write(fmt as unknown as MagickFormat, (o: Uint8Array) => {
 				resolve(structuredClone(o));
 			});

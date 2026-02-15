@@ -7,8 +7,11 @@
 
 	type Props = DialogType;
 
-	let { id, title, message, buttons, type, ...rest }: Props = $props();
-	let additional = $derived("additional" in rest ? rest.additional : undefined);
+	let props: Props = $props();
+	// svelte-ignore state_referenced_locally
+	const { id, title, message, buttons, type } = props;
+	// svelte-ignore state_referenced_locally
+	const additional = "additional" in props ? props.additional : undefined;
 
 	const colors = {
 		success: "purple",
@@ -53,7 +56,9 @@
 	</div>
 	<div class="flex flex-col gap-1 w-full">
 		{#if typeof message === "string"}
-			<p class="text-sm font-normal text-muted whitespace-pre-wrap">{message}</p>
+			<p class="text-sm font-normal text-muted whitespace-pre-wrap">
+				{message}
+			</p>
 		{:else}
 			{@const MessageComponent = message}
 			<div class="text-sm font-normal text-muted">

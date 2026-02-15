@@ -12,12 +12,18 @@
 	import type { ToastProps } from "$lib/util/toast.svelte";
 	import type { SvelteComponent } from "svelte";
 	import clsx from "clsx";
+	import type { Toast as ToastType } from "$lib/util/toast.svelte";
 
-	const { id, type, message, durations, ...rest }: ToastProps = $props();
+	const props: {
+		toast: ToastType<unknown>;
+	} = $props();
 
-	const additional = $derived(
-		"additional" in rest ? rest.additional : undefined,
-	);
+	// svelte-ignore state_referenced_locally
+	const { id, type, message, durations } = props.toast;
+
+	// svelte-ignore state_referenced_locally
+	const additional =
+		"additional" in props.toast ? props.toast.additional : {};
 
 	const colors = {
 		success: "purple",

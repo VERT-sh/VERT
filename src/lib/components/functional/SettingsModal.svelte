@@ -6,6 +6,8 @@
 	import { m } from "$lib/paraglide/messages";
 	import type { VertFile } from "$lib/types";
 	import { sanitize } from "$lib/store/index.svelte";
+	import { log } from "$lib/util/logger";
+	import { type ConversionSettings } from "$lib/types/conversion-settings";
 
 	type Props = {
 		file: VertFile | null;
@@ -14,21 +16,32 @@
 
 	let { file, onclose }: Props = $props();
 
-	let settings = $state<Record<string, any>>({});
+	let settings = $state<ConversionSettings>({});
 
 	const handleSettingChange = (key: string, value: any) => {
 		if (!file) return;
 		settings[key] = value;
-		console.log(
-			`Changed settings for ${file.name}: ${JSON.stringify(settings, null, 2)}`,
-		);
 	};
 
-	const applySettings = () => {
+	const applySettings = async () => {
 		onclose?.();
 		if (!file) return;
-		file.conversionSettings = { ...file.conversionSettings, ...settings };
-		console.log(
+		const converter = file.findConverter();
+		if (!converter) {
+			log(
+				["settings", "modal"],
+				`No converter found for ${file.name}, cannot apply settings`,
+			);
+			return;
+		}
+		// apply defaults, then existing settings, then new settings on top
+		file.conversionSettings = {
+			...(await converter.getDefaultSettings()),
+			...file.conversionSettings,
+			...settings,
+		};
+		log(
+			["settings", "modal"],
 			`Applied settings for ${file.name}: ${JSON.stringify(file.conversionSettings, null, 2)}`,
 		);
 	};
@@ -58,7 +71,8 @@
 					<p class="text-base">
 						{@html sanitize(
 							m["convert.settings.description"]({
-								converter: file.findConverter()?.name,
+								converter:
+									file.findConverter()?.name || "unknown",
 								filename: file.name,
 							}),
 						)}

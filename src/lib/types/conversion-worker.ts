@@ -9,8 +9,7 @@ interface ConvertMessage {
 		to: string;
 	} | VertFile;
 	to: string;
-	compression: number | null;
-	keepMetadata?: boolean;
+	conversionSettings: string; // JSON stringified ConversionSettings
 }
 
 interface FinishedMessage {
