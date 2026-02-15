@@ -39,10 +39,10 @@ export class VertFile {
 
 	public isZip = $state(() => this.from === ".zip");
 
-	public getAvailableSettings(): SettingDefinition[] {
+	public getAvailableSettings(): Promise<SettingDefinition[]> {
 		const converter = this.findConverter();
-		if (!converter) return [];
-		return converter.getAvailableSettings(this);
+		if (!converter) return Promise.resolve([]);
+		return converter.getAvailableSettings();
 	}
 
 	public findConverters(supportedFormats: string[] = [this.from]) {

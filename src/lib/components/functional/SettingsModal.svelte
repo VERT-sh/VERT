@@ -5,6 +5,7 @@
 	import Modal from "./Modal.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import type { VertFile } from "$lib/types";
+	import { sanitize } from "$lib/store/index.svelte";
 
 	type Props = {
 		file: VertFile | null;
@@ -35,7 +36,7 @@
 
 <Modal
 	icon={SearchIcon}
-	title="Conversion Settings"
+	title={m["convert.settings.title"]()}
 	color="purple"
 	buttons={[
 		{
@@ -51,89 +52,84 @@
 	onclose={() => onclose?.()}
 >
 	<div class="flex flex-col gap-8">
-		{#if !file}
-			<p class="text-sm text-muted">No file selected</p>
-		{:else}
-			{@const settings = file.getAvailableSettings()}
-			<div class="flex flex-col gap-4">
-				<div class="flex flex-col gap-2">
-					<p class="text-base font-bold">
-						{m["settings.conversion.title"]?.() ||
-							"Conversion Settings"}
+		{#if file}
+			{#await file.getAvailableSettings() then settings}
+				<div class="flex flex-col gap-4">
+					<p class="text-base">
+						{@html sanitize(
+							m["convert.settings.description"]({
+								converter: file.findConverter()?.name,
+								filename: file.name,
+							}),
+						)}
 					</p>
-					<p class="text-sm text-muted font-normal">
-						{m["settings.conversion.description"]?.() ||
-							`Configure conversion options for ${file.name}`}
-					</p>
-				</div>
 
-				{#if settings.length === 0}
-					<p class="text-sm text-muted">
-						{m["settings.conversion.no_settings"]?.() ||
-							"No settings available for this converter"}
-					</p>
-				{:else}
-					<div class="grid grid-cols-2 gap-4">
-						{#each settings as setting (setting.key)}
-							<div class="flex flex-col gap-2">
-								<p class="text-sm font-bold">
-									{setting.label}
-								</p>
-								<!-- prob unneeded -->
-								{#if setting.description}
-									<p class="text-xs text-muted">
-										{setting.description}
+					{#if settings.length === 0}
+						<p class="text-sm text-muted">
+							{m["convert.settings.none"]()}
+						</p>
+					{:else}
+						<div class="grid grid-cols-2 gap-4">
+							{#each settings as setting (setting.key)}
+								<div class="flex flex-col gap-2">
+									<p class="text-sm font-bold">
+										{setting.label}
 									</p>
-								{/if}
+									<!-- prob unneeded -->
+									{#if setting.description}
+										<p class="text-xs text-muted">
+											{setting.description}
+										</p>
+									{/if}
 
-								{#if setting.type === "select"}
-									<Dropdown
-										options={setting.options?.map(
-											(opt) => opt.value,
-										) || []}
-										selected={file.conversionSettings[
-											setting.key
-										] ?? setting.default}
-										settingsStyle
-										onselect={(value) =>
-											handleSettingChange(
-												setting.key,
-												value,
-											)}
-									/>
-								{:else if setting.type === "boolean"}
-									<FancyInput
-										type="checkbox"
-										checked={file.conversionSettings[
-											setting.key
-										] ?? setting.default}
-										placeholder={setting.placeholder}
-										onchange={(e) =>
-											handleSettingChange(
-												setting.key,
-												e.currentTarget.checked,
-											)}
-										
-									/>
-								{:else}
-									<FancyInput
-										type={setting.type}
-										value={file.conversionSettings[
-											setting.key
-										] ?? setting.default}
-										placeholder={setting.placeholder}
-										oninput={(e) =>
-											handleSettingChange(
-												setting.key,
-												e.currentTarget.value,
-											)}
-									/>
-								{/if}
-							</div>
-						{/each}
-					</div>
-				{/if}
-			</div>
+									{#if setting.type === "select"}
+										<Dropdown
+											options={setting.options?.map(
+												(opt) => opt.value,
+											) || []}
+											selected={file.conversionSettings[
+												setting.key
+											] ?? setting.default}
+											settingsStyle
+											onselect={(value) =>
+												handleSettingChange(
+													setting.key,
+													value,
+												)}
+										/>
+									{:else if setting.type === "boolean"}
+										<FancyInput
+											type="checkbox"
+											checked={file.conversionSettings[
+												setting.key
+											] ?? setting.default}
+											placeholder={setting.placeholder}
+											onchange={(e) =>
+												handleSettingChange(
+													setting.key,
+													e.currentTarget.checked,
+												)}
+										/>
+									{:else}
+										<FancyInput
+											type={setting.type}
+											value={file.conversionSettings[
+												setting.key
+											] ?? setting.default}
+											placeholder={setting.placeholder}
+											oninput={(e) =>
+												handleSettingChange(
+													setting.key,
+													e.currentTarget.value,
+												)}
+										/>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{/await}
 		{/if}
 	</div>
 </Modal>
