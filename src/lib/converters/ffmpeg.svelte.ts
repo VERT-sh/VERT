@@ -6,6 +6,7 @@ import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
+import type { SettingDefinition, ConversionSettings } from "$lib/types/conversion-settings";
 
 // TODO: differentiate in UI? (not native formats)
 const videoFormats = [
@@ -103,6 +104,63 @@ export class FFmpegConverter extends Converter {
 				message: m["workers.errors.ffmpeg"](),
 			});
 		}
+	}
+
+	public async getAvailableSettings(): Promise<SettingDefinition[]> {
+		// audio - bitrate, sample rate, channels, normalize, trim silence
+
+		// TODO: detect bitrate, sample rate, audio channels and set default/max accordingly
+
+		const bitrate: SettingDefinition = {
+			key: "bitrate",
+			label: m["convert.settings.audio.bitrate"](),
+			type: "select",
+			default: "auto",
+			options: CONVERSION_BITRATES.map((b) => ({
+				value: b.toString(),
+				label: b.toString(),
+			})),
+		};
+
+		const sampleRate: SettingDefinition = {
+			key: "sampleRate",
+			label: m["convert.settings.audio.sample_rate"](),
+			type: "select",
+			default: "auto",
+			options: SAMPLE_RATES.map((r) => ({
+				value: r.toString(),
+				label: r.toString(),
+			})),
+		};
+
+		const channels: SettingDefinition = {
+			key: "channels",
+			label: m["convert.settings.audio.channels"](),
+			type: "number",
+			default: 2,
+			min: 1,
+			max: 8,
+		};
+
+		const metadata: SettingDefinition = {
+			key: "metadata",
+			label: m["convert.settings.common.metadata"](),
+			type: "boolean",
+			default: true,
+		};
+
+		// resize, crop, rotate - prob want a ui
+
+		return [bitrate, sampleRate, channels, metadata];
+	}
+
+	public async getDefaultSettings(): Promise<ConversionSettings> {
+		const defaults: ConversionSettings = {};
+		const settings = await this.getAvailableSettings();
+		settings.forEach((setting) => {
+			defaults[setting.key] = setting.default;
+		});
+		return defaults;
 	}
 
 	public async convert(input: VertFile, to: string): Promise<VertFile> {

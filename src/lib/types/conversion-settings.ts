@@ -3,9 +3,10 @@ export type SettingType = "number" | "select" | "boolean" | "string" | "range";
 
 export interface SettingDefinition {
     key: string;
-    label: () => string;
+    label: string;
     type: SettingType;
-    default: any;
+    default?: any;
+    placeholder?: string;
     min?: number;
     max?: number;
     step?: number;

@@ -88,19 +88,32 @@
 				"quality": "Quality",
 				"depth": "Color depth",
 				"color_space": "Color space",
-				"transparency": "Transparency",
-				"metadata": "Metadata"
+				"transparency": "Transparency"
 			},
 			"audio": {
-				"quality": "Quality",
-				"rate": "Sample rate",
-				"metadata": "Metadata"
+				"bitrate": "Bitrate",
+				"sample_rate": "Sample rate",
+				"channels": "Audio channels"
 			},
 			"video": {
 				"quality": "Quality",
-				"metadata": "Metadata"
+				"metadata": "Metadata",
+				"speed": "Conversion speed",
+				"speed_very_slow": "Very Slow",
+				"speed_slower": "Slower",
+				"speed_slow": "Slow",
+				"speed_medium": "Medium",
+				"speed_fast": "Fast",
+				"speed_ultra_fast": "Ultra Fast",
+				"fps": "Frame rate (FPS)",
+				"fps_placeholder": "Auto",
+				"resolution": "Resolution",
+				"resolution_placeholder": "Auto (e.g., 1920x1080)"
 			},
 			"document": {
+				"something": "Something"
+			},
+			"common": {
 				"metadata": "Metadata"
 			}
 		},

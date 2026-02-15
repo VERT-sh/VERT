@@ -116,8 +116,7 @@ export class MagickConverter extends Converter {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	public getAvailableSettings(input: VertFile): SettingDefinition[] {
+	public async getAvailableSettings(): Promise<SettingDefinition[]> {
 		// images - quality/compression/quantize/interlace/depth-DPI, resize, crop, rotate, flip/flop, autoOrient?, color space/bit depth, transparency settings
 		
 		const quality: SettingDefinition = {
@@ -173,7 +172,7 @@ export class MagickConverter extends Converter {
 
 		const metadata: SettingDefinition = {
 			key: "metadata",
-			label: m["convert.settings.image.metadata"](),
+			label: m["convert.settings.common.metadata"](),
 			type: "boolean",
 			default: true,
 		};
@@ -183,9 +182,10 @@ export class MagickConverter extends Converter {
 		return [quality, depth, colorSpace, transparency, metadata];
 	}
 
-	public getDefaultSettings(input: VertFile): ConversionSettings {
+	public async getDefaultSettings(): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		this.getAvailableSettings(input).forEach((setting) => {
+		const settings = await this.getAvailableSettings();
+		settings.forEach((setting) => {
 			defaults[setting.key] = setting.default;
 		});
 		return defaults;

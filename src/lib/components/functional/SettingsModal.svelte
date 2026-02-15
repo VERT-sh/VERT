@@ -107,6 +107,7 @@
 										checked={file.conversionSettings[
 											setting.key
 										] ?? setting.default}
+										placeholder={setting.placeholder}
 										onchange={(e) =>
 											handleSettingChange(
 												setting.key,
@@ -120,6 +121,7 @@
 										value={file.conversionSettings[
 											setting.key
 										] ?? setting.default}
+										placeholder={setting.placeholder}
 										oninput={(e) =>
 											handleSettingChange(
 												setting.key,

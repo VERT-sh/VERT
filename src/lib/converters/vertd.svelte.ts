@@ -8,6 +8,10 @@ import { Converter, FormatInfo } from "./converter.svelte";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { converters } from "./index";
+import type {
+	SettingDefinition,
+	ConversionSettings,
+} from "$lib/types/conversion-settings";
 
 interface UploadResponse {
 	id: string;
@@ -266,7 +270,7 @@ export class VertdConverter extends Converter {
 		new FormatInfo("mov", true, true),
 		new FormatInfo("gif", true, true),
 		new FormatInfo("apng", true, true),
-		new FormatInfo("webp", true, true), 
+		new FormatInfo("webp", true, true),
 		new FormatInfo("mts", true, true),
 		new FormatInfo("ts", true, true),
 		new FormatInfo("m2ts", true, true),
@@ -347,6 +351,77 @@ export class VertdConverter extends Converter {
 		Settings.instance.save();
 	}
 
+	public async getAvailableSettings(): Promise<SettingDefinition[]> {
+		// video - bitrate, fps, resolution, trim, crop, rotate, flip/flop, audio settings?
+
+		const qualityOptions = [
+			{
+				value: "verySlow",
+				label: m["convert.settings.video.speed_very_slow"](),
+			},
+			{
+				value: "slower",
+				label: m["convert.settings.video.speed_slower"](),
+			},
+			{ value: "slow", label: m["convert.settings.video.speed_slow"]() },
+			{
+				value: "medium",
+				label: m["convert.settings.video.speed_medium"](),
+			},
+			{ value: "fast", label: m["convert.settings.video.speed_fast"]() },
+			{
+				value: "ultraFast",
+				label: m["convert.settings.video.speed_ultra_fast"](),
+			},
+		];
+
+		const quality: SettingDefinition = {
+			key: "vertdSpeed",
+			label: m["convert.settings.video.speed"](),
+			type: "select",
+			default: "medium",
+			options: qualityOptions,
+		};
+
+		// TODO: for fps and resolution, set placeholder to detected values
+		const fps: SettingDefinition = {
+			key: "fps",
+			label: m["convert.settings.video.fps"](),
+			placeholder: m["convert.settings.video.fps_placeholder"](),
+			type: "number",
+			min: 1,
+		};
+
+		const resolution: SettingDefinition = {
+			key: "resolution",
+			label: m["convert.settings.video.resolution"](),
+			placeholder: m["convert.settings.video.resolution_placeholder"](),
+			type: "string",
+		};
+
+		const metadata: SettingDefinition = {
+			key: "metadata",
+			label: m["convert.settings.common.metadata"](),
+			type: "boolean",
+			default: true,
+		};
+
+		// trim/crop/rotate - also have another ui for this prob
+
+		// import all audio settings?
+
+		return [quality, fps, resolution, metadata];
+	}
+
+	public async getDefaultSettings(): Promise<ConversionSettings> {
+		const defaults: ConversionSettings = {};
+		const settings = await this.getAvailableSettings();
+		settings.forEach((setting) => {
+			defaults[setting.key] = setting.default;
+		});
+		return defaults;
+	}
+
 	public async convert(input: VertFile, to: string): Promise<VertFile> {
 		if (to.startsWith(".")) to = to.slice(1);
 
@@ -357,10 +432,17 @@ export class VertdConverter extends Converter {
 		// https://trac.ffmpeg.org/ticket/4907
 		if (input.from === ".webp") {
 			this.log(`animated webp detected, converting to gif first`);
-			const magickConverter = converters.find((c) => c.name === "imagemagick");
+			const magickConverter = converters.find(
+				(c) => c.name === "imagemagick",
+			);
 			if (magickConverter) {
 				try {
-					fileUpload = await magickConverter.convert(input, ".gif", 100);
+					fileUpload = await magickConverter.convert(
+						input,
+						".gif",
+						input.conversionSettings,
+						100,
+					);
 					this.log(`successfully converted webp to gif`);
 				} catch (e) {
 					this.log(`failed to convert webp to gif: ${e}`);
