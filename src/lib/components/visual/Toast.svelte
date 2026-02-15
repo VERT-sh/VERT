@@ -12,16 +12,12 @@
 	import type { ToastProps } from "$lib/util/toast.svelte";
 	import type { SvelteComponent } from "svelte";
 	import clsx from "clsx";
-	import type { Toast as ToastType } from "$lib/util/toast.svelte";
 
-	const props: {
-		toast: ToastType<unknown>;
-	} = $props();
+	const { id, type, message, durations, ...rest }: ToastProps = $props();
 
-	const { id, type, message, durations } = props.toast;
-
-	const additional =
-		"additional" in props.toast ? props.toast.additional : {};
+	const additional = $derived(
+		"additional" in rest ? rest.additional : undefined,
+	);
 
 	const colors = {
 		success: "purple",
