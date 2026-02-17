@@ -25,6 +25,7 @@
 			{...rest}
 			type="checkbox"
 			bind:checked
+			{disabled}
 			class="w-full p-3 rounded-lg bg-panel border-2 border-button
 				{prefix ? 'pl-[2rem]' : 'pl-3'} 
 				{extension ? 'pr-[4rem]' : 'pr-3'}
@@ -42,6 +43,7 @@
 		<input
 			{...rest}
 			bind:value
+			{disabled}
 			class="w-full p-3 rounded-lg bg-panel border-2 border-button
 				{prefix ? 'pl-[2rem]' : 'pl-3'} 
 				{extension ? 'pr-[4rem]' : 'pr-3'}

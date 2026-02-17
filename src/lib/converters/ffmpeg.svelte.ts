@@ -6,7 +6,10 @@ import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
-import type { SettingDefinition, ConversionSettings } from "$lib/types/conversion-settings";
+import type {
+	SettingDefinition,
+	ConversionSettings,
+} from "$lib/types/conversion-settings";
 
 // TODO: differentiate in UI? (not native formats)
 const videoFormats = [
@@ -106,65 +109,107 @@ export class FFmpegConverter extends Converter {
 		}
 	}
 
-	public async getAvailableSettings(): Promise<SettingDefinition[]> {
+	public async getAvailableSettings(
+		input: VertFile,
+	): Promise<SettingDefinition[]> {
 		// audio - bitrate, sample rate, channels, normalize, trim silence
 
-		// TODO: detect bitrate, sample rate, audio channels and set default/max accordingly
+		const global = Settings.instance.settings;
 
+		const ffmpeg = await this.setupFFmpeg(input, true);
+		const buf = new Uint8Array(await input.file.arrayBuffer());
+		await ffmpeg.writeFile("input", buf);
+
+		// TODO: should we really be doing all this detection here? it adds a lot of time before the settings even show up.
+		// which isn't very nice for the UX guh
+
+		const detectedBitrate = await this.detectAudioBitrate(ffmpeg);
 		const bitrate: SettingDefinition = {
 			key: "bitrate",
 			label: m["convert.settings.audio.bitrate"](),
 			type: "select",
-			default: "auto",
+			default: global.ffmpegQuality,
 			options: CONVERSION_BITRATES.map((b) => ({
-				value: b.toString(),
-				label: b.toString(),
+				value: b,
+				label: b,
 			})),
+			hasCustomInput: true,
+			customInputKey: "customBitrate",
+			placeholder: detectedBitrate ?? "128"
 		};
 
+		const detectedSampleRate = await this.detectAudioSampleRate(ffmpeg);
 		const sampleRate: SettingDefinition = {
 			key: "sampleRate",
 			label: m["convert.settings.audio.sample_rate"](),
 			type: "select",
-			default: "auto",
+			default:
+				global.ffmpegSampleRate === "custom"
+					? global.ffmpegCustomSampleRate
+					: global.ffmpegSampleRate,
 			options: SAMPLE_RATES.map((r) => ({
-				value: r.toString(),
-				label: r.toString(),
+				value: r,
+				label: r,
 			})),
+			hasCustomInput: true,
+			customInputKey: "customSampleRate",
+			placeholder: detectedSampleRate ?? "44100"
 		};
 
+		const audioTracks = await this.detectAudioTracks(ffmpeg);
+		const tracks: SettingDefinition = {
+			key: "tracks",
+			label: m["convert.settings.audio.tracks"](),
+			type: "number",
+			default: audioTracks ?? 1,
+			min: 1,
+			max: audioTracks ? audioTracks : 1,
+		};
+
+		const audioChannels = await this.detectAudioChannels(ffmpeg);
 		const channels: SettingDefinition = {
 			key: "channels",
 			label: m["convert.settings.audio.channels"](),
 			type: "number",
-			default: 2,
+			default: audioChannels ?? 2,
 			min: 1,
-			max: 8,
+			max: audioChannels ? audioChannels * 2 : 5,
 		};
 
 		const metadata: SettingDefinition = {
 			key: "metadata",
 			label: m["convert.settings.common.metadata"](),
 			type: "boolean",
-			default: true,
+			default: global.metadata ?? true,
 		};
 
 		// resize, crop, rotate - prob want a ui
 
-		return [bitrate, sampleRate, channels, metadata];
+		return [bitrate, sampleRate, tracks, channels, metadata];
 	}
 
-	public async getDefaultSettings(): Promise<ConversionSettings> {
+	public async getDefaultSettings(
+		input: VertFile,
+	): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings();
+		const settings = await this.getAvailableSettings(input);
 		settings.forEach((setting) => {
 			defaults[setting.key] = setting.default;
 		});
 		return defaults;
 	}
 
-	public async convert(input: VertFile, to: string): Promise<VertFile> {
+	public async convert(
+		input: VertFile,
+		to: string,
+		settings: ConversionSettings,
+	): Promise<VertFile> {
 		if (!to.startsWith(".")) to = `.${to}`;
+
+		const conversionSettings =
+			Object.keys(settings).length > 0
+				? settings
+				: await this.getDefaultSettings(input); // use defaults if not provided
 
 		const isAlac = to === ".alac";
 		if (isAlac) to = ".m4a";
@@ -181,7 +226,10 @@ export class FFmpegConverter extends Converter {
 				msg.includes("Specified sample rate") &&
 				msg.includes("is not supported")
 			) {
-				const rate = Settings.instance.settings.ffmpegCustomSampleRate;
+				const rate =
+					conversionSettings.sampleRate === "custom"
+						? conversionSettings.customSampleRate
+						: conversionSettings.sampleRate;
 				conversionError = m["workers.errors.invalid_rate"]({
 					rate,
 				});
@@ -212,6 +260,7 @@ export class FFmpegConverter extends Converter {
 			ffmpeg,
 			input,
 			to,
+			conversionSettings,
 			isAlac,
 		);
 		log(["converters", this.name], `FFmpeg command: ${command.join(" ")}`);
@@ -267,16 +316,21 @@ export class FFmpegConverter extends Converter {
 		this.activeConversions.delete(input.id);
 	}
 
-	private async setupFFmpeg(input: VertFile): Promise<FFmpeg> {
+	private async setupFFmpeg(
+		input: VertFile,
+		temporary = false,
+	): Promise<FFmpeg> {
 		const ffmpeg = new FFmpeg();
 
-		ffmpeg.on("progress", (progress) => {
-			input.progress = progress.progress * 100;
-		});
+		if (!temporary) {
+			ffmpeg.on("progress", (progress) => {
+				input.progress = progress.progress * 100;
+			});
 
-		ffmpeg.on("log", (l) => {
-			log(["converters", this.name], l.message);
-		});
+			ffmpeg.on("log", (l) => {
+				log(["converters", this.name], l.message);
+			});
+		}
 
 		const baseURL =
 			"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
@@ -370,10 +424,105 @@ export class FFmpegConverter extends Converter {
 		}
 	}
 
+	private async detectAudioTracks(ffmpeg: FFmpeg): Promise<number | null> {
+		const args = [
+			"-v",
+			"error",
+			"-select_streams",
+			"a",
+			"-show_entries",
+			"stream=index",
+			"-of",
+			"json",
+			"input",
+		];
+
+		try {
+			let output = "";
+
+			const tracksListener = (event: { message: string }) => {
+				output += `${event.message}\n`;
+			};
+
+			ffmpeg.on("log", tracksListener);
+
+			try {
+				log(
+					["converters", this.name],
+					`Running ffprobe to detect audio tracks with args: ${args.join(" ")}`,
+				);
+				await ffmpeg.ffprobe.call(ffmpeg, args);
+			} finally {
+				ffmpeg.off("log", tracksListener);
+			}
+
+			if (!output.trim()) return null;
+
+			const parsed = JSON.parse(output);
+			const tracks = Array.isArray(parsed?.streams)
+				? parsed.streams.length
+				: null;
+
+			log(
+				["converters", this.name],
+				`Detected stream audio tracks: ${tracks}`,
+			);
+
+			return tracks;
+		} catch (err) {
+			error(
+				["converters", this.name],
+				`Error detecting audio tracks: ${err}`,
+			);
+			return null;
+		}
+	}
+
+	private async detectAudioChannels(ffmpeg: FFmpeg): Promise<number | null> {
+		const args = [
+			"-v",
+			"0",
+			"-select_streams",
+			"a",
+			"-show_entries",
+			"stream=channels",
+			"-of",
+			"compact=p=0:nk=1",
+			"input",
+		];
+
+		try {
+			let channels: number | null = null;
+
+			const channelsListener = (event: { message: string }) => {
+				if (channels !== null) return;
+				const n = parseInt(event.message.trim(), 10);
+				if (!n) return;
+				channels = n;
+				log(
+					["converters", this.name],
+					`Detected stream audio channels: ${channels}`,
+				);
+			};
+
+			ffmpeg.on("log", channelsListener);
+
+			try {
+				await ffmpeg.ffprobe.call(ffmpeg, args);
+				return channels;
+			} finally {
+				ffmpeg.off("log", channelsListener);
+			}
+		} catch {
+			return null;
+		}
+	}
+
 	private async buildConversionCommand(
 		ffmpeg: FFmpeg,
 		input: VertFile,
 		to: string,
+		settings: ConversionSettings,
 		isAlac: boolean = false,
 	): Promise<string[]> {
 		const inputFormat = input.from.slice(1);
@@ -390,14 +539,16 @@ export class FFmpegConverter extends Converter {
 			"dsf",
 			"dff",
 		];
-		const userSetting = Settings.instance.settings.ffmpegQuality;
-		const userSampleRate = Settings.instance.settings.ffmpegSampleRate;
-		const customSampleRate =
-			Settings.instance.settings.ffmpegCustomSampleRate ?? 44100;
-		const keepMetadata = Settings.instance.settings.metadata;
+		const userBitrate = settings.bitrate;
+		const customBitrate = settings.customBitrate;
+		const userSampleRate = settings.sampleRate;
+		const customSampleRate = settings.customSampleRate;
+		const keepMetadata = settings.metadata;
 
 		let audioBitrateArgs: string[] = [];
 		let sampleRateArgs: string[] = [];
+		let channelsArgs: string[] = [];
+		let tracksArgs: string[] = [];
 		let metadataArgs: string[] = [];
 		let m4aArgs: string[] = [];
 
@@ -415,12 +566,15 @@ export class FFmpegConverter extends Converter {
 
 		const isLosslessToLossy =
 			lossless.includes(inputFormat) && !lossless.includes(outputFormat);
-		if (userSetting !== "auto") {
+		if (userBitrate !== "auto") {
 			// user's setting
-			audioBitrateArgs = ["-b:a", `${userSetting}k`];
+			audioBitrateArgs = [
+				"-b:a",
+				`${userBitrate === "custom" ? customBitrate : userBitrate}k`,
+			];
 			log(
 				["converters", this.name],
-				`using user setting for audio bitrate: ${userSetting}`,
+				`using user setting for audio bitrate: ${userBitrate}`,
 			);
 		} else {
 			// detect bitrate of original file and use
@@ -445,14 +599,13 @@ export class FFmpegConverter extends Converter {
 
 		// sample rate setting
 		if (userSampleRate !== "auto") {
-			const rate =
-				userSampleRate === "custom"
-					? customSampleRate.toString()
-					: userSampleRate;
-			sampleRateArgs = ["-ar", rate];
+			sampleRateArgs = [
+				"-ar",
+				userSampleRate === "custom" ? customSampleRate : userSampleRate,
+			];
 			log(
 				["converters", this.name],
-				`using user setting for sample rate: ${rate}`,
+				`using user setting for sample rate: ${userSampleRate}Hz`,
 			);
 		} else {
 			// detect sample rate of original file and use
@@ -476,13 +629,40 @@ export class FFmpegConverter extends Converter {
 				}
 
 				sampleRateArgs = inputSampleRate
-					? ["-ar", inputSampleRate.toString()]
+					? ["-ar", `${inputSampleRate}`]
 					: [];
 				log(
 					["converters", this.name],
 					`using detected audio sample rate: ${inputSampleRate}Hz`,
 				);
 			}
+		}
+
+		// channels setting
+		if (settings.channels !== "auto") {
+			channelsArgs = ["-ac", settings.channels];
+			log(
+				["converters", this.name],
+				`using user setting for audio channels: ${settings.channels}`,
+			);
+		}
+
+		// tracks setting
+		// TODO: select specific tracks? (prob should be for the other settings that need extra ui stuff)
+		if (settings.tracks !== "auto") {
+			// -map for each audio track
+			if (settings.tracks > 1) {
+				for (let i = 0; i < settings.tracks; i++) {
+					tracksArgs.push("-map", `0:a:${i - 1}`);
+				}
+			} else {
+				tracksArgs = ["-map", "0:a:0"]; // default to first audio track if not specified
+			}
+
+			log(
+				["converters", this.name],
+				`using user setting for audio tracks: ${settings.tracks}`,
+			);
 		}
 
 		// video to audio
@@ -499,6 +679,8 @@ export class FFmpegConverter extends Converter {
 				...metadataArgs,
 				...audioBitrateArgs,
 				...sampleRateArgs,
+				...channelsArgs,
+				...tracksArgs,
 				"output" + to,
 			];
 		}
@@ -538,6 +720,8 @@ export class FFmpegConverter extends Converter {
 					...metadataArgs,
 					...audioBitrateArgs,
 					...sampleRateArgs,
+					...channelsArgs,
+					...tracksArgs,
 					"output" + to,
 				];
 			} else {
@@ -558,6 +742,8 @@ export class FFmpegConverter extends Converter {
 					...metadataArgs,
 					...audioBitrateArgs,
 					...sampleRateArgs,
+					...channelsArgs,
+					...tracksArgs,
 					"output" + to,
 				];
 			}
@@ -580,6 +766,8 @@ export class FFmpegConverter extends Converter {
 			...metadataArgs,
 			...audioBitrateArgs,
 			...sampleRateArgs,
+			...channelsArgs,
+			...tracksArgs,
 			"output" + to,
 		];
 	}
@@ -758,6 +946,7 @@ const getCodecs = (
 
 export const CONVERSION_BITRATES = [
 	"auto",
+	"custom",
 	320,
 	256,
 	192,

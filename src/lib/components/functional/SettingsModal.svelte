@@ -36,7 +36,7 @@
 		}
 		// apply defaults, then existing settings, then new settings on top
 		file.conversionSettings = {
-			...(await converter.getDefaultSettings()),
+			...(await converter.getDefaultSettings(file)),
 			...file.conversionSettings,
 			...settings,
 		};
@@ -66,7 +66,8 @@
 >
 	<div class="flex flex-col gap-8">
 		{#if file}
-			{#await file.getAvailableSettings() then settings}
+			<!-- FIXME: modal loads before settings is finished for some reason -->
+			{#await file.getAvailableSettings(file) then availableSettings}
 				<div class="flex flex-col gap-4">
 					<p class="text-base">
 						{@html sanitize(
@@ -78,13 +79,13 @@
 						)}
 					</p>
 
-					{#if settings.length === 0}
+					{#if availableSettings.length === 0}
 						<p class="text-sm text-muted">
 							{m["convert.settings.none"]()}
 						</p>
 					{:else}
 						<div class="grid grid-cols-2 gap-4">
-							{#each settings as setting (setting.key)}
+							{#each availableSettings as setting (setting.key)}
 								<div class="flex flex-col gap-2">
 									<p class="text-sm font-bold">
 										{setting.label}
@@ -111,6 +112,30 @@
 													value,
 												)}
 										/>
+										{#if setting.hasCustomInput}
+											{@const disabled =
+												(settings[setting.key] ??
+													file.conversionSettings[
+														setting.key
+													]) !== "custom"}
+											<FancyInput
+												type="text"
+												value={settings[
+													setting.customInputKey!
+												] ??
+													file.conversionSettings[
+														setting.customInputKey!
+													] ??
+													""}
+												placeholder={setting.placeholder}
+												{disabled}
+												oninput={(e) =>
+													handleSettingChange(
+														setting.customInputKey!,
+														e.currentTarget.value,
+													)}
+											/>
+										{/if}
 									{:else if setting.type === "boolean"}
 										<FancyInput
 											type="checkbox"

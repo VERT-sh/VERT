@@ -55,7 +55,7 @@ export class Converter {
 	 * Can be overridden per converter for format-specific settings.
 	 * @param input The input file.
 	 */
-	public async getAvailableSettings(): Promise<SettingDefinition[]> {
+	public async getAvailableSettings(input?: VertFile): Promise<SettingDefinition[]> {
 		return [];
 	}
 
@@ -63,9 +63,9 @@ export class Converter {
 	 * Get default settings for a conversion.
 	 * @param input The input file.
 	 */
-	public async getDefaultSettings(): Promise<ConversionSettings> {
+	public async getDefaultSettings(input?: VertFile): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings();
+		const settings = await this.getAvailableSettings(input);
 		settings.forEach((setting) => {
 			defaults[setting.key] = setting.default;
 		});

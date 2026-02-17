@@ -93,9 +93,10 @@
 				"transparency": "Transparency"
 			},
 			"audio": {
-				"bitrate": "Bitrate",
-				"sample_rate": "Sample rate",
-				"channels": "Audio channels"
+				"bitrate": "Bitrate (kbps)",
+				"sample_rate": "Sample rate (Hz)",
+				"channels": "Audio channels",
+				"tracks": "Audio tracks"
 			},
 			"video": {
 				"quality": "Quality",

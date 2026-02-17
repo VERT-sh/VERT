@@ -23,7 +23,7 @@ export class VertFile {
 		return this.file.name;
 	}
 
-	public conversionSettings = $state<ConversionSettings>({});
+	public conversionSettings = $state<ConversionSettings>({}); // empty object = defaults
 	public progress = $state(0);
 	public result = $state<VertFile | null>(null);
 
@@ -39,10 +39,10 @@ export class VertFile {
 
 	public isZip = $state(() => this.from === ".zip");
 
-	public getAvailableSettings(): Promise<SettingDefinition[]> {
+	public getAvailableSettings(input: VertFile): Promise<SettingDefinition[]> {
 		const converter = this.findConverter();
 		if (!converter) return Promise.resolve([]);
-		return converter.getAvailableSettings();
+		return converter.getAvailableSettings(input);
 	}
 
 	public findConverters(supportedFormats: string[] = [this.from]) {
@@ -106,14 +106,6 @@ export class VertFile {
 		this.convert = this.convert.bind(this);
 		this.download = this.download.bind(this);
 		this.blobUrl = blobUrl;
-	}
-
-	public settings() {
-		// settings modal
-		// images - quality/compression/quantize/interlace/depth-DPI, resize, crop, rotate, flip/flop, autoOrient?, color space/bit depth, transparency settings
-		// audio - bitrate, sample rate, channels, normalize, trim silence
-		// video - bitrate, fps, resolution, trim, crop, rotate, flip/flop, audio settings?
-		// common - metadata?
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

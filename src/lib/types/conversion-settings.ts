@@ -6,12 +6,14 @@ export interface SettingDefinition {
     label: string;
     type: SettingType;
     default?: any;
-    placeholder?: string;
+    placeholder?: any;
     min?: number;
     max?: number;
     step?: number;
-    options?: Array<{ value: any; label: string }>; // for select types
+    options?: Array<{ value: any; label: any }>; // for select types
     description?: string;
+    hasCustomInput?: boolean; // for select types with a "custom" option
+    customInputKey?: string; // key to use for custom input value in settings object
 }
 
 export interface ConversionSettings {
