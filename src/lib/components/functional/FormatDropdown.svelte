@@ -8,9 +8,6 @@
 	import { onMount } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
-	import Modal from "./Modal.svelte";
-	import Dropdown from "./Dropdown.svelte";
-	import FancyInput from "./FancyInput.svelte";
 	import SettingsModal from "./SettingsModal.svelte";
 
 	type Props = {
@@ -75,9 +72,18 @@
 				: file.converters
 			: files.files.flatMap((f) => f.converters);
 
-		// pick the best matching category, or fall back to first category
-		// TODO: if something fails for some reason, maybe show all categories?
-		const detectedCategory =
+		// if file is provided, first try to find its category by input format
+		let detectedCategory: string | null = null;
+		if (file && from) {
+			detectedCategory =
+				Object.keys(categories).find((cat) =>
+					categories[cat].formats.includes(from),
+				) || null;
+		}
+
+		// fallback to category with most converter overlap if input category not found
+		detectedCategory =
+			detectedCategory ||
 			pickCategoryFromConverters(convertersToCheck) ||
 			Object.keys(categories)[0];
 

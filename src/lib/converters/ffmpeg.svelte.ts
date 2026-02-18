@@ -164,6 +164,7 @@ export class FFmpegConverter extends Converter {
 			default: audioTracks ?? 1,
 			min: 1,
 			max: audioTracks ? audioTracks : 1,
+			placeholder: audioTracks ?? 1
 		};
 
 		const audioChannels = await this.detectAudioChannels(ffmpeg);
@@ -174,6 +175,7 @@ export class FFmpegConverter extends Converter {
 			default: audioChannels ?? 2,
 			min: 1,
 			max: audioChannels ? audioChannels * 2 : 5,
+			placeholder: audioChannels ?? 2
 		};
 
 		const metadata: SettingDefinition = {
