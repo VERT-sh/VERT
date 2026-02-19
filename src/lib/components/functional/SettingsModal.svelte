@@ -86,13 +86,17 @@
 					{:else}
 						<div class="grid grid-cols-2 gap-4">
 							{#each availableSettings as setting (setting.key)}
-								<div class="flex flex-col gap-2">
+								<div
+									class={setting.forceFullWidth
+										? "col-span-2"
+										: "flex flex-col gap-2"}
+								>
 									<p class="text-sm font-bold">
 										{setting.label}
 									</p>
 									<!-- prob unneeded -->
 									{#if setting.description}
-										<p class="text-xs text-muted">
+										<p class="text-xs text-muted mt-1">
 											{setting.description}
 										</p>
 									{/if}
@@ -102,9 +106,11 @@
 											options={setting.options?.map(
 												(opt) => opt.value,
 											) || []}
-											selected={file.conversionSettings[
-												setting.key
-											] ?? setting.default}
+											selected={settings[setting.key] ??
+												file.conversionSettings[
+													setting.key
+												] ??
+												setting.default}
 											settingsStyle
 											onselect={(value) =>
 												handleSettingChange(
@@ -139,9 +145,11 @@
 									{:else if setting.type === "boolean"}
 										<FancyInput
 											type="checkbox"
-											checked={file.conversionSettings[
-												setting.key
-											] ?? setting.default}
+											checked={settings[setting.key] ??
+												file.conversionSettings[
+													setting.key
+												] ??
+												setting.default}
 											placeholder={setting.placeholder}
 											onchange={(e) =>
 												handleSettingChange(
@@ -149,12 +157,51 @@
 													e.currentTarget.checked,
 												)}
 										/>
+									{:else if setting.type === "range"}
+										{@const rangeValue = (settings[
+											setting.key
+										] ??
+											file.conversionSettings[
+												setting.key
+											] ??
+											setting.default ??
+											setting.min ??
+											0) as number}
+										{@const rangeLabel =
+											setting.options?.[rangeValue]
+												?.label ?? rangeValue}
+										<div class="flex items-center mt-2 gap-2">
+											<input
+												type="range"
+												min={setting.min}
+												max={setting.max}
+												step={setting.step}
+												value={rangeValue}
+												class="range-slider w-full"
+												oninput={(e) => {
+													const nextValue =
+														e.currentTarget
+															.valueAsNumber;
+													handleSettingChange(
+														setting.key,
+														nextValue,
+													);
+												}}
+											/>
+											<span
+												class="text-sm max-w-28 w-full text-right"
+											>
+												{rangeLabel}
+											</span>
+										</div>
 									{:else}
 										<FancyInput
 											type={setting.type}
-											value={file.conversionSettings[
-												setting.key
-											] ?? setting.default}
+											value={settings[setting.key] ??
+												file.conversionSettings[
+													setting.key
+												] ??
+												setting.default}
 											placeholder={setting.placeholder}
 											oninput={(e) =>
 												handleSettingChange(

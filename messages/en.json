@@ -84,7 +84,7 @@
 		"settings": {
 			"settings": "Settings",
 			"title": "File conversion settings",
-			"description": "Change the conversion settings for <b>{filename}</b>, which is using <b>{converter}</b>. These settings may not be available for all formats.",
+			"description": "Change the conversion settings for <b>{filename}</b>, which is using <b>{converter}</b>. These settings may not be available for all formats. This is an early beta and may have some issues.",
 			"none": "No settings available for this format.",
 			"image": {
 				"quality": "Quality",
@@ -94,30 +94,42 @@
 			},
 			"audio": {
 				"bitrate": "Bitrate (kbps)",
+				"bitrate_placeholder": "Custom bitrate",
 				"sample_rate": "Sample rate (Hz)",
+				"sample_rate_placeholder": "Custom sample rate",
 				"channels": "Audio channels",
-				"tracks": "Audio tracks"
+				"channels_placeholder": "Custom audio channels",
+				"tracks": "Audio tracks",
+				"tracks_placeholder": "Custom audio tracks"
 			},
 			"video": {
 				"quality": "Quality",
 				"metadata": "Metadata",
 				"speed": "Conversion speed",
-				"speed_very_slow": "Very Slow",
-				"speed_slower": "Slower",
-				"speed_slow": "Slow",
-				"speed_medium": "Medium",
-				"speed_fast": "Fast",
-				"speed_ultra_fast": "Ultra Fast",
+				"speed_description": "This will be overridden if you manually set the bitrate or resolution below - selecting options other than \"auto\".",
+				"speed_very_slow": "Highest quality (slowest)",
+				"speed_slower": "Higher quality (slower)",
+				"speed_slow": "High quality (slow)",
+				"speed_medium": "Medium quality (average)",
+				"speed_fast": "Lower quality (faster)",
+				"speed_ultra_fast": "Lowest quality (fastest)",
 				"fps": "Frame rate (FPS)",
-				"fps_placeholder": "Auto",
+				"fps_placeholder": "Custom frame rate",
 				"resolution": "Resolution",
-				"resolution_placeholder": "Auto (e.g., 1920x1080)"
+				"resolution_placeholder": "Custom resolution",
+				"video_bitrate": "Video bitrate (kbps)",
+				"audio_bitrate": "Audio bitrate (kbps)",
+				"bitrate_placeholder": "Custom bitrate",
+				"sample_rate": "Audio sample rate (Hz)",
+				"sample_rate_placeholder": "Custom sample rate"
 			},
 			"document": {
 				"something": "Something"
 			},
 			"common": {
-				"metadata": "Metadata"
+				"metadata": "Metadata",
+				"auto": "auto",
+				"custom": "custom"
 			}
 		},
 		"tooltips": {

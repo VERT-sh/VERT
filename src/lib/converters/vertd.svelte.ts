@@ -12,6 +12,7 @@ import type {
 	SettingDefinition,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
+import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.svelte";
 
 interface UploadResponse {
 	id: string;
@@ -84,6 +85,15 @@ export type ConversionSpeed =
 	| "medium"
 	| "fast"
 	| "ultraFast";
+
+const vertdSpeedValues: ConversionSpeed[] = [
+	"verySlow",
+	"slower",
+	"slow",
+	"medium",
+	"fast",
+	"ultraFast",
+];
 
 interface StartJobMessage {
 	type: "startJob";
@@ -375,30 +385,128 @@ export class VertdConverter extends Converter {
 			},
 		];
 
-		const quality: SettingDefinition = {
-			key: "vertdSpeed",
+		const qualitySpeedRange: SettingDefinition = {
+			key: "vertdSpeedSlider",
 			label: m["convert.settings.video.speed"](),
-			type: "select",
-			default: "medium",
-			options: qualityOptions,
+			description: m["convert.settings.video.speed_description"](),
+			type: "range",
+			min: 0,
+			max: qualityOptions.length - 1,
+			step: 1,
+			default: 3,
+			options: qualityOptions.map((option, index) => ({
+				value: index,
+				label: option.label,
+				speedValue: option.value,
+			})),
+			forceFullWidth: true,
 		};
 
-		// TODO: for fps and resolution, set placeholder to detected values
 		const fps: SettingDefinition = {
 			key: "fps",
 			label: m["convert.settings.video.fps"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: 24, label: "24" },
+				{ value: 30, label: "30" },
+				{ value: 60, label: "60" },
+				{ value: 120, label: "120" },
+				{ value: 144, label: "144" },
+				{ value: 240, label: "240" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customFps",
 			placeholder: m["convert.settings.video.fps_placeholder"](),
-			type: "number",
-			min: 1,
 		};
 
 		const resolution: SettingDefinition = {
 			key: "resolution",
 			label: m["convert.settings.video.resolution"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: "426x240", label: "426x240" },
+				{ value: "640x360", label: "640x360" },
+				{ value: "854x480", label: "854x480" },
+				{ value: "1280x720", label: "1280x720" },
+				{ value: "1920x1080", label: "1920x1080" },
+				{ value: "2560x1440", label: "2560x1440" },
+				{ value: "3840x2160", label: "3840x2160" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customResolution",
 			placeholder: m["convert.settings.video.resolution_placeholder"](),
-			type: "string",
 		};
 
+		// TODO: allow CRF for consistent quality?
+		const videoBitrate: SettingDefinition = {
+			key: "videoBitrate",
+			label: m["convert.settings.video.video_bitrate"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: 1000, label: "1000 kbps" },
+				{ value: 2500, label: "2500 kbps" },
+				{ value: 5000, label: "5000 kbps" },
+				{ value: 8000, label: "8000 kbps" },
+				{ value: 12000, label: "12000 kbps" },
+				{ value: 18000, label: "18000 kbps" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customBitrate",
+			placeholder: m["convert.settings.video.bitrate_placeholder"](),
+		};
+
+		/*
+		 *	audio settings
+		 */
+		const audioBitrate: SettingDefinition = {
+			key: "audioBitrate",
+			label: m["convert.settings.video.audio_bitrate"](),
+			type: "select",
+			default: "auto",
+			options: CONVERSION_BITRATES.map((b) => ({
+				value: b,
+				label: b,
+			})),
+			hasCustomInput: true,
+			customInputKey: "customBitrate",
+			placeholder: m["convert.settings.audio.bitrate_placeholder"](),
+		};
+
+		const sampleRate: SettingDefinition = {
+			key: "sampleRate",
+			label: m["convert.settings.audio.sample_rate"](),
+			type: "select",
+			default: "auto",
+			options: SAMPLE_RATES.map((r) => ({
+				value: r,
+				label: r,
+			})),
+			hasCustomInput: true,
+			customInputKey: "customSampleRate",
+			placeholder: m["convert.settings.audio.sample_rate_placeholder"](),
+		};
+
+		/*
+		 *	common
+		 */
 		const metadata: SettingDefinition = {
 			key: "metadata",
 			label: m["convert.settings.common.metadata"](),
@@ -408,9 +516,15 @@ export class VertdConverter extends Converter {
 
 		// trim/crop/rotate - also have another ui for this prob
 
-		// import all audio settings?
-
-		return [quality, fps, resolution, metadata];
+		return [
+			qualitySpeedRange,
+			videoBitrate,
+			resolution,
+			fps,
+			metadata,
+			audioBitrate,
+			sampleRate,
+		];
 	}
 
 	public async getDefaultSettings(): Promise<ConversionSettings> {
@@ -419,10 +533,19 @@ export class VertdConverter extends Converter {
 		settings.forEach((setting) => {
 			defaults[setting.key] = setting.default;
 		});
+
+		if (defaults.vertdSpeedSlider !== undefined) {
+			const sliderIndex = defaults.vertdSpeedSlider as number;
+			defaults.vertdSpeed = vertdSpeedValues[sliderIndex];
+		}
 		return defaults;
 	}
 
-	public async convert(input: VertFile, to: string, settings: ConversionSettings): Promise<VertFile> {
+	public async convert(
+		input: VertFile,
+		to: string,
+		settings: ConversionSettings,
+	): Promise<VertFile> {
 		if (to.startsWith(".")) to = to.slice(1);
 
 		let fileUpload = input;
@@ -481,7 +604,14 @@ export class VertdConverter extends Converter {
 			});
 
 			ws.onopen = () => {
-				const speed = Settings.instance.settings.vertdSpeed;
+				let speed = settings.vertdSpeed as ConversionSpeed | undefined;
+				const sliderIndex = settings.vertdSpeedSlider as
+					| number
+					| undefined;
+				if (sliderIndex !== undefined) {
+					speed = vertdSpeedValues[sliderIndex] || speed;
+				}
+				if (!speed) speed = Settings.instance.settings.vertdSpeed;
 				const keepMetadata = Settings.instance.settings.metadata;
 				this.log(
 					`opened ws connection to vertd for file ${input.name}`,

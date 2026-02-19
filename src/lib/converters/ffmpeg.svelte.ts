@@ -109,21 +109,11 @@ export class FFmpegConverter extends Converter {
 		}
 	}
 
-	public async getAvailableSettings(
-		input: VertFile,
-	): Promise<SettingDefinition[]> {
+	public async getAvailableSettings(): Promise<SettingDefinition[]> {
 		// audio - bitrate, sample rate, channels, normalize, trim silence
 
 		const global = Settings.instance.settings;
 
-		const ffmpeg = await this.setupFFmpeg(input, true);
-		const buf = new Uint8Array(await input.file.arrayBuffer());
-		await ffmpeg.writeFile("input", buf);
-
-		// TODO: should we really be doing all this detection here? it adds a lot of time before the settings even show up.
-		// which isn't very nice for the UX guh
-
-		const detectedBitrate = await this.detectAudioBitrate(ffmpeg);
 		const bitrate: SettingDefinition = {
 			key: "bitrate",
 			label: m["convert.settings.audio.bitrate"](),
@@ -135,10 +125,9 @@ export class FFmpegConverter extends Converter {
 			})),
 			hasCustomInput: true,
 			customInputKey: "customBitrate",
-			placeholder: detectedBitrate ?? "128"
+			placeholder: m["convert.settings.audio.bitrate_placeholder"](),
 		};
 
-		const detectedSampleRate = await this.detectAudioSampleRate(ffmpeg);
 		const sampleRate: SettingDefinition = {
 			key: "sampleRate",
 			label: m["convert.settings.audio.sample_rate"](),
@@ -153,31 +142,31 @@ export class FFmpegConverter extends Converter {
 			})),
 			hasCustomInput: true,
 			customInputKey: "customSampleRate",
-			placeholder: detectedSampleRate ?? "44100"
+			placeholder: m["convert.settings.audio.sample_rate_placeholder"](),
 		};
 
-		const audioTracks = await this.detectAudioTracks(ffmpeg);
 		const tracks: SettingDefinition = {
 			key: "tracks",
 			label: m["convert.settings.audio.tracks"](),
 			type: "number",
-			default: audioTracks ?? 1,
+			default: 1,
 			min: 1,
-			max: audioTracks ? audioTracks : 1,
-			placeholder: audioTracks ?? 1
+			placeholder: m["convert.settings.audio.tracks_placeholder"](),
 		};
 
-		const audioChannels = await this.detectAudioChannels(ffmpeg);
 		const channels: SettingDefinition = {
 			key: "channels",
 			label: m["convert.settings.audio.channels"](),
 			type: "number",
-			default: audioChannels ?? 2,
+			default: 2,
 			min: 1,
-			max: audioChannels ? audioChannels * 2 : 5,
-			placeholder: audioChannels ?? 2
+			max: 8,
+			placeholder: m["convert.settings.audio.channels_placeholder"](),
 		};
 
+		/*
+		 *	common
+		 */
 		const metadata: SettingDefinition = {
 			key: "metadata",
 			label: m["convert.settings.common.metadata"](),
@@ -420,100 +409,6 @@ export class FFmpegConverter extends Converter {
 				return sampleRate;
 			} finally {
 				ffmpeg.off("log", sampleRateListener);
-			}
-		} catch {
-			return null;
-		}
-	}
-
-	private async detectAudioTracks(ffmpeg: FFmpeg): Promise<number | null> {
-		const args = [
-			"-v",
-			"error",
-			"-select_streams",
-			"a",
-			"-show_entries",
-			"stream=index",
-			"-of",
-			"json",
-			"input",
-		];
-
-		try {
-			let output = "";
-
-			const tracksListener = (event: { message: string }) => {
-				output += `${event.message}\n`;
-			};
-
-			ffmpeg.on("log", tracksListener);
-
-			try {
-				log(
-					["converters", this.name],
-					`Running ffprobe to detect audio tracks with args: ${args.join(" ")}`,
-				);
-				await ffmpeg.ffprobe.call(ffmpeg, args);
-			} finally {
-				ffmpeg.off("log", tracksListener);
-			}
-
-			if (!output.trim()) return null;
-
-			const parsed = JSON.parse(output);
-			const tracks = Array.isArray(parsed?.streams)
-				? parsed.streams.length
-				: null;
-
-			log(
-				["converters", this.name],
-				`Detected stream audio tracks: ${tracks}`,
-			);
-
-			return tracks;
-		} catch (err) {
-			error(
-				["converters", this.name],
-				`Error detecting audio tracks: ${err}`,
-			);
-			return null;
-		}
-	}
-
-	private async detectAudioChannels(ffmpeg: FFmpeg): Promise<number | null> {
-		const args = [
-			"-v",
-			"0",
-			"-select_streams",
-			"a",
-			"-show_entries",
-			"stream=channels",
-			"-of",
-			"compact=p=0:nk=1",
-			"input",
-		];
-
-		try {
-			let channels: number | null = null;
-
-			const channelsListener = (event: { message: string }) => {
-				if (channels !== null) return;
-				const n = parseInt(event.message.trim(), 10);
-				if (!n) return;
-				channels = n;
-				log(
-					["converters", this.name],
-					`Detected stream audio channels: ${channels}`,
-				);
-			};
-
-			ffmpeg.on("log", channelsListener);
-
-			try {
-				await ffmpeg.ffprobe.call(ffmpeg, args);
-				return channels;
-			} finally {
-				ffmpeg.off("log", channelsListener);
 			}
 		} catch {
 			return null;
@@ -962,12 +857,12 @@ export type ConversionBitrate = (typeof CONVERSION_BITRATES)[number];
 export const SAMPLE_RATES = [
 	"auto",
 	"custom",
-	"48000",
-	"44100",
-	"32000",
-	"22050",
-	"16000",
-	"11025",
-	"8000",
+	48000,
+	44100,
+	32000,
+	22050,
+	16000,
+	11025,
+	8000,
 ] as const;
 export type SampleRate = (typeof SAMPLE_RATES)[number];

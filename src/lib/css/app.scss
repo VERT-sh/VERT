@@ -413,6 +413,36 @@ body {
 		@apply outline outline-accent outline-2;
 	}
 
+	input[type="range"].range-slider {
+		@apply w-full h-[10px] appearance-none bg-transparent;
+	}
+
+	input[type="range"].range-slider:focus {
+		@apply outline-none;
+	}
+
+	// for some reason, thumb and tracks behave differently in webkit (chromium) and firefox
+	// so i had to do some manual adjustments to get them similar :sob: -maya
+	input[type="range"].range-slider::-webkit-slider-runnable-track {
+		@apply h-[10px] rounded-full bg-button;
+		appearance: none;
+	}
+
+	input[type="range"].range-slider::-webkit-slider-thumb {
+		@apply bg-panel w-[18px] h-[18px] -mt-1 rounded-full cursor-pointer shadow-md;
+		appearance: none;
+		border: 2px solid var(--accent);
+	}
+
+	input[type="range"].range-slider::-moz-range-track {
+		@apply h-[10px] rounded-full bg-button;
+		appearance: none;
+	}
+
+	input[type="range"].range-slider::-moz-range-thumb {
+		@apply bg-panel border-2 border-accent w-4 h-4 rounded-full cursor-pointer shadow-md;
+	}
+
 	hr {
 		@apply border-separator;
 	}
