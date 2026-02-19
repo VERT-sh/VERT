@@ -116,7 +116,9 @@ export class MagickConverter extends Converter {
 		}
 	}
 
-	public async getAvailableSettings(): Promise<SettingDefinition[]> {
+	public async getAvailableSettings(
+		input: VertFile,
+	): Promise<SettingDefinition[]> {
 		// images - quality/compression/quantize/interlace/depth-DPI, resize, crop, rotate, flip/flop, autoOrient?, color space/bit depth, transparency settings
 		const global = Settings.instance.settings;
 
@@ -163,13 +165,15 @@ export class MagickConverter extends Converter {
 			],
 		};
 
-		// allow transparency or not
-		// TODO: disable if jpg/jpeg input/output
+		// TODO: check other formats for transparency support
+		const fromJpeg = input.from === ".jpg" || input.from === ".jpeg" || input.from === ".jfif";
+		const toJpeg = input.to === ".jpg" || input.to === ".jpeg" || input.to === ".jfif";
 		const transparency: SettingDefinition = {
 			key: "transparency",
 			label: m["convert.settings.image.transparency"](),
 			type: "boolean",
 			default: true,
+			disabled: fromJpeg || toJpeg,
 		};
 
 		const metadata: SettingDefinition = {

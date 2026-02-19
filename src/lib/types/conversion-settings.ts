@@ -5,6 +5,7 @@ export interface SettingDefinition {
 	key: string;
 	label: string;
 	type: SettingType;
+	disabled?: boolean;
 	default?: any;
 	placeholder?: any;
 	min?: number;

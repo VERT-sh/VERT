@@ -117,6 +117,7 @@
 													setting.key,
 													value,
 												)}
+											disabled={setting.disabled}
 										/>
 										{#if setting.hasCustomInput}
 											{@const disabled =
@@ -134,7 +135,8 @@
 													] ??
 													""}
 												placeholder={setting.placeholder}
-												{disabled}
+												disabled={disabled ||
+													setting.disabled}
 												oninput={(e) =>
 													handleSettingChange(
 														setting.customInputKey!,
@@ -156,6 +158,7 @@
 													setting.key,
 													e.currentTarget.checked,
 												)}
+											disabled={setting.disabled}
 										/>
 									{:else if setting.type === "range"}
 										{@const rangeValue = (settings[
@@ -170,7 +173,9 @@
 										{@const rangeLabel =
 											setting.options?.[rangeValue]
 												?.label ?? rangeValue}
-										<div class="flex items-center mt-2 gap-2">
+										<div
+											class="flex items-center mt-2 gap-2"
+										>
 											<input
 												type="range"
 												min={setting.min}
@@ -187,6 +192,7 @@
 														nextValue,
 													);
 												}}
+												disabled={setting.disabled}
 											/>
 											<span
 												class="text-sm max-w-28 w-full text-right"
@@ -208,6 +214,7 @@
 													setting.key,
 													e.currentTarget.value,
 												)}
+											disabled={setting.disabled}
 										/>
 									{/if}
 								</div>
