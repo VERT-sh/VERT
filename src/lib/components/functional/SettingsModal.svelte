@@ -104,7 +104,13 @@
 									{#if setting.type === "select"}
 										<Dropdown
 											options={setting.options?.map(
-												(opt) => opt.value,
+												(opt) =>
+													typeof opt === "string"
+														? {
+																value: opt,
+																label: opt,
+															}
+														: opt,
 											) || []}
 											selected={settings[setting.key] ??
 												file.conversionSettings[

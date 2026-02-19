@@ -136,13 +136,12 @@ export class MagickConverter extends Converter {
 			label: m["convert.settings.image.depth"](),
 			type: "select",
 			default: "auto",
-			// somehow implement custom option
 			options: [
 				{ value: "auto", label: "Auto" },
+				{ value: "custom", label: "Custom" },
 				{ value: "8", label: "8-bit" },
 				{ value: "16", label: "16-bit" },
 				{ value: "32", label: "32-bit" },
-				{ value: "custom", label: "Custom" },
 			],
 		};
 
@@ -166,8 +165,12 @@ export class MagickConverter extends Converter {
 		};
 
 		// TODO: check other formats for transparency support
-		const fromJpeg = input.from === ".jpg" || input.from === ".jpeg" || input.from === ".jfif";
-		const toJpeg = input.to === ".jpg" || input.to === ".jpeg" || input.to === ".jfif";
+		const fromJpeg =
+			input.from === ".jpg" ||
+			input.from === ".jpeg" ||
+			input.from === ".jfif";
+		const toJpeg =
+			input.to === ".jpg" || input.to === ".jpeg" || input.to === ".jfif";
 		const transparency: SettingDefinition = {
 			key: "transparency",
 			label: m["convert.settings.image.transparency"](),
@@ -188,9 +191,11 @@ export class MagickConverter extends Converter {
 		return [quality, depth, colorSpace, transparency, metadata];
 	}
 
-	public async getDefaultSettings(): Promise<ConversionSettings> {
+	public async getDefaultSettings(
+		input: VertFile,
+	): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings();
+		const settings = await this.getAvailableSettings(input);
 		settings.forEach((setting) => {
 			defaults[setting.key] = setting.default;
 		});
@@ -272,7 +277,7 @@ export class MagickConverter extends Converter {
 			const conversionSettings = JSON.stringify(
 				Object.keys(settings).length > 0
 					? settings // user-provided settings
-					: await this.getDefaultSettings(), // use defaults if not provided
+					: await this.getDefaultSettings(input), // use defaults if not provided
 			);
 			const convertMsg: WorkerMessage = {
 				type: "convert",

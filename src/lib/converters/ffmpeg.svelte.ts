@@ -121,7 +121,10 @@ export class FFmpegConverter extends Converter {
 			default: global.ffmpegQuality,
 			options: CONVERSION_BITRATES.map((b) => ({
 				value: b,
-				label: b,
+				label:
+					b === "auto" || b === "custom"
+						? m[`convert.settings.common.${b}`]()
+						: `${b} kbps`,
 			})),
 			hasCustomInput: true,
 			customInputKey: "customBitrate",
@@ -138,7 +141,10 @@ export class FFmpegConverter extends Converter {
 					: global.ffmpegSampleRate,
 			options: SAMPLE_RATES.map((r) => ({
 				value: r,
-				label: r,
+				label:
+					r === "auto" || r === "custom"
+						? m[`convert.settings.common.${r}`]()
+						: `${r} Hz`,
 			})),
 			hasCustomInput: true,
 			customInputKey: "customSampleRate",
@@ -179,11 +185,9 @@ export class FFmpegConverter extends Converter {
 		return [bitrate, sampleRate, tracks, channels, metadata];
 	}
 
-	public async getDefaultSettings(
-		input: VertFile,
-	): Promise<ConversionSettings> {
+	public async getDefaultSettings(): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings(input);
+		const settings = await this.getAvailableSettings();
 		settings.forEach((setting) => {
 			defaults[setting.key] = setting.default;
 		});
@@ -200,7 +204,7 @@ export class FFmpegConverter extends Converter {
 		const conversionSettings =
 			Object.keys(settings).length > 0
 				? settings
-				: await this.getDefaultSettings(input); // use defaults if not provided
+				: await this.getDefaultSettings(); // use defaults if not provided
 
 		const isAlac = to === ".alac";
 		if (isAlac) to = ".m4a";

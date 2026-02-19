@@ -483,7 +483,12 @@ export class VertdConverter extends Converter {
 			default: "auto",
 			options: CONVERSION_BITRATES.map((b) => ({
 				value: b,
-				label: b,
+				label:
+					b === "auto"
+						? m["convert.settings.common.auto"]()
+						: b === "custom"
+							? m["convert.settings.common.custom"]()
+							: `${b} kbps`,
 			})),
 			hasCustomInput: true,
 			customInputKey: "customBitrate",
@@ -497,7 +502,12 @@ export class VertdConverter extends Converter {
 			default: "auto",
 			options: SAMPLE_RATES.map((r) => ({
 				value: r,
-				label: r,
+				label:
+					r === "auto"
+						? m["convert.settings.common.auto"]()
+						: r === "custom"
+							? m["convert.settings.common.custom"]()
+							: `${r} Hz`,
 			})),
 			hasCustomInput: true,
 			customInputKey: "customSampleRate",

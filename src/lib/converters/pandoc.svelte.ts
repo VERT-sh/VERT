@@ -61,8 +61,8 @@ export class PandocConverter extends Converter {
 				from: file.from,
 				to,
 			},
-			compression: null,
 			id: file.id,
+			conversionSettings: "", // no settings for pandoc yet
 		};
 		worker.postMessage(convertMsg);
 		const result = await waitForMessage(worker);

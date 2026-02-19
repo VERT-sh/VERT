@@ -5,7 +5,7 @@
 	import { quintOut } from "svelte/easing";
 
 	type Props = {
-		options: string[];
+		options: string[] | { value: string; label: string }[];
 		selected?: string;
 		onselect?: (option: string) => void;
 		disabled?: boolean;
@@ -14,7 +14,9 @@
 
 	let {
 		options,
-		selected = $bindable(options[0]),
+		selected = $bindable(
+			typeof options[0] === "string" ? options[0] : options[0].value,
+		),
 		onselect,
 		disabled,
 		settingsStyle,
@@ -29,12 +31,21 @@
 		open = !open;
 	};
 
-	const select = (option: string) => {
-		const oldIndex = options.indexOf(selected || "");
-		const newIndex = options.indexOf(option);
+	const getValue = (option: string | { value: string; label: string }) =>
+		typeof option === "string" ? option : option.value;
+
+	const getLabel = (option: string | { value: string; label: string }) =>
+		typeof option === "string" ? option : option.label;
+
+	const select = (option: string | { value: string; label: string }) => {
+		const selectedValue = getValue(option);
+		const oldIndex = options.findIndex((opt) => getValue(opt) === selected);
+		const newIndex = options.findIndex(
+			(opt) => getValue(opt) === selectedValue,
+		);
 		isUp = oldIndex > newIndex;
-		selected = option;
-		onselect?.(option);
+		selected = selectedValue;
+		onselect?.(selectedValue);
 		toggle();
 	};
 
@@ -89,14 +100,17 @@
 						? 'font-normal'
 						: 'font-medium'}"
 				>
-					{selected}
+					{getLabel(
+						options.find((opt) => getValue(opt) === selected) ||
+							selected,
+					)}
 				</p>
 			{/key}
 			{#each options as option}
 				<p
 					class="col-start-1 row-start-1 invisible pointer-events-none"
 				>
-					{option}
+					{getLabel(option)}
 				</p>
 			{/each}
 		</div>
@@ -121,7 +135,7 @@
 					class="w-full p-2 px-4 text-left hover:bg-panel"
 					onclick={() => select(option)}
 				>
-					{option}
+					{getLabel(option)}
 				</button>
 			{/each}
 		</div>

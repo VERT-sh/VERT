@@ -128,8 +128,8 @@
 			},
 			"common": {
 				"metadata": "Metadata",
-				"auto": "auto",
-				"custom": "custom"
+				"auto": "Auto",
+				"custom": "Custom"
 			}
 		},
 		"tooltips": {
