@@ -64,7 +64,7 @@
 	]}
 	onclose={() => onclose?.()}
 >
-	<div class="flex flex-col gap-8">
+	<div class="flex flex-col gap-8 max-h-[calc(100vh-225px)] overflow-y-auto">
 		{#if file}
 			<!-- FIXME: modal loads before settings is finished for some reason -->
 			{#await file.getAvailableSettings(file) then availableSettings}
