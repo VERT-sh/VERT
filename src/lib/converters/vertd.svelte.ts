@@ -664,6 +664,25 @@ export class VertdConverter extends Converter {
 						this.log(`downloading from ${url}`);
 						// const res = await fetch(url).then((res) => res.blob());
 						const res = await downloadFile(url, input);
+
+						// confirm download to clean up on server
+						try {
+							await fetch(
+								`${apiUrl}/api/confirm/${msg.data.jobId}/${uploadRes.auth}`,
+								{
+									method: "GET",
+								},
+							);
+							this.log(
+								`confirmed download for file ${input.name}`,
+							);
+						} catch (e) {
+							error(
+								["converters", this.name],
+								`failed to confirm download: ${e}`,
+							);
+						}
+
 						resolve(new VertFile(new File([res], input.name), to));
 						break;
 					}
