@@ -14,7 +14,6 @@ import { parseAni } from "$lib/util/parse/ani";
 import { parseIcns } from "vert-wasm";
 import type { WorkerMessage } from "$lib/types";
 import type { ConversionSettings } from "$lib/types/conversion-settings";
-import { log } from "$lib/util/logger";
 
 let magickInitialized = false;
 
@@ -354,11 +353,6 @@ const magickConvert = async (
 				img.backgroundColor = new MagickColor(0, 0, 0, 255); // TODO: probably make it an option to set the bg colour
 				img.alpha(AlphaAction.Remove);
 			}
-
-			log(
-				["workers", "imagemagick"],
-				`Converting to ${fmt} with settings: ${JSON.stringify(conversionSettings)}`,
-			);
 
 			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
 			img.write(fmt as unknown as MagickFormat, (o: Uint8Array) => {
