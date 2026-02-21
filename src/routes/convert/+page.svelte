@@ -32,7 +32,6 @@
 	import { Settings } from "$lib/sections/settings/index.svelte";
 	import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
 	import { GB } from "$lib/util/consts";
-	import { log } from "$lib/util/logger";
 
 	let processedFileIds = $state(new Set<string>());
 

@@ -79,7 +79,8 @@
 			"image": "Image",
 			"placeholder": "Search format",
 			"no_formats": "No formats available",
-			"no_results": "No formats match your search"
+			"no_results": "No formats match your search",
+			"fallback": "An error occurred loading available categories & formats, showing everything."
 		},
 		"settings": {
 			"settings": "Settings",

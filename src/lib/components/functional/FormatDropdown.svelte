@@ -9,6 +9,7 @@
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
 	import SettingsModal from "./SettingsModal.svelte";
+	import { log } from "$lib/util/logger";
 
 	type Props = {
 		categories: Categories;
@@ -41,6 +42,11 @@
 	$effect(() => {
 		if (currentCategory) return;
 
+		log(
+			["dropdown", "init"],
+			`initializing category, file: ${file?.name}, from: ${from}`,
+		);
+
 		// find the category whose formats overlap most with the converters for this file (or all files)
 		// this finds the best matching category based on the formats supported by the converters
 		const pickCategoryFromConverters = (
@@ -72,6 +78,12 @@
 				: file.converters
 			: files.files.flatMap((f) => f.converters);
 
+		log(
+			["dropdown", "init"],
+			`checking converters:`,
+			convertersToCheck.map((c) => c.formatStrings()),
+		);
+
 		// if file is provided, first try to find its category by input format
 		let detectedCategory: string | null = null;
 		if (file && from) {
@@ -79,6 +91,11 @@
 				Object.keys(categories).find((cat) =>
 					categories[cat].formats.includes(from),
 				) || null;
+			log(
+				["dropdown", "init"],
+				`detected category from input format (${from}):`,
+				detectedCategory,
+			);
 		}
 
 		// fallback to category with most converter overlap if input category not found
@@ -86,6 +103,8 @@
 			detectedCategory ||
 			pickCategoryFromConverters(convertersToCheck) ||
 			Object.keys(categories)[0];
+
+		log(["dropdown", "init"], `final detected category:`, detectedCategory);
 
 		currentCategory = detectedCategory;
 		rootCategory = detectedCategory;
@@ -143,9 +162,33 @@
 					)
 				: [];
 
+			// if no formats found at all, show everything
+			if (formats.length !== 0) {
+				const allCategories = Object.keys(categories);
+				// show formats for current category if set, otherwise all formats
+				const fallbackFormats =
+					currentCategory && allCategories.includes(currentCategory)
+						? categories[currentCategory].formats
+						: allCategories.flatMap(
+								(cat) => categories[cat].formats,
+							);
+
+				log(
+					["dropdown", "filter"],
+					`no formats found for category ${currentCategory}, showing all categories and formats as fallback`,
+				);
+
+				return {
+					categories: allCategories,
+					formats: fallbackFormats,
+					isFallback: true,
+				};
+			}
+
 			return {
 				categories: availableCategories,
 				formats,
+				isFallback: false,
 			};
 		}
 		const searchLower = normalize(searchQuery);
@@ -162,6 +205,7 @@
 			return {
 				categories: availableCategories,
 				formats: [],
+				isFallback: false,
 			};
 		}
 
@@ -198,6 +242,7 @@
 					? matchingCategories
 					: availableCategories,
 			formats: filteredFormats,
+			isFallback: false,
 		};
 	});
 
@@ -451,16 +496,21 @@
 					<input
 						type="text"
 						placeholder={m["convert.dropdown.placeholder"]()}
-						class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground"
+						class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground {filteredData.isFallback
+							? 'opacity-50 cursor-not-allowed'
+							: ''}"
 						bind:value={searchQuery}
 						oninput={handleSearch}
 						onkeydown={onEnter}
 						onfocus={() => {}}
 						id="format-search"
 						autocomplete="off"
+						disabled={filteredData.isFallback}
 					/>
 					<span
-						class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center"
+						class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center {filteredData.isFallback
+							? 'opacity-50'
+							: ''}"
 					>
 						<SearchIcon class="w-4 h-4" />
 					</span>
@@ -477,6 +527,12 @@
 					{/if}
 				</div>
 			</div>
+			<!-- fallback message -->
+			{#if filteredData.isFallback}
+				<div class="pb-4 text-center text-muted text-base">
+					{m["convert.dropdown.fallback"]()}
+				</div>
+			{/if}
 			<!-- available categories -->
 			<div class="flex items-center justify-between">
 				{#each filteredData.categories as category}
