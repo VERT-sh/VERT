@@ -101,8 +101,7 @@ interface StartJobMessage {
 		token: string;
 		jobId: string;
 		to: string;
-		speed: ConversionSpeed;
-		keepMetadata: boolean;
+		settings: ConversionSettings;
 	};
 }
 
@@ -413,12 +412,12 @@ export class VertdConverter extends Converter {
 					value: "custom",
 					label: m["convert.settings.common.custom"](),
 				},
-				{ value: 24, label: "24" },
-				{ value: 30, label: "30" },
-				{ value: 60, label: "60" },
-				{ value: 120, label: "120" },
-				{ value: 144, label: "144" },
-				{ value: 240, label: "240" },
+				{ value: "24", label: "24" },
+				{ value: "30", label: "30" },
+				{ value: "60", label: "60" },
+				{ value: "120", label: "120" },
+				{ value: "144", label: "144" },
+				{ value: "240", label: "240" },
 			],
 			hasCustomInput: true,
 			customInputKey: "customFps",
@@ -461,12 +460,12 @@ export class VertdConverter extends Converter {
 					value: "custom",
 					label: m["convert.settings.common.custom"](),
 				},
-				{ value: 1000, label: "1000 kbps" },
-				{ value: 2500, label: "2500 kbps" },
-				{ value: 5000, label: "5000 kbps" },
-				{ value: 8000, label: "8000 kbps" },
-				{ value: 12000, label: "12000 kbps" },
-				{ value: 18000, label: "18000 kbps" },
+				{ value: "1000", label: "1000 kbps" },
+				{ value: "2500", label: "2500 kbps" },
+				{ value: "5000", label: "5000 kbps" },
+				{ value: "8000", label: "8000 kbps" },
+				{ value: "12000", label: "12000 kbps" },
+				{ value: "18000", label: "18000 kbps" },
 			],
 			hasCustomInput: true,
 			customInputKey: "customBitrate",
@@ -482,7 +481,7 @@ export class VertdConverter extends Converter {
 			type: "select",
 			default: "auto",
 			options: CONVERSION_BITRATES.map((b) => ({
-				value: b,
+				value: b.toString(),
 				label:
 					b === "auto"
 						? m["convert.settings.common.auto"]()
@@ -501,7 +500,7 @@ export class VertdConverter extends Converter {
 			type: "select",
 			default: "auto",
 			options: SAMPLE_RATES.map((r) => ({
-				value: r,
+				value: r.toString(),
 				label:
 					r === "auto"
 						? m["convert.settings.common.auto"]()
@@ -559,6 +558,11 @@ export class VertdConverter extends Converter {
 		if (to.startsWith(".")) to = to.slice(1);
 
 		let fileUpload = input;
+		// TODO:  replace input of "custom" options with actual (bitrate = customBitrate) before sending to vertd
+		const conversionSettings = // vertd expects object not string json
+			Object.keys(settings).length > 0
+				? settings // user-provided settings
+				: await this.getDefaultSettings(); // use defaults if not provided
 
 		// if converting animated webp to video, first convert to gif
 		// ffmpeg (in vertd) doesn't support decoding animated webp still.. while supporting encoding animated webp for some reason
@@ -573,7 +577,7 @@ export class VertdConverter extends Converter {
 					fileUpload = await magickConverter.convert(
 						input,
 						".gif",
-						settings,
+						conversionSettings,
 						100,
 					);
 					this.log(`successfully converted webp to gif`);
@@ -614,15 +618,6 @@ export class VertdConverter extends Converter {
 			});
 
 			ws.onopen = () => {
-				let speed = settings.vertdSpeed as ConversionSpeed | undefined;
-				const sliderIndex = settings.vertdSpeedSlider as
-					| number
-					| undefined;
-				if (sliderIndex !== undefined) {
-					speed = vertdSpeedValues[sliderIndex] || speed;
-				}
-				if (!speed) speed = Settings.instance.settings.vertdSpeed;
-				const keepMetadata = Settings.instance.settings.metadata;
 				this.log(
 					`opened ws connection to vertd for file ${input.name}`,
 				);
@@ -632,11 +627,11 @@ export class VertdConverter extends Converter {
 						jobId: uploadRes.id,
 						token: uploadRes.auth,
 						to,
-						speed,
-						keepMetadata,
+						settings: conversionSettings,
 					},
 				};
 				ws.send(JSON.stringify(msg));
+				this.log(JSON.stringify(msg, null, 2));
 				this.log(`sent startJob message for file ${input.name}`);
 			};
 

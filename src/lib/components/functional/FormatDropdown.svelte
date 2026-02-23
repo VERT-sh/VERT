@@ -163,7 +163,7 @@
 				: [];
 
 			// if no formats found at all, show everything
-			if (formats.length !== 0) {
+			if (formats.length === 0) {
 				const allCategories = Object.keys(categories);
 				// show formats for current category if set, otherwise all formats
 				const fallbackFormats =

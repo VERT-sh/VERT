@@ -50,7 +50,7 @@ export class Settings {
 		magickQuality: 100,
 		ffmpegQuality: "auto",
 		ffmpegSampleRate: "auto",
-		ffmpegCustomSampleRate: 44100,
+		ffmpegCustomSampleRate: 44100, //TODO: make string to match for vertd
 		vertdBlockedHashes: new Map<string, Date[]>(),
 	});
 
