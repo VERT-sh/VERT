@@ -183,9 +183,7 @@ const progressEstimate = (
 	return progress * progressEstimates[type] + previousValues;
 };
 
-const processSettings = (
-	settings: ConversionSettings,
-): ConversionSettings => {
+const processSettings = (settings: ConversionSettings): ConversionSettings => {
 	const newSettings = { ...settings };
 
 	if (newSettings.fps === "custom") {
@@ -413,6 +411,9 @@ export class VertdConverter extends Converter {
 			},
 		];
 
+		// get default vertd speed
+		const defaultSpeed = Settings.instance.settings.vertdSpeed;
+		const defaultSpeedIndex = vertdSpeedValues.indexOf(defaultSpeed);
 		const qualitySpeedRange: SettingDefinition = {
 			key: "vertdSpeedSlider",
 			label: m["convert.settings.video.speed"](),
@@ -421,7 +422,7 @@ export class VertdConverter extends Converter {
 			min: 0,
 			max: qualityOptions.length - 1,
 			step: 1,
-			default: 3,
+			default: defaultSpeedIndex !== -1 ? defaultSpeedIndex : 3,
 			options: qualityOptions.map((option, index) => ({
 				value: index,
 				label: option.label,
