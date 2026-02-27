@@ -51,6 +51,7 @@
 		"clsx": "^2.1.1",
 		"fflate": "^0.8.2",
 		"lucide-svelte": "^0.554.0",
+		"mediabunny": "^1.35.1",
 		"music-metadata": "^11.10.3",
 		"overlayscrollbars": "^2.12.0",
 		"overlayscrollbars-svelte": "^0.5.5",

@@ -1,16 +1,19 @@
 import { VertFile } from "$lib/types";
 import {
-	ALL_FORMATS,
+	BlobSource,
 	BufferTarget,
 	Conversion,
 	Input,
+	MATROSKA,
 	MkvOutputFormat,
 	MovOutputFormat,
-	Mp4InputFormat,
+	MP4,
 	Mp4OutputFormat,
+	MPEG_TS,
+	MpegTsOutputFormat,
 	Output,
-	ReadableStreamSource,
-	WebMInputFormat,
+	QTFF,
+	WEBM,
 	WebMOutputFormat,
 } from "mediabunny";
 import { Converter, FormatInfo, type WorkerStatus } from "./converter.svelte";
@@ -22,9 +25,16 @@ export class MediabunnyConverter extends Converter {
 
 	public supportedFormats: FormatInfo[] = [
 		new FormatInfo("mp4", true, true),
-		new FormatInfo("mkv", false, true),
+		new FormatInfo("m4v", true, true),
+		new FormatInfo("mkv", true, true),
 		new FormatInfo("webm", true, true),
-		new FormatInfo("mov", false, true),
+		new FormatInfo("mov", true, true),
+
+		// mp4-based formats (should work)
+		new FormatInfo("f4v", true, true),
+		new FormatInfo("3gp", true, true),
+		new FormatInfo("3g2", true, true),
+		new FormatInfo("ts", true, true),
 	];
 
 	constructor() {
@@ -32,10 +42,10 @@ export class MediabunnyConverter extends Converter {
 	}
 
 	public async convert(file: VertFile, to: string): Promise<VertFile> {
-		const stream = file.file.stream(); // ReadableStream<Uint8Array<ArrayBuffer>>
 		const input = new Input({
-			formats: [new Mp4InputFormat(), new WebMInputFormat()],
-			source: new ReadableStreamSource(stream),
+			// TODO: add settings & special handling for certain formats & codecs
+			formats: [MP4, QTFF, MATROSKA, WEBM, MPEG_TS],
+			source: new BlobSource(file.file)
 		});
 
 		const toFormat = to.startsWith(".") ? to.slice(1) : to;
@@ -81,7 +91,12 @@ export class MediabunnyConverter extends Converter {
 
 	private format(ext: string) {
 		switch (ext) {
+			// i'm seeing this "ISMV" format from microsoft, so maybe?
 			case ".mp4":
+			case ".m4v":
+			case ".f4v":
+			case ".3gp":
+			case ".3g2":
 				return new Mp4OutputFormat();
 			case ".mkv":
 				return new MkvOutputFormat();
@@ -89,6 +104,8 @@ export class MediabunnyConverter extends Converter {
 				return new WebMOutputFormat();
 			case ".mov":
 				return new MovOutputFormat();
+			case ".ts":
+				return new MpegTsOutputFormat();
 			default:
 				throw new Error(`Unsupported format: ${ext}`);
 		}
