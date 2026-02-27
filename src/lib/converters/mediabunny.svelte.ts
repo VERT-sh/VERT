@@ -18,10 +18,14 @@ import {
 } from "mediabunny";
 import { Converter, FormatInfo, type WorkerStatus } from "./converter.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
+import { error, log } from "$lib/util/logger";
 
 export class MediabunnyConverter extends Converter {
 	public name = "mediabunny";
 	public status: WorkerStatus = $state("ready");
+	public reportsProgress: boolean = true;
+
+	private activeConversions = new Map<string, Conversion>();
 
 	public supportedFormats: FormatInfo[] = [
 		new FormatInfo("mp4", true, true),
@@ -45,11 +49,8 @@ export class MediabunnyConverter extends Converter {
 		const input = new Input({
 			// TODO: add settings & special handling for certain formats & codecs
 			formats: [MP4, QTFF, MATROSKA, WEBM, MPEG_TS],
-			source: new BlobSource(file.file)
+			source: new BlobSource(file.file),
 		});
-
-		const toFormat = to.startsWith(".") ? to.slice(1) : to;
-		const originalName = file.file.name.split(".").slice(0, -1).join(".");
 
 		const output = new Output({
 			format: this.format(to),
@@ -72,12 +73,20 @@ export class MediabunnyConverter extends Converter {
 			throw new Error(`Mediabunny conversion not valid`);
 		}
 
+		conversion.onProgress = (progress) => {
+			file.progress = progress * 100;
+		};
+
+		this.activeConversions.set(file.id, conversion);
 		await conversion.execute();
+		this.activeConversions.delete(file.id);
 
 		if (!output.target.buffer) {
 			throw new Error("Mediabunny conversion failed: no output buffer");
 		}
 
+		const toFormat = to.startsWith(".") ? to.slice(1) : to;
+		const originalName = file.file.name.split(".").slice(0, -1).join(".");
 		const f = new File(
 			[output.target.buffer],
 			`${originalName}.${toFormat}`,
@@ -111,5 +120,22 @@ export class MediabunnyConverter extends Converter {
 		}
 	}
 
-	public async cancel(input: VertFile): Promise<void> {}
+	public async cancel(input: VertFile): Promise<void> {
+		const conversion = this.activeConversions.get(input.id);
+		if (!conversion) {
+			error(
+				["converters", this.name],
+				`no active conversion found for file ${input.name}`,
+			);
+			return;
+		}
+
+		log(
+			["converters", this.name],
+			`cancelling conversion for file ${input.name}`,
+		);
+
+		conversion.cancel();
+		this.activeConversions.delete(input.id);
+	}
 }

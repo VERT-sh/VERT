@@ -66,10 +66,20 @@
 		};
 
 		if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
+			const formats = Array.from(
+				new Set([
+					...getSupportedFormats("vertd").split(", "),
+					...getSupportedFormats("mediabunny").split(", "),
+				]),
+			)
+				.filter((f) => f !== "none")
+				.join(", ");
+
 			output.Video = {
-				formats: getSupportedFormats("vertd"),
+				formats,
 				icon: Film,
 				title: m["upload.cards.video"](),
+				// TODO: add "partial" state? somehow figure out diff between vertd and mediabunny
 				status: $vertdLoaded === true ? "ready" : "not-ready", // not using converter.status for this
 			};
 		}
@@ -231,9 +241,11 @@
 										</p>
 									{/if}
 									<p>
-										{@html sanitize(m["upload.cards.status.text"]({
-											status: getStatusText(s.status),
-										}))}
+										{@html sanitize(
+											m["upload.cards.status.text"]({
+												status: getStatusText(s.status),
+											}),
+										)}
 									</p>
 									<div
 										class="flex flex-col items-center relative"
