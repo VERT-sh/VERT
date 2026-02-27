@@ -183,6 +183,35 @@ const progressEstimate = (
 	return progress * progressEstimates[type] + previousValues;
 };
 
+const processSettings = (
+	settings: ConversionSettings,
+): ConversionSettings => {
+	const newSettings = { ...settings };
+
+	if (newSettings.fps === "custom") {
+		newSettings.fps = newSettings.customFps;
+		delete newSettings.customFps;
+	}
+	if (newSettings.resolution === "custom") {
+		newSettings.resolution = newSettings.customResolution;
+		delete newSettings.customResolution;
+	}
+	if (newSettings.videoBitrate === "custom") {
+		newSettings.videoBitrate = newSettings.customVideoBitrate;
+		delete newSettings.customVideoBitrate;
+	}
+	if (newSettings.audioBitrate === "custom") {
+		newSettings.audioBitrate = newSettings.customAudioBitrate;
+		delete newSettings.customAudioBitrate;
+	}
+	if (newSettings.sampleRate === "custom") {
+		newSettings.sampleRate = newSettings.customSampleRate;
+		delete newSettings.customSampleRate;
+	}
+
+	return newSettings;
+};
+
 const uploadFile = async (file: VertFile): Promise<UploadResponse> => {
 	const apiUrl = await VertdInstance.instance.url();
 	const formData = new FormData();
@@ -468,7 +497,7 @@ export class VertdConverter extends Converter {
 				{ value: "18000", label: "18000 kbps" },
 			],
 			hasCustomInput: true,
-			customInputKey: "customBitrate",
+			customInputKey: "customVideoBitrate",
 			placeholder: m["convert.settings.video.bitrate_placeholder"](),
 		};
 
@@ -490,7 +519,7 @@ export class VertdConverter extends Converter {
 							: `${b} kbps`,
 			})),
 			hasCustomInput: true,
-			customInputKey: "customBitrate",
+			customInputKey: "customAudioBitrate",
 			placeholder: m["convert.settings.audio.bitrate_placeholder"](),
 		};
 
@@ -558,7 +587,6 @@ export class VertdConverter extends Converter {
 		if (to.startsWith(".")) to = to.slice(1);
 
 		let fileUpload = input;
-		// TODO:  replace input of "custom" options with actual (bitrate = customBitrate) before sending to vertd
 		const conversionSettings = // vertd expects object not string json
 			Object.keys(settings).length > 0
 				? settings // user-provided settings
@@ -627,7 +655,7 @@ export class VertdConverter extends Converter {
 						jobId: uploadRes.id,
 						token: uploadRes.auth,
 						to,
-						settings: conversionSettings,
+						settings: processSettings(conversionSettings),
 					},
 				};
 				ws.send(JSON.stringify(msg));
