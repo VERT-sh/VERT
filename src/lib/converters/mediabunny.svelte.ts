@@ -2,6 +2,7 @@ import { VertFile } from "$lib/types";
 import {
 	BlobSource,
 	BufferTarget,
+	canEncodeAudio,
 	Conversion,
 	Input,
 	MATROSKA,
@@ -16,6 +17,8 @@ import {
 	WEBM,
 	WebMOutputFormat,
 } from "mediabunny";
+import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
+import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
 import { Converter, FormatInfo, type WorkerStatus } from "./converter.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { error, log } from "$lib/util/logger";
@@ -43,6 +46,19 @@ export class MediabunnyConverter extends Converter {
 
 	constructor() {
 		super();
+
+		// additional mediabunny coders
+		// currently both official ones -- maybe add our own in the future
+		this.initializeCodecs();
+	}
+
+	private async initializeCodecs(): Promise<void> {
+		if (!(await canEncodeAudio("mp3"))) {
+			// Only register the custom encoder if there's no native support
+			registerMp3Encoder();
+		}
+		registerAc3Decoder();
+		registerAc3Encoder();
 	}
 
 	public async convert(file: VertFile, to: string): Promise<VertFile> {
@@ -114,7 +130,7 @@ export class MediabunnyConverter extends Converter {
 			case ".mov":
 				return new MovOutputFormat();
 			case ".ts":
-				return new MpegTsOutputFormat();
+				return new MpegTsOutputFormat(); // FIXME: audio tracks discarded - prob needs another audio codec
 			default:
 				throw new Error(`Unsupported format: ${ext}`);
 		}

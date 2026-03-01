@@ -12,6 +12,8 @@
         "@fontsource/lexend": "^5.2.11",
         "@fontsource/radio-canada-big": "^5.2.7",
         "@imagemagick/magick-wasm": "^0.0.37",
+        "@mediabunny/ac3": "^1.35.1",
+        "@mediabunny/mp3-encoder": "^1.35.1",
         "@stripe/stripe-js": "^8.5.2",
         "byte-data": "^19.0.1",
         "client-zip": "^2.5.0",
@@ -175,6 +177,10 @@
     "@lix-js/sdk": ["@lix-js/sdk@0.4.7", "", { "dependencies": { "@lix-js/server-protocol-schema": "0.1.1", "dedent": "1.5.1", "human-id": "^4.1.1", "js-sha256": "^0.11.0", "kysely": "^0.27.4", "sqlite-wasm-kysely": "0.3.0", "uuid": "^10.0.0" } }, "sha512-pRbW+joG12L0ULfMiWYosIW0plmW4AsUdiPCp+Z8rAsElJ+wJ6in58zhD3UwUcd4BNcpldEGjg6PdA7e0RgsDQ=="],
 
     "@lix-js/server-protocol-schema": ["@lix-js/server-protocol-schema@0.1.1", "", {}, "sha512-jBeALB6prAbtr5q4vTuxnRZZv1M2rKe8iNqRQhFJ4Tv7150unEa0vKyz0hs8Gl3fUGsWaNJBh3J8++fpbrpRBQ=="],
+
+    "@mediabunny/ac3": ["@mediabunny/ac3@1.35.1", "", { "peerDependencies": { "mediabunny": "^1.0.0" } }, "sha512-gLx3mFfs58/cdz2/f5Fp+6ZOrX5Jli3AZMXw/5EJcgm2VpnC/2oxtJyP1x/00PIS4UCE770slwIdz7U+2CQ31g=="],
+
+    "@mediabunny/mp3-encoder": ["@mediabunny/mp3-encoder@1.35.1", "", { "peerDependencies": { "mediabunny": "^1.0.0" } }, "sha512-iY6FcPs7GbHMs/ASPmdzwojKcBN4AfMa+zFh4KNZNaLToyR7aEZILj9FsPVJA11bshaoo80dTaBcn69i33JHVA=="],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 

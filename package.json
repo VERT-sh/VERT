@@ -45,6 +45,8 @@
 		"@fontsource/lexend": "^5.2.11",
 		"@fontsource/radio-canada-big": "^5.2.7",
 		"@imagemagick/magick-wasm": "^0.0.37",
+		"@mediabunny/ac3": "^1.35.1",
+		"@mediabunny/mp3-encoder": "^1.35.1",
 		"@stripe/stripe-js": "^8.5.2",
 		"byte-data": "^19.0.1",
 		"client-zip": "^2.5.0",
