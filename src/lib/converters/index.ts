@@ -5,6 +5,7 @@ import { PandocConverter } from "./pandoc.svelte";
 import { VertdConverter } from "./vertd.svelte";
 import { MagickConverter } from "./magick.svelte";
 import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
+import { MediabunnyConverter } from "./mediabunny.svelte";
 
 const getConverters = (): Converter[] => {
 	const converters: Converter[] = [
@@ -12,9 +13,11 @@ const getConverters = (): Converter[] => {
 		new FFmpegConverter(),
 	];
 
-	if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
+	if (DISABLE_ALL_EXTERNAL_REQUESTS) {
 		converters.push(new VertdConverter());
 	}
+
+	converters.push(new MediabunnyConverter());
 
 	converters.push(new PandocConverter());
 	return converters;
@@ -45,7 +48,7 @@ categories.audio.formats =
 		.map((f) => f.name) || [];
 categories.video.formats =
 	converters
-		.find((c) => c.name === "vertd")
+		.find((c) => c.name === "mediabunny")
 		?.supportedFormats.filter((f) => f.toSupported && f.isNative)
 		.map((f) => f.name) || [];
 categories.image.formats =
