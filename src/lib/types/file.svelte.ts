@@ -8,6 +8,7 @@ import type {
 	ConversionSettings,
 	SettingDefinition,
 } from "./conversion-settings";
+import { log } from "$lib/util/logger";
 
 const MAX_BLOB_SIZE_LIMIT = 2 * 1024 * 1024 * 1024; // 2GB
 
@@ -98,10 +99,12 @@ export class VertFile {
 	public supportsStreaming(): boolean {
 		// only vertd (video/gif -> video/gif) supports streaming
 		// rest of converters need entire file in memory, limited by ArrayBuffer limits
-		const converter = this.isZip()
-			? this.converters[0]
-			: this.findConverters()[0];
-		return converter?.name === "vertd";
+		const availableConverters = this.isZip()
+			? this.converters
+			: this.findConverters();
+		return availableConverters.some(
+			(converter) => converter.name === "vertd",
+		);
 	}
 
 	constructor(file: File, to: string, blobUrl?: string) {
@@ -119,8 +122,8 @@ export class VertFile {
 		this.download = this.download.bind(this);
 		this.blobUrl = blobUrl;
 
-		console.log(`VertFile: ${this.name}`);
-		console.log(
+		log(
+			["file", "init"],
 			`findConverters: ${this.findConverters()
 				.map((c) => c.name)
 				.join(", ")}`,

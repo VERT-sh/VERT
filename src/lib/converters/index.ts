@@ -43,11 +43,17 @@ categories.audio.formats =
 		.find((c) => c.name === "ffmpeg")
 		?.supportedFormats.filter((f) => f.toSupported && f.isNative)
 		.map((f) => f.name) || [];
-categories.video.formats =
-	converters
-		.find((c) => c.name === "mediabunny")
-		?.supportedFormats.filter((f) => f.toSupported && f.isNative)
-		.map((f) => f.name) || [];
+categories.video.formats = [
+	...new Set(
+		converters
+			.filter((c) => c.name === "mediabunny" || c.name === "vertd")
+			.flatMap((c) =>
+				c.supportedFormats
+					.filter((f) => f.toSupported && f.isNative)
+					.map((f) => f.name),
+			),
+	),
+];
 categories.image.formats =
 	converters
 		.find((c) => c.name === "imagemagick")

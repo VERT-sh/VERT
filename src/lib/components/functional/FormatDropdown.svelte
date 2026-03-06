@@ -30,159 +30,110 @@
 		dropdownSize = "default",
 		file,
 	}: Props = $props();
+
 	let open = $state(false);
 	let dropdown = $state<HTMLDivElement>();
-	let currentCategory = $state<string | null>();
-	let searchQuery = $state("");
 	let dropdownMenu: HTMLElement | undefined = $state();
-	let rootCategory: string | null = null;
 	let dropdownPosition = $state<"left" | "center" | "right">("center");
+	let showSettingsModal = $state(false);
+	let currentCategory = $state<string | null>(null);
+	let searchQuery = $state("");
+	let rootCategory: string | null = null;
 
-	// initialize current category
-	$effect(() => {
-		if (currentCategory) return;
+	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
 
-		log(
-			["dropdown", "init"],
-			`initializing category, file: ${file?.name}, from: ${from}`,
+	const shouldExclude = (format: string): boolean =>
+		!!(
+			categories["audio"]?.formats.includes(from ?? "") &&
+			format === ".gif"
 		);
 
-		// find the category whose formats overlap most with the converters for this file (or all files)
-		// this finds the best matching category based on the formats supported by the converters
-		const pickCategoryFromConverters = (
-			convList: VertFile["converters"],
-		) => {
-			let bestCategory: string | null = null;
-			let maxOverlap = 0;
+	const getFormats = (cat: string) =>
+		(categories[cat]?.formats ?? []).filter((f) => !shouldExclude(f));
 
-			for (const cat of Object.keys(categories)) {
-				const overlapCount = categories[cat].formats.filter((fmt) =>
-					convList.some((conv) => conv.formatStrings().includes(fmt)),
-				).length;
-
-				if (overlapCount > maxOverlap) {
-					maxOverlap = overlapCount;
-					bestCategory = cat;
-				}
-			}
-
-			return bestCategory;
-		};
-
-		// decide which converters to use to detect category:
-		// - if file provided, prefer its primary converter -- individual file dropdown
-		// - if no file provided, use all converters from all files -- "set all to" dropdown
-		const primaryConverter = file ? (file.isZip() ? file.converters[0] : file.findConverters()[0]) : null;
-		const convertersToCheck = file
-			? primaryConverter
-				? [primaryConverter]
-				: file.converters
-			: files.files.flatMap((f) => f.converters);
-
-		log(
-			["dropdown", "init"],
-			`checking converters:`,
-			convertersToCheck.map((c) => c.formatStrings()),
-		);
-
-		// if file is provided, first try to find its category by input format
-		let detectedCategory: string | null = null;
-		if (file && from) {
-			detectedCategory =
-				Object.keys(categories).find((cat) =>
-					categories[cat].formats.includes(from),
-				) || null;
-			log(
-				["dropdown", "init"],
-				`detected category from input format (${from}):`,
-				detectedCategory,
+	const detectCategory = (): string => {
+		if (from) {
+			// find category containing the input format, if any
+			const match = Object.keys(categories).find((cat) =>
+				categories[cat].formats.includes(from),
 			);
+			if (match) return match;
 		}
 
-		// fallback to category with most converter overlap if input category not found
-		detectedCategory =
-			detectedCategory ||
-			pickCategoryFromConverters(convertersToCheck) ||
-			Object.keys(categories)[0];
+		// else, fall back by finding the category whose formats overlap most with the converters for this file
+		// this finds the best matching category based on the formats supported by the converters
+		const converters = file
+			? file.findConverters()
+			: files.files.flatMap((f) => f.findConverters());
 
-		log(["dropdown", "init"], `final detected category:`, detectedCategory);
+		let best: string | null = null;
+		let maxOverlap = 0;
+		for (const cat of Object.keys(categories)) {
+			const count = categories[cat].formats.filter((fmt) =>
+				converters.some((c) => c.formatStrings().includes(fmt)),
+			).length;
+			if (count > maxOverlap) {
+				maxOverlap = count;
+				best = cat;
+			}
+		}
 
-		currentCategory = detectedCategory;
-		rootCategory = detectedCategory;
+		return best ?? Object.keys(categories)[0];
+	};
+
+	$effect(() => {
+		if (currentCategory) return;
+		const detected = detectCategory();
+		log(
+			["dropdown", "init"],
+			`root category: ${detected} (file: ${file?.name}, from: ${from})`,
+		);
+		currentCategory = detected;
+		rootCategory = detected;
 	});
 
 	// other available categories based on current category (e.g. converting between video and audio)
 	const availableCategories = $derived.by(() => {
 		if (!rootCategory) return Object.keys(categories);
 
-		let finalCategories = Object.keys(categories).filter(
+		let cats = Object.keys(categories).filter(
 			(cat) =>
 				cat === rootCategory ||
 				categories[rootCategory!]?.canConvertTo?.includes(cat),
 		);
 
 		// handle special cases
-		if (from === ".gif" || from === ".webp") finalCategories.push("video");
+		if (from === ".gif" || from === ".webp") cats.push("video");
 		if (from === ".apng") {
-			//finalCategories.push("image"); // -- buggy, magick can't convert from or to apng properly
-			finalCategories = finalCategories.filter((cat) => cat !== "audio");
+			//cats.push("image"); // -- buggy, magick can't convert from or to apng properly
+			cats = cats.filter((cat) => cat !== "audio");
 		}
 
-		// filter out categories that can't handle large files (due to browser/device limitations)
-		if (file && file.isLarge()) {
-			// if file is large video, disable audio conversion
-			if (rootCategory === "video")
-				finalCategories = finalCategories.filter(
-					(cat) => cat !== "audio",
-				);
-		}
+		// large videos can't be extracted to audio (browser/device limitations)
+		if (file && file.isLarge() && rootCategory === "video")
+			cats = cats.filter((cat) => cat !== "audio");
 
-		return finalCategories;
+		return cats.filter(
+			(cat) => (categories[cat]?.formats?.length ?? 0) > 0,
+		);
 	});
 
-	const shouldInclude = (format: string, category: string): boolean => {
-		// if converting from audio to video, dont show gifs
-		if (
-			categories["audio"]?.formats.includes(from ?? "") &&
-			format === ".gif"
-		) {
-			return false;
-		}
-
-		return true;
-	};
-
 	const filteredData = $derived.by(() => {
-		const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
-
 		// if no query, return formats for current category
 		if (!searchQuery) {
-			let formats = currentCategory
-				? categories[currentCategory].formats.filter((format) =>
-						shouldInclude(format, currentCategory!),
-					)
-				: [];
+			const formats = getFormats(currentCategory ?? "");
 
-			// if no formats found at all, show everything
-			if (formats.length === 0) {
-				const allCategories = Object.keys(categories);
-				// show formats for current category if set, otherwise all formats
-				const fallbackFormats =
-					currentCategory && allCategories.includes(currentCategory)
-						? categories[currentCategory].formats
-						: allCategories.flatMap(
-								(cat) => categories[cat].formats,
-							);
-
+			// if no formats & categories for some reason, fall back and show all categories/formats
+			if (formats.length === 0 && availableCategories.length === 0) {
 				log(
 					["dropdown", "filter"],
-					`no formats found for category ${currentCategory}, showing all categories and formats as fallback`,
+					`no formats or available categories found for file ${file?.name}, falling back to all categories and formats`,
 				);
-
 				return {
-					categories: allCategories,
-					formats: fallbackFormats,
+					categories: Object.keys(categories),
+					formats: categories[currentCategory ?? ""]?.formats ?? [],
 					isFallback: true,
+					resolvedCategory: currentCategory,
 				};
 			}
 
@@ -190,61 +141,58 @@
 				categories: availableCategories,
 				formats,
 				isFallback: false,
+				resolvedCategory: currentCategory,
 			};
 		}
-		const searchLower = normalize(searchQuery);
 
-		// find all categories that have formats matching the search query
+		const query = normalize(searchQuery);
+		const matches = (f: string) =>
+			normalize(f).includes(query) && !shouldExclude(f);
+
 		const matchingCategories = availableCategories.filter((cat) =>
-			categories[cat].formats.some(
-				(format) =>
-					normalize(format).includes(searchLower) &&
-					shouldInclude(format, cat),
-			),
+			(categories[cat]?.formats ?? []).some(matches),
 		);
+
 		if (matchingCategories.length === 0) {
 			return {
 				categories: availableCategories,
 				formats: [],
 				isFallback: false,
+				resolvedCategory: currentCategory,
 			};
 		}
 
-		// if current category has no matches, switch to first category that does
-		const currentCategoryHasMatches =
-			currentCategory &&
-			matchingCategories.some((cat) => cat === currentCategory);
-		if (!currentCategoryHasMatches && matchingCategories.length > 0) {
-			const newCategory = matchingCategories[0];
-			currentCategory = newCategory;
-		}
+		// stay on current category if it matches, else move to first matched category
+		const resolvedCategory =
+			currentCategory && matchingCategories.includes(currentCategory)
+				? currentCategory
+				: matchingCategories[0];
 
-		// return formats only from the current category that match the search
-		let filteredFormats = currentCategory
-			? categories[currentCategory].formats.filter(
-					(format) =>
-						normalize(format).includes(searchLower) &&
-						shouldInclude(format, currentCategory!),
-				)
-			: [];
+		const formats = (categories[resolvedCategory ?? ""]?.formats ?? [])
+			.filter(matches)
+			.sort((a, b) => {
+				// exact matches first, then original order
+				const aExact = normalize(a) === query;
+				const bExact = normalize(b) === query;
+				if (aExact !== bExact) return aExact ? -1 : 1;
+				return 0;
+			});
 
-		// sorting exact match first, then others
-		filteredFormats = filteredFormats.sort((a, b) => {
-			const aExact = normalize(a) === searchLower;
-			const bExact = normalize(b) === searchLower;
-			if (aExact && !bExact) return -1;
-			if (!aExact && bExact) return 1;
-			return 0;
-		});
-
+		// show categories with matches, formats from within resolved category
 		return {
-			categories:
-				matchingCategories.length > 0
-					? matchingCategories
-					: availableCategories,
-			formats: filteredFormats,
+			categories: matchingCategories,
+			formats,
 			isFallback: false,
+			resolvedCategory,
 		};
+	});
+
+	$effect(() => {
+		if (
+			filteredData.resolvedCategory &&
+			filteredData.resolvedCategory !== currentCategory
+		)
+			currentCategory = filteredData.resolvedCategory;
 	});
 
 	const selectOption = (option: string) => {
@@ -253,24 +201,10 @@
 
 		// save user's selection to dropdownStates for this session
 		if (file) {
-			dropdownStates.update((states) => {
-				const updated = { ...states, [file.name]: option };
-				return updated;
-			});
-		}
-
-		// find the category of this option if it's not in the current category
-		if (
-			currentCategory &&
-			!categories[currentCategory].formats.includes(option)
-		) {
-			const formatCategory = Object.keys(categories).find((cat) =>
-				categories[cat].formats.includes(option),
-			);
-
-			if (formatCategory) {
-				currentCategory = formatCategory;
-			}
+			dropdownStates.update((states) => ({
+				...states,
+				[file.name]: option,
+			}));
 		}
 
 		onselect?.(option);
@@ -282,39 +216,14 @@
 	};
 
 	const handleSearch = (event: Event) => {
-		const query = (event.target as HTMLInputElement).value;
-		searchQuery = query;
-
-		// find which categories have matching formats & switch
-		if (query) {
-			const queryLower = query.toLowerCase();
-			const categoriesWithMatches = availableCategories.filter((cat) =>
-				categories[cat].formats.some((format) =>
-					format.toLowerCase().includes(queryLower),
-				),
-			);
-
-			if (categoriesWithMatches.length > 0) {
-				const currentHasMatches =
-					currentCategory &&
-					categories[currentCategory].formats.some((format) =>
-						format.toLowerCase().includes(queryLower),
-					);
-
-				if (!currentHasMatches) {
-					currentCategory = categoriesWithMatches[0];
-				}
-			}
-		}
+		searchQuery = (event.target as HTMLInputElement).value;
 	};
 
 	const onEnter = (event: KeyboardEvent) => {
-		if (event.key === "Enter") {
-			event.preventDefault();
-			if (filteredData.formats.length > 0) {
-				selectOption(filteredData.formats[0]);
-			}
-		}
+		if (event.key !== "Enter") return;
+		event.preventDefault();
+		if (filteredData.formats.length > 0)
+			selectOption(filteredData.formats[0]);
 	};
 
 	const clickDropdown = () => {
@@ -327,25 +236,18 @@
 			const viewportWidth = window.innerWidth;
 
 			let dropdownWidth: number;
-			if (dropdownSize === "large") {
-				dropdownWidth = rect.width * 3.2;
-			} else if (dropdownSize === "default") {
+			if (dropdownSize === "large") dropdownWidth = rect.width * 3.2;
+			else if (dropdownSize === "default")
 				dropdownWidth = rect.width * 2.5;
-			} else {
-				dropdownWidth = rect.width * 1.5;
-			}
+			else dropdownWidth = rect.width * 1.5;
 
 			const centerX = rect.left + rect.width / 2;
 			const leftEdge = centerX - dropdownWidth / 2;
 			const rightEdge = centerX + dropdownWidth / 2;
 
-			if (leftEdge < 0) {
-				dropdownPosition = "left";
-			} else if (rightEdge > viewportWidth) {
-				dropdownPosition = "right";
-			} else {
-				dropdownPosition = "center";
-			}
+			if (leftEdge < 0) dropdownPosition = "left";
+			else if (rightEdge > viewportWidth) dropdownPosition = "right";
+			else dropdownPosition = "center";
 		}
 
 		setTimeout(() => {
@@ -387,8 +289,6 @@
 		newFiles.forEach((f) => files.add(f));
 	};
 
-	let showSettingsModal = $state(false);
-
 	const settings = () => {
 		if (!file) return;
 		showSettingsModal = true;
@@ -396,9 +296,7 @@
 
 	onMount(() => {
 		const handleClickOutside = (e: MouseEvent) => {
-			if (dropdown && !dropdown.contains(e.target as Node)) {
-				open = false;
-			}
+			if (dropdown && !dropdown.contains(e.target as Node)) open = false;
 		};
 
 		const handleResize = () => {
