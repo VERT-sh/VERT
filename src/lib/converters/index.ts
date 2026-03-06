@@ -11,15 +11,12 @@ const getConverters = (): Converter[] => {
 	const converters: Converter[] = [
 		new MagickConverter(),
 		new FFmpegConverter(),
+		new PandocConverter(),
+		new MediabunnyConverter(),
 	];
 
-	if (DISABLE_ALL_EXTERNAL_REQUESTS) {
-		converters.push(new VertdConverter());
-	}
+	if (!DISABLE_ALL_EXTERNAL_REQUESTS) converters.push(new VertdConverter());
 
-	converters.push(new MediabunnyConverter());
-
-	converters.push(new PandocConverter());
 	return converters;
 };
 

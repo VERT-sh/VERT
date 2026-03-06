@@ -298,8 +298,8 @@ export class VertdConverter extends Converter {
 	>();
 
 	public supportedFormats = [
-		new FormatInfo("mkv", true, true),
 		new FormatInfo("mp4", true, true),
+		new FormatInfo("mkv", true, true),
 		new FormatInfo("webm", true, true),
 		new FormatInfo("avi", true, true),
 		new FormatInfo("wmv", true, true),

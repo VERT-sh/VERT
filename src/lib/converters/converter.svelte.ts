@@ -16,6 +16,7 @@ export class FormatInfo {
 		public fromSupported = true,
 		public toSupported = true,
 		public isNative = true,
+		public priority = 1,
 	) {
 		this.name = name;
 		if (!this.name.startsWith(".")) {

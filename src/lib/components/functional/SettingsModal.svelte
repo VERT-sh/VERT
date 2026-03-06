@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable @typescript-eslint/no-explicit-any */
 	import { SearchIcon } from "lucide-svelte";
 	import Dropdown from "./Dropdown.svelte";
 	import FancyInput from "./FancyInput.svelte";
@@ -26,7 +27,9 @@
 	const applySettings = async () => {
 		onclose?.();
 		if (!file) return;
-		const converter = file.findConverter();
+		const converter = file.isZip()
+			? file.converters[0]
+			: file.findConverters()[0];
 		if (!converter) {
 			log(
 				["settings", "modal"],
@@ -72,8 +75,10 @@
 					<p class="text-base">
 						{@html sanitize(
 							m["convert.settings.description"]({
-								converter:
-									file.findConverter()?.name || "unknown",
+								converter: file.isZip()
+									? file.converters[0].name
+									: file.findConverters()[0].name ||
+										"unknown",
 								filename: file.name,
 							}),
 						)}

@@ -74,7 +74,7 @@ export class FFmpegConverter extends Converter {
 		new FormatInfo("m4b", true, true),
 		new FormatInfo("voc", true, true),
 		new FormatInfo("weba", true, true),
-		...videoFormats.map((f) => new FormatInfo(f, true, true, false)),
+		...videoFormats.map((f) => new FormatInfo(f, true, true, false, 0)),
 	];
 
 	public readonly reportsProgress = true;

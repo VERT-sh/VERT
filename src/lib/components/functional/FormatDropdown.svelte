@@ -72,9 +72,10 @@
 		// decide which converters to use to detect category:
 		// - if file provided, prefer its primary converter -- individual file dropdown
 		// - if no file provided, use all converters from all files -- "set all to" dropdown
+		const primaryConverter = file ? (file.isZip() ? file.converters[0] : file.findConverters()[0]) : null;
 		const convertersToCheck = file
-			? file.findConverter()
-				? [file.findConverter()!]
+			? primaryConverter
+				? [primaryConverter]
 				: file.converters
 			: files.files.flatMap((f) => f.converters);
 

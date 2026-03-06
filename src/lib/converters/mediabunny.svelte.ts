@@ -22,31 +22,147 @@ import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
 import { Converter, FormatInfo, type WorkerStatus } from "./converter.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { error, log } from "$lib/util/logger";
+import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 
 // codec compatibility object, based on docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
 const codecCompatibility = {
 	video: {
-		mp4: ['avc', 'hevc', 'vp8', 'vp9', 'av1'],
-		m4v: ['avc', 'hevc', 'vp8', 'vp9', 'av1'],
-		f4v: ['avc', 'hevc', 'vp8', 'vp9', 'av1'],
-		'3gp': ['avc', 'hevc', 'vp8', 'vp9', 'av1'],
-		'3g2': ['avc', 'hevc', 'vp8', 'vp9', 'av1'],
-		mkv: ['avc', 'hevc', 'vp8', 'vp9', 'av1'],
-		webm: ['vp8', 'vp9', 'av1'],
-		mov: ['avc', 'hevc', 'vp8', 'vp9', 'av1'],
-		ts: ['avc', 'hevc'],
+		mp4: ["avc", "hevc", "vp8", "vp9", "av1"],
+		m4v: ["avc", "hevc", "vp8", "vp9", "av1"],
+		f4v: ["avc", "hevc", "vp8", "vp9", "av1"],
+		"3gp": ["avc", "hevc", "vp8", "vp9", "av1"],
+		"3g2": ["avc", "hevc", "vp8", "vp9", "av1"],
+		mkv: ["avc", "hevc", "vp8", "vp9", "av1"],
+		webm: ["vp8", "vp9", "av1"],
+		mov: ["avc", "hevc", "vp8", "vp9", "av1"],
+		ts: ["avc", "hevc"],
 	},
 	audio: {
-		mp4: ['aac', 'opus', 'mp3', 'vorbis', 'flac', 'ac3', 'eac3', 'pcm-s16', 'pcm-s16be', 'pcm-s24', 'pcm-s24be', 'pcm-s32', 'pcm-s32be', 'pcm-f32', 'pcm-f64'],
-		m4v: ['aac', 'opus', 'mp3', 'vorbis', 'flac', 'ac3', 'eac3', 'pcm-s16', 'pcm-s16be', 'pcm-s24', 'pcm-s24be', 'pcm-s32', 'pcm-s32be', 'pcm-f32', 'pcm-f64'],
-		f4v: ['aac', 'opus', 'mp3', 'vorbis', 'flac', 'ac3', 'eac3', 'pcm-s16', 'pcm-s16be', 'pcm-s24', 'pcm-s24be', 'pcm-s32', 'pcm-s32be', 'pcm-f32', 'pcm-f64'],
-		'3gp': ['aac', 'opus', 'mp3', 'vorbis', 'flac', 'ac3', 'eac3', 'pcm-s16', 'pcm-s16be', 'pcm-s24', 'pcm-s24be', 'pcm-s32', 'pcm-s32be', 'pcm-f32', 'pcm-f64'],
-		'3g2': ['aac', 'opus', 'mp3', 'vorbis', 'flac', 'ac3', 'eac3', 'pcm-s16', 'pcm-s16be', 'pcm-s24', 'pcm-s24be', 'pcm-s32', 'pcm-s32be', 'pcm-f32', 'pcm-f64'],
-		mkv: ['aac', 'opus', 'mp3', 'vorbis', 'flac', 'ac3', 'eac3', 'pcm-u8', 'pcm-s16', 'pcm-s24', 'pcm-s32', 'pcm-f32', 'pcm-f64'],
-		webm: ['opus', 'vorbis'],
-		mov: ['aac', 'opus', 'mp3', 'vorbis', 'flac', 'ac3', 'eac3', 'pcm-u8', 'pcm-s8', 'pcm-s16', 'pcm-s16be', 'pcm-s24', 'pcm-s24be', 'pcm-s32', 'pcm-s32be', 'pcm-f32', 'pcm-f32be', 'pcm-f64', 'ulaw', 'alaw'],
-		ts: ['aac', 'mp3', 'ac3', 'eac3'],
+		mp4: [
+			"aac",
+			"opus",
+			"mp3",
+			"vorbis",
+			"flac",
+			"ac3",
+			"eac3",
+			"pcm-s16",
+			"pcm-s16be",
+			"pcm-s24",
+			"pcm-s24be",
+			"pcm-s32",
+			"pcm-s32be",
+			"pcm-f32",
+			"pcm-f64",
+		],
+		m4v: [
+			"aac",
+			"opus",
+			"mp3",
+			"vorbis",
+			"flac",
+			"ac3",
+			"eac3",
+			"pcm-s16",
+			"pcm-s16be",
+			"pcm-s24",
+			"pcm-s24be",
+			"pcm-s32",
+			"pcm-s32be",
+			"pcm-f32",
+			"pcm-f64",
+		],
+		f4v: [
+			"aac",
+			"opus",
+			"mp3",
+			"vorbis",
+			"flac",
+			"ac3",
+			"eac3",
+			"pcm-s16",
+			"pcm-s16be",
+			"pcm-s24",
+			"pcm-s24be",
+			"pcm-s32",
+			"pcm-s32be",
+			"pcm-f32",
+			"pcm-f64",
+		],
+		"3gp": [
+			"aac",
+			"opus",
+			"mp3",
+			"vorbis",
+			"flac",
+			"ac3",
+			"eac3",
+			"pcm-s16",
+			"pcm-s16be",
+			"pcm-s24",
+			"pcm-s24be",
+			"pcm-s32",
+			"pcm-s32be",
+			"pcm-f32",
+			"pcm-f64",
+		],
+		"3g2": [
+			"aac",
+			"opus",
+			"mp3",
+			"vorbis",
+			"flac",
+			"ac3",
+			"eac3",
+			"pcm-s16",
+			"pcm-s16be",
+			"pcm-s24",
+			"pcm-s24be",
+			"pcm-s32",
+			"pcm-s32be",
+			"pcm-f32",
+			"pcm-f64",
+		],
+		mkv: [
+			"aac",
+			"opus",
+			"mp3",
+			"vorbis",
+			"flac",
+			"ac3",
+			"eac3",
+			"pcm-u8",
+			"pcm-s16",
+			"pcm-s24",
+			"pcm-s32",
+			"pcm-f32",
+			"pcm-f64",
+		],
+		webm: ["opus", "vorbis"],
+		mov: [
+			"aac",
+			"opus",
+			"mp3",
+			"vorbis",
+			"flac",
+			"ac3",
+			"eac3",
+			"pcm-u8",
+			"pcm-s8",
+			"pcm-s16",
+			"pcm-s16be",
+			"pcm-s24",
+			"pcm-s24be",
+			"pcm-s32",
+			"pcm-s32be",
+			"pcm-f32",
+			"pcm-f32be",
+			"pcm-f64",
+			"ulaw",
+			"alaw",
+		],
+		ts: ["aac", "mp3", "ac3", "eac3"],
 	},
 } as const;
 
@@ -57,18 +173,21 @@ export class MediabunnyConverter extends Converter {
 
 	private activeConversions = new Map<string, Conversion>();
 
-	public supportedFormats: FormatInfo[] = [
-		new FormatInfo("mp4", true, true),
-		new FormatInfo("m4v", true, true),
-		new FormatInfo("mkv", true, true),
-		new FormatInfo("webm", true, true),
-		new FormatInfo("mov", true, true),
+	private formats: string[] = [
+		"mp4",
+		"m4v",
+		"mkv",
+		"webm",
+		"mov",
+		"f4v",
+		"3gp",
+		"3g2",
+		"mts",
+		"ts",
+	];
 
-		// mp4-based formats (should work)
-		new FormatInfo("f4v", true, true),
-		new FormatInfo("3gp", true, true),
-		new FormatInfo("3g2", true, true),
-		new FormatInfo("ts", true, true),
+	public supportedFormats: FormatInfo[] = [
+		...this.formats.map((f) => new FormatInfo(f, true, true, true, 2)),
 	];
 
 	constructor() {
@@ -81,8 +200,10 @@ export class MediabunnyConverter extends Converter {
 
 	private async initializeCodecs(): Promise<void> {
 		if (!(await canEncodeAudio("mp3"))) {
-			// Only register the custom encoder if there's no native support
 			registerMp3Encoder();
+		}
+		if (!(await canEncodeAudio("flac"))) {
+			registerFlacEncoder();
 		}
 		registerAc3Decoder();
 		registerAc3Encoder();

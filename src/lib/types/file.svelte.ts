@@ -23,7 +23,7 @@ export class VertFile {
 		return this.file.name;
 	}
 
-	public conversionSettings = $state<ConversionSettings>({}); // empty object = defaults
+	public conversionSettings = $state<ConversionSettings>({}); // empty object / key = default
 	public progress = $state(0);
 	public result = $state<VertFile | null>(null);
 
@@ -40,45 +40,55 @@ export class VertFile {
 	public isZip = $state(() => this.from === ".zip");
 
 	public getAvailableSettings(input: VertFile): Promise<SettingDefinition[]> {
-		const converter = this.findConverter();
+		const converter = this.findConverters()[0];
 		if (!converter) return Promise.resolve([]);
 		return converter.getAvailableSettings(input);
 	}
 
 	public findConverters(supportedFormats: string[] = [this.from]) {
-		const converter = this.converters
-			.filter((converter) =>
-				converter
-					.formatStrings()
-					.map((f) => supportedFormats.includes(f)),
-			)
-			.sort(byNative(this.from));
-		return converter;
-	}
+		return this.converters
+			.filter((converter) => {
+				if (
+					!converter
+						.formatStrings()
+						.some((f) => supportedFormats.includes(f))
+				) {
+					return false;
+				}
 
-	public findConverter() {
-		// zip will always only be added if there's one converter that supports all files - handled in store's _handleZipFile()
-		if (this.isZip()) return this.converters[0];
+				if (
+					supportedFormats.includes(this.from) &&
+					supportedFormats.includes(this.to)
+				) {
+					if (!converter.formatStrings().includes(this.to)) {
+						return false;
+					}
 
-		const converter = this.converters.find((converter) => {
-			if (
-				!converter.formatStrings().includes(this.from) ||
-				!converter.formatStrings().includes(this.to)
-			) {
-				return false;
-			}
+					const theirFrom = converter.supportedFormats.find(
+						(f) => f.name === this.from,
+					);
+					const theirTo = converter.supportedFormats.find(
+						(f) => f.name === this.to,
+					);
+					if (!theirFrom || !theirTo) return false;
+					if (!theirFrom.isNative && !theirTo.isNative) return false;
+				}
 
-			const theirFrom = converter.supportedFormats.find(
-				(f) => f.name === this.from,
-			);
-			const theirTo = converter.supportedFormats.find(
-				(f) => f.name === this.to,
-			);
-			if (!theirFrom || !theirTo) return false;
-			if (!theirFrom.isNative && !theirTo.isNative) return false;
-			return true;
-		});
-		return converter;
+				return true;
+			})
+			.sort(byNative(this.from))
+			.sort((a, b) => {
+				// sort by priority of format
+				const aFrom = a.supportedFormats.find(
+					(f) => f.name === this.from,
+				);
+				const bFrom = b.supportedFormats.find(
+					(f) => f.name === this.from,
+				);
+				const aPriority = aFrom ? aFrom.priority : 1;
+				const bPriority = bFrom ? bFrom.priority : 1;
+				return bPriority - aPriority;
+			});
 	}
 
 	public isLarge(): boolean {
@@ -88,7 +98,9 @@ export class VertFile {
 	public supportsStreaming(): boolean {
 		// only vertd (video/gif -> video/gif) supports streaming
 		// rest of converters need entire file in memory, limited by ArrayBuffer limits
-		const converter = this.findConverter();
+		const converter = this.isZip()
+			? this.converters[0]
+			: this.findConverters()[0];
 		return converter?.name === "vertd";
 	}
 
@@ -106,12 +118,21 @@ export class VertFile {
 		this.convert = this.convert.bind(this);
 		this.download = this.download.bind(this);
 		this.blobUrl = blobUrl;
+
+		console.log(`VertFile: ${this.name}`);
+		console.log(
+			`findConverters: ${this.findConverters()
+				.map((c) => c.name)
+				.join(", ")}`,
+		);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
 		if (!this.converters.length) throw new Error("No converters found");
-		const converter = this.findConverter();
+		const converter = this.isZip()
+			? this.converters[0]
+			: this.findConverters()[0];
 		if (!converter) throw new Error("No converter found");
 		this.result = null;
 		this.progress = 0;
@@ -231,7 +252,9 @@ export class VertFile {
 
 	public async cancel() {
 		if (!this.processing) return;
-		const converter = this.findConverter();
+		const converter = this.isZip()
+			? this.converters[0]
+			: this.findConverters()[0];
 		if (!converter) throw new Error("No converter found");
 		this.cancelled = true;
 		try {

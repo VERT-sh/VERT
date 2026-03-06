@@ -42,7 +42,7 @@
 			const settings = Settings.instance.settings;
 			if (processedFileIds.has(file.id)) return;
 
-			const converter = file.findConverter();
+			const converter = file.isZip() ? file.converters[0] : file.findConverters()[0];
 			if (!converter) return;
 
 			let category: string | undefined;
@@ -108,7 +108,7 @@
 		let type = "";
 		if (files.files.length) {
 			const converters = files.files.map(
-				(file) => file.findConverter()?.name,
+				(file) => (file.isZip() ? file.converters[0] : file.findConverters()[0])?.name,
 			);
 			const uniqueTypes = new Set(converters);
 
@@ -130,7 +130,7 @@
 </script>
 
 {#snippet fileItem(file: VertFile, index: number)}
-	{@const currentConverter = file.findConverter()}
+	{@const currentConverter = file.isZip() ? file.converters[0] : file.findConverters()[0]}
 	{@const isImage = currentConverter?.name === "imagemagick"}
 	{@const isAudio = currentConverter?.name === "ffmpeg"}
 	{@const isVideo = currentConverter?.name === "vertd"}
