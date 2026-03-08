@@ -23,6 +23,12 @@ import { Converter, FormatInfo, type WorkerStatus } from "./converter.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { error, log } from "$lib/util/logger";
 import { registerFlacEncoder } from "@mediabunny/flac-encoder";
+import { m } from "$lib/paraglide/messages";
+import type {
+	SettingDefinition,
+	ConversionSettings,
+} from "$lib/types/conversion-settings";
+import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.svelte";
 
 // codec compatibility object, based on docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
@@ -207,6 +213,152 @@ export class MediabunnyConverter extends Converter {
 		}
 		registerAc3Decoder();
 		registerAc3Encoder();
+	}
+
+	public async getAvailableSettings(): Promise<SettingDefinition[]> {
+		// TODO: maybe have a slider for conversion speed/quality like vertd
+
+		const fps: SettingDefinition = {
+			key: "fps",
+			label: m["convert.settings.video.fps"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: "24", label: "24" },
+				{ value: "30", label: "30" },
+				{ value: "60", label: "60" },
+				{ value: "120", label: "120" },
+				{ value: "144", label: "144" },
+				{ value: "240", label: "240" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customFps",
+			placeholder: m["convert.settings.video.fps_placeholder"](),
+		};
+
+		const resolution: SettingDefinition = {
+			key: "resolution",
+			label: m["convert.settings.video.resolution"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: "426x240", label: "426x240" },
+				{ value: "640x360", label: "640x360" },
+				{ value: "854x480", label: "854x480" },
+				{ value: "1280x720", label: "1280x720" },
+				{ value: "1920x1080", label: "1920x1080" },
+				{ value: "2560x1440", label: "2560x1440" },
+				{ value: "3840x2160", label: "3840x2160" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customResolution",
+			placeholder: m["convert.settings.video.resolution_placeholder"](),
+		};
+
+		// TODO: allow CRF for consistent quality?
+		const videoBitrate: SettingDefinition = {
+			key: "videoBitrate",
+			label: m["convert.settings.video.video_bitrate"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: "1000", label: "1000 kbps" },
+				{ value: "2500", label: "2500 kbps" },
+				{ value: "5000", label: "5000 kbps" },
+				{ value: "8000", label: "8000 kbps" },
+				{ value: "12000", label: "12000 kbps" },
+				{ value: "18000", label: "18000 kbps" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customVideoBitrate",
+			placeholder: m["convert.settings.video.bitrate_placeholder"](),
+		};
+
+		/*
+		 *	audio settings
+		 */
+		const audioBitrate: SettingDefinition = {
+			key: "audioBitrate",
+			label: m["convert.settings.video.audio_bitrate"](),
+			type: "select",
+			default: "auto",
+			options: CONVERSION_BITRATES.map((b) => ({
+				value: b.toString(),
+				label:
+					b === "auto"
+						? m["convert.settings.common.auto"]()
+						: b === "custom"
+							? m["convert.settings.common.custom"]()
+							: `${b} kbps`,
+			})),
+			hasCustomInput: true,
+			customInputKey: "customAudioBitrate",
+			placeholder: m["convert.settings.audio.bitrate_placeholder"](),
+		};
+
+		const sampleRate: SettingDefinition = {
+			key: "sampleRate",
+			label: m["convert.settings.audio.sample_rate"](),
+			type: "select",
+			default: "auto",
+			options: SAMPLE_RATES.map((r) => ({
+				value: r.toString(),
+				label:
+					r === "auto"
+						? m["convert.settings.common.auto"]()
+						: r === "custom"
+							? m["convert.settings.common.custom"]()
+							: `${r} Hz`,
+			})),
+			hasCustomInput: true,
+			customInputKey: "customSampleRate",
+			placeholder: m["convert.settings.audio.sample_rate_placeholder"](),
+		};
+
+		/*
+		 *	common
+		 */
+		const metadata: SettingDefinition = {
+			key: "metadata",
+			label: m["convert.settings.common.metadata"](),
+			type: "boolean",
+			default: true,
+		};
+
+		// trim/crop/rotate - also have another ui for this prob
+
+		return [
+			videoBitrate,
+			resolution,
+			fps,
+			metadata,
+			audioBitrate,
+			sampleRate,
+		];
+	}
+
+	public async getDefaultSettings(): Promise<ConversionSettings> {
+		const defaults: ConversionSettings = {};
+		const settings = await this.getAvailableSettings();
+		settings.forEach((setting) => {
+			defaults[setting.key] = setting.default;
+		});
+		return defaults;
 	}
 
 	public async convert(file: VertFile, to: string): Promise<VertFile> {

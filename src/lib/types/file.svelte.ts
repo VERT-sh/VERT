@@ -40,10 +40,15 @@ export class VertFile {
 
 	public isZip = $state(() => this.from === ".zip");
 
-	public getAvailableSettings(input: VertFile): Promise<SettingDefinition[]> {
-		const converter = this.findConverters()[0];
-		if (!converter) return Promise.resolve([]);
-		return converter.getAvailableSettings(input);
+	public getAvailableSettings(
+		input: VertFile,
+		converter: string | undefined = this.conversionSettings.converter,
+	): Promise<SettingDefinition[]> {
+		const converterInstance = this.converters.find(
+			(c) => c.name === converter,
+		);
+		if (!converterInstance) return Promise.resolve([]);
+		return converterInstance.getAvailableSettings(input);
 	}
 
 	public findConverters(supportedFormats: string[] = [this.from]) {
@@ -133,10 +138,19 @@ export class VertFile {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
 		if (!this.converters.length) throw new Error("No converters found");
-		const converter = this.isZip()
-			? this.converters[0]
-			: this.findConverters()[0];
+
+		const customConverter = this.converters.find(
+			(c) => c.name === this.conversionSettings.converter,
+		);
+		const converter =
+			customConverter ||
+			(this.isZip() // TODO: not sure if the zip needs to be changed now
+				? this.converters[0]
+				: this.findConverters([this.from, this.to])[0]);
+		log(["file", "convert"], `using converter: ${converter.name}`);
+
 		if (!converter) throw new Error("No converter found");
+
 		this.result = null;
 		this.progress = 0;
 		this.processing = true;
@@ -255,9 +269,9 @@ export class VertFile {
 
 	public async cancel() {
 		if (!this.processing) return;
-		const converter = this.isZip()
-			? this.converters[0]
-			: this.findConverters()[0];
+		const converter = this.converters.find(
+			(c) => c.name === this.conversionSettings.converter,
+		);
 		if (!converter) throw new Error("No converter found");
 		this.cancelled = true;
 		try {

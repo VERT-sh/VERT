@@ -5,7 +5,11 @@
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import ProgressBar from "$lib/components/visual/ProgressBar.svelte";
 	import Tooltip from "$lib/components/visual/Tooltip.svelte";
-	import { categories, converters } from "$lib/converters";
+	import {
+		categories,
+		converterCategories,
+		converters,
+	} from "$lib/converters";
 	import {
 		effects,
 		files,
@@ -35,6 +39,22 @@
 
 	let processedFileIds = $state(new Set<string>());
 
+	const getCurrentConverter = (file: VertFile) => {
+		const converterName = file.conversionSettings.converter;
+		const availableConverters = file.isZip()
+			? file.converters
+			: file.findConverters();
+
+		if (converterName) {
+			const selectedConverter =
+				availableConverters.find((c) => c.name === converterName) ||
+				file.converters.find((c) => c.name === converterName);
+			if (selectedConverter) return selectedConverter;
+		}
+
+		return file.isZip() ? file.converters[0] : file.findConverters()[0];
+	};
+
 	$effect(() => {
 		if (!Settings.instance.settings || files.files.length === 0) return;
 
@@ -42,14 +62,19 @@
 			const settings = Settings.instance.settings;
 			if (processedFileIds.has(file.id)) return;
 
-			const converter = file.isZip() ? file.converters[0] : file.findConverters()[0];
+			const converter = getCurrentConverter(file);
 			if (!converter) return;
 
+		// Initialize converter in settings if not already set
+		if (!file.conversionSettings.converter)
+			file.conversionSettings.converter = converter.name;
+
+
 			let category: string | undefined;
-			const isImage = converter.name === "imagemagick";
-			const isAudio = converter.name === "ffmpeg";
-			const isVideo = converter.name === "vertd";
-			const isDocument = converter.name === "pandoc";
+			const isImage = converterCategories.image.includes(converter.name);
+			const isAudio = converterCategories.audio.includes(converter.name);
+			const isVideo = converterCategories.video.includes(converter.name);
+			const isDocument = converterCategories.doc.includes(converter.name);
 
 			if (isImage) category = "image";
 			else if (isAudio) category = "audio";
@@ -108,16 +133,19 @@
 		let type = "";
 		if (files.files.length) {
 			const converters = files.files.map(
-				(file) => (file.isZip() ? file.converters[0] : file.findConverters()[0])?.name,
+				(file) => getCurrentConverter(file)?.name,
 			);
 			const uniqueTypes = new Set(converters);
 
 			if (uniqueTypes.size === 1) {
 				const onlyType = converters[0];
-				if (onlyType === "imagemagick") type = "blue";
-				else if (onlyType === "ffmpeg") type = "purple";
-				else if (onlyType === "vertd") type = "red";
-				else if (onlyType === "pandoc") type = "green";
+				if (converterCategories.image.includes(onlyType)) type = "blue";
+				else if (converterCategories.audio.includes(onlyType))
+					type = "purple";
+				else if (converterCategories.video.includes(onlyType))
+					type = "red";
+				else if (converterCategories.doc.includes(onlyType))
+					type = "green";
 			}
 		}
 
@@ -130,11 +158,12 @@
 </script>
 
 {#snippet fileItem(file: VertFile, index: number)}
-	{@const currentConverter = file.isZip() ? file.converters[0] : file.findConverters()[0]}
-	{@const isImage = currentConverter?.name === "imagemagick"}
-	{@const isAudio = currentConverter?.name === "ffmpeg"}
-	{@const isVideo = currentConverter?.name === "vertd"}
-	{@const isDocument = currentConverter?.name === "pandoc"}
+	{@const currentConverter = getCurrentConverter(file)}
+	{@const name = currentConverter?.name || "unknown"}
+	{@const isImage = converterCategories.image.includes(name)}
+	{@const isAudio = converterCategories.audio.includes(name)}
+	{@const isVideo = converterCategories.video.includes(name)}
+	{@const isDocument = converterCategories.doc.includes(name)}
 	<Panel class="p-5 flex flex-col min-w-0 gap-4 relative">
 		<div class="flex-shrink-0 h-8 w-full flex items-center gap-2">
 			{#if !converters.length}

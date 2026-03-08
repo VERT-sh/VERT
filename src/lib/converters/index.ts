@@ -7,6 +7,7 @@ import { MagickConverter } from "./magick.svelte";
 import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
 import { MediabunnyConverter } from "./mediabunny.svelte";
 
+// TODO: change this to include category with initialization to replace converterCategories and maybe categories as well
 const getConverters = (): Converter[] => {
 	const converters: Converter[] = [
 		new MagickConverter(),
@@ -21,6 +22,12 @@ const getConverters = (): Converter[] => {
 };
 
 export const converters = getConverters();
+export const converterCategories = {
+	image: ["imagemagick"],
+	video: ["mediabunny", "vertd"],
+	audio: ["ffmpeg"],
+	doc: ["pandoc"],
+}
 
 export function getConverterByFormat(format: string) {
 	for (const converter of converters) {
@@ -40,13 +47,13 @@ export const categories: Categories = {
 
 categories.audio.formats =
 	converters
-		.find((c) => c.name === "ffmpeg")
+		.find((c) => converterCategories.audio.includes(c.name))
 		?.supportedFormats.filter((f) => f.toSupported && f.isNative)
 		.map((f) => f.name) || [];
 categories.video.formats = [
 	...new Set(
 		converters
-			.filter((c) => c.name === "mediabunny" || c.name === "vertd")
+			.filter((c) => converterCategories.video.includes(c.name))
 			.flatMap((c) =>
 				c.supportedFormats
 					.filter((f) => f.toSupported && f.isNative)
@@ -56,11 +63,11 @@ categories.video.formats = [
 ];
 categories.image.formats =
 	converters
-		.find((c) => c.name === "imagemagick")
+		.find((c) => converterCategories.image.includes(c.name))
 		?.formatStrings((f) => f.toSupported) || [];
 categories.doc.formats =
 	converters
-		.find((c) => c.name === "pandoc")
+		.find((c) => converterCategories.doc.includes(c.name))
 		?.supportedFormats.filter((f) => f.toSupported && f.isNative)
 		.map((f) => f.name) || [];
 

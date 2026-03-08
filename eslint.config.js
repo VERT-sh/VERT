@@ -31,9 +31,9 @@ export default ts.config(
 		ignores: ["build/", ".svelte-kit/", "dist/"],
 	},
 	{
-		files: ["**/*.ts", "**/*.svelte.ts"],
+		files: ["**/*.ts", "**/*.svelte.ts", "**/*.svelte"],
 		rules: {
-			"no-at-html-tags": "off",
+			"svelte/no-at-html-tags": "off",
 		},
 	},
 );

@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { byNative, converters } from "$lib/converters";
+import { byNative, converterCategories, converters } from "$lib/converters";
 import { error, log } from "$lib/util/logger";
 import { VertFile } from "$lib/types";
 import { parseBlob, selectCover } from "music-metadata";
@@ -36,12 +36,12 @@ class Files {
 	private _addThumbnail = async (file: VertFile) => {
 		this.thumbnailQueue.add(async () => {
 			const isAudio = converters
-				.find((c) => c.name === "ffmpeg")
+				.find((c) => converterCategories.audio.includes(c.name))
 				?.supportedFormats.filter((f) => f.isNative)
 				.map((f) => f.name)
 				?.includes(file.from.toLowerCase());
 			const isVideo = converters
-				.find((c) => c.name === "vertd")
+				.find((c) => converterCategories.video.includes(c.name))
 				?.supportedFormats.filter((f) => f.isNative)
 				.map((f) => f.name)
 				?.includes(file.from.toLowerCase());
@@ -291,7 +291,7 @@ class Files {
 			this._addThumbnail(vf);
 
 			const convName = converter.name;
-			if (file.size > MAX_ARRAY_BUFFER_SIZE && convName === "vertd") {
+			if (file.size > MAX_ARRAY_BUFFER_SIZE && (converterCategories.video.includes(convName))) {
 				ToastManager.add({
 					type: "warning",
 					message: m["convert.large_file_warning"]({
@@ -303,10 +303,11 @@ class Files {
 				});
 			}
 
-			const isVideo = convName === "vertd";
+			// TODO: only show if vertd is needed/requested
+			const isServerVideo = convName === "vertd";
 			const acceptedExternalWarning =
 				localStorage.getItem("acceptedExternalWarning") === "true";
-			if (isVideo && !acceptedExternalWarning && !this._warningShown) {
+			if (isServerVideo && !acceptedExternalWarning && !this._warningShown) {
 				this._warningShown = true;
 				const title = m["convert.external_warning.title"]();
 				const message = m["convert.external_warning.text"]();
