@@ -4,6 +4,7 @@ import { m } from "$lib/paraglide/messages";
 import { ToastManager } from "$lib/util/toast.svelte";
 import type { Component } from "svelte";
 import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
+import FallbackToast from "$lib/components/functional/popups/FallbackToast.svelte";
 import type {
 	ConversionSettings,
 	SettingDefinition,
@@ -37,6 +38,9 @@ export class VertFile {
 	public cancelled = $state(false);
 
 	public converters: Converter[] = [];
+	private fallbackToastId: number | null = null;
+	private attemptedConverters = new Set<string>();
+	private retryingFallback = false;
 
 	public isZip = $state(() => this.from === ".zip");
 
@@ -137,6 +141,8 @@ export class VertFile {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
+		if (!this.retryingFallback) this.attemptedConverters.clear();
+
 		if (!this.converters.length) throw new Error("No converters found");
 
 		const customConverter = this.converters.find(
@@ -162,6 +168,7 @@ export class VertFile {
 		}
 
 		if (!converter) throw new Error("No converter found");
+		this.attemptedConverters.add(converter.name);
 		log(["file", "convert"], `using converter: ${converter.name}`);
 
 		this.result = null;
@@ -181,8 +188,74 @@ export class VertFile {
 						...args,
 					);
 			this.result = res;
+			if (this.fallbackToastId !== null) {
+				ToastManager.remove(this.fallbackToastId);
+				this.fallbackToastId = null;
+			}
 		} catch (err) {
 			if (!this.cancelled) this.toastErr(err);
+
+			const compatibleConverters = this.findConverters([
+				this.from,
+				this.to,
+			]);
+			const nextConverter = compatibleConverters.find(
+				(c) => !this.attemptedConverters.has(c.name),
+			);
+
+			// TODO: clean up languages file, then migrate all languages to new structure
+
+			// TODO: should figure out a cleaner way to do this
+			if (!this.cancelled && nextConverter) {
+				if (this.fallbackToastId !== null)
+					ToastManager.remove(this.fallbackToastId);
+
+				this.fallbackToastId = ToastManager.add({
+					type: "warning",
+					disappearing: false,
+					message: FallbackToast,
+					additional: {
+						fileName: this.file.name,
+						nextConverter: nextConverter.name,
+						onNext: async () => {
+							if (this.fallbackToastId !== null)
+								ToastManager.remove(this.fallbackToastId);
+							this.fallbackToastId = null;
+
+							log(
+								["file", "convert"],
+								`retrying ${this.name} with next compatible converter: ${nextConverter.name}`,
+							);
+
+							this.conversionSettings = {
+								...this.conversionSettings,
+								converter: nextConverter.name,
+							};
+							this.retryingFallback = true;
+							try {
+								await this.convert(...args);
+							} finally {
+								this.retryingFallback = false;
+							}
+						},
+						onCancel: () => {
+							if (this.fallbackToastId !== null)
+								ToastManager.remove(this.fallbackToastId);
+							this.fallbackToastId = null;
+							this.cancelled = true;
+						},
+					},
+				});
+			} else if (!this.cancelled) {
+				this.cancelled = true;
+				ToastManager.add({
+					type: "error",
+					message: m["convert.errors.converter_fallback.all_failed"]({
+						filename: this.file.name,
+					}),
+				});
+			}
+
 			this.result = null;
 		}
 		this.processing = false;

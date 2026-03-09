@@ -145,6 +145,12 @@
 		},
 		"errors": {
 			"cant_convert": "We can't convert this file.",
+			"converter_fallback": {
+				"body": "Conversion failed for {filename}. Would you like to try the next compatible converter {converter}?",
+				"yes": "Next converter",
+				"no": "Cancel conversion",
+				"all_failed": "All compatible converters failed for {filename}. Conversion has been cancelled."
+			},
 			"vertd_server": "what are you doing..? you're supposed to run the vertd server!",
 			"vertd_generic_view": "View error details",
 			"vertd_generic_body": "An error occurred whilst whilst trying convert your video. Would you like to submit this video to the developers to help fix this bug? Only your video file will be sent. No identifiers will be uploaded.",
