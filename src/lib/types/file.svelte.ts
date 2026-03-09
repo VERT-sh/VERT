@@ -142,14 +142,27 @@ export class VertFile {
 		const customConverter = this.converters.find(
 			(c) => c.name === this.conversionSettings.converter,
 		);
-		const converter =
-			customConverter ||
-			(this.isZip() // TODO: not sure if the zip needs to be changed now
-				? this.converters[0]
-				: this.findConverters([this.from, this.to])[0]);
-		log(["file", "convert"], `using converter: ${converter.name}`);
+		let converter = customConverter;
+
+		if (!converter) {
+			const compatibleConverters = this.findConverters([
+				this.from,
+				this.to,
+			]);
+			if (compatibleConverters.length) {
+				converter = compatibleConverters[0];
+				log(["file", "convert"], `found compatible converter: ${converter.name}`);
+			} else {
+				log(["file", "convert"], `no compatible converter found for ${this.from} to ${this.to}`);
+				// TODO: handle zip converter fallback explicitly if needed
+				// TODO: provide a clearer error path for unsupported from/to pairs
+			}
+		} else {
+			log(["file", "convert"], `using custom converter from settings: ${converter.name}`);
+		}
 
 		if (!converter) throw new Error("No converter found");
+		log(["file", "convert"], `using converter: ${converter.name}`);
 
 		this.result = null;
 		this.progress = 0;

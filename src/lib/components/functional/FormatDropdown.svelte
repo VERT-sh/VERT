@@ -8,7 +8,7 @@
 	import { onMount } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
-	import SettingsModal from "./SettingsModal.svelte";
+	import SettingsModal from "./popups/SettingsModal.svelte";
 	import { log } from "$lib/util/logger";
 
 	type Props = {
@@ -279,7 +279,7 @@
 					});
 					const ext = filename.split(".").pop() ?? "";
 					return new VertFile(f, ext);
-				} catch (err) {
+				} catch {
 					return null;
 				}
 			})

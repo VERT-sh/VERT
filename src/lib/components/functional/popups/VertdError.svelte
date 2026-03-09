@@ -31,8 +31,9 @@
 		submitting = true;
 		try {
 			await submitInner();
-		} catch (e) {}
-		submitting = false;
+		} finally {
+			submitting = false;
+		}
 	};
 
 	const submitInner = async () => {

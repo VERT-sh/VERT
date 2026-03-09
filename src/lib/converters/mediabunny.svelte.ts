@@ -17,12 +17,12 @@ import {
 	WEBM,
 	WebMOutputFormat,
 } from "mediabunny";
-import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
+import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
+import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 import { Converter, FormatInfo, type WorkerStatus } from "./converter.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { error, log } from "$lib/util/logger";
-import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 import { m } from "$lib/paraglide/messages";
 import type {
 	SettingDefinition,
@@ -32,6 +32,7 @@ import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.svelte";
 
 // codec compatibility object, based on docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const codecCompatibility = {
 	video: {
 		mp4: ["avc", "hevc", "vp8", "vp9", "av1"],
@@ -200,7 +201,7 @@ export class MediabunnyConverter extends Converter {
 		super();
 
 		// additional mediabunny coders
-		// currently both official ones -- maybe add our own in the future
+		// currently the official ones -- maybe add our own in the future
 		this.initializeCodecs();
 	}
 

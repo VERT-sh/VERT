@@ -64,12 +64,6 @@
 
 			const converter = getCurrentConverter(file);
 			if (!converter) return;
-
-		// Initialize converter in settings if not already set
-		if (!file.conversionSettings.converter)
-			file.conversionSettings.converter = converter.name;
-
-
 			let category: string | undefined;
 			const isImage = converterCategories.image.includes(converter.name);
 			const isAudio = converterCategories.audio.includes(converter.name);

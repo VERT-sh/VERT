@@ -1,4 +1,4 @@
-import VertdErrorComponent from "$lib/components/functional/VertdError.svelte";
+import VertdErrorComponent from "$lib/components/functional/popups/VertdError.svelte";
 import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";

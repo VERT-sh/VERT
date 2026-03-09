@@ -1,8 +1,8 @@
 <script lang="ts">
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	import { SearchIcon } from "lucide-svelte";
-	import Dropdown from "./Dropdown.svelte";
-	import FancyInput from "./FancyInput.svelte";
+	import Dropdown from "../Dropdown.svelte";
+	import FancyInput from "../FancyInput.svelte";
 	import Modal from "./Modal.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import type { VertFile } from "$lib/types";
