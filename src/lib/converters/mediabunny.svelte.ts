@@ -21,7 +21,6 @@ import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
 import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 import { Converter, FormatInfo, type WorkerStatus } from "./converter.svelte";
-import { ToastManager } from "$lib/util/toast.svelte";
 import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import type {
@@ -29,108 +28,49 @@ import type {
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
 import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.svelte";
+import { ToastManager } from "$lib/util/toast.svelte";
 
-// codec compatibility object, based on docs
+// codec compatibility stuff, based on mediabunny's docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const mp4VideoCodecs = ["avc", "hevc", "vp8", "vp9", "av1"] as const;
+const mp4AudioCodecs = [
+	"aac",
+	"opus",
+	"mp3",
+	"vorbis",
+	"flac",
+	"ac3",
+	"eac3",
+	"pcm-s16",
+	"pcm-s16be",
+	"pcm-s24",
+	"pcm-s24be",
+	"pcm-s32",
+	"pcm-s32be",
+	"pcm-f32",
+	"pcm-f64",
+] as const;
 const codecCompatibility = {
 	video: {
-		mp4: ["avc", "hevc", "vp8", "vp9", "av1"],
-		m4v: ["avc", "hevc", "vp8", "vp9", "av1"],
-		f4v: ["avc", "hevc", "vp8", "vp9", "av1"],
-		"3gp": ["avc", "hevc", "vp8", "vp9", "av1"],
-		"3g2": ["avc", "hevc", "vp8", "vp9", "av1"],
-		mkv: ["avc", "hevc", "vp8", "vp9", "av1"],
+		mp4: mp4VideoCodecs,
+		m4v: mp4VideoCodecs,
+		f4v: mp4VideoCodecs,
+		"3gp": mp4VideoCodecs,
+		"3g2": mp4VideoCodecs,
+		mkv: mp4VideoCodecs,
 		webm: ["vp8", "vp9", "av1"],
-		mov: ["avc", "hevc", "vp8", "vp9", "av1"],
+		mov: mp4VideoCodecs,
 		ts: ["avc", "hevc"],
 	},
 	audio: {
-		mp4: [
-			"aac",
-			"opus",
-			"mp3",
-			"vorbis",
-			"flac",
-			"ac3",
-			"eac3",
-			"pcm-s16",
-			"pcm-s16be",
-			"pcm-s24",
-			"pcm-s24be",
-			"pcm-s32",
-			"pcm-s32be",
-			"pcm-f32",
-			"pcm-f64",
-		],
-		m4v: [
-			"aac",
-			"opus",
-			"mp3",
-			"vorbis",
-			"flac",
-			"ac3",
-			"eac3",
-			"pcm-s16",
-			"pcm-s16be",
-			"pcm-s24",
-			"pcm-s24be",
-			"pcm-s32",
-			"pcm-s32be",
-			"pcm-f32",
-			"pcm-f64",
-		],
-		f4v: [
-			"aac",
-			"opus",
-			"mp3",
-			"vorbis",
-			"flac",
-			"ac3",
-			"eac3",
-			"pcm-s16",
-			"pcm-s16be",
-			"pcm-s24",
-			"pcm-s24be",
-			"pcm-s32",
-			"pcm-s32be",
-			"pcm-f32",
-			"pcm-f64",
-		],
-		"3gp": [
-			"aac",
-			"opus",
-			"mp3",
-			"vorbis",
-			"flac",
-			"ac3",
-			"eac3",
-			"pcm-s16",
-			"pcm-s16be",
-			"pcm-s24",
-			"pcm-s24be",
-			"pcm-s32",
-			"pcm-s32be",
-			"pcm-f32",
-			"pcm-f64",
-		],
-		"3g2": [
-			"aac",
-			"opus",
-			"mp3",
-			"vorbis",
-			"flac",
-			"ac3",
-			"eac3",
-			"pcm-s16",
-			"pcm-s16be",
-			"pcm-s24",
-			"pcm-s24be",
-			"pcm-s32",
-			"pcm-s32be",
-			"pcm-f32",
-			"pcm-f64",
-		],
+		mp4: mp4AudioCodecs,
+		m4v: mp4AudioCodecs,
+		f4v: mp4AudioCodecs,
+		"3gp": mp4AudioCodecs,
+		"3g2": mp4AudioCodecs,
+		m4a: mp4AudioCodecs,
+		m4b: mp4AudioCodecs,
+		m4p: mp4AudioCodecs,
 		mkv: [
 			"aac",
 			"opus",
@@ -173,6 +113,80 @@ const codecCompatibility = {
 	},
 } as const;
 
+const getCompatibleCodecs = (
+	type: keyof typeof codecCompatibility,
+	format: string,
+) => {
+	const normalized = format.replace(/^\./, "").toLowerCase();
+	const direct =
+		codecCompatibility[type][
+			normalized as keyof (typeof codecCompatibility)[typeof type]
+		];
+	if (direct) return [...direct];
+	return [];
+};
+
+const buildVideoConfig = (
+	settings: ConversionSettings,
+): Record<string, unknown> => {
+	const config: Record<string, unknown> = {};
+
+	if (settings.videoCodec !== "auto") config.codec = settings.videoCodec;
+
+	if (settings.videoBitrate !== "auto") {
+		const bitrate =
+			settings.videoBitrate === "custom"
+				? settings.customVideoBitrate
+				: settings.videoBitrate;
+		config.bitrate = Number(bitrate);
+	}
+
+	if (settings.fps !== "auto") {
+		const fps =
+			settings.fps === "custom" ? settings.customFps : settings.fps;
+		config.frameRate = Number(fps);
+	}
+
+	if (settings.resolution !== "auto") {
+		const resolution =
+			settings.resolution === "custom"
+				? settings.customResolution
+				: settings.resolution;
+		const [width, height] = resolution.split("x").map(Number);
+		config.width = width;
+		config.height = height;
+		config.fit = "contain"; // TODO: maybe allow changing this?
+	}
+
+	return config;
+};
+
+const buildAudioConfig = (
+	settings: ConversionSettings,
+): Record<string, unknown> => {
+	const config: Record<string, unknown> = {};
+
+	if (settings.audioCodec !== "auto") config.codec = settings.audioCodec;
+
+	if (settings.audioBitrate !== "auto") {
+		const bitrate =
+			settings.audioBitrate === "custom"
+				? settings.customAudioBitrate
+				: settings.audioBitrate;
+		config.bitrate = Number(bitrate);
+	}
+
+	if (settings.sampleRate !== "auto") {
+		const sampleRate =
+			settings.sampleRate === "custom"
+				? settings.customSampleRate
+				: settings.sampleRate;
+		config.sampleRate = Number(sampleRate);
+	}
+
+	return config;
+};
+
 export class MediabunnyConverter extends Converter {
 	public name = "mediabunny";
 	public status: WorkerStatus = $state("ready");
@@ -197,8 +211,16 @@ export class MediabunnyConverter extends Converter {
 		...this.formats.map((f) => new FormatInfo(f, true, true, true, 2)),
 	];
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private log: (...msg: any[]) => void = () => {};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private error: (...msg: any[]) => void = () => {};
+
 	constructor() {
 		super();
+
+		this.log = (msg) => log(["converters", this.name], msg);
+		this.error = (msg) => error(["converters", this.name], msg);
 
 		// additional mediabunny coders
 		// currently the official ones -- maybe add our own in the future
@@ -216,7 +238,9 @@ export class MediabunnyConverter extends Converter {
 		registerAc3Encoder();
 	}
 
-	public async getAvailableSettings(): Promise<SettingDefinition[]> {
+	public async getAvailableSettings(
+		input: VertFile,
+	): Promise<SettingDefinition[]> {
 		// TODO: maybe have a slider for conversion speed/quality like vertd
 
 		const fps: SettingDefinition = {
@@ -290,6 +314,38 @@ export class MediabunnyConverter extends Converter {
 			placeholder: m["convert.settings.video.bitrate_placeholder"](),
 		};
 
+		const toFormat = input.to;
+		const supportedVideoCodecs = getCompatibleCodecs("video", toFormat);
+		const videoCodec: SettingDefinition = {
+			key: "videoCodec",
+			label: m["convert.settings.video.video_codec"](),
+			type: "select",
+			default: "auto",
+			// TODO: get supported from codecCompatibility based on output format
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				...supportedVideoCodecs.map((codec) => ({
+					value: codec,
+					label: codec,
+				})),
+			],
+		};
+
+		const supportedAudioCodecs = getCompatibleCodecs("audio", toFormat);
+		const audioCodec: SettingDefinition = {
+			key: "audioCodec",
+			label: m["convert.settings.video.audio_codec"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				...supportedAudioCodecs.map((codec) => ({
+					value: codec,
+					label: codec,
+				})),
+			],
+		};
+
 		/*
 		 *	audio settings
 		 */
@@ -346,6 +402,8 @@ export class MediabunnyConverter extends Converter {
 		return [
 			videoBitrate,
 			resolution,
+			videoCodec,
+			audioCodec,
 			fps,
 			metadata,
 			audioBitrate,
@@ -353,16 +411,22 @@ export class MediabunnyConverter extends Converter {
 		];
 	}
 
-	public async getDefaultSettings(): Promise<ConversionSettings> {
+	public async getDefaultSettings(
+		input: VertFile,
+	): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings();
+		const settings = await this.getAvailableSettings(input);
 		settings.forEach((setting) => {
 			defaults[setting.key] = setting.default;
 		});
 		return defaults;
 	}
 
-	public async convert(file: VertFile, to: string): Promise<VertFile> {
+	public async convert(
+		file: VertFile,
+		to: string,
+		settings: ConversionSettings,
+	): Promise<VertFile> {
 		const input = new Input({
 			// TODO: add settings & special handling for certain formats & codecs
 			formats: [MP4, QTFF, MATROSKA, WEBM, MPEG_TS],
@@ -374,27 +438,41 @@ export class MediabunnyConverter extends Converter {
 			target: new BufferTarget(),
 		});
 
+		const conversionSettings =
+			Object.keys(settings).length > 0
+				? settings // user-provided settings
+				: await this.getDefaultSettings(file); // use defaults if not provided
+
+		const videoConfig = buildVideoConfig(conversionSettings);
+		const audioConfig = buildAudioConfig(conversionSettings);
+
 		const conversion = await Conversion.init({
 			input,
 			output,
+			video: videoConfig,
+			audio: audioConfig,
+			...(conversionSettings.metadata === "false" ? { tags: {} } : {}),
 		});
 
-		if (!conversion.isValid) {
-			for (const discarded of conversion.discardedTracks) {
-				ToastManager.add({
-					type: "error",
-					message: `Mediabunny discarded unsupported track: ${discarded.reason}`,
-				});
-			}
+		this.activeConversions.set(file.id, conversion);
 
-			throw new Error(`Mediabunny conversion not valid`);
+		this.log(`videoConfig: ${JSON.stringify(videoConfig)}`);
+		this.log(`audioConfig: ${JSON.stringify(audioConfig)}`);
+
+		for (const discarded of conversion.discardedTracks) {
+			ToastManager.add({
+				type: "error",
+				message: `Mediabunny discarded ${discarded.track.type} track ${discarded.track.id} (${discarded.track.codec}) for reason: ${discarded.reason}`,
+				durations: {
+					stay: 10000,
+				},
+			});
 		}
 
 		conversion.onProgress = (progress) => {
 			file.progress = progress * 100;
 		};
 
-		this.activeConversions.set(file.id, conversion);
 		await conversion.execute();
 		this.activeConversions.delete(file.id);
 
@@ -431,7 +509,7 @@ export class MediabunnyConverter extends Converter {
 			case ".mov":
 				return new MovOutputFormat();
 			case ".ts":
-				return new MpegTsOutputFormat(); // FIXME: audio tracks discarded - prob needs another audio codec
+				return new MpegTsOutputFormat();
 			default:
 				throw new Error(`Unsupported format: ${ext}`);
 		}
@@ -440,17 +518,13 @@ export class MediabunnyConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const conversion = this.activeConversions.get(input.id);
 		if (!conversion) {
-			error(
-				["converters", this.name],
+			this.error(
 				`no active conversion found for file ${input.name}`,
 			);
 			return;
 		}
 
-		log(
-			["converters", this.name],
-			`cancelling conversion for file ${input.name}`,
-		);
+		this.log(`cancelling conversion for file ${input.name}`);
 
 		conversion.cancel();
 		this.activeConversions.delete(input.id);

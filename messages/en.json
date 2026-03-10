@@ -123,7 +123,9 @@
 				"audio_bitrate": "Audio bitrate (kbps)",
 				"bitrate_placeholder": "Custom bitrate",
 				"sample_rate": "Audio sample rate (Hz)",
-				"sample_rate_placeholder": "Custom sample rate"
+				"sample_rate_placeholder": "Custom sample rate",
+				"video_codec": "Video codec",
+				"audio_codec": "Audio codec"
 			},
 			"document": {
 				"something": "Something"

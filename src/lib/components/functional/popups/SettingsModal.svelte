@@ -119,7 +119,6 @@
 					}}
 				/>
 			</div>
-			<!-- FIXME: modal loads before settings is finished for some reason -->
 			{#key settings}
 				{#await file.getAvailableSettings(file, settings.converter) then availableSettings}
 					<div class="flex flex-col gap-4">
