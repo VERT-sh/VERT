@@ -83,9 +83,16 @@ export class MagickConverter extends Converter {
 
 	public readonly reportsProgress = false;
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private log: (...msg: any[]) => void = () => {};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private error: (...msg: any[]) => void = () => {};
+
 	constructor() {
 		super();
-		log(["converters", this.name], `created converter`);
+		this.log = (msg) => log(["converters", this.name], msg);
+		this.error = (msg) => error(["converters", this.name], msg);
+		this.log(`created converter`);
 		if (!browser) return;
 		this.initializeWasm();
 	}
@@ -104,10 +111,7 @@ export class MagickConverter extends Converter {
 			this.status = "ready";
 		} catch (err) {
 			this.status = "error";
-			error(
-				["converters", this.name],
-				`Failed to load ImageMagick WASM: ${err}`,
-			);
+			this.error(`Failed to load ImageMagick WASM: ${err}`);
 
 			ToastManager.add({
 				type: "error",
@@ -209,7 +213,7 @@ export class MagickConverter extends Converter {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		...args: any[]
 	): Promise<VertFile> {
-		log(["converters", this.name], `converting ${input.name} to ${to}`);
+		this.log(`converting ${input.name} to ${to}`);
 
 		// handle converting from SVG manually because magick-wasm doesn't support it
 		if (input.from === ".svg") {
@@ -222,10 +226,7 @@ export class MagickConverter extends Converter {
 				if (to === ".png") return pngFile; // if target is png, return it directly
 				return await this.convert(pngFile, to, settings, ...args); // otherwise, recursively convert png to user's target format
 			} catch (err) {
-				error(
-					["converters", this.name],
-					`SVG conversion failed: ${err}`,
-				);
+				this.error(`SVG conversion failed: ${err}`);
 				throw err;
 			}
 		}
@@ -295,10 +296,7 @@ export class MagickConverter extends Converter {
 
 			const res = await this.waitForMessage(worker);
 			if (res.type === "finished") {
-				log(
-					["converters", this.name],
-					`converted ${input.name} to ${to}`,
-				);
+				this.log(`converted ${input.name} to ${to}`);
 				return new VertFile(
 					new File([res.output as unknown as BlobPart], input.name),
 					res.zip ? ".zip" : to,
@@ -319,17 +317,11 @@ export class MagickConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const worker = this.activeConversions.get(input.id);
 		if (!worker) {
-			error(
-				["converters", this.name],
-				`no active conversion found for file ${input.name}`,
-			);
+			this.error(`no active conversion found for file ${input.name}`);
 			return;
 		}
 
-		log(
-			["converters", this.name],
-			`cancelling conversion for file ${input.name}`,
-		);
+		this.log(`cancelling conversion for file ${input.name}`);
 
 		worker.terminate();
 		this.activeConversions.delete(input.id);
@@ -366,7 +358,7 @@ export class MagickConverter extends Converter {
 	}
 
 	private async svgToImage(input: VertFile): Promise<Blob> {
-		log(["converters", this.name], `converting SVG to image (PNG)`);
+		this.log(`converting SVG to image (PNG)`);
 
 		const svgText = await input.file.text();
 		const svgBlob = new Blob([svgText], { type: "image/svg+xml" });

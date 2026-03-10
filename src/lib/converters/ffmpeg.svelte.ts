@@ -79,9 +79,16 @@ export class FFmpegConverter extends Converter {
 
 	public readonly reportsProgress = true;
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private log: (...msg: any[]) => void = () => {};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private error: (...msg: any[]) => void = () => {};
+
 	constructor() {
 		super();
-		log(["converters", this.name], `created converter`);
+		this.log = (msg) => log(["converters", this.name], msg);
+		this.error = (msg) => error(["converters", this.name], msg);
+		this.log(`created converter`);
 		if (!browser) return;
 		try {
 			// this is just to cache the wasm and js for when we actually use it. we're not using this ffmpeg instance
@@ -246,10 +253,7 @@ export class FFmpegConverter extends Converter {
 
 		const buf = new Uint8Array(await input.file.arrayBuffer());
 		await ffmpeg.writeFile("input", buf);
-		log(
-			["converters", this.name],
-			`wrote ${input.name} to ffmpeg virtual fs`,
-		);
+		this.log(`wrote ${input.name} to ffmpeg virtual fs`);
 
 		const command = await this.buildConversionCommand(
 			ffmpeg,
@@ -258,9 +262,9 @@ export class FFmpegConverter extends Converter {
 			conversionSettings,
 			isAlac,
 		);
-		log(["converters", this.name], `FFmpeg command: ${command.join(" ")}`);
+		this.log(`FFmpeg command: ${command.join(" ")}`);
 		await ffmpeg.exec(command);
-		log(["converters", this.name], "executed ffmpeg command");
+		this.log("executed ffmpeg command");
 
 		if (conversionError) {
 			ffmpeg.off("log", errorListener);
@@ -280,10 +284,7 @@ export class FFmpegConverter extends Converter {
 
 		const outputFileName =
 			input.name.split(".").slice(0, -1).join(".") + to;
-		log(
-			["converters", this.name],
-			`read ${outputFileName} from ffmpeg virtual fs`,
-		);
+		this.log(`read ${outputFileName} from ffmpeg virtual fs`);
 
 		ffmpeg.off("log", errorListener);
 		ffmpeg.terminate();
@@ -295,17 +296,11 @@ export class FFmpegConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const ffmpeg = this.activeConversions.get(input.id);
 		if (!ffmpeg) {
-			error(
-				["converters", this.name],
-				`no active conversion found for file ${input.name}`,
-			);
+			this.error(`no active conversion found for file ${input.name}`);
 			return;
 		}
 
-		log(
-			["converters", this.name],
-			`cancelling conversion for file ${input.name}`,
-		);
+		this.log(`cancelling conversion for file ${input.name}`);
 
 		ffmpeg.terminate();
 		this.activeConversions.delete(input.id);
@@ -323,7 +318,7 @@ export class FFmpegConverter extends Converter {
 			});
 
 			ffmpeg.on("log", (l) => {
-				log(["converters", this.name], l.message);
+				this.log(l.message);
 			});
 		}
 
@@ -358,10 +353,7 @@ export class FFmpegConverter extends Converter {
 				const n = parseInt(event.message.trim(), 10);
 				if (!n) return;
 				bitrate = Math.round(n / 1000);
-				log(
-					["converters", this.name],
-					`Detected stream audio bitrate: ${bitrate} kbps`,
-				);
+				this.log(`Detected stream audio bitrate: ${bitrate} kbps`);
 			};
 
 			ffmpeg.on("log", bitrateListener);
@@ -400,10 +392,7 @@ export class FFmpegConverter extends Converter {
 				const n = parseInt(event.message.trim(), 10);
 				if (!n) return;
 				sampleRate = n;
-				log(
-					["converters", this.name],
-					`Detected stream audio sample rate: ${sampleRate} Hz`,
-				);
+				this.log(`Detected stream audio sample rate: ${sampleRate} Hz`);
 			};
 
 			ffmpeg.on("log", sampleRateListener);
@@ -453,7 +442,7 @@ export class FFmpegConverter extends Converter {
 		let metadataArgs: string[] = [];
 		let m4aArgs: string[] = [];
 
-		log(["converters", this.name], `keep metadata: ${keepMetadata}`);
+		this.log(`keep metadata: ${keepMetadata}`);
 		if (!keepMetadata) {
 			metadataArgs = [
 				"-map_metadata", // remove metadata
@@ -473,17 +462,13 @@ export class FFmpegConverter extends Converter {
 				"-b:a",
 				`${userBitrate === "custom" ? customBitrate : userBitrate}k`,
 			];
-			log(
-				["converters", this.name],
-				`using user setting for audio bitrate: ${userBitrate}`,
-			);
+			this.log(`using user setting for audio bitrate: ${userBitrate}`);
 		} else {
 			// detect bitrate of original file and use
 			if (isLosslessToLossy) {
 				// use safe default
 				audioBitrateArgs = ["-b:a", "128k"];
-				log(
-					["converters", this.name],
+				this.log(
 					`converting from lossless to lossy, using default audio bitrate: 128k`,
 				);
 			} else {
@@ -491,10 +476,7 @@ export class FFmpegConverter extends Converter {
 				audioBitrateArgs = inputBitrate
 					? ["-b:a", `${inputBitrate}k`]
 					: [];
-				log(
-					["converters", this.name],
-					`using detected audio bitrate: ${inputBitrate}k`,
-				);
+				this.log(`using detected audio bitrate: ${inputBitrate}k`);
 			}
 		}
 
@@ -504,17 +486,13 @@ export class FFmpegConverter extends Converter {
 				"-ar",
 				userSampleRate === "custom" ? customSampleRate : userSampleRate,
 			];
-			log(
-				["converters", this.name],
-				`using user setting for sample rate: ${userSampleRate}Hz`,
-			);
+			this.log(`using user setting for sample rate: ${userSampleRate}Hz`);
 		} else {
 			// detect sample rate of original file and use
 			if (isLosslessToLossy) {
 				// use safe default
 				const defaultRate = to === ".opus" ? "48000" : "44100";
-				log(
-					["converters", this.name],
+				this.log(
 					`converting from lossless to lossy, using default sample rate: ${defaultRate}Hz`,
 				);
 				sampleRateArgs = ["-ar", defaultRate];
@@ -522,9 +500,8 @@ export class FFmpegConverter extends Converter {
 				let inputSampleRate = await this.detectAudioSampleRate(ffmpeg);
 				if (to === ".opus" && inputSampleRate === 44100) {
 					// special case: opus does not support 44100Hz which is more common - adjust to 48000Hz
-					log(
-						["converters", this.name],
-						"conversion to opus with 44100Hz sample rate detected, adjusting to 48000Hz",
+					this.log(
+						`conversion to opus with 44100Hz sample rate detected, adjusting to 48000Hz`,
 					);
 					inputSampleRate = 48000;
 				}
@@ -532,8 +509,7 @@ export class FFmpegConverter extends Converter {
 				sampleRateArgs = inputSampleRate
 					? ["-ar", `${inputSampleRate}`]
 					: [];
-				log(
-					["converters", this.name],
+				this.log(
 					`using detected audio sample rate: ${inputSampleRate}Hz`,
 				);
 			}
@@ -542,8 +518,7 @@ export class FFmpegConverter extends Converter {
 		// channels setting
 		if (settings.channels !== "auto") {
 			channelsArgs = ["-ac", settings.channels];
-			log(
-				["converters", this.name],
+			this.log(
 				`using user setting for audio channels: ${settings.channels}`,
 			);
 		}
@@ -560,18 +535,12 @@ export class FFmpegConverter extends Converter {
 				tracksArgs = ["-map", "0:a:0"]; // default to first audio track if not specified
 			}
 
-			log(
-				["converters", this.name],
-				`using user setting for audio tracks: ${settings.tracks}`,
-			);
+			this.log(`using user setting for audio tracks: ${settings.tracks}`);
 		}
 
 		// video to audio
 		if (videoFormats.includes(inputFormat)) {
-			log(
-				["converters", this.name],
-				`Converting video ${input.from} to audio ${to}`,
-			);
+			this.log(`Converting video ${input.from} to audio ${to}`);
 			return [
 				"-i",
 				"input",
@@ -588,10 +557,7 @@ export class FFmpegConverter extends Converter {
 
 		// audio to video
 		if (videoFormats.includes(outputFormat)) {
-			log(
-				["converters", this.name],
-				`Converting audio ${input.from} to video ${to}`,
-			);
+			this.log(`Converting audio ${input.from} to video ${to}`);
 
 			const hasAlbumArt = keepMetadata
 				? await this.extractAlbumArt(ffmpeg)
@@ -599,10 +565,7 @@ export class FFmpegConverter extends Converter {
 			const codecArgs = toArgs(to, isAlac);
 
 			if (hasAlbumArt) {
-				log(
-					["converters", this.name],
-					"Using album art as video background",
-				);
+				this.log("Using album art as video background");
 				return [
 					"-loop",
 					"1",
@@ -626,7 +589,7 @@ export class FFmpegConverter extends Converter {
 					"output" + to,
 				];
 			} else {
-				log(["converters", this.name], "Using solid color background");
+				this.log("Using solid color background");
 				return [
 					"-f",
 					"lavfi",
@@ -651,10 +614,7 @@ export class FFmpegConverter extends Converter {
 		}
 
 		// audio to audio
-		log(
-			["converters", this.name],
-			`Converting audio ${input.from} to audio ${to}`,
-		);
+		this.log(`Converting audio ${input.from} to audio ${to}`);
 		const { audio: audioCodec } = getCodecs(to, isAlac);
 		if (m4a && keepMetadata) m4aArgs = ["-c:v", "copy"]; // for album art
 
@@ -688,10 +648,7 @@ export class FFmpegConverter extends Converter {
 				"cover.jpg",
 			])
 		) {
-			log(
-				["converters", this.name],
-				"Successfully extracted album art from stream 0:1",
-			);
+			this.log("Successfully extracted album art from stream 0:1");
 			return true;
 		}
 
@@ -708,17 +665,11 @@ export class FFmpegConverter extends Converter {
 				"cover.jpg",
 			])
 		) {
-			log(
-				["converters", this.name],
-				"Successfully extracted album art (fallback method)",
-			);
+			this.log("Successfully extracted album art (fallback method)");
 			return true;
 		}
 
-		log(
-			["converters", this.name],
-			"No album art found, will create solid color background",
-		);
+		this.log("No album art found, will create solid color background");
 		return false;
 	}
 

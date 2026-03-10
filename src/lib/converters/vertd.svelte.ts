@@ -332,10 +332,13 @@ export class VertdConverter extends Converter {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private log: (...msg: any[]) => void = () => {};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private error: (...msg: any[]) => void = () => {};
 
 	constructor() {
 		super();
 		this.log = (msg) => log(["converters", this.name], msg);
+		this.error = (msg) => error(["converters", this.name], msg);
 		this.log("created converter");
 		this.log("not rly sure how to implement this :P");
 		this.status = "ready";
@@ -712,10 +715,7 @@ export class VertdConverter extends Converter {
 								`confirmed download for file ${input.name}`,
 							);
 						} catch (e) {
-							error(
-								["converters", this.name],
-								`failed to confirm download: ${e}`,
-							);
+							this.error(`failed to confirm download: ${e}`);
 						}
 
 						resolve(new VertFile(new File([res], input.name), to));
@@ -754,10 +754,7 @@ export class VertdConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const activeConversion = this.activeConversions.get(input.id);
 		if (!activeConversion) {
-			error(
-				["converters", this.name],
-				`no active conversion found for file ${input.name}`,
-			);
+			this.error(`no active conversion found for file ${input.name}`);
 			return;
 		}
 
