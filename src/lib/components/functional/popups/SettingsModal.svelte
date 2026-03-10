@@ -17,30 +17,20 @@
 
 	let { file, onclose }: Props = $props();
 
-	const getCurrentConverter = (
-		vertFile: VertFile,
-		converterOverride?: string,
-	) => {
-		const converterName =
-			converterOverride || vertFile.conversionSettings.converter;
-		const availableConverters = vertFile.isZip()
-			? vertFile.converters
-			: vertFile.findConverters();
-
-		if (converterName) {
-			const selectedConverter =
-				availableConverters.find((c) => c.name === converterName) ||
-				vertFile.converters.find((c) => c.name === converterName);
-			if (selectedConverter) return selectedConverter;
-		}
-
+	const getAvailableConverters = (vertFile: VertFile) => {
 		return vertFile.isZip()
-			? vertFile.converters[0]
-			: vertFile.findConverters()[0];
+			? vertFile.converters
+			: vertFile.findConverters([vertFile.from, vertFile.to]);
+	};
+
+	const getValidConverter = (vertFile: VertFile, converterName?: string) => {
+		const available = getAvailableConverters(vertFile);
+		const name = converterName || vertFile.conversionSettings.converter;
+		return available.find((c) => c.name === name) || available[0];
 	};
 
 	let settings = $derived<ConversionSettings>({
-		converter: file ? getCurrentConverter(file)?.name : undefined,
+		converter: file ? getValidConverter(file)?.name : undefined,
 	});
 
 	const handleSettingChange = (key: string, value: any) => {
@@ -50,7 +40,7 @@
 
 	const applySettings = async (converterName: string) => {
 		if (!file) return;
-		const converter = getCurrentConverter(file, converterName);
+		const converter = getValidConverter(file, converterName);
 		if (!converter) {
 			log(
 				["settings", "modal"],
@@ -93,14 +83,15 @@
 >
 	<div class="flex flex-col gap-8 max-h-[calc(100vh-225px)] overflow-y-auto">
 		{#if file}
-			{@const currentConverter = getCurrentConverter(file)}
-			{@const availableConverters = file.isZip()
-				? file.converters
-				: file.findConverters()}
+			{@const availableConverters = getAvailableConverters(file)}
+			{@const validConverter = getValidConverter(
+				file,
+				settings.converter,
+			)}
 			<p class="text-base">
 				{@html sanitize(
 					m["convert.settings.description"]({
-						converter: currentConverter?.name || "unknown",
+						converter: validConverter?.name || "unknown",
 						filename: file.name,
 					}),
 				)}
@@ -115,7 +106,7 @@
 						value: converter.name,
 						label: converter.name,
 					}))}
-					selected={settings.converter || currentConverter?.name}
+					selected={validConverter?.name}
 					settingsStyle
 					onselect={(value) => {
 						settings = { converter: value }; // TODO: dont think i need to add the converter here
