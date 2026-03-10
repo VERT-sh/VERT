@@ -9,6 +9,7 @@
 	import { sanitize } from "$lib/store/index.svelte";
 	import { log } from "$lib/util/logger";
 	import { type ConversionSettings } from "$lib/types/conversion-settings";
+	import { onMount } from "svelte";
 
 	type Props = {
 		file: VertFile | null;
@@ -29,9 +30,7 @@
 		return available.find((c) => c.name === name) || available[0];
 	};
 
-	let settings = $derived<ConversionSettings>({
-		converter: file ? getValidConverter(file)?.name : undefined,
-	});
+	let settings = $state<ConversionSettings>({});
 
 	const handleSettingChange = (key: string, value: any) => {
 		if (!file) return;
@@ -59,6 +58,13 @@
 			`Applied settings for ${file.name}: ${JSON.stringify(file.conversionSettings, null, 2)}`,
 		);
 	};
+
+	onMount(() => {
+		if (!file) return;
+
+		// always have a converter initialized so we can show its settings
+		settings.converter = getValidConverter(file)?.name;
+	});
 </script>
 
 <Modal
@@ -109,7 +115,7 @@
 					selected={validConverter?.name}
 					settingsStyle
 					onselect={(value) => {
-						settings = { converter: value }; // TODO: dont think i need to add the converter here
+						settings.converter = value;
 					}}
 				/>
 			</div>

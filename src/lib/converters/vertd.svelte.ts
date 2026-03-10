@@ -392,21 +392,27 @@ export class VertdConverter extends Converter {
 
 		const qualityOptions = [
 			{
-				value: "verySlow",
+				value: 0, // very slow
 				label: m["convert.settings.video.speed_very_slow"](),
 			},
 			{
-				value: "slower",
+				value: 1, // slower
 				label: m["convert.settings.video.speed_slower"](),
 			},
-			{ value: "slow", label: m["convert.settings.video.speed_slow"]() },
 			{
-				value: "medium",
+				value: 2, // slow
+				label: m["convert.settings.video.speed_slow"](),
+			},
+			{
+				value: 3, // medium
 				label: m["convert.settings.video.speed_medium"](),
 			},
-			{ value: "fast", label: m["convert.settings.video.speed_fast"]() },
 			{
-				value: "ultraFast",
+				value: 4, // faster
+				label: m["convert.settings.video.speed_fast"](),
+			},
+			{
+				value: 5, // fastest
 				label: m["convert.settings.video.speed_ultra_fast"](),
 			},
 		];
@@ -415,7 +421,7 @@ export class VertdConverter extends Converter {
 		const defaultSpeed = Settings.instance.settings.vertdSpeed;
 		const defaultSpeedIndex = vertdSpeedValues.indexOf(defaultSpeed);
 		const qualitySpeedRange: SettingDefinition = {
-			key: "vertdSpeedSlider",
+			key: "vertdSpeed",
 			label: m["convert.settings.video.speed"](),
 			description: m["convert.settings.video.speed_description"](),
 			type: "range",
@@ -426,7 +432,6 @@ export class VertdConverter extends Converter {
 			options: qualityOptions.map((option, index) => ({
 				value: index,
 				label: option.label,
-				speedValue: option.value,
 			})),
 			forceFullWidth: true,
 		};
@@ -573,10 +578,6 @@ export class VertdConverter extends Converter {
 			defaults[setting.key] = setting.default;
 		});
 
-		if (defaults.vertdSpeedSlider !== undefined) {
-			const sliderIndex = defaults.vertdSpeedSlider as number;
-			defaults.vertdSpeed = vertdSpeedValues[sliderIndex];
-		}
 		return defaults;
 	}
 
