@@ -75,12 +75,23 @@
 				.filter((f) => f !== "none")
 				.join(", ");
 
+			const mediabunnyStatus = converters.find(
+				(c) => c.name === "mediabunny",
+			)?.status;
+			const vertdReady = $vertdLoaded === true;
+			const mediabunnyReady = mediabunnyStatus === "ready";
+			const videoStatus =
+				vertdReady && mediabunnyReady
+					? "ready"
+					: vertdReady || mediabunnyReady
+						? "partially-ready"
+						: "not-ready";
+
 			output.Video = {
 				formats,
 				icon: Film,
 				title: m["upload.cards.video"](),
-				// TODO: add "partial" state? somehow figure out diff between vertd and mediabunny
-				status: $vertdLoaded === true ? "ready" : "not-ready", // not using converter.status for this
+				status: videoStatus as WorkerStatus,
 			};
 		}
 
@@ -109,6 +120,8 @@
 		switch (status) {
 			case "downloading":
 				return m["upload.cards.status.downloading"]();
+			case "partially-ready":
+				return m["upload.cards.status.partially_ready"]();
 			case "ready":
 				return m["upload.cards.status.ready"]();
 			default:

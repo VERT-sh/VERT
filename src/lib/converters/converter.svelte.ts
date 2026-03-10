@@ -6,7 +6,7 @@ import type {
 	SettingDefinition,
 } from "$lib/types/conversion-settings";
 
-export type WorkerStatus = "not-ready" | "downloading" | "ready" | "error";
+export type WorkerStatus = "not-ready" | "downloading" | "ready" | "partially-ready" | "error";
 
 export class FormatInfo {
 	public name: string;

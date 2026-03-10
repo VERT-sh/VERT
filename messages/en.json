@@ -31,6 +31,7 @@
 			"status": {
 				"text": "<b>Status:</b> {status}",
 				"ready": "ready",
+				"partially_ready": "partially ready",
 				"not_ready": "not ready",
 				"not_initialized": "not initialized",
 				"downloading": "downloading...",
