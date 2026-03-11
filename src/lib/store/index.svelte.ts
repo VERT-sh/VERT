@@ -4,7 +4,7 @@ import type { Converter } from "$lib/converters/converter.svelte";
 import { error, log } from "$lib/util/logger";
 import { VertFile } from "$lib/types";
 import { parseBlob, selectCover } from "music-metadata";
-import { writable } from "svelte/store";
+import { get, writable } from "svelte/store";
 import PQueue from "p-queue";
 import { getLocale, setLocale } from "$lib/paraglide/runtime";
 import { m } from "$lib/paraglide/messages";
@@ -602,9 +602,9 @@ export const getMaxArrayBufferSize = (): number => {
 
 	// lmao uh mobile devices definitely have a much lower limit and using binary search here
 	// was causing crashes especially on iOS, so just return 2GB to be safe :p
-	if (isMobile) {
-		log(["converters"], `mobile device detected, using 2GB fallback for max ArrayBuffer size`);
-		localStorage.setItem("maxArrayBufferSize", (2 * GB).toString());
+	if (get(isMobile)) {
+		log(["converters"], `mobile device likely detected, using 2GB fallback for max ArrayBuffer size`);
+		// don't save to localStorage, since it can always be a false positive or the user's browser window is simply just small
 		return 2 * GB;
 	}
 
