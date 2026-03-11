@@ -225,7 +225,7 @@ export class MediabunnyConverter extends Converter {
 		// additional mediabunny coders
 		// currently the official ones -- maybe add our own in the future
 		this.initializeCodecs();
-		
+
 		// checks if mediabunny and webcodecs are initialized and supported
 		this.checkStatus();
 	}
@@ -504,10 +504,24 @@ export class MediabunnyConverter extends Converter {
 		this.log(`videoConfig: ${JSON.stringify(videoConfig)}`);
 		this.log(`audioConfig: ${JSON.stringify(audioConfig)}`);
 
-		for (const discarded of conversion.discardedTracks) {
+		// log any discarded tracks & its reasons
+		const discardedTracks = conversion.discardedTracks;
+		if (discardedTracks.length > 0) {
+			const discardedTrackCount = discardedTracks.length;
+			const discardedTrackList = discardedTracks.map(
+				(discarded, index) =>
+					`${index + 1}. ${discarded.track.type} (${discarded.track.codec}) - ${discarded.reason}`,
+			);
+
+			const isValid = conversion.isValid;
+			const logMethod = isValid ? this.error : this.log;
+			logMethod(`${discardedTrackCount} discarded track(s) for ${file.name}:\n${discardedTrackList.join("\n")}`);
 			ToastManager.add({
-				type: "error",
-				message: `Mediabunny discarded ${discarded.track.type} track ${discarded.track.id} (${discarded.track.codec}) for reason: ${discarded.reason}`,
+				type: isValid ? "warning" : "error", // warning if output created, error if nothing / conversion was completely invalid
+				message: m["workers.errors.mediabunny_discarded"]({
+					count: discardedTrackCount,
+					file: file.name,
+				}),
 				durations: {
 					stay: 10000,
 				},

@@ -51,7 +51,11 @@
 			if (selectedConverter) return selectedConverter;
 		}
 
-		return file.isZip() ? file.converters[0] : file.findConverters()[0];
+		// prefer a usable converter over a not-ready one
+		const readyConverter = availableConverters.find(
+			(c) => c.status === "ready" || c.status === "partially-ready",
+		);
+		return readyConverter ?? availableConverters[0];
 	};
 
 	$effect(() => {
@@ -123,28 +127,35 @@
 
 	$effect(() => {
 		// Set gradient color depending on the file types
-		let type = "";
-		if (files.files.length) {
-			const converters = files.files.map(
-				(file) => getCurrentConverter(file)?.name,
+		const fileTypes = files.files
+			.map((file) => {
+				const converterName = getCurrentConverter(file)?.name;
+				if (!converterName) return null;
+				if (converterCategories.image.includes(converterName))
+					return "blue";
+				if (converterCategories.audio.includes(converterName))
+					return "purple";
+				if (converterCategories.video.includes(converterName))
+					return "red";
+				if (converterCategories.doc.includes(converterName))
+					return "green";
+				return null;
+			})
+			.filter(
+				(type): type is "blue" | "purple" | "red" | "green" =>
+					type !== null,
 			);
-			const uniqueTypes = new Set(converters);
 
-			if (uniqueTypes.size === 1) {
-				const onlyType = converters[0];
-				if (converterCategories.image.includes(onlyType)) type = "blue";
-				else if (converterCategories.audio.includes(onlyType))
-					type = "purple";
-				else if (converterCategories.video.includes(onlyType))
-					type = "red";
-				else if (converterCategories.doc.includes(onlyType))
-					type = "green";
-			}
-		}
+		const uniqueTypes = new Set(fileTypes);
+		const type =
+			files.files.length > 0 &&
+			fileTypes.length === files.files.length &&
+			uniqueTypes.size === 1
+				? fileTypes[0]
+				: "";
 
-		if (files.files.length === 0 || !type) {
-			showGradient.set(false);
-		} else showGradient.set(true);
+		if (files.files.length === 0 || !type) showGradient.set(false);
+		else showGradient.set(true);
 
 		gradientColor.set(type);
 	});
@@ -153,7 +164,6 @@
 {#snippet fileItem(file: VertFile, index: number)}
 	{@const currentConverter = getCurrentConverter(file)}
 	{@const name = currentConverter?.name || "unknown"}
-	{@const isImage = converterCategories.image.includes(name)}
 	{@const isAudio = converterCategories.audio.includes(name)}
 	{@const isVideo = converterCategories.video.includes(name)}
 	{@const isDocument = converterCategories.doc.includes(name)}
@@ -327,7 +337,7 @@
 							type: isAudio
 								? m["convert.errors.audio"]()
 								: isVideo
-									? "Video"
+									? m["convert.errors.video"]()
 									: isDocument
 										? m["convert.errors.doc"]()
 										: m["convert.errors.image"](),

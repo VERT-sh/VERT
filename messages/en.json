@@ -182,7 +182,8 @@
 			"worker_timeout": "The {type} converter is taking longer than expected to initialize, please wait a few more moments or refresh the page.",
 			"audio": "audio",
 			"doc": "document",
-			"image": "image"
+			"image": "image",
+			"video": "video"
 		}
 	},
 	"settings": {
@@ -344,6 +345,7 @@
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
 			"mediabunny_init": "Error loading Mediabunny, video conversion may not work as expected.",
 			"mediabunny_webcodecs": "Some WebCodecs APIs are not supported in this browser, video conversion may not work as expected.",
+			"mediabunny_discarded": "Mediabunny discarded {count} track(s) for {file}. See the browser console for details.",
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
