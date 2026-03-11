@@ -158,7 +158,7 @@
 			},
 			"vertd_server": "what are you doing..? you're supposed to run the vertd server!",
 			"vertd_generic_view": "View error details",
-			"vertd_generic_body": "An error occurred whilst whilst trying convert your video. Would you like to submit this video to the developers to help fix this bug? Only your video file will be sent. No identifiers will be uploaded.",
+			"vertd_generic_body": "An error occurred whilst whilst trying to convert your video. Would you like to submit this video to the developers to help fix this bug? Only your video file will be sent and no identifiers will be uploaded.",
 			"vertd_generic_title": "Video conversion error",
 			"vertd_generic_yes": "Submit video",
 			"vertd_generic_no": "Don't submit",
@@ -226,12 +226,12 @@
 			"rate": "Sample rate (Hz)"
 		},
 		"vertd": {
-			"title": "Video conversion",
+			"title": "Server video conversion",
 			"status": "status:",
 			"loading": "loading...",
 			"available": "available, commit id {commitId}",
 			"unavailable": "unavailable (is the url right?)",
-			"description": "The <code>vertd</code> project is a server wrapper for FFmpeg. This allows you to convert videos through the convenience of VERT's web interface, while still being able to harness the power of your GPU to do it as quickly as possible.",
+			"description": "When possible, VERT converts videos locally in your browser, however some conversions may require the use of the <code>vertd</code> project, a server wrapper for FFmpeg. This allows you to convert videos through the convenience of VERT's web interface, while still being able to harness the power of your GPU to do it as quickly as possible.",
 			"hosting_info": "We host a public instance for your convenience, but it is quite easy to host your own on your PC or server if you know what you are doing. You can download the server binaries [vertd_link]here[/vertd_link] - the process of setting this up will become easier in the future, so stay tuned!",
 			"instance": "Instance",
 			"url_placeholder": "Example: http://localhost:24153",
@@ -284,7 +284,7 @@
 		"title": "About",
 		"why": {
 			"title": "Why VERT?",
-			"description": "<b>File converters have always disappointed us.</b> They're ugly, riddled with ads, and most importantly; slow. We decided to solve this problem once and for all by making an alternative that solves all those problems, and more.<br/><br/>All non-video files are converted completely on-device; this means that there's no delay between sending and receiving the files from a server, and we never get to snoop on the files you convert.<br/><br/>Video files get uploaded to our lightning-fast RTX 4000 Ada server. Your videos stay on there for an hour if you do not convert them. If you do convert the file, the video will stay on the server for an hour, or until it is downloaded. The file will then be deleted from our server."
+			"description": "<b>File converters have always disappointed us.</b> They're ugly, riddled with ads, and most importantly; slow. We decided to solve this problem once and for all by making an alternative that solves all those problems, and more.<br/><br/>When possible, all files are converted completely on-device; this means that there's no delay between sending and receiving the files from a server, and we never get to snoop on the files you convert.<br/><br/>If the conversion is unsupported locally in your browser, video files get uploaded to our lightning-fast RTX 4000 Ada server. Your videos stay on there for an hour if you do not convert them. If you do convert the file, the video will stay on the server for an hour, or until it is downloaded fully. The file will then be deleted from our server."
 		},
 		"sponsors": {
 			"title": "Sponsors",
@@ -314,17 +314,17 @@
 		},
 		"credits": {
 			"title": "Credits",
-			"contact_team": "If you would like to contact the development team, please use the email found on the \"Resources\" card.",
+			"contact_team": "If you would like to contact the VERT team, please use the email found on the \"Resources\" card.",
 			"notable_contributors": "Notable contributors",
 			"notable_description": "We'd like to thank these people for their major contributions to VERT.",
 			"github_contributors": "GitHub contributors",
 			"github_description": "Big thanks to all these people for helping out! [github_link]Want to help too?[/github_link]",
 			"no_contributors": "Seems like no one has contributed yet... [contribute_link]be the first to contribute![/contribute_link]",
 			"libraries": "Libraries",
-			"libraries_description": "A big thanks to FFmpeg (audio, video), ImageMagick (images) and Pandoc (documents) for maintaining such excellent libraries for so many years. VERT relies on them to provide you with your conversions.",
+			"libraries_description": "A big thanks to Mediabunny (video), FFmpeg (audio, video), ImageMagick (images) and Pandoc (documents) for maintaining such excellent libraries for so many years. VERT relies on them to provide you with your conversions.",
 			"roles": {
 				"lead_developer": "Lead developer; conversion backend, UI implementation",
-				"developer": "Developer; UI implementation",
+				"developer": "Developer; conversion backend, UI implementation",
 				"designer": "Designer; UX, branding, marketing",
 				"docker_ci": "Maintaining Docker & CI support",
 				"former_cofounder": "Former co-founder & designer"
@@ -341,6 +341,7 @@
 			"magick": "Error in Magick worker, image conversion may not work as expected.",
 			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
+			"mediabunny": "Error loading Mediabunny worker, video conversion may not work as expected.",
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
@@ -354,7 +355,7 @@
 		},
 		"conversions": {
 			"title": "Conversions",
-			"description": "Most conversions (images, documents, audio) happen entirely locally on your device using WebAssembly versions of the relevant tools (e.g. ImageMagick, Pandoc, FFmpeg). This means your files never leave your device and we will never have access to them.<br/><br/>Video conversions are performed on our servers because they require more processing power and cannot be done very quickly on the browser yet. Videos you convert with VERT are deleted after being downloaded, or after one hour, unless you explicitly give permission for us to store them longer purely for troubleshooting purposes."
+			"description": "Most conversions (video, images, documents, audio) happen entirely locally on your device using WebAssembly versions of the relevant tools (e.g. ImageMagick, Pandoc, FFmpeg), or tools that use built-in browesr APIs (e.g. Mediabunny). This means your files never leave your device and we will never have access to them.<br/><br/>When possible, video conversions happen locally in your browser using Mediabunny, however if unsupported they are performed on our servers. Videos you upload to our servers (using vertd) are deleted after being downloaded fully, or after one hour no matter its status, unless you explicitly give permission for us to store them longer purely for troubleshooting purposes."
 		},
 		"donations": {
 			"title": "Donations",
@@ -362,7 +363,7 @@
 		},
 		"conversion_errors": {
 			"title": "Conversion Errors",
-			"description": "When a video conversion fails, we may collect some anonymous data to help us diagnose the issue. This data may include:",
+			"description": "When a server video conversion fails (vertd), we may collect some anonymous data to help us diagnose the issue. This data may include:",
 			"list_job_id": "The job ID, which is the anonymized file name",
 			"list_format_from": "The format you converted from",
 			"list_format_to": "The format you converted to",
@@ -376,13 +377,13 @@
 		},
 		"local_storage": {
 			"title": "Local Storage",
-			"description": "We use your browser's local storage to save your settings, and your browser's session storage to temporarily store the GitHub contributors list for the \"About\" section to reduce repeated GitHub API requests. No personal data is stored or transmitted.<br/><br/>The WebAssembly versions of the conversion tools we use (FFmpeg, ImageMagick, Pandoc) are also stored locally on your browser when you first visit the website, so you don't need to redownload them each visit. No personal data is stored or transmitted. You may view or delete this data at any time in the \"Privacy & data\" section in [settings_link]settings[/settings_link]."
+			"description": "We use your browser's local storage to save your settings, and your browser's session storage to temporarily store the GitHub contributors list for the \"About\" section to reduce repeated GitHub API requests. No personal data is stored or transmitted.<br/><br/>The WebAssembly or browser versions of the conversion tools we use (Mediabunny, FFmpeg, ImageMagick, Pandoc) are also stored locally on your browser when you first visit the website, so you don't need to redownload them each visit. No personal data is stored or transmitted. You may view or delete this data at any time in the \"Privacy & data\" section in [settings_link]settings[/settings_link]."
 		},
 		"contact": {
 			"title": "Contact",
 			"description": "For questions, email us at: [email_link]hello@vert.sh[/email_link]. If you are using a third-party instance of VERT, please contact the hoster of that instance instead."
 		},
-		"last_updated": "Last updated: 2025-10-29"
+		"last_updated": "Last updated: 2026-03-11"
 	},
 	"toast": {
 		"insecure_context": "You are visiting VERT in an insecure context (e.g. accessing over HTTP instead of HTTPS). Some features may not work as expected."

@@ -34,6 +34,7 @@ export default ts.config(
 		files: ["**/*.ts", "**/*.svelte.ts", "**/*.svelte"],
 		rules: {
 			"svelte/no-at-html-tags": "off",
+			"svelte/valid-compile": "off"
 		},
 	},
 );

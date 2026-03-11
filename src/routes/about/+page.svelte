@@ -38,7 +38,7 @@
 			avatar: avatarNullptr,
 		},
 		{
-			name: "JovannMC",
+			name: "JovannMC // Maya",
 			github: "https://github.com/JovannMC",
 			role: m["about.credits.roles.developer"](),
 			avatar: avatarJovannMC,
