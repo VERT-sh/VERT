@@ -139,6 +139,14 @@ export class VertFile {
 				.map((c) => c.name)
 				.join(", ")}`,
 		);
+
+		setInterval(() => {
+			log(["file", "effect"], `from: ${this.from}, to: ${this.to}`);
+			log(
+				["file", "effect"],
+				`converter status: ${this.converters.map((c) => `${c.name}: ${c.status}`).join(", ")}`,
+			);
+		}, 1000);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -159,14 +167,23 @@ export class VertFile {
 			]);
 			if (compatibleConverters.length) {
 				converter = compatibleConverters[0];
-				log(["file", "convert"], `found compatible converter: ${converter.name}`);
+				log(
+					["file", "convert"],
+					`found compatible converter: ${converter.name}`,
+				);
 			} else {
-				log(["file", "convert"], `no compatible converter found for ${this.from} to ${this.to}`);
+				log(
+					["file", "convert"],
+					`no compatible converter found for ${this.from} to ${this.to}`,
+				);
 				// TODO: handle zip converter fallback explicitly if needed
 				// TODO: provide a clearer error path for unsupported from/to pairs
 			}
 		} else {
-			log(["file", "convert"], `using custom converter from settings: ${converter.name}`);
+			log(
+				["file", "convert"],
+				`using custom converter from settings: ${converter.name}`,
+			);
 		}
 
 		if (!converter) throw new Error("No converter found");

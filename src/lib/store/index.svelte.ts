@@ -1,5 +1,6 @@
 import { browser } from "$app/environment";
 import { byNative, converterCategories, converters } from "$lib/converters";
+import type { Converter } from "$lib/converters/converter.svelte";
 import { error, log } from "$lib/util/logger";
 import { VertFile } from "$lib/types";
 import { parseBlob, selectCover } from "music-metadata";
@@ -14,16 +15,62 @@ import { GB } from "$lib/util/consts";
 class Files {
 	public files = $state<VertFile[]>([]);
 
+	private getRequiredConverters(file: VertFile): Converter[] {
+		if (file.isZip()) return file.converters;
+
+		const compatibleConverters = file.findConverters([file.from, file.to]);
+		const selectedConverterName = file.conversionSettings.converter;
+
+		if (!selectedConverterName) return compatibleConverters;
+
+		const selectedConverter = compatibleConverters.find(
+			(converter) => converter.name === selectedConverterName,
+		);
+
+		return selectedConverter ? [selectedConverter] : compatibleConverters;
+	}
+
+	private isConverterReady(converter: Converter): boolean {
+		return (
+			converter.status === "ready" ||
+			converter.status === "partially-ready" // no idea where this could be used actually in a real converter
+		);
+	}
+
+	public isReady(file: VertFile): boolean {
+		const requiredConverters = this.getRequiredConverters(file);
+		if (requiredConverters.length === 0) return false;
+
+		return (
+			!file.processing &&
+			requiredConverters.some((converter) =>
+				this.isConverterReady(converter),
+			)
+		);
+	}
+
 	public requiredConverters = $derived(
-		Array.from(new Set(files.files.map((f) => f.converters).flat())),
+		Array.from(
+			new Set(
+				this.files.flatMap((file) =>
+					this.getRequiredConverters(file),
+				),
+			),
+		),
 	);
 
 	public ready = $derived(
 		this.files.length === 0
 			? false
-			: this.requiredConverters.every((f) => f?.status === "ready") &&
-					this.files.every((f) => !f.processing),
+			: this.files.some((file) => this.isReady(file)),
 	);
+
+	public allReady = $derived(
+		this.files.length === 0
+			? false
+			: this.files.every((file) => this.isReady(file)),
+	);
+
 	public results = $derived(
 		this.files.length === 0 ? false : this.files.every((f) => f.result),
 	);
@@ -289,7 +336,10 @@ class Files {
 			this._addThumbnail(vf);
 
 			const convName = converter.name;
-			if (file.size > MAX_ARRAY_BUFFER_SIZE && (converterCategories.video.includes(convName))) {
+			if (
+				file.size > MAX_ARRAY_BUFFER_SIZE &&
+				converterCategories.video.includes(convName)
+			) {
 				ToastManager.add({
 					type: "warning",
 					message: m["convert.large_file_warning"]({
@@ -363,9 +413,10 @@ class Files {
 			if (!result) continue;
 
 			let filename = filenames[i];
-			
+
 			// check if this filename appears more than once
-			const isDuplicate = filenames.filter((name) => name === filename).length > 1;
+			const isDuplicate =
+				filenames.filter((name) => name === filename).length > 1;
 			if (isDuplicate) {
 				const nameParts = filename.lastIndexOf(".");
 				const nameWithoutExt = filename.substring(0, nameParts);

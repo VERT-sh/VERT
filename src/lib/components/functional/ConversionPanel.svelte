@@ -25,7 +25,7 @@
 				class="btn {$effects
 					? ''
 					: '!scale-100'} highlight flex gap-3 max-md:w-full md:max-w-[15.5rem]"
-				disabled={!files.ready}
+				disabled={!files.allReady}
 			>
 				<RefreshCw size="24" />
 				<p>{m["convert.panel.convert_all"]()}</p>
@@ -34,7 +34,7 @@
 				class="btn {$effects
 					? ''
 					: '!scale-100'} flex gap-3 max-md:w-full md:max-w-[15.5rem]"
-				disabled={!files.ready || !files.results}
+				disabled={!files.allReady || !files.results}
 				onclick={() => files.downloadAll()}
 			>
 				<FolderArchiveIcon size="24" />

@@ -226,7 +226,7 @@ export class MediabunnyConverter extends Converter {
 		// currently the official ones -- maybe add our own in the future
 		this.initializeCodecs();
 
-		// don't know how to check if mediabunny is ready rn, maybe test smol conversion or run some other method? shrug
+		// TODO: don't know how to check if mediabunny is ready/actually supported rn, maybe test smol conversion or run some other method? shrug
 		if (typeof Conversion === "undefined") {
 			this.status = "not-ready";
 			this.error("Mediabunny failed to load");

@@ -401,7 +401,7 @@
 												: isDocument
 													? 'bg-accent-green'
 													: 'bg-accent-blue'}"
-										disabled={!files.ready}
+										disabled={!files.isReady(file)}
 										onclick={() => file.convert()}
 									>
 										<RotateCwIcon size="24" />
