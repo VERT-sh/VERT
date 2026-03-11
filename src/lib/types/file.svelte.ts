@@ -139,14 +139,6 @@ export class VertFile {
 				.map((c) => c.name)
 				.join(", ")}`,
 		);
-
-		setInterval(() => {
-			log(["file", "effect"], `from: ${this.from}, to: ${this.to}`);
-			log(
-				["file", "effect"],
-				`converter status: ${this.converters.map((c) => `${c.name}: ${c.status}`).join(", ")}`,
-			);
-		}, 1000);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -40,7 +40,7 @@
 
 			cacheInfo = await swManager.getCacheInfo();
 		} catch (err) {
-			error(["privacy", "cache"], "Failed to load cache info:", err);
+			error(["privacy", "cache"], `Failed to load cache info: ${err}`);
 		} finally {
 			isLoadingCache = false;
 		}

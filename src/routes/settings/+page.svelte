@@ -32,7 +32,7 @@
 			Settings.Settings.instance.save();
 			log(["settings"], "saving settings");
 		} catch (error) {
-			log(["settings", "error"], `failed to save settings: ${error}`);
+			error(["settings", "error"], `failed to save settings: ${error}`);
 			ToastManager.add({
 				type: "error",
 				message: m["settings.errors.save_failed"](),

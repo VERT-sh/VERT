@@ -6,17 +6,17 @@
 	import Modal from "./Modal.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import type { VertFile } from "$lib/types";
-	import { sanitize } from "$lib/store/index.svelte";
-	import { log } from "$lib/util/logger";
+	import { files, sanitize } from "$lib/store/index.svelte";
+	import { log, error } from "$lib/util/logger";
 	import { type ConversionSettings } from "$lib/types/conversion-settings";
-	import { onMount } from "svelte";
 
 	type Props = {
-		file: VertFile | null;
+		file: VertFile | undefined;
 		onclose?: () => void;
 	};
 
 	let { file, onclose }: Props = $props();
+	let targetFile = $derived(file ?? files.files[0]);
 
 	const getAvailableConverters = (vertFile: VertFile) => {
 		return vertFile.isZip()
@@ -33,37 +33,63 @@
 	let settings = $state<ConversionSettings>({});
 
 	const handleSettingChange = (key: string, value: any) => {
-		if (!file) return;
 		settings[key] = value;
 	};
 
 	const applySettings = async (converterName: string) => {
-		if (!file) return;
-		const converter = getValidConverter(file, converterName);
-		if (!converter) {
-			log(
+		const targetFiles = file ? [file] : files.files;
+		if (targetFiles.length === 0) {
+			error(
 				["settings", "modal"],
-				`No converter found for ${file.name}, cannot apply settings`,
+				"no files available to apply settings to",
 			);
 			return;
 		}
-		// apply defaults, then existing settings, then new settings on top
-		file.conversionSettings = {
-			...(await converter.getDefaultSettings(file)),
-			...file.conversionSettings,
-			...settings,
-		};
-		log(
-			["settings", "modal"],
-			`Applied settings for ${file.name}: ${JSON.stringify(file.conversionSettings, null, 2)}`,
-		);
+
+		const firstConverter = targetFiles[0].conversionSettings.converter;
+		const selectedConverter = converterName || firstConverter;
+
+		for (const targetFile of targetFiles) {
+			try {
+				const converter = getValidConverter(
+					targetFile,
+					selectedConverter,
+				);
+				if (!converter) {
+					error(
+						["settings", "modal"],
+						`no converter found for ${targetFile.name}, can't apply settings`,
+					);
+					continue;
+				}
+
+				// apply defaults, then existing settings, then new settings on top
+				targetFile.conversionSettings = {
+					...(await converter.getDefaultSettings(targetFile)),
+					...targetFile.conversionSettings,
+					...settings,
+					converter: converter.name,
+				};
+				log(
+					["settings", "modal"],
+					`applied settings for ${targetFile.name}: ${JSON.stringify(targetFile.conversionSettings, null, 2)}`,
+				);
+			} catch (e) {
+				error(
+					["settings", "modal"],
+					`failed to apply settings for ${targetFile.name}: ${e}`,
+				);
+			}
+		}
 	};
 
-	onMount(() => {
-		if (!file) return;
+	$effect(() => {
+		if (!targetFile) return;
+		if (settings.converter) return;
 
-		// always have a converter initialized so we can show its settings
-		settings.converter = getValidConverter(file)?.name;
+		settings.converter =
+			targetFile.conversionSettings.converter ||
+			getValidConverter(targetFile)?.name;
 	});
 </script>
 
@@ -88,17 +114,17 @@
 	onclose={() => onclose?.()}
 >
 	<div class="flex flex-col gap-8 max-h-[calc(100vh-225px)] overflow-y-auto">
-		{#if file}
-			{@const availableConverters = getAvailableConverters(file)}
+		{#if targetFile}
+			{@const availableConverters = getAvailableConverters(targetFile)}
 			{@const validConverter = getValidConverter(
-				file,
+				targetFile,
 				settings.converter,
 			)}
 			<p class="text-base">
 				{@html sanitize(
 					m["convert.settings.description"]({
-						converter: validConverter?.name || "unknown",
-						filename: file.name,
+						filename:
+							file?.name ?? m["convert.settings.all_files"](),
 					}),
 				)}
 			</p>
@@ -120,7 +146,7 @@
 				/>
 			</div>
 			{#key settings}
-				{#await file.getAvailableSettings(file, settings.converter) then availableSettings}
+				{#await targetFile.getAvailableSettings(targetFile, settings.converter) then availableSettings}
 					<div class="flex flex-col gap-4">
 						{#if availableSettings.length === 0}
 							<p class="text-sm text-muted">
@@ -158,7 +184,8 @@
 												selected={settings[
 													setting.key
 												] ??
-													file.conversionSettings[
+													targetFile
+														.conversionSettings[
 														setting.key
 													] ??
 													setting.default}
@@ -173,7 +200,8 @@
 											{#if setting.hasCustomInput}
 												{@const disabled =
 													(settings[setting.key] ??
-														file.conversionSettings[
+														targetFile
+															.conversionSettings[
 															setting.key
 														]) !== "custom"}
 												<FancyInput
@@ -181,7 +209,8 @@
 													value={settings[
 														setting.customInputKey!
 													] ??
-														file.conversionSettings[
+														targetFile
+															.conversionSettings[
 															setting
 																.customInputKey!
 														] ??
@@ -203,7 +232,8 @@
 												checked={settings[
 													setting.key
 												] ??
-													file.conversionSettings[
+													targetFile
+														.conversionSettings[
 														setting.key
 													] ??
 													setting.default}
@@ -219,7 +249,7 @@
 											{@const rangeValue = (settings[
 												setting.key
 											] ??
-												file.conversionSettings[
+												targetFile.conversionSettings[
 													setting.key
 												] ??
 												setting.default ??
@@ -259,7 +289,8 @@
 											<FancyInput
 												type={setting.type}
 												value={settings[setting.key] ??
-													file.conversionSettings[
+													targetFile
+														.conversionSettings[
 														setting.key
 													] ??
 													setting.default}

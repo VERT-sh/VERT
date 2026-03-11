@@ -290,7 +290,10 @@
 	};
 
 	const settings = () => {
-		if (!file) return;
+		log(
+			["dropdown", "settings"],
+			`opening settings modal for ${file?.name ?? "all files"}`,
+		);
 		showSettingsModal = true;
 	};
 
@@ -316,7 +319,7 @@
 	});
 </script>
 
-{#if showSettingsModal && file}
+{#if showSettingsModal}
 	<SettingsModal {file} onclose={() => (showSettingsModal = false)} />
 {/if}
 
@@ -442,6 +445,7 @@
 							: 'border-b-separator text-muted'}"
 						onclick={() => selectCategory(category)}
 					>
+						<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
 						{(m as any)[`convert.dropdown.${category}`]?.()}
 					</button>
 				{/each}
@@ -481,7 +485,7 @@
 						{m["convert.archive_file.extract"]()}
 					</button>
 				</div>
-			{:else if file}
+			{:else}
 				<div class="border-t border-separator text-base p-2">
 					<button
 						class="w-full p-2 text-center rounded-lg bg-accent text-black"

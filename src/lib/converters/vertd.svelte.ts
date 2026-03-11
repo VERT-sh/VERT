@@ -615,7 +615,7 @@ export class VertdConverter extends Converter {
 					);
 					this.log(`successfully converted webp to gif`);
 				} catch (e) {
-					this.log(`failed to convert webp to gif: ${e}`);
+					this.error(`failed to convert webp to gif: ${e}`);
 					throw e;
 				}
 			}
@@ -731,7 +731,7 @@ export class VertdConverter extends Converter {
 					}
 
 					case "error": {
-						this.log(`error: ${msg.data.message}`);
+						this.error(`error: ${msg.data.message}`);
 						this.activeConversions.delete(input.id);
 						if (hash) this.failure(hash);
 
