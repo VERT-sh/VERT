@@ -341,7 +341,8 @@
 			"magick": "Error in Magick worker, image conversion may not work as expected.",
 			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
-			"mediabunny": "Error loading Mediabunny worker, video conversion may not work as expected.",
+			"mediabunny_init": "Error loading Mediabunny, video conversion may not work as expected.",
+			"mediabunny_webcodecs": "Some WebCodecs APIs are not supported in this browser, video conversion may not work as expected.",
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."

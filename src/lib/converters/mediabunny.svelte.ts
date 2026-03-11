@@ -225,14 +225,50 @@ export class MediabunnyConverter extends Converter {
 		// additional mediabunny coders
 		// currently the official ones -- maybe add our own in the future
 		this.initializeCodecs();
+		
+		// checks if mediabunny and webcodecs are initialized and supported
+		this.checkStatus();
+	}
 
-		// TODO: don't know how to check if mediabunny is ready/actually supported rn, maybe test smol conversion or run some other method? shrug
-		if (typeof Conversion === "undefined") {
-			this.status = "not-ready";
-			this.error("Mediabunny failed to load");
+	private checkStatus() {
+		const mediabunnyInitialized = canEncodeAudio("pcm-s16");
+
+		const webCodecsVideoDecode = "VideoDecoder" in globalThis;
+		const webCodecsVideoEncode = "VideoEncoder" in globalThis;
+		const webCodecsAudioDecode = "AudioDecoder" in globalThis;
+		const webCodecsAudioEncode = "AudioEncoder" in globalThis;
+
+		this.log(
+			`Supported WebCodecs APIs: VideoDecoder: ${webCodecsVideoDecode}, VideoEncoder: ${webCodecsVideoEncode}, AudioDecoder: ${webCodecsAudioDecode}, AudioEncoder: ${webCodecsAudioEncode}`,
+		);
+
+		if (!mediabunnyInitialized) {
+			this.error("Mediabunny failed to initialize");
+			ToastManager.add({
+				type: "error",
+				message: m["workers.errors.mediabunny"](),
+				durations: {
+					stay: 10000,
+				},
+			});
+			this.status = "error";
+		} else if (
+			!webCodecsVideoDecode ||
+			!webCodecsVideoEncode ||
+			!webCodecsAudioDecode ||
+			!webCodecsAudioEncode
+		) {
+			this.error("WebCodecs API support incomplete");
+			ToastManager.add({
+				type: "error",
+				message: m["workers.errors.mediabunny_webcodecs"](),
+				durations: {
+					stay: 10000,
+				},
+			});
+			this.status = "partially-ready";
 		} else {
 			this.status = "ready";
-			this.log("Mediabunny loaded successfully");
 		}
 	}
 
@@ -527,9 +563,7 @@ export class MediabunnyConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const conversion = this.activeConversions.get(input.id);
 		if (!conversion) {
-			this.error(
-				`no active conversion found for file ${input.name}`,
-			);
+			this.error(`no active conversion found for file ${input.name}`);
 			return;
 		}
 
