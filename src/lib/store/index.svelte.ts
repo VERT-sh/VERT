@@ -600,6 +600,14 @@ function findFirstPositive(
 export const getMaxArrayBufferSize = (): number => {
 	if (typeof window === "undefined") return 2 * GB; // default for SSR
 
+	// lmao uh mobile devices definitely have a much lower limit and using binary search here
+	// was causing crashes especially on iOS, so just return 2GB to be safe :p
+	if (isMobile) {
+		log(["converters"], `mobile device detected, using 2GB fallback for max ArrayBuffer size`);
+		localStorage.setItem("maxArrayBufferSize", (2 * GB).toString());
+		return 2 * GB;
+	}
+
 	// check cache first
 	const cached = localStorage.getItem("maxArrayBufferSize");
 	if (cached) {
