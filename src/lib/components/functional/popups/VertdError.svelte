@@ -5,7 +5,7 @@
 		from?: string;
 		to?: string;
 		errorMessage?: string;
-		fileName?: string;
+		filename?: string;
 	}
 </script>
 
@@ -21,7 +21,7 @@
 
 	let submitting = $state(false);
 
-	export const title = "An error occurred";
+	export const title = m["convert.errors.vertd_generic_title"]();
 
 	const remove = () => {
 		ToastManager.remove(toast.id);

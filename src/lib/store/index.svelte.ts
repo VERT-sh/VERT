@@ -4,7 +4,6 @@ import { error, log } from "$lib/util/logger";
 import { VertFile } from "$lib/types";
 import { parseBlob, selectCover } from "music-metadata";
 import { writable } from "svelte/store";
-import { addDialog } from "./DialogProvider";
 import PQueue from "p-queue";
 import { getLocale, setLocale } from "$lib/paraglide/runtime";
 import { m } from "$lib/paraglide/messages";
@@ -236,7 +235,6 @@ class Files {
 		}
 	}
 
-	private _warningShown = false;
 	private async _add(file: VertFile | File) {
 		if (file instanceof VertFile) {
 			this.files.push(file);
@@ -302,43 +300,6 @@ class Files {
 					},
 				});
 			}
-
-			// TODO: only show if vertd is needed/requested
-			const isServerVideo = convName === "vertd";
-			const acceptedExternalWarning =
-				localStorage.getItem("acceptedExternalWarning") === "true";
-			if (isServerVideo && !acceptedExternalWarning && !this._warningShown) {
-				this._warningShown = true;
-				const title = m["convert.external_warning.title"]();
-				const message = m["convert.external_warning.text"]();
-				const buttons = [
-					{
-						text: m["convert.external_warning.no"](),
-						action: () => {
-							this.files = [
-								...this.files.filter(
-									(f) =>
-										!f.converters
-											.map((c) => c.name)
-											.includes("vertd"),
-								),
-							];
-							this._warningShown = false;
-						},
-					},
-					{
-						text: m["convert.external_warning.yes"](),
-						action: () => {
-							localStorage.setItem(
-								"acceptedExternalWarning",
-								"true",
-							);
-							this._warningShown = false;
-						},
-					},
-				];
-				addDialog(title, message, buttons, "warning");
-			}
 		}
 	}
 
@@ -378,7 +339,7 @@ class Files {
 		if (this.files.length === 0) return;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const dlFiles: any[] = [];
-		const fileNames: string[] = [];
+		const filenames: string[] = [];
 
 		for (let i = 0; i < this.files.length; i++) {
 			const file = this.files[i];
@@ -392,7 +353,7 @@ class Files {
 			let to = result.to;
 			if (!to.startsWith(".")) to = `.${to}`;
 
-			fileNames.push(file.file.name.replace(/\.[^/.]+$/, "") + to);
+			filenames.push(file.file.name.replace(/\.[^/.]+$/, "") + to);
 		}
 
 		for (let i = 0; i < this.files.length; i++) {
@@ -401,19 +362,19 @@ class Files {
 
 			if (!result) continue;
 
-			let fileName = fileNames[i];
+			let filename = filenames[i];
 			
 			// check if this filename appears more than once
-			const isDuplicate = fileNames.filter((name) => name === fileName).length > 1;
+			const isDuplicate = filenames.filter((name) => name === filename).length > 1;
 			if (isDuplicate) {
-				const nameParts = fileName.lastIndexOf(".");
-				const nameWithoutExt = fileName.substring(0, nameParts);
-				const ext = fileName.substring(nameParts);
-				fileName = `${nameWithoutExt} (${i + 1})${ext}`;
+				const nameParts = filename.lastIndexOf(".");
+				const nameWithoutExt = filename.substring(0, nameParts);
+				const ext = filename.substring(nameParts);
+				filename = `${nameWithoutExt} (${i + 1})${ext}`;
 			}
 
 			dlFiles.push({
-				name: fileName,
+				name: filename,
 				lastModified: Date.now(),
 				input: await result.file.arrayBuffer(),
 			});

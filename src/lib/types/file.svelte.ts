@@ -5,6 +5,7 @@ import { ToastManager } from "$lib/util/toast.svelte";
 import type { Component } from "svelte";
 import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
 import FallbackToast from "$lib/components/functional/popups/FallbackToast.svelte";
+import ServerUploadWarning from "$lib/components/functional/popups/ServerUploadWarning.svelte";
 import type {
 	ConversionSettings,
 	SettingDefinition,
@@ -41,6 +42,7 @@ export class VertFile {
 	private fallbackToastId: number | null = null;
 	private attemptedConverters = new Set<string>();
 	private retryingFallback = false;
+	private vertdWarningToastId: number | null = null;
 
 	public isZip = $state(() => this.from === ".zip");
 
@@ -168,6 +170,13 @@ export class VertFile {
 		}
 
 		if (!converter) throw new Error("No converter found");
+
+		const canProceed = await this.confirmServerWarning(converter);
+		if (!canProceed) {
+			this.cancelled = true;
+			return;
+		}
+
 		this.attemptedConverters.add(converter.name);
 		log(["file", "convert"], `using converter: ${converter.name}`);
 
@@ -215,7 +224,7 @@ export class VertFile {
 					disappearing: false,
 					message: FallbackToast,
 					additional: {
-						fileName: this.file.name,
+						filename: this.file.name,
 						nextConverter: nextConverter.name,
 						onNext: async () => {
 							if (this.fallbackToastId !== null)
@@ -260,6 +269,47 @@ export class VertFile {
 		}
 		this.processing = false;
 		return res;
+	}
+
+	private async confirmServerWarning(converter: Converter): Promise<boolean> {
+		if (converter.name !== "vertd") return true;
+		if (localStorage.getItem("acceptedExternalWarning") === "true")
+			return true;
+
+		return new Promise((resolve) => {
+			let resolved = false;
+
+			const finish = (shouldProceed: boolean) => {
+				if (resolved) return;
+				resolved = true;
+				if (this.vertdWarningToastId !== null)
+					ToastManager.remove(this.vertdWarningToastId);
+				this.vertdWarningToastId = null;
+				resolve(shouldProceed);
+			};
+
+			if (this.vertdWarningToastId !== null)
+				ToastManager.remove(this.vertdWarningToastId);
+
+			this.vertdWarningToastId = ToastManager.add({
+				type: "warning",
+				disappearing: false,
+				message: ServerUploadWarning,
+				additional: {
+					filename: this.file.name,
+					onProceed: () => {
+						finish(true);
+					},
+					onCancel: () => {
+						finish(false);
+					},
+					onDontShowAgain: () => {
+						localStorage.setItem("acceptedExternalWarning", "true");
+						finish(true);
+					},
+				},
+			});
+		});
 	}
 
 	private async convertZip(converter: Converter): Promise<VertFile> {

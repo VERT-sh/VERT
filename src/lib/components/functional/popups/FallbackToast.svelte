@@ -2,7 +2,7 @@
 	import { m } from "$lib/paraglide/messages";
 
 	type Additional = {
-		fileName: string;
+		filename: string;
 		nextConverter: string;
 		onNext: () => void | Promise<void>;
 		onCancel: () => void;
@@ -10,13 +10,13 @@
 
 	let { additional }: { additional: Additional } = $props();
 
-	export const title = "An error occurred";
+	export const title = m["convert.errors.converter_fallback.title"]();
 </script>
 
 <div class="flex flex-col gap-4">
 	<p class="text-black">
 		{m["convert.errors.converter_fallback.body"]({
-			filename: additional.fileName,
+			filename: additional.filename,
 			converter: additional.nextConverter,
 		})}
 	</p>

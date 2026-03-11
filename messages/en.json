@@ -44,7 +44,7 @@
 			"partial_support": "This format can only be converted as {direction}.",
 			"direction_input": "input (from)",
 			"direction_output": "output (to)",
-			"video_server_processing": "Video uploads to a server for processing by default, learn how to set it up locally here."
+			"video_server_processing": "When possible, VERT converts videos locally in your browser. Some conversions may require server-side processing, learn how to set it up locally here."
 		}
 	},
 	"convert": {
@@ -62,9 +62,10 @@
 		"large_file_warning": "Due to browser / device limitations, video to audio conversion is disabled for this file as it is larger than {limit}GB. We recommend using Firefox or Safari for files of this size since they have less limitations.",
 		"external_warning": {
 			"title": "External server warning",
-			"text": "If you choose to convert into a video format, those files will be uploaded to an external server to be converted. Do you want to continue?",
-			"yes": "Yes",
-			"no": "No"
+			"text": "Converting {filename} with its current settings is not supported locally and requires server-side processing. Do you want to continue?",
+			"yes": "Convert on server",
+			"no": "Cancel conversion",
+			"dont_show_again": "Don't show again"
 		},
 		"panel": {
 			"convert_all": "Convert all",
@@ -149,6 +150,7 @@
 		"errors": {
 			"cant_convert": "We can't convert this file.",
 			"converter_fallback": {
+				"title": "Change converter?",
 				"body": "Conversion failed for {filename}. Would you like to try the next compatible converter {converter}?",
 				"yes": "Next converter",
 				"no": "Cancel conversion",
