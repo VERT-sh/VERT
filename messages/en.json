@@ -15,7 +15,7 @@
 	},
 	"upload": {
 		"title": "The file converter you'll love.",
-		"subtitle": "All file processing is done on your device. If unsupported, videos are converted on our lightning-fast servers. No file size limit, no ads, and completely open source.",
+		"subtitle": "All file processing is done on your device. No file size limit, no ads, and completely open source.",
 		"uploader": {
 			"text": "Drop or click to {action}",
 			"convert": "convert"
