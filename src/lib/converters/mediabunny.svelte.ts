@@ -29,6 +29,7 @@ import type {
 } from "$lib/types/conversion-settings";
 import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
+import { browser } from "$app/environment";
 
 // codec compatibility stuff, based on mediabunny's docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
@@ -218,6 +219,8 @@ export class MediabunnyConverter extends Converter {
 
 	constructor() {
 		super();
+
+		if (!browser) return;
 
 		this.log = (msg) => log(["converters", this.name], msg);
 		this.error = (msg) => error(["converters", this.name], msg);
