@@ -448,14 +448,14 @@ export class MediabunnyConverter extends Converter {
 		// trim/crop/rotate - also have another ui for this prob
 
 		return [
-			videoBitrate,
-			resolution,
 			videoCodec,
 			audioCodec,
-			fps,
-			metadata,
+			videoBitrate,
 			audioBitrate,
+			fps,
 			sampleRate,
+			resolution,
+			metadata,
 		];
 	}
 
@@ -518,7 +518,9 @@ export class MediabunnyConverter extends Converter {
 
 			const isValid = conversion.isValid;
 			const logMethod = isValid ? this.error : this.log;
-			logMethod(`${discardedTrackCount} discarded track(s) for ${file.name}:\n${discardedTrackList.join("\n")}`);
+			logMethod(
+				`${discardedTrackCount} discarded track(s) for ${file.name}:\n${discardedTrackList.join("\n")}`,
+			);
 			ToastManager.add({
 				type: isValid ? "warning" : "error", // warning if output created, error if nothing / conversion was completely invalid
 				message: m["workers.errors.mediabunny_discarded"]({

@@ -30,10 +30,19 @@ interface RouteRequestMap {
 	};
 }
 
+interface CodecsResponse {
+	videoCodecs: string[];
+	audioCodecs: string[];
+}
+
 interface RouteResponseMap {
 	"/api/upload": UploadResponse;
 	"/api/version": string;
 	"/api/keep": void;
+	"/api/codecs": string[]; // get list of all codecs supported by vertd server
+	[key: `/api/codecs/${string}`]: unknown; // list of codecs for this format
+	[key: `/api/codecs/support/${string}`]: unknown; // list of formats supporting this codec -- i dont know how this works in ts, i have to put both as unknown since this and /api/codecs are different types (CodecsResponse & string[]) and TS errors
+	[key: `/api/confirm/${string}/${string}`]: void; // confirm download - job id, token
 }
 
 export const vertdFetch: {
@@ -335,6 +344,8 @@ export class VertdConverter extends Converter {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private error: (...msg: any[]) => void = () => {};
 
+	private codecs: CodecsResponse = { videoCodecs: [], audioCodecs: [] };
+
 	constructor() {
 		super();
 		this.log = (msg) => log(["converters", this.name], msg);
@@ -390,7 +401,9 @@ export class VertdConverter extends Converter {
 		Settings.instance.save();
 	}
 
-	public async getAvailableSettings(): Promise<SettingDefinition[]> {
+	public async getAvailableSettings(
+		input: VertFile,
+	): Promise<SettingDefinition[]> {
 		// video - bitrate, fps, resolution, trim, crop, rotate, flip/flop, audio settings?
 
 		const qualityOptions = [
@@ -419,6 +432,25 @@ export class VertdConverter extends Converter {
 				label: m["convert.settings.video.speed_ultra_fast"](),
 			},
 		];
+
+		// get codecs for this format from vertd
+		try {
+			const targetFormat = input.to.replace(/^\./, "");
+			const codecsJson = await vertdFetch(`/api/codecs/${targetFormat}`, {
+				method: "GET",
+			});
+
+			const previousCodecs = JSON.stringify(this.codecs);
+			const newCodecs = JSON.stringify(codecsJson);
+
+			if (previousCodecs !== newCodecs) {
+				this.codecs = codecsJson as CodecsResponse;
+				this.log(`updated codecs from vertd: ${newCodecs}`);
+			}
+		} catch (e) {
+			this.error(`failed to fetch codecs from vertd: ${e}`);
+			throw e;
+		}
 
 		// get default vertd speed
 		const defaultSpeed = Settings.instance.settings.vertdSpeed;
@@ -486,6 +518,20 @@ export class VertdConverter extends Converter {
 			placeholder: m["convert.settings.video.resolution_placeholder"](),
 		};
 
+		const videoCodec: SettingDefinition = {
+			key: "videoCodec",
+			label: m["convert.settings.video.video_codec"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				...(this.codecs.videoCodecs || []).map((codec) => ({
+					value: codec,
+					label: codec,
+				})),
+			],
+		};
+
 		// TODO: allow CRF for consistent quality?
 		const videoBitrate: SettingDefinition = {
 			key: "videoBitrate",
@@ -513,6 +559,20 @@ export class VertdConverter extends Converter {
 		/*
 		 *	audio settings
 		 */
+		const audioCodec: SettingDefinition = {
+			key: "audioCodec",
+			label: m["convert.settings.video.audio_codec"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				...(this.codecs.audioCodecs || []).map((codec) => ({
+					value: codec,
+					label: codec,
+				})),
+			],
+		};
+
 		const audioBitrate: SettingDefinition = {
 			key: "audioBitrate",
 			label: m["convert.settings.video.audio_bitrate"](),
@@ -565,18 +625,22 @@ export class VertdConverter extends Converter {
 
 		return [
 			qualitySpeedRange,
+			videoCodec,
+			audioCodec,
 			videoBitrate,
-			resolution,
-			fps,
-			metadata,
 			audioBitrate,
+			fps,
 			sampleRate,
+			resolution,
+			metadata,
 		];
 	}
 
-	public async getDefaultSettings(): Promise<ConversionSettings> {
+	public async getDefaultSettings(
+		input: VertFile,
+	): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings();
+		const settings = await this.getAvailableSettings(input);
 		settings.forEach((setting) => {
 			defaults[setting.key] = setting.default;
 		});
@@ -595,7 +659,7 @@ export class VertdConverter extends Converter {
 		const conversionSettings = // vertd expects object not string json
 			Object.keys(settings).length > 0
 				? settings // user-provided settings
-				: await this.getDefaultSettings(); // use defaults if not provided
+				: await this.getDefaultSettings(input); // use defaults if not provided
 
 		// if converting animated webp to video, first convert to gif
 		// ffmpeg (in vertd) doesn't support decoding animated webp still.. while supporting encoding animated webp for some reason
@@ -705,8 +769,8 @@ export class VertdConverter extends Converter {
 
 						// confirm download to clean up on server
 						try {
-							await fetch(
-								`${apiUrl}/api/confirm/${msg.data.jobId}/${uploadRes.auth}`,
+							await vertdFetch(
+								`/api/confirm/${msg.data.jobId}/${uploadRes.auth}`,
 								{
 									method: "GET",
 								},
