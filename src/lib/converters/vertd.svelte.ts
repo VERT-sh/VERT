@@ -71,18 +71,36 @@ export const vertdFetch: {
 	const res = await fetch(domain + url, options);
 
 	const text = await res.text();
-	let json = null;
+	const normalizedText = text.replace(/^\uFEFF/, "").trim();
+
+	if (!normalizedText.length) {
+		if (!res.ok) throw new Error(`vertd request failed (${res.status})`);
+		return undefined as RouteResponseMap[typeof url];
+	}
+
+	let json: unknown = null;
 	try {
-		json = JSON.parse(text);
+		json = JSON.parse(normalizedText);
 	} catch {
-		throw new Error(text);
+		throw new Error(normalizedText);
 	}
 
-	if (json.type === "error") {
-		throw new Error(json.data);
+	if (json && typeof json === "object" && "type" in json && "data" in json) {
+		const envelope = json as { type: string; data: unknown };
+
+		if (envelope.type === "error") {
+			if (typeof envelope.data === "string")
+				throw new Error(envelope.data);
+			throw new Error(JSON.stringify(envelope.data));
+		}
+
+		if (envelope.type === "success")
+			return envelope.data as RouteResponseMap[typeof url];
 	}
 
-	return json.data;
+	if (!res.ok) throw new Error(normalizedText);
+
+	return json as RouteResponseMap[typeof url];
 };
 
 // ws types
