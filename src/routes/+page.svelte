@@ -303,11 +303,11 @@
 									</div>
 								</div>
 							</OverlayScrollbarsComponent>
-							<!-- blur at bottom if scrollable - positioned relative to the card container -->
+							<!-- bottom blur if scrollable -->
 							{#if showBlur[i]}
 								<div
 									class="absolute left-0 bottom-0 w-full h-10 pointer-events-none"
-									style={`background: linear-gradient(to top, var(--bg-panel), transparent 100%);`}
+									style={`background: linear-gradient(to top, var(--bg-panel), transparent 65%);`}
 								></div>
 							{/if}
 						</div>
