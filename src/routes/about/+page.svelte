@@ -76,8 +76,15 @@
 		// Check if the data is already in sessionStorage
 		const cachedContribs = sessionStorage.getItem("ghContribs");
 		if (cachedContribs) {
-			ghContribs = JSON.parse(cachedContribs);
-			return;
+			try {
+				const parsedContribs = JSON.parse(cachedContribs);
+				if (Array.isArray(parsedContribs)) {
+					ghContribs = parsedContribs;
+					return;
+				}
+			} catch {
+				sessionStorage.removeItem("ghContribs");
+			}
 		}
 
 		// Fetch GitHub contributors
@@ -104,30 +111,16 @@
 					!excludedNames.has(contrib.login),
 			);
 
-			// Fetch and cache avatar images as Base64
-			const fetchAvatar = async (url: string) => {
-				const res = await fetch(url);
-				const blob = await res.blob();
-				return new Promise<string>((resolve, reject) => {
-					const reader = new FileReader();
-					reader.onloadend = () => resolve(reader.result as string);
-					reader.onerror = reject;
-					reader.readAsDataURL(blob);
-				});
-			};
-
-			ghContribs = await Promise.all(
-				filteredContribs.map(
-					async (contrib: {
-						login: string;
-						avatar_url: string;
-						html_url: string;
-					}) => ({
-						name: contrib.login,
-						avatar: await fetchAvatar(contrib.avatar_url),
-						github: contrib.html_url,
-					}),
-				),
+			ghContribs = filteredContribs.map(
+				(contrib: {
+					login: string;
+					avatar_url: string;
+					html_url: string;
+				}) => ({
+					name: contrib.login,
+					avatar: contrib.avatar_url,
+					github: contrib.html_url,
+				}),
 			);
 
 			// Cache the data in sessionStorage

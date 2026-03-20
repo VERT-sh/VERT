@@ -49,69 +49,70 @@ export class PandocConverter extends Converter {
 
 		this.activeConversions.set(file.id, worker);
 
-		const loadMsg: WorkerMessage = {
-			type: "load",
-			wasm: this.wasm,
-			id: file.id,
-		};
-		worker.postMessage(loadMsg);
-		await waitForMessage(worker, "loaded");
-		const convertMsg: WorkerMessage = {
-			type: "convert",
-			to,
-			input: {
-				file: file.file,
-				name: file.name,
-				from: file.from,
+		try {
+			const loadMsg: WorkerMessage = {
+				type: "load",
+				wasm: this.wasm,
+				id: file.id,
+			};
+			worker.postMessage(loadMsg);
+			await waitForMessage(worker, "loaded");
+			const convertMsg: WorkerMessage = {
+				type: "convert",
 				to,
-			},
-			id: file.id,
-			conversionSettings: "", // no settings for pandoc yet
-		};
-		worker.postMessage(convertMsg);
-		const result = await waitForMessage(worker);
-		if (result.type === "error") {
-			worker.terminate();
-			// throw new Error(result.error);
-			const error = result.error.toString();
-			switch (result.errorKind) {
-				case "PandocUnknownReaderError": {
-					throw new Error(
-						`${file.from} is not a supported input format for documents.`,
-					);
-				}
-
-				case "PandocUnknownWriterError": {
-					throw new Error(
-						`${to} is not a supported output format for documents.`,
-					);
-				}
-
-				case "PandocParseError": {
-					if (error.includes("JSON missing pandoc-api-version")) {
+				input: {
+					file: file.file,
+					name: file.name,
+					from: file.from,
+					to,
+				},
+				id: file.id,
+				conversionSettings: "", // no settings for pandoc yet
+			};
+			worker.postMessage(convertMsg);
+			const result = await waitForMessage(worker);
+			if (result.type === "error") {
+				const error = result.error.toString();
+				switch (result.errorKind) {
+					case "PandocUnknownReaderError": {
 						throw new Error(
-							`This JSON file is not a pandoc-converted JSON file. It must be converted with pandoc / VERT to be converted again.`,
+							`${file.from} is not a supported input format for documents.`,
 						);
 					}
-				}
 
-				// eslint-disable-next-line no-fallthrough
-				default:
-					if (result.errorKind)
+					case "PandocUnknownWriterError": {
 						throw new Error(
-							`[${result.errorKind}] ${result.error}`,
+							`${to} is not a supported output format for documents.`,
 						);
-					else throw new Error(result.error);
-			}
-		}
+					}
 
-		if (!to.startsWith(".")) to = `.${to}`;
-		this.activeConversions.delete(file.id);
-		worker.terminate();
-		return new VertFile(
-			new File([result.output], file.name),
-			result.isZip ? ".zip" : to,
-		);
+					case "PandocParseError": {
+						if (error.includes("JSON missing pandoc-api-version")) {
+							throw new Error(
+								`This JSON file is not a pandoc-converted JSON file. It must be converted with pandoc / VERT to be converted again.`,
+							);
+						}
+					}
+
+					// eslint-disable-next-line no-fallthrough
+					default:
+						if (result.errorKind)
+							throw new Error(
+								`[${result.errorKind}] ${result.error}`,
+							);
+						else throw new Error(result.error);
+				}
+			}
+
+			if (!to.startsWith(".")) to = `.${to}`;
+			return new VertFile(
+				new File([result.output], file.name),
+				result.isZip ? ".zip" : to,
+			);
+		} finally {
+			this.activeConversions.delete(file.id);
+			worker.terminate();
+		}
 	}
 
 	public async cancel(input: VertFile): Promise<void> {

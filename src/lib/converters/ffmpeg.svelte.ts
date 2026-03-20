@@ -90,10 +90,11 @@ export class FFmpegConverter extends Converter {
 		this.error = (msg) => error(["converters", this.name], msg);
 		this.log(`created converter`);
 		if (!browser) return;
-		try {
-			// this is just to cache the wasm and js for when we actually use it. we're not using this ffmpeg instance
-			this.ffmpeg = new FFmpeg();
-			(async () => {
+
+		// this is just to cache the wasm and js for when we actually use it. we're not using this ffmpeg instance
+		this.ffmpeg = new FFmpeg();
+		void (async () => {
+			try {
 				const baseURL =
 					"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
 
@@ -105,15 +106,15 @@ export class FFmpegConverter extends Converter {
 				});
 
 				this.status = "ready";
-			})();
-		} catch (err) {
-			this.error(`Error loading ffmpeg: ${err}`);
-			this.status = "error";
-			ToastManager.add({
-				type: "error",
-				message: m["workers.errors.ffmpeg"](),
-			});
-		}
+			} catch (err) {
+				this.error(`Error loading ffmpeg: ${err}`);
+				this.status = "error";
+				ToastManager.add({
+					type: "error",
+					message: m["workers.errors.ffmpeg"](),
+				});
+			}
+		})();
 	}
 
 	public async getAvailableSettings(): Promise<SettingDefinition[]> {
@@ -251,46 +252,42 @@ export class FFmpegConverter extends Converter {
 
 		ffmpeg.on("log", errorListener);
 
-		const buf = new Uint8Array(await input.file.arrayBuffer());
-		await ffmpeg.writeFile("input", buf);
-		this.log(`wrote ${input.name} to ffmpeg virtual fs`);
+		try {
+			const buf = new Uint8Array(await input.file.arrayBuffer());
+			await ffmpeg.writeFile("input", buf);
+			this.log(`wrote ${input.name} to ffmpeg virtual fs`);
 
-		const command = await this.buildConversionCommand(
-			ffmpeg,
-			input,
-			to,
-			conversionSettings,
-			isAlac,
-		);
-		this.log(`FFmpeg command: ${command.join(" ")}`);
-		await ffmpeg.exec(command);
-		this.log("executed ffmpeg command");
+			const command = await this.buildConversionCommand(
+				ffmpeg,
+				input,
+				to,
+				conversionSettings,
+				isAlac,
+			);
+			this.log(`FFmpeg command: ${command.join(" ")}`);
+			await ffmpeg.exec(command);
+			this.log("executed ffmpeg command");
 
-		if (conversionError) {
+			if (conversionError) throw new Error(conversionError);
+
+			const output = (await ffmpeg.readFile(
+				"output" + to,
+			)) as unknown as Uint8Array;
+
+			if (!output || output.length === 0)
+				throw new Error("empty file returned");
+
+			const outputFileName =
+				input.name.split(".").slice(0, -1).join(".") + to;
+			this.log(`read ${outputFileName} from ffmpeg virtual fs`);
+
+			const outBuf = new Uint8Array(output).buffer.slice(0);
+			return new VertFile(new File([outBuf], outputFileName), to);
+		} finally {
 			ffmpeg.off("log", errorListener);
+			this.activeConversions.delete(input.id);
 			ffmpeg.terminate();
-			throw new Error(conversionError);
 		}
-
-		const output = (await ffmpeg.readFile(
-			"output" + to,
-		)) as unknown as Uint8Array;
-
-		if (!output || output.length === 0) {
-			ffmpeg.off("log", errorListener);
-			ffmpeg.terminate();
-			throw new Error("empty file returned");
-		}
-
-		const outputFileName =
-			input.name.split(".").slice(0, -1).join(".") + to;
-		this.log(`read ${outputFileName} from ffmpeg virtual fs`);
-
-		ffmpeg.off("log", errorListener);
-		ffmpeg.terminate();
-
-		const outBuf = new Uint8Array(output).buffer.slice(0);
-		return new VertFile(new File([outBuf], outputFileName), to);
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
@@ -529,7 +526,7 @@ export class FFmpegConverter extends Converter {
 			// -map for each audio track
 			if (settings.tracks > 1) {
 				for (let i = 0; i < settings.tracks; i++) {
-					tracksArgs.push("-map", `0:a:${i - 1}`);
+					tracksArgs.push("-map", `0:a:${i}`);
 				}
 			} else {
 				tracksArgs = ["-map", "0:a:0"]; // default to first audio track if not specified

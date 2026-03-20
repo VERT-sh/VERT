@@ -723,10 +723,41 @@ export class VertdConverter extends Converter {
 		const apiUrl = await VertdInstance.instance.url();
 
 		return new Promise((resolve, reject) => {
+			let settled = false;
 			const protocol = apiUrl.startsWith("https") ? "wss:" : "ws:";
 			const ws = new WebSocket(
 				`${protocol}//${apiUrl.replace("http://", "").replace("https://", "")}/api/ws`,
 			);
+
+			const connectTimeout = setTimeout(() => {
+				if (settled) return;
+				settled = true;
+				this.activeConversions.delete(input.id);
+				ws.close();
+				reject(new Error("vertd websocket connection timeout"));
+			}, 30000);
+
+			const rejectConversion = (reason: unknown) => {
+				if (settled) return;
+				settled = true;
+				clearTimeout(connectTimeout);
+				this.activeConversions.delete(input.id);
+				if (
+					ws.readyState === WebSocket.CONNECTING ||
+					ws.readyState === WebSocket.OPEN
+				) {
+					ws.close();
+				}
+				reject(reason);
+			};
+
+			const resolveConversion = (value: VertFile) => {
+				if (settled) return;
+				settled = true;
+				clearTimeout(connectTimeout);
+				this.activeConversions.delete(input.id);
+				resolve(value);
+			};
 
 			this.activeConversions.set(input.id, {
 				ws,
@@ -735,6 +766,7 @@ export class VertdConverter extends Converter {
 			});
 
 			ws.onopen = () => {
+				clearTimeout(connectTimeout);
 				this.log(
 					`opened ws connection to vertd for file ${input.name}`,
 				);
@@ -752,8 +784,32 @@ export class VertdConverter extends Converter {
 				this.log(`sent startJob message for file ${input.name}`);
 			};
 
+			ws.onerror = () => {
+				this.error(`ws error for file ${input.name}`);
+				rejectConversion(new Error("vertd websocket error"));
+			};
+
+			ws.onclose = (event) => {
+				if (settled) return;
+				this.error(
+					`ws closed unexpectedly for file ${input.name} (code: ${event.code})`,
+				);
+				rejectConversion(new Error("vertd websocket closed unexpectedly"));
+			};
+
 			ws.onmessage = async (e) => {
-				const msg: VertdMessage = JSON.parse(e.data);
+				let msg: VertdMessage;
+				try {
+					if (typeof e.data !== "string") {
+						rejectConversion(new Error("invalid websocket payload type"));
+						return;
+					}
+					msg = JSON.parse(e.data);
+				} catch {
+					rejectConversion(new Error("invalid websocket payload"));
+					return;
+				}
+
 				this.log(`received message ${msg.type} for file ${input.name}`);
 				switch (msg.type) {
 					case "progressUpdate": {
@@ -781,45 +837,48 @@ export class VertdConverter extends Converter {
 					case "jobFinished": {
 						this.log(`job finished for file ${input.name}`);
 						ws.close();
-						this.activeConversions.delete(input.id);
-						const url = `${apiUrl}/api/download/${msg.data.jobId}/${uploadRes.auth}`;
-						this.log(`downloading from ${url}`);
-						// const res = await fetch(url).then((res) => res.blob());
-						const res = await downloadFile(url, input);
-
-						// confirm download to clean up on server
 						try {
-							await vertdFetch(
-								`/api/confirm/${msg.data.jobId}/${uploadRes.auth}`,
-								{
-									method: "GET",
-								},
-							);
-							this.log(
-								`confirmed download for file ${input.name}`,
+							const url = `${apiUrl}/api/download/${msg.data.jobId}/${uploadRes.auth}`;
+							this.log(`downloading from ${url}`);
+							const res = await downloadFile(url, input);
+
+							// confirm download to clean up on server
+							try {
+								await vertdFetch(
+									`/api/confirm/${msg.data.jobId}/${uploadRes.auth}`,
+									{
+										method: "GET",
+									},
+								);
+								this.log(
+									`confirmed download for file ${input.name}`,
+								);
+							} catch (e) {
+								this.error(`failed to confirm download: ${e}`);
+							}
+
+							resolveConversion(
+								new VertFile(new File([res], input.name), to),
 							);
 						} catch (e) {
-							this.error(`failed to confirm download: ${e}`);
+							if (hash) this.failure(hash);
+							rejectConversion(e);
 						}
-
-						resolve(new VertFile(new File([res], input.name), to));
 						break;
 					}
 
 					case "jobCancelled": {
 						this.log("job cancelled");
 						ws.close();
-						this.activeConversions.delete(input.id);
-						reject("Conversion cancelled");
+						rejectConversion("Conversion cancelled");
 						break;
 					}
 
 					case "error": {
 						this.error(`error: ${msg.data.message}`);
-						this.activeConversions.delete(input.id);
 						if (hash) this.failure(hash);
 
-						reject({
+						rejectConversion({
 							component: VertdErrorComponent,
 							additional: {
 								jobId: uploadRes.id,
@@ -829,6 +888,11 @@ export class VertdConverter extends Converter {
 								errorMessage: msg.data.message,
 							},
 						});
+						break;
+					}
+
+					default: {
+						break;
 					}
 				}
 			};

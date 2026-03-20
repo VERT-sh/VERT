@@ -13,6 +13,25 @@
 	type Props = DialogProps<VertdErrorDetailsProps>;
 
 	let { additional }: Props = $props();
+	let errorBlobUrl = $state("");
+
+	$effect(() => {
+		if (!additional.errorMessage) {
+			errorBlobUrl = "";
+			return;
+		}
+
+		const nextUrl = URL.createObjectURL(
+			new Blob([additional.errorMessage], {
+				type: "text/plain",
+			}),
+		);
+		errorBlobUrl = nextUrl;
+
+		return () => {
+			URL.revokeObjectURL(nextUrl);
+		};
+	});
 </script>
 
 <div class="flex flex-col gap-2">
@@ -41,13 +60,7 @@
 			{@html sanitize(link(
 				["view_link"],
 				m["convert.errors.vertd_details_error_message"](),
-				[
-					URL.createObjectURL(
-						new Blob([additional.errorMessage], {
-							type: "text/plain",
-						}),
-					),
-				],
+				[errorBlobUrl || "#"],
 				[true],
 				["text-blue-500 font-normal"],
 			))}

@@ -1,6 +1,7 @@
 import { PUB_VERTD_URL } from "$env/static/public";
 import type { ConversionBitrate } from "$lib/converters/ffmpeg.svelte";
 import type { ConversionSpeed } from "$lib/converters/vertd.svelte";
+import { readSettings } from "$lib/util/settings";
 import { VertdInstance } from "./vertdSettings.svelte";
 
 export { default as Appearance } from "./Appearance.svelte";
@@ -62,9 +63,9 @@ export class Settings {
 	public load() {
 		try {
 			VertdInstance.instance.load();
-			const ls = localStorage.getItem("settings");
-			if (!ls) return;
-			const settings: ISettings = JSON.parse(ls);
+			const persisted = readSettings<ISettings>();
+			if (!Object.keys(persisted).length) return;
+			const settings = persisted as ISettings;
 			const vertdBlockedHashes = new Map<string, Date[]>(
 				Object.entries(
 					settings.vertdBlockedHashes ||

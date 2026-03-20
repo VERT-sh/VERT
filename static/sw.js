@@ -126,8 +126,10 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("message", (event) => {
     if (!event.data) return;
     const type = event.data.type;
+    const port = event.ports?.[0];
 
 	if (type === "GET_CACHE_INFO") {
+		if (!port) return;
 		event.waitUntil(
 			caches.open(CACHE_NAME).then(async (cache) => {
 				const keys = await cache.keys();
@@ -159,7 +161,7 @@ self.addEventListener("message", (event) => {
 					}
 				}
 
-				event.ports[0].postMessage({
+				port.postMessage({
 					totalSize,
 					fileCount: files.length,
 					files,
@@ -169,6 +171,7 @@ self.addEventListener("message", (event) => {
 	}
 
 	if (type === "CLEAR_CACHE") {
+		if (!port) return;
 		event.waitUntil(
 			caches
 				.delete(CACHE_NAME)
@@ -177,11 +180,11 @@ self.addEventListener("message", (event) => {
 					return caches.open(CACHE_NAME);
 				})
 				.then(() => {
-					event.ports[0].postMessage({ success: true });
+					port.postMessage({ success: true });
 				})
 				.catch((err) => {
 					console.error("[SW] failed to clear cache:", err);
-					event.ports[0].postMessage({
+					port.postMessage({
 						success: false,
 						error: err.message,
 					});

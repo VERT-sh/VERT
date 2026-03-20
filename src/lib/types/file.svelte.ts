@@ -11,6 +11,7 @@ import type {
 	SettingDefinition,
 } from "./conversion-settings";
 import { log } from "$lib/util/logger";
+import { readSettings } from "$lib/util/settings";
 
 const MAX_BLOB_SIZE_LIMIT = 2 * 1024 * 1024 * 1024; // 2GB
 
@@ -121,7 +122,7 @@ export class VertFile {
 	constructor(file: File, to: string, blobUrl?: string) {
 		const ext = file.name.split(".").pop();
 		const newFile = new File(
-			[file.slice(0, file.size, file.type)],
+			[file],
 			`${file.name.split(".").slice(0, -1).join(".")}.${ext?.toLowerCase()}`,
 		);
 		this.file = newFile;
@@ -479,7 +480,7 @@ export class VertFile {
 		let to = this.result.to;
 		if (!to.startsWith(".")) to = `.${to}`;
 
-		const settings = JSON.parse(localStorage.getItem("settings") ?? "{}");
+		const settings = readSettings<{ filenameFormat?: string }>();
 		const filenameFormat = settings.filenameFormat || "VERT_%name%";
 
 		const format = (name: string) => {
@@ -528,7 +529,7 @@ export class VertFile {
 
 			setTimeout(() => {
 				cache.delete(cacheKey);
-			}, 3000);
+			}, 30000);
 		} else {
 			blob = URL.createObjectURL(
 				new Blob([await this.result.file.arrayBuffer()], {
@@ -545,7 +546,9 @@ export class VertFile {
 		a.target = "_blank";
 		a.style.display = "none";
 		a.click();
-		URL.revokeObjectURL(blob);
+		setTimeout(() => {
+			URL.revokeObjectURL(blob);
+		}, 30000);
 		a.remove();
 	}
 

@@ -9,7 +9,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint ."
+		"lint": "prettier --check .; p=$?; eslint .; e=$?; [ $p -eq 0 ] && [ $e -eq 0 ]"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "^2.15.0",

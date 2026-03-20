@@ -2,16 +2,21 @@
 	import { browser } from "$app/environment";
 	import { error, log } from "$lib/util/logger";
 	import * as Settings from "$lib/sections/settings/index.svelte";
-	import { PUB_PLAUSIBLE_URL } from "$env/static/public";
 	import { SettingsIcon } from "lucide-svelte";
 	import { onMount } from "svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager } from "$lib/util/toast.svelte";
 	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
+	import { readSettings } from "$lib/util/settings";
 
 	let settings = $state(Settings.Settings.instance.settings);
 
 	let isInitial = $state(true);
+
+	const readSavedSettings = () => {
+		const parsed = readSettings<typeof settings>();
+		return Object.keys(parsed).length ? parsed : null;
+	};
 
 	$effect(() => {
 		if (!browser) return;
@@ -20,12 +25,9 @@
 			return;
 		}
 
-		const savedSettings = localStorage.getItem("settings");
-		if (savedSettings) {
-			const parsedSettings = JSON.parse(savedSettings);
-			if (JSON.stringify(parsedSettings) === JSON.stringify(settings))
-				return;
-		}
+		const parsedSettings = readSavedSettings();
+		if (parsedSettings && JSON.stringify(parsedSettings) === JSON.stringify(settings))
+			return;
 
 		try {
 			Settings.Settings.instance.settings = settings;
@@ -41,9 +43,8 @@
 	});
 
 	onMount(() => {
-		const savedSettings = localStorage.getItem("settings");
-		if (savedSettings) {
-			const parsedSettings = JSON.parse(savedSettings);
+		const parsedSettings = readSavedSettings();
+		if (parsedSettings) {
 			Settings.Settings.instance.settings = {
 				...Settings.Settings.instance.settings,
 				...parsedSettings,
