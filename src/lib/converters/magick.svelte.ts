@@ -135,6 +135,32 @@ export class MagickConverter extends Converter {
 			max: 100,
 		};
 
+		const resolution: SettingDefinition = {
+			key: "resolution",
+			label: m["convert.settings.video.resolution"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: "426x240", label: "426x240" },
+				{ value: "640x360", label: "640x360" },
+				{ value: "854x480", label: "854x480" },
+				{ value: "720x1280", label: "720x1280 (V)" },
+				{ value: "1280x720", label: "1280x720" },
+				{ value: "1080x1920", label: "1080x1920 (V)" },
+				{ value: "1920x1080", label: "1920x1080" },
+				{ value: "2160x3840", label: "2160x3840 (V)" },
+				{ value: "3840x2160", label: "3840x2160" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customResolution",
+			placeholder: m["convert.settings.video.resolution_placeholder"](),
+		};
+
 		const depth: SettingDefinition = {
 			key: "depth",
 			label: m["convert.settings.image.depth"](),
@@ -192,7 +218,7 @@ export class MagickConverter extends Converter {
 
 		// resize, crop, rotate - prob want a ui
 
-		return [quality, depth, colorSpace, transparency, metadata];
+		return [quality, depth, colorSpace, resolution, transparency, metadata];
 	}
 
 	public async getDefaultSettings(
@@ -360,6 +386,8 @@ export class MagickConverter extends Converter {
 	private async svgToImage(input: VertFile): Promise<Blob> {
 		this.log(`converting SVG to image (PNG)`);
 
+		const settings = input.conversionSettings;
+
 		const svgText = await input.file.text();
 		const svgBlob = new Blob([svgText], { type: "image/svg+xml" });
 		const svgUrl = URL.createObjectURL(svgBlob);
@@ -370,21 +398,42 @@ export class MagickConverter extends Converter {
 
 		const img = new Image();
 
-		// try to extract dimensions from SVG, and if not fallback to default
-		let width = 512;
-		let height = 512;
-		const widthMatch = svgText.match(/width=["'](\d+)["']/);
-		const heightMatch = svgText.match(/height=["'](\d+)["']/);
-		const viewBoxMatch = svgText.match(
-			/viewBox=["'][^"']*\s+(\d+)\s+(\d+)["']/,
-		);
+		// use resolution from settings if provided, otherwwise try to extract dimensions from SVG, and then fallback to 512x512
+		const defaultSize = 512;
+		let [width, height] = [defaultSize, defaultSize];
 
-		if (widthMatch && heightMatch) {
-			width = parseInt(widthMatch[1]);
-			height = parseInt(heightMatch[1]);
-		} else if (viewBoxMatch) {
-			width = parseInt(viewBoxMatch[1]);
-			height = parseInt(viewBoxMatch[2]);
+		// TODO: figure out a better way to process "custom" settings in general lol (see vertd.svelte.ts#processSettings)
+		if (settings.resolution) {
+			const resolution =
+				settings.resolution === "custom"
+					? settings.customResolution
+					: settings.resolution;
+			[width, height] = resolution
+				.split("x")
+				.map((dim: string) => parseInt(dim));
+			this.log(
+				`using custom dimensions from settings for SVG: ${width}x${height}`,
+			);
+		} else {
+			const widthMatch = svgText.match(/width=["'](\d+)["']/);
+			const heightMatch = svgText.match(/height=["'](\d+)["']/);
+			const viewBoxMatch = svgText.match(
+				/viewBox=["'][^"']*\s+(\d+)\s+(\d+)["']/,
+			);
+
+			if (widthMatch && heightMatch) {
+				width = parseInt(widthMatch[1]);
+				height = parseInt(heightMatch[1]);
+				this.log(
+					`extracted dimensions from SVG width/height attributes for SVG: ${width}x${height}`,
+				);
+			} else if (viewBoxMatch) {
+				width = parseInt(viewBoxMatch[1]);
+				height = parseInt(viewBoxMatch[2]);
+				this.log(
+					`extracted dimensions from SVG viewBox for SVG: ${width}x${height}`,
+				);
+			}
 		}
 
 		return new Promise((resolve, reject) => {
