@@ -483,11 +483,18 @@ export class VertFile {
 		const filenameFormat = settings.filenameFormat || "VERT_%name%";
 
 		const format = (name: string) => {
-			const date = new Date().toISOString();
+			const now = new Date();
+			const iso = now.toISOString();
+			const date = iso.split("T")[0];
+			const time = iso.split("T")[1].split(".")[0].replace(/:/g, "-");
+			const unix = now.getTime().toString();
 			const baseName = this.file.name.replace(/\.[^/.]+$/, "");
 			const originalExtension = this.file.name.split(".").pop()!;
 			return name
+				.replace(/%datetime%/g, iso)
 				.replace(/%date%/g, date)
+				.replace(/%time%/g, time)
+				.replace(/%unix%/g, unix)
 				.replace(/%name%/g, baseName)
 				.replace(/%extension%/g, originalExtension);
 		};
