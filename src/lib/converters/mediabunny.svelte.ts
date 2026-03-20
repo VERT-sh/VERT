@@ -533,6 +533,13 @@ export class MediabunnyConverter extends Converter {
 					stay: 10000,
 				},
 			});
+
+			if (!isValid) {
+				this.activeConversions.delete(file.id);
+				throw new Error(
+					`Mediabunny cannot produce an output for ${file.name} due to unsupported tracks/codecs.`,
+				);
+			}
 		}
 
 		conversion.onProgress = (progress) => {

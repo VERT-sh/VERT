@@ -293,6 +293,22 @@ const magickConvert = async (
 	let fmt = to.slice(1).toUpperCase();
 	if (fmt === "JFIF") fmt = "JPEG";
 
+	const resolution = conversionSettings.resolution as string;
+	if (resolution && resolution !== "auto") {
+		const actualResolution =
+			resolution === "custom"
+				? (conversionSettings.customResolution as string)
+				: resolution;
+
+		const [width, height] = actualResolution
+			.split("x")
+			.map((dim: string) => parseInt(dim));
+
+		if (width && height) {
+			img.resize(width, height);
+		}
+	}
+
 	// ICO size clamp to avoid WidthOrHeightExceedsLimit
 	if (fmt === "ICO") {
 		const max = 256;
