@@ -142,14 +142,14 @@
 							{m["settings.privacy.plausible_title"]()}
 						</p>
 						<p class="text-sm text-muted font-normal">
-							{@html link(
+							{@html sanitize(link(
 								["plausible_link", "analytics_link"],
 								m["settings.privacy.plausible_description"](),
 								[
 									"https://plausible.io/privacy-focused-web-analytics",
 									"https://ats.vert.sh/vert.sh",
 								],
-							)}
+							))}
 						</p>
 					</div>
 					<div class="flex flex-col gap-3 w-full">
