@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from "$app/environment";
-	import { log } from "$lib/util/logger";
+	import { error, log } from "$lib/util/logger";
 	import * as Settings from "$lib/sections/settings/index.svelte";
 	import { PUB_PLAUSIBLE_URL } from "$env/static/public";
 	import { SettingsIcon } from "lucide-svelte";
@@ -31,8 +31,8 @@
 			Settings.Settings.instance.settings = settings;
 			Settings.Settings.instance.save();
 			log(["settings"], "saving settings");
-		} catch (error) {
-			error(["settings", "error"], `failed to save settings: ${error}`);
+		} catch (e) {
+			error(["settings", "error"], `failed to save settings: ${e}`);
 			ToastManager.add({
 				type: "error",
 				message: m["settings.errors.save_failed"](),

@@ -249,7 +249,7 @@ export class MediabunnyConverter extends Converter {
 			this.error("Mediabunny failed to initialize");
 			ToastManager.add({
 				type: "error",
-				message: m["workers.errors.mediabunny"](),
+				message: m["workers.errors.mediabunny_init"](),
 				durations: {
 					stay: 10000,
 				},
