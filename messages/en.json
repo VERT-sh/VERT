@@ -70,6 +70,7 @@
 		"panel": {
 			"convert_all": "Convert all",
 			"download_all": "Download all as .zip",
+			"download_all_toast": "Zipping {count} files ({size}MB) for download. This may take a while for larger files (which may be streamed).",
 			"remove_all": "Remove all files",
 			"set_all_to": "Set all to",
 			"na": "N/A"

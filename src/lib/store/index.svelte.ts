@@ -400,6 +400,7 @@ class Files {
 
 	public async downloadAll() {
 		if (this.files.length === 0) return;
+
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const dlFiles: any[] = [];
 		const filenames: string[] = [];
@@ -419,6 +420,8 @@ class Files {
 			filenames.push(file.file.name.replace(/\.[^/.]+$/, "") + to);
 		}
 
+		let totalSize = 0;
+
 		for (let i = 0; i < this.files.length; i++) {
 			const file = this.files[i];
 			const result = file.result;
@@ -437,6 +440,7 @@ class Files {
 				filename = `${nameWithoutExt} (${i + 1})${ext}`;
 			}
 
+			totalSize += result.file.size;
 			dlFiles.push({
 				name: filename,
 				lastModified: Date.now(),
@@ -445,7 +449,20 @@ class Files {
 		}
 
 		const { downloadZip } = await import("client-zip");
+		const size = (totalSize / (1024 * 1024)).toFixed(2);
+		log(
+			["files"],
+			`adding ${dlFiles.length} files into zip (size: ${size}MB)...`,
+		);
+		ToastManager.add({
+			type: "info",
+			message: m["convert.panel.download_all_toast"]({
+				count: dlFiles.length,
+				size,
+			}),
+		});
 		const blob = await downloadZip(dlFiles, "converted.zip").blob();
+
 		const url = URL.createObjectURL(blob);
 
 		const settings = readSettings<{ filenameFormat?: string }>();
