@@ -46,6 +46,7 @@ export class VertFile {
 	private retryingFallback = false;
 	private vertdWarningToastId: number | null = null;
 	private postDownload: (() => Promise<void>) | null = null;
+	private activeConverterName: string | null = null;
 
 	public isZip = $state(() => this.from === ".zip");
 
@@ -214,6 +215,7 @@ export class VertFile {
 		}
 
 		this.attemptedConverters.add(converter.name);
+		this.activeConverterName = converter.name;
 		log(["file", "convert"], `using converter: ${converter.name}`);
 
 		this.result = null;
@@ -304,6 +306,7 @@ export class VertFile {
 			this.result = null;
 		}
 		this.processing = false;
+		this.activeConverterName = null;
 		return res;
 	}
 
@@ -441,17 +444,19 @@ export class VertFile {
 
 	public async cancel() {
 		if (!this.processing) return;
-		const converter = this.converters.find(
-			(c) => c.name === this.conversionSettings.converter,
-		);
-		if (!converter) throw new Error("No converter found");
+		const selectedConverter = this.conversionSettings.converter;
+		const converterName = selectedConverter || this.activeConverterName;
+		const converter = this.converters.find((c) => c.name === converterName);
 		this.cancelled = true;
 		try {
+			if (!converter) return;
 			await converter.cancel(this);
-			this.processing = false;
-			this.result = null;
 		} catch (err) {
 			this.toastErr(err);
+		} finally {
+			this.processing = false;
+			this.result = null;
+			this.activeConverterName = null;
 		}
 	}
 
