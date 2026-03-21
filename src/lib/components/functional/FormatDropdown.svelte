@@ -265,7 +265,7 @@
 	const extract = async () => {
 		// extract all files in zip, then add all extracted files to files store
 		if (!file) return;
-		const { extractZip } = await import("$lib/util/zip");
+		const { extractZip } = await import("$lib/util/file");
 		const extractedFiles = await extractZip(file.file);
 
 		if (!Array.isArray(extractedFiles) || extractedFiles.length === 0)

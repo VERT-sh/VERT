@@ -12,6 +12,7 @@ import sanitizeHtml from "sanitize-html";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { GB } from "$lib/util/consts";
 import { readSettings } from "$lib/util/settings";
+import { formatFilename } from "$lib/util/file";
 
 class Files {
 	public files = $state<VertFile[]>([]);
@@ -209,7 +210,7 @@ class Files {
 				}),
 			});
 
-			const { extractZip } = await import("$lib/util/zip");
+			const { extractZip } = await import("$lib/util/file");
 			const entries = await extractZip(file);
 
 			const totalEntries = entries.length;
@@ -439,7 +440,7 @@ class Files {
 			dlFiles.push({
 				name: filename,
 				lastModified: Date.now(),
-				input: await result.file.arrayBuffer(),
+				input: result.file.stream(),
 			});
 		}
 
@@ -450,17 +451,9 @@ class Files {
 		const settings = readSettings<{ filenameFormat?: string }>();
 		const filenameFormat = settings.filenameFormat || "VERT_%name%";
 
-		const format = (name: string) => {
-			const date = new Date().toISOString();
-			return name
-				.replace(/%date%/g, date)
-				.replace(/%name%/g, "Multi")
-				.replace(/%extension%/g, "");
-		};
-
 		const a = document.createElement("a");
 		a.href = url;
-		a.download = `${format(filenameFormat)}.zip`;
+		a.download = `${formatFilename(filenameFormat, "Multi")}.zip`;
 		a.click();
 		URL.revokeObjectURL(url);
 		a.remove();

@@ -12,8 +12,9 @@ import type {
 } from "./conversion-settings";
 import { log } from "$lib/util/logger";
 import { readSettings } from "$lib/util/settings";
+import { formatFilename } from "$lib/util/file";
 
-const MAX_BLOB_SIZE_LIMIT = 2 * 1024 * 1024 * 1024; // 2GB
+const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
 
 export class VertFile {
 	public id: string = Math.random().toString(36).slice(2, 8);
@@ -44,8 +45,25 @@ export class VertFile {
 	private attemptedConverters = new Set<string>();
 	private retryingFallback = false;
 	private vertdWarningToastId: number | null = null;
+	private postDownload: (() => Promise<void>) | null = null;
 
 	public isZip = $state(() => this.from === ".zip");
+
+	public setPostDownload(cleanup: (() => Promise<void>) | null) {
+		this.postDownload = cleanup;
+	}
+
+	private async runPostDownload() {
+		if (!this.postDownload) return;
+
+		try {
+			await this.postDownload();
+		} catch (err) {
+			log(["file", "cleanup"], `post-download function failed: ${err}`);
+		} finally {
+			this.postDownload = null;
+		}
+	}
 
 	public getAvailableSettings(
 		input: VertFile,
@@ -109,13 +127,19 @@ export class VertFile {
 	}
 
 	public supportsStreaming(): boolean {
-		// only vertd (video/gif -> video/gif) supports streaming
-		// rest of converters need entire file in memory, limited by ArrayBuffer limits
+		// vertd supports server-side streaming; mediabunny can stream to OPFS if available
+		const opfsSupported =
+			typeof navigator !== "undefined" &&
+			"storage" in navigator &&
+			typeof navigator.storage.getDirectory === "function";
+
 		const availableConverters = this.isZip()
 			? this.converters
 			: this.findConverters();
 		return availableConverters.some(
-			(converter) => converter.name === "vertd",
+			(converter) =>
+				converter.name === "vertd" ||
+				(converter.name === "mediabunny" && opfsSupported),
 		);
 	}
 
@@ -144,6 +168,8 @@ export class VertFile {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
+		await this.runPostDownload();
+
 		if (!this.retryingFallback) this.attemptedConverters.clear();
 
 		if (!this.converters.length) throw new Error("No converters found");
@@ -323,7 +349,7 @@ export class VertFile {
 	}
 
 	private async convertZip(converter: Converter): Promise<VertFile> {
-		const { extractZip, createZip } = await import("$lib/util/zip");
+		const { extractZip, createZip } = await import("$lib/util/file");
 		const { default: PQueue } = await import("p-queue");
 
 		const entries = await extractZip(this.file);
@@ -483,60 +509,54 @@ export class VertFile {
 		const settings = readSettings<{ filenameFormat?: string }>();
 		const filenameFormat = settings.filenameFormat || "VERT_%name%";
 
-		const format = (name: string) => {
-			const now = new Date();
-			const iso = now.toISOString();
-			const date = iso.split("T")[0];
-			const time = iso.split("T")[1].split(".")[0].replace(/:/g, "-");
-			const unix = now.getTime().toString();
-			const baseName = this.file.name.replace(/\.[^/.]+$/, "");
-			const originalExtension = this.file.name.split(".").pop()!;
-			return name
-				.replace(/%datetime%/g, iso)
-				.replace(/%date%/g, date)
-				.replace(/%time%/g, time)
-				.replace(/%unix%/g, unix)
-				.replace(/%name%/g, baseName)
-				.replace(/%extension%/g, originalExtension);
+		const filename = `${formatFilename(filenameFormat, this.file)}${to}`;
+		const resultFile = this.result.file;
+
+		const filePicker = window as Window & {
+			showSaveFilePicker?: (options?: {
+				suggestedName?: string;
+				types?: Array<{
+					description?: string;
+					accept: Record<string, string[]>;
+				}>;
+			}) => Promise<FileSystemFileHandle>;
 		};
 
-		const filename = `${format(filenameFormat)}${to}`;
+		const diskStreamSupported =
+			typeof filePicker.showSaveFilePicker === "function";
+		const shouldDiskStream =
+			diskStreamSupported && resultFile.size >= LARGE_FILE;
 
-		// larger files (>2gb) requires cache API
-		// blob constructor can't use arraybuffer above 2gb
-		const useCacheApi = this.result.file.size > MAX_BLOB_SIZE_LIMIT;
-		let blob: string;
+		if (shouldDiskStream) {
+			// use the File System Access API to directly stream to disk, so we can actually save larger files
+			try {
+				const ext = to.slice(1);
+				const handle = await filePicker.showSaveFilePicker!({
+					suggestedName: filename,
+					types: [
+						{
+							description: "The VERT converted file",
+							accept: { "application/octet-stream": [`.${ext}`] },
+						},
+					],
+				});
 
-		if (useCacheApi) {
-			const cache = await caches.open("vert-downloads");
-			const cacheKey = `vert-download-${Date.now()}-${filename}`;
-
-			const response = new Response(this.result.file.stream(), {
-				headers: {
-					"Content-Type": "application/octet-stream",
-					"Content-Length": this.result.file.size.toString(),
-				},
-			});
-
-			await cache.put(cacheKey, response);
-
-			const cachedResponse = await cache.match(cacheKey);
-			if (!cachedResponse)
-				throw new Error("Failed to cache file for download");
-
-			const cachedBlob = await cachedResponse.blob();
-			blob = URL.createObjectURL(cachedBlob);
-
-			setTimeout(() => {
-				cache.delete(cacheKey);
-			}, 30000);
-		} else {
-			blob = URL.createObjectURL(
-				new Blob([await this.result.file.arrayBuffer()], {
-					type: "application/octet-stream",
-				}),
-			);
+				const writable = await handle.createWritable();
+				await resultFile.stream().pipeTo(writable);
+				this.blobUrl = undefined;
+				return;
+			} catch (err) {
+				const casted = err as DOMException;
+				if (casted?.name === "AbortError") return;
+				log(
+					["file", "download"],
+					`disk-streaming download failed, falling back to blob URL: ${err}`,
+				);
+			}
 		}
+
+		// fallback to blob URL download for smaller files or if the File System Access API isn't supported
+		const blob = URL.createObjectURL(resultFile);
 
 		// download
 		const a = document.createElement("a");

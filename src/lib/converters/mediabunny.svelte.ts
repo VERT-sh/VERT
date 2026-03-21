@@ -14,6 +14,7 @@ import {
 	MpegTsOutputFormat,
 	Output,
 	QTFF,
+	StreamTarget,
 	WEBM,
 	WebMOutputFormat,
 } from "mediabunny";
@@ -33,24 +34,10 @@ import { browser } from "$app/environment";
 
 // codec compatibility stuff, based on mediabunny's docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
+// prettier-ignore
 const mp4VideoCodecs = ["avc", "hevc", "vp8", "vp9", "av1"] as const;
-const mp4AudioCodecs = [
-	"aac",
-	"opus",
-	"mp3",
-	"vorbis",
-	"flac",
-	"ac3",
-	"eac3",
-	"pcm-s16",
-	"pcm-s16be",
-	"pcm-s24",
-	"pcm-s24be",
-	"pcm-s32",
-	"pcm-s32be",
-	"pcm-f32",
-	"pcm-f64",
-] as const;
+// prettier-ignore
+const mp4AudioCodecs = [ "aac", "opus", "mp3", "vorbis", "flac", "ac3", "eac3", "pcm-s16", "pcm-s16be", "pcm-s24", "pcm-s24be", "pcm-s32", "pcm-s32be", "pcm-f32", "pcm-f64"] as const;
 const codecCompatibility = {
 	video: {
 		mp4: mp4VideoCodecs,
@@ -194,6 +181,7 @@ export class MediabunnyConverter extends Converter {
 	public reportsProgress: boolean = true;
 
 	private activeConversions = new Map<string, Conversion>();
+	private pendingOutputCleanups = new Map<string, () => Promise<void>>();
 
 	private formats: string[] = [
 		"mp4",
@@ -477,15 +465,31 @@ export class MediabunnyConverter extends Converter {
 		to: string,
 		settings: ConversionSettings,
 	): Promise<VertFile> {
+		const toFormat = to.startsWith(".") ? to.slice(1) : to;
+		const originalName = file.file.name.split(".").slice(0, -1).join(".");
+		const outputFilename = `${originalName}.${toFormat}`;
+
 		const input = new Input({
 			// TODO: add settings & special handling for certain formats & codecs
 			formats: [MP4, QTFF, MATROSKA, WEBM, MPEG_TS],
 			source: new BlobSource(file.file),
 		});
 
+		const streamTargetContext =
+			await this.createStreamingTarget(outputFilename);
+		if (streamTargetContext) {
+			this.log(`using OPFS stream target for ${file.name}`);
+			this.pendingOutputCleanups.set(
+				file.id,
+				streamTargetContext.cleanup,
+			);
+		}
+
+		const target = streamTargetContext?.target ?? new BufferTarget();
+
 		const output = new Output({
 			format: this.format(to),
-			target: new BufferTarget(),
+			target,
 		});
 
 		const conversionSettings =
@@ -546,22 +550,34 @@ export class MediabunnyConverter extends Converter {
 			file.progress = progress * 100;
 		};
 
-		await conversion.execute();
-		this.activeConversions.delete(file.id);
+		try {
+			await conversion.execute();
+		} catch (err) {
+			const cleanup = this.pendingOutputCleanups.get(file.id);
+			if (cleanup) {
+				await cleanup();
+				this.pendingOutputCleanups.delete(file.id);
+			}
+			throw err;
+		} finally {
+			this.activeConversions.delete(file.id);
+		}
 
-		if (!output.target.buffer) {
+		if (streamTargetContext) {
+			const streamedFile = await streamTargetContext.getFile();
+			const result = new VertFile(streamedFile, toFormat);
+			result.setPostDownload(streamTargetContext.cleanup);
+			this.pendingOutputCleanups.delete(file.id);
+			return result;
+		}
+
+		if (!(target instanceof BufferTarget) || !target.buffer) {
 			throw new Error("Mediabunny conversion failed: no output buffer");
 		}
 
-		const toFormat = to.startsWith(".") ? to.slice(1) : to;
-		const originalName = file.file.name.split(".").slice(0, -1).join(".");
-		const f = new File(
-			[output.target.buffer],
-			`${originalName}.${toFormat}`,
-			{
-				type: "application/octet-stream",
-			},
-		);
+		const f = new File([target.buffer], `${originalName}.${toFormat}`, {
+			type: "application/octet-stream",
+		});
 
 		return new VertFile(f, toFormat);
 	}
@@ -599,5 +615,58 @@ export class MediabunnyConverter extends Converter {
 
 		conversion.cancel();
 		this.activeConversions.delete(input.id);
+
+		const cleanup = this.pendingOutputCleanups.get(input.id);
+		if (cleanup) {
+			await cleanup();
+			this.pendingOutputCleanups.delete(input.id);
+		}
+	}
+
+	private async createStreamingTarget(filename: string): Promise<{
+		target: StreamTarget;
+		getFile: () => Promise<File>;
+		cleanup: () => Promise<void>;
+	} | null> {
+		try {
+			const storage = navigator.storage as StorageManager & {
+				getDirectory?: () => Promise<FileSystemDirectoryHandle>;
+			};
+			if (!storage.getDirectory) return null;
+
+			const root = await storage.getDirectory();
+			const tempDir = await root.getDirectoryHandle("vert-temp", {
+				create: true,
+			});
+			const tempName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${filename}`;
+			const fileHandle = await tempDir.getFileHandle(tempName, {
+				create: true,
+			});
+
+			const fileStream = await fileHandle.createWritable();
+			const writable = new WritableStream({
+				write: (chunk) => fileStream.write(chunk),
+				close: () => fileStream.close(),
+				abort: (reason) => fileStream.abort(reason),
+			});
+
+			const cleanup = async () => {
+				await tempDir.removeEntry(tempName).catch(() => {});
+			};
+
+			return {
+				target: new StreamTarget(writable, {
+					chunked: true,
+					chunkSize: 32 * 1024 * 1024,
+				}),
+				getFile: () => fileHandle.getFile(),
+				cleanup,
+			};
+		} catch (err) {
+			this.error(
+				`failed to initialize OPFS stream target, falling back to BufferTarget: ${err}`,
+			);
+			return null;
+		}
 	}
 }
