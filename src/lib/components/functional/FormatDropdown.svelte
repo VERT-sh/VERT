@@ -226,6 +226,15 @@
 			selectOption(filteredData.formats[0]);
 	};
 
+	const scrollView = () => {
+		if (!dropdownMenu) return;
+		const selectedOption = dropdownMenu.querySelector(
+			"[data-selected='true']",
+		) as HTMLButtonElement | null;
+		if (!selectedOption) return;
+		selectedOption.scrollIntoView({ block: "start" });
+	};
+
 	const clickDropdown = () => {
 		open = !open;
 		if (!open) return;
@@ -259,6 +268,7 @@
 				searchInput.focus();
 				searchInput.select();
 			}
+			scrollView();
 		}, 0); // let dropdown open first
 	};
 
@@ -455,6 +465,7 @@
 				{#if filteredData.formats.length > 0}
 					{#each filteredData.formats as format}
 						<button
+							data-selected={format === selected}
 							class="w-full p-2 text-center rounded-xl
 							{format === selected
 								? 'bg-accent text-black'

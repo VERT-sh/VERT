@@ -22,8 +22,6 @@
 	}: Props = $props();
 
 	let open = $state(false);
-	let hover = $state(false);
-	let isUp = $state(false);
 	let dropdown = $state<HTMLDivElement>();
 	let menuElement = $state<HTMLDivElement>();
 	let button = $state<HTMLButtonElement>();
@@ -38,11 +36,6 @@
 
 	const select = (option: string | { value: string; label: string }) => {
 		const selectedValue = getValue(option);
-		const oldIndex = options.findIndex((opt) => getValue(opt) === selected);
-		const newIndex = options.findIndex(
-			(opt) => getValue(opt) === selectedValue,
-		);
-		isUp = oldIndex > newIndex;
 		selected = selectedValue;
 		onselect?.(selectedValue);
 		toggle();
@@ -59,6 +52,15 @@
 			menuElement.style.left = `${rect.left}px`;
 			menuElement.style.width = `${rect.width}px`;
 		}
+	};
+
+	const scrollView = () => {
+		if (!menuElement) return;
+		const selectedButton = menuElement.querySelector(
+			"[data-selected='true']",
+		) as HTMLButtonElement | null;
+		if (!selectedButton) return;
+		selectedButton.scrollIntoView({ block: "start" });
 	};
 
 	// outside clicks
@@ -82,6 +84,7 @@
 			document.body.appendChild(menuElement);
 			menuElement.style.position = "fixed";
 			updateMenuPosition();
+			requestAnimationFrame(scrollView);
 
 			return () => {
 				if (resizeHandler)
@@ -111,8 +114,6 @@
 			? 'rounded-xl'
 			: 'rounded-full'} focus:!outline-none"
 		onclick={toggle}
-		onmouseenter={() => (hover = true)}
-		onmouseleave={() => (hover = false)}
 		{disabled}
 	>
 		<div class="grid grid-cols-1 grid-rows-1 w-fit flex-grow-0">
@@ -166,7 +167,9 @@
 	>
 		{#each options as option}
 			<button
-				class="w-full p-2 px-4 text-left hover:bg-panel font-normal text-sm text-muted"
+				data-selected={getValue(option) === selected}
+				class={`w-full p-2 px-4 text-left hover:bg-panel font-normal text-sm text-muted
+				${getValue(option) === selected ? "bg-separator" : ""}`}
 				onclick={() => select(option)}
 			>
 				{getLabel(option)}
