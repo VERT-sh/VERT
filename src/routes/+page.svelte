@@ -135,7 +135,7 @@
 		<div
 			class="flex items-center h-auto gap-12 md:gap-24 md:flex-row flex-col"
 		>
-			<div class="flex-grow w-full text-center md:text-left">
+			<div class="grow w-full text-center md:text-left">
 				<h1
 					class="text-4xl px-12 md:p-0 md:text-6xl flex-wrap tracking-tight leading-tight md:leading-[72px] mb-4 md:mb-6"
 				>
@@ -147,7 +147,7 @@
 					{m["upload.subtitle"]()}
 				</p>
 			</div>
-			<div class="flex-grow w-full h-72">
+			<div class="grow w-full h-72">
 				<Uploader class="w-full h-full" />
 			</div>
 		</div>
@@ -178,7 +178,7 @@
 						</div>
 
 						<div
-							class="file-category-card-content flex-grow relative"
+							class="file-category-card-content grow relative"
 						>
 							<OverlayScrollbarsComponent
 								options={{
@@ -294,6 +294,8 @@
 </div>
 
 <style lang="postcss">
+	@reference "../lib/css/app.css";
+
 	.file-category-card {
 		@apply bg-panel rounded-2xl p-5 shadow-panel relative;
 	}

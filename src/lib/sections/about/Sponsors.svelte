@@ -74,6 +74,8 @@
 </Panel>
 
 <style lang="postcss">
+	@reference "../../css/app.css";
+
 	#email {
 		@apply font-mono bg-gray-200 rounded-md px-1 text-inherit no-underline dynadark:bg-panel-alt dynadark:text-white;
 	}

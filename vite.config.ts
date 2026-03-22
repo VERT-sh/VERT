@@ -2,6 +2,7 @@ import { paraglideVitePlugin } from "@inlang/paraglide-js";
 import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig, type PluginOption } from "vite";
 import svg from "@poppanator/sveltekit-svg";
+import tailwindcss from "@tailwindcss/vite";
 import wasm from "vite-plugin-wasm";
 import { execSync } from "child_process";
 
@@ -22,6 +23,7 @@ if (commitHash === "unknown") {
 export default defineConfig(({ command }) => {
 	const plugins: PluginOption[] = [
 		sveltekit(),
+		tailwindcss(),
 		paraglideVitePlugin({
 			project: "./project.inlang",
 			outdir: "./src/lib/paraglide",
@@ -54,13 +56,6 @@ export default defineConfig(({ command }) => {
 		},
 		optimizeDeps: {
 			exclude: ["@ffmpeg/core-mt", "@ffmpeg/ffmpeg", "@ffmpeg/util"],
-		},
-		css: {
-			preprocessorOptions: {
-				scss: {
-					api: "modern",
-				},
-			},
 		},
 		build: {
 			target: "esnext",

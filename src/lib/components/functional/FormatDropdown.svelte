@@ -354,14 +354,14 @@
 	bind:this={dropdown}
 >
 	<button
-		class="relative flex items-center justify-center w-full font-display px-3 py-3.5 bg-button rounded-full overflow-hidden cursor-pointer focus:!outline-none
+		class="relative flex items-center justify-center w-full font-display px-3 py-3.5 bg-button rounded-full overflow-hidden cursor-pointer focus:!outline-hidden
 		{disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}"
 		onclick={() => clickDropdown()}
 		{disabled}
 	>
 		<!-- <p>{selected}</p> -->
 		<div
-			class="grid grid-cols-1 grid-rows-1 w-fit flex-grow-0 max-h-[2.5rem] overflow-hidden"
+			class="grid grid-cols-1 grid-rows-1 w-fit grow-0 max-h-[2.5rem] overflow-hidden"
 		>
 			{#key selected}
 				<p
@@ -389,7 +389,7 @@
 			{/if}
 		</div>
 		<ChevronDown
-			class="w-4 h-4 ml-3 mt-0.5 flex-shrink-0"
+			class="w-4 h-4 ml-3 mt-0.5 shrink-0"
 			style="transform: rotate({open
 				? 180
 				: 0}deg); transition: transform {duration}ms {transition};"
@@ -424,7 +424,7 @@
 					<input
 						type="text"
 						placeholder={m["convert.dropdown.placeholder"]()}
-						class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground"
+						class="grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground"
 						bind:value={searchQuery}
 						oninput={handleSearch}
 						onkeydown={onEnter}
@@ -454,9 +454,9 @@
 			<div class="flex items-center justify-between">
 				{#each filteredData.categories as category}
 					<button
-						class="flex-grow text-lg hover:text-muted/20 border-b-[1px] pb-2 capitalize
+						class="grow text-lg hover:text-muted/20 border-b-[1px] pb-2 capitalize
                         {currentCategory === category
-							? 'text-accent border-b-accent'
+							? 'text-fg-accent border-b-accent'
 							: 'border-b-separator text-muted'}"
 						onclick={() => selectCategory(category)}
 					>

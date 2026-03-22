@@ -18,7 +18,9 @@
 		locale,
 		updateLocale,
 	} from "$lib/store/index.svelte";
-	import "$lib/css/app.scss";
+	import "@fontsource/radio-canada-big/600.css";
+	import "$lib/assets/style/host-grotesk.css";
+	import "$lib/css/app.css";
 	import { browser } from "$app/environment";
 	import { initStores as initAnimStores } from "$lib/util/animation.js";
 	import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte.js";

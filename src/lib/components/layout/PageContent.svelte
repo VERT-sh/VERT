@@ -8,7 +8,7 @@
 	let { children } = $props();
 </script>
 
-<div class="grid grid-rows-1 grid-cols-1 h-full flex-grow">
+<div class="grid grid-rows-1 grid-cols-1 h-full grow">
 	{#key page.url.pathname}
 		<div
 			class="row-start-1 col-start-1"

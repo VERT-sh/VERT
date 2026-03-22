@@ -69,7 +69,7 @@
 	<div class="flex flex-row items-center justify-between w-full gap-4">
 		<div class="flex items-center gap-2">
 			<Icon
-				class="w-6 h-6 text-black flex-shrink-0"
+				class="w-6 h-6 text-black shrink-0"
 				size="24"
 				stroke="2"
 				fill="none"
@@ -83,7 +83,7 @@
 			</p>
 		</div>
 		<button
-			class="text-gray-600 hover:text-black flex-shrink-0"
+			class="text-gray-600 hover:text-black shrink-0"
 			onclick={() => ToastManager.remove(id)}
 		>
 			<XIcon size="16" />
