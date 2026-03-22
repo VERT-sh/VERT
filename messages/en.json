@@ -174,6 +174,7 @@
 			"vertd_details_error_message": "<b>Error message:</b> [view_link]View error logs[/view_link]",
 			"vertd_details_close": "Close",
 			"vertd_ratelimit": "Your video, '{filename}', has failed to convert a few times. To prevent server overload, further conversion attempts for this file have been temporarily blocked. Please try again later.",
+			"vertd_file_too_large": "This file is too big for the specified vertd server ({fileSize}/{limit}). Please choose a smaller file or use another converter/server.",
 			"vertd_retry": "Retrying video conversion for {filename} with different settings due to failure. This may take longer than usual.",
 			"unsupported_format": "Only image, video, audio, and document files are supported",
 			"format_output_only": "This format can currently only be used as output (converted to), not as input.",
@@ -382,7 +383,7 @@
 		},
 		"local_storage": {
 			"title": "Local Storage",
-			"description": "We use your browser's local storage to save your settings, and your browser's session storage to temporarily store the GitHub contributors list for the \"About\" section to reduce repeated GitHub API requests. No personal data is stored or transmitted.<br/><br/>The WebAssembly or browser versions of the conversion tools we use (Mediabunny, FFmpeg, ImageMagick, Pandoc) are also stored locally on your browser when you first visit the website, so you don't need to redownload them each visit. No personal data is stored or transmitted. You may view or delete this data at any time in the \"Privacy & data\" section in [settings_link]settings[/settings_link]."
+			"description": "We use your browser's local storage to save your settings. We also use your browser's session storage to temporarily store the specified vertd server's file size limit (if applicable) to reduce repeated API requests and the GitHub contributors list for the \"About\" section to do the same. No personal data is stored or transmitted.<br/><br/>The WebAssembly or browser versions of the conversion tools we use (Mediabunny, FFmpeg, ImageMagick, Pandoc) are also stored locally on your browser when you first visit the website, so you don't need to redownload them each visit. No personal data is stored or transmitted. You may view or delete this data at any time in the \"Privacy & data\" section in [settings_link]settings[/settings_link]."
 		},
 		"contact": {
 			"title": "Contact",

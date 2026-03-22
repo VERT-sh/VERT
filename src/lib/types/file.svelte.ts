@@ -196,8 +196,6 @@ export class VertFile {
 					["file", "convert"],
 					`no compatible converter found for ${this.from} to ${this.to}`,
 				);
-				// TODO: handle zip converter fallback explicitly if needed
-				// TODO: provide a clearer error path for unsupported from/to pairs
 			}
 		} else {
 			log(
@@ -249,8 +247,6 @@ export class VertFile {
 			const nextConverter = compatibleConverters.find(
 				(c) => !this.attemptedConverters.has(c.name),
 			);
-
-			// TODO: clean up languages file, then migrate all languages to new structure
 
 			// TODO: should figure out a cleaner way to do this
 			if (!this.cancelled && nextConverter) {

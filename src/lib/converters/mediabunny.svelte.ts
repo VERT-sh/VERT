@@ -359,7 +359,6 @@ export class MediabunnyConverter extends Converter {
 			label: m["convert.settings.video.video_codec"](),
 			type: "select",
 			default: "auto",
-			// TODO: get supported from codecCompatibility based on output format
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
 				...supportedVideoCodecs.map((codec) => ({

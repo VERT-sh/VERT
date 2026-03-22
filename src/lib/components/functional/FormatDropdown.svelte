@@ -475,7 +475,7 @@
 				{/if}
 			</div>
 			<!-- format options -->
-			<!-- TODO: extract zip, image sequence & fps -->
+			<!-- TODO: image sequence & fps -->
 			{#if file?.name.toLowerCase().endsWith(".zip")}
 				<div class="border-t border-separator text-base p-2">
 					<button

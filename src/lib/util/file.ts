@@ -74,3 +74,19 @@ export function formatFilename(format: string, file: File | string) {
 		.replace(/%name%/g, baseName)
 		.replace(/%extension%/g, originalExtension);
 }
+
+export const formatBytes = (bytes: number): string => {
+	if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+	if (bytes < 1024) return `${bytes} B`;
+
+	const units = ["KB", "MB", "GB", "TB"];
+	let value = bytes;
+	let unitIndex = -1;
+
+	while (value >= 1024 && unitIndex < units.length - 1) {
+		value /= 1024;
+		unitIndex++;
+	}
+
+	return `${value.toFixed(value >= 100 ? 0 : value >= 10 ? 1 : 2)} ${units[unitIndex]}`;
+};

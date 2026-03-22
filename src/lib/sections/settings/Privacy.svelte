@@ -85,18 +85,18 @@
 						isLoadingCache = true;
 						try {
 							await swManager.clearCache();
-							localStorage.clear();
-							sessionStorage.clear();
+							if (typeof localStorage.clear === "function") {
+								localStorage.clear();
+							}
+							if (typeof sessionStorage.clear === "function") {
+								sessionStorage.clear();
+							}
 
 							ToastManager.add({
 								type: "success",
 								message:
 									m["settings.privacy.all_data_cleared"](),
 							});
-
-							setTimeout(() => {
-								window.location.href = "/";
-							}, 1500);
 						} catch (err) {
 							error(
 								["privacy", "data"],
@@ -111,6 +111,9 @@
 							});
 						} finally {
 							isLoadingCache = false;
+							setTimeout(() => {
+								window.location.href = "/";
+							}, 1500);
 						}
 					},
 				},
@@ -142,14 +145,18 @@
 							{m["settings.privacy.plausible_title"]()}
 						</p>
 						<p class="text-sm text-muted font-normal">
-							{@html sanitize(link(
-								["plausible_link", "analytics_link"],
-								m["settings.privacy.plausible_description"](),
-								[
-									"https://plausible.io/privacy-focused-web-analytics",
-									"https://ats.vert.sh/vert.sh",
-								],
-							))}
+							{@html sanitize(
+								link(
+									["plausible_link", "analytics_link"],
+									m[
+										"settings.privacy.plausible_description"
+									](),
+									[
+										"https://plausible.io/privacy-focused-web-analytics",
+										"https://ats.vert.sh/vert.sh",
+									],
+								),
+							)}
 						</p>
 					</div>
 					<div class="flex flex-col gap-3 w-full">
@@ -270,7 +277,6 @@
 					{m["settings.privacy.clear_all_data"]()}
 				</button>
 			</div>
-			
 		</div>
 	</div></Panel
 >

@@ -13,6 +13,7 @@ import type {
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
 import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.svelte";
+import { formatBytes } from "$lib/util/file";
 
 interface UploadResponse {
 	id: string;
@@ -38,6 +39,7 @@ interface CodecsResponse {
 interface RouteResponseMap {
 	"/api/upload": UploadResponse;
 	"/api/version": string;
+	"/api/size_limit": number | null;
 	"/api/keep": void;
 	"/api/codecs": string[]; // get list of all codecs supported by vertd server
 	[key: `/api/codecs/${string}`]: unknown; // list of codecs for this format
@@ -371,6 +373,54 @@ export class VertdConverter extends Converter {
 		this.log("created converter");
 		this.log("not rly sure how to implement this :P");
 		this.status = "ready";
+	}
+
+	private async getServerSizeLimit(apiUrl: string): Promise<number | null> {
+		const cacheKey = `vertd:size-limit:${apiUrl}`;
+
+		if (typeof sessionStorage !== "undefined") {
+			try {
+				const cached = sessionStorage.getItem(cacheKey);
+				if (cached !== null) {
+					const parsedCached = Number(cached);
+					if (Number.isFinite(parsedCached) && parsedCached > 0) {
+						this.log(
+							`using cached vertd size limit: ${parsedCached} bytes`,
+						);
+						return parsedCached;
+					}
+					sessionStorage.removeItem(cacheKey);
+				}
+			} catch (e) {
+				this.error(
+					`failed to read vertd size limit from sessionStorage: ${e}`,
+				);
+			}
+		}
+
+		try {
+			const limit = await vertdFetch("/api/size_limit", {
+				method: "GET",
+			});
+			const parsed = Number(limit);
+			if (!Number.isFinite(parsed) || parsed <= 0) return null;
+
+			if (typeof sessionStorage !== "undefined") {
+				try {
+					sessionStorage.setItem(cacheKey, parsed.toString());
+				} catch (e) {
+					this.error(
+						`failed to cache vertd size limit in sessionStorage: ${e}`,
+					);
+				}
+			}
+
+			this.log(`fetched vertd size limit: ${parsed} bytes`);
+			return parsed;
+		} catch (e) {
+			this.error(`failed to fetch vertd size limit: ${e}`);
+			return null;
+		}
 	}
 
 	private blocked(hash: string): boolean {
@@ -719,8 +769,22 @@ export class VertdConverter extends Converter {
 			}
 		}
 
-		const uploadRes = await uploadFile(fileUpload);
 		const apiUrl = await VertdInstance.instance.url();
+		const sizeLimit =
+			(await this.getServerSizeLimit(apiUrl)) || Number.POSITIVE_INFINITY; // fall back to no limit just in case - server will block if too large anyways
+		if (sizeLimit !== null && fileUpload.file.size > sizeLimit) {
+			this.log(
+				`blocked upload for ${input.name}: ${fileUpload.file.size} bytes exceeds server limit of ${sizeLimit} bytes`,
+			);
+			throw new Error(
+				m["convert.errors.vertd_file_too_large"]({
+					fileSize: formatBytes(fileUpload.file.size),
+					limit: formatBytes(sizeLimit),
+				}),
+			);
+		}
+
+		const uploadRes = await uploadFile(fileUpload);
 
 		return new Promise((resolve, reject) => {
 			let settled = false;
@@ -794,14 +858,18 @@ export class VertdConverter extends Converter {
 				this.error(
 					`ws closed unexpectedly for file ${input.name} (code: ${event.code})`,
 				);
-				rejectConversion(new Error("vertd websocket closed unexpectedly"));
+				rejectConversion(
+					new Error("vertd websocket closed unexpectedly"),
+				);
 			};
 
 			ws.onmessage = async (e) => {
 				let msg: VertdMessage;
 				try {
 					if (typeof e.data !== "string") {
-						rejectConversion(new Error("invalid websocket payload type"));
+						rejectConversion(
+							new Error("invalid websocket payload type"),
+						);
 						return;
 					}
 					msg = JSON.parse(e.data);
