@@ -531,6 +531,7 @@ export const availableLocales = {
 	"zh-Hans": "简体中文",
 	"zh-Hant": "繁體中文",
 	"pt-BR": "Português (Brasil)",
+	pl: "Polski",
 };
 
 export function updateLocale(newLocale: string) {
