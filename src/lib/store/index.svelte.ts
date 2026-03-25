@@ -514,7 +514,6 @@ export const effects = writable(true);
 export const theme = writable<"light" | "dark">("light");
 export const locale = writable(getLocale());
 export const availableLocales = {
-	cs: "Čeština",
 	en: "English",
 	es: "Español",
 	fr: "Français",
@@ -526,12 +525,13 @@ export const availableLocales = {
 	tr: "Türkçe",
 	ja: "日本語",
 	ko: "한국어",
+	pl: "Polski",
+	cs: "Čeština",
 	no: "Norsk",
 	el: "Ελληνικά",
 	"zh-Hans": "简体中文",
 	"zh-Hant": "繁體中文",
 	"pt-BR": "Português (Brasil)",
-	pl: "Polski",
 };
 
 export function updateLocale(newLocale: string) {
