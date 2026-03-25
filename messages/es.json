@@ -77,15 +77,17 @@
 		},
 		"errors": {
 			"cant_convert": "No podemos convertir este archivo.",
-			"vertd_server": "¿Qué estás haciendo..? ¡Debes ejecutar el servidor de vertd!",
 			"unsupported_format": "Solo aceptamos imágenes, vídeos, audios y documentos.",
-			"vertd_not_found": "No se encontró la instancia de vertd para iniciar la conversión de vídeos. ¿Estás seguro de que la URL es correcta?",
 			"worker_downloading": "El convertidor {type} se está inicializando actualmente, espere unos momentos.",
 			"worker_error": "El convertidor {type} tuvo un error durante la inicialización, inténtelo nuevamente más tarde.",
 			"worker_timeout": "El convertidor {type} está tardando más de lo esperado en inicializarse. Espere unos momentos más o actualice la página.",
 			"audio": "audio",
 			"doc": "documento",
-			"image": "imagen"
+			"image": "imagen",
+			"vertd": {
+				"server": "¿Qué estás haciendo..? ¡Debes ejecutar el servidor de vertd!",
+				"not_found": "No se encontró la instancia de vertd para iniciar la conversión de vídeos. ¿Estás seguro de que la URL es correcta?"
+			}
 		}
 	},
 	"settings": {
@@ -95,37 +97,53 @@
 		},
 		"appearance": {
 			"title": "Apariencia",
-			"brightness_theme": "Tema",
-			"brightness_description": "¿Prefieres una flash-bang soleada o una silenciosa y solitaria noche?",
 			"light": "Claro",
 			"dark": "Oscuro",
-			"effect_settings": "Efectos",
-			"effect_description": "¿Prefieres efectos en la interfaz o una experiencia más estática?",
 			"enable": "Habilitar",
-			"disable": "Deshabilitar"
+			"disable": "Deshabilitar",
+			"brightness": {
+				"theme": "Tema",
+				"description": "¿Prefieres una flash-bang soleada o una silenciosa y solitaria noche?"
+			},
+			"effect": {
+				"settings": "Efectos",
+				"description": "¿Prefieres efectos en la interfaz o una experiencia más estática?"
+			},
+			"language": {
+				"title": "Lenguaje",
+				"description": "Selecciona el lenguaje que prefieres usar para la interfaz de VERT."
+			}
 		},
 		"conversion": {
 			"title": "Conversión",
 			"advanced_settings": "Configuraciones avanzadas",
-			"filename_format": "Formato del nombre de archivo",
-			"filename_description": "Esto va a determinar el nombre del archivo al ser descargado <b>sin incluir la extensión</b>. Puedes poner las siguientes plantillas en el formato, las cuales serán reemplazadas con la información que les corresponde: <b>%name%</b> para el nombre original, <b>%extension%</b> para la extensión original del archivo y <b>%date%</b> para la fecha de cuando el archivo fue convertido.",
-			"placeholder": "VERT_%name%",
-			"default_format": "Formato de conversión predeterminado",
-			"default_format_description": "Esto cambiará el formato predeterminado seleccionado cuando subes un archivo de este tipo.",
-			"default_format_image": "Imágenes",
-			"default_format_video": "Vídeos",
-			"default_format_audio": "Audio",
-			"default_format_document": "Documentos",
-			"metadata": "Metadatos del archivo",
-			"metadata_description": "Esto cambia si los metadatos (EXIF, información de la canción, etc.) del archivo original se conservan en los archivos convertidos.",
-			"keep": "Mantener",
-			"remove": "Eliminar",
-			"quality": "Calidad de la conversión",
-			"quality_description": "Esto cambia la calidad por defecto de los archivos convertidos (en su categoría). Valores más altos pueden resultar en tiempos de conversión y tamaños de archivo más largos.",
-			"quality_video": "Esto cambia la calidad por defecto de los vídeos convertidos. Valores más altos pueden resultar en tiempos de conversión y tamaños de archivo más largos.",
-			"quality_audio": "Audio (kbps)",
-			"quality_images": "Imagen (%)",
-			"rate": "Tasa de muestreo (Hz)"
+			"default_format": {
+				"image": "Imágenes",
+				"audio": "Audio",
+				"document": "Documentos",
+				"label": "Formato de conversión predeterminado",
+				"description": "Esto cambiará el formato predeterminado seleccionado cuando subes un archivo de este tipo.",
+				"video": "Vídeos"
+			},
+			"metadata": {
+				"label": "Metadatos del archivo",
+				"description": "Esto cambia si los metadatos (EXIF, información de la canción, etc.) del archivo original se conservan en los archivos convertidos.",
+				"keep": "Mantener",
+				"remove": "Eliminar"
+			},
+			"quality": {
+				"label": "Calidad de la conversión",
+				"description": "Esto cambia la calidad por defecto de los archivos convertidos (en su categoría). Valores más altos pueden resultar en tiempos de conversión y tamaños de archivo más largos.",
+				"video": "Esto cambia la calidad por defecto de los vídeos convertidos. Valores más altos pueden resultar en tiempos de conversión y tamaños de archivo más largos.",
+				"audio": "Audio (kbps)",
+				"images": "Imagen (%)"
+			},
+			"rate": "Tasa de muestreo (Hz)",
+			"filename": {
+				"format": "Formato del nombre de archivo",
+				"description": "Esto va a determinar el nombre del archivo al ser descargado <b>sin incluir la extensión</b>. Puedes poner las siguientes plantillas en el formato, las cuales serán reemplazadas con la información que les corresponde: <b>%name%</b> para el nombre original, <b>%extension%</b> para la extensión original del archivo y <b>%date%</b> para la fecha de cuando el archivo fue convertido.",
+				"placeholder": "VERT_%name%"
+			}
 		},
 		"vertd": {
 			"title": "Conversión de vídeo",
@@ -133,44 +151,50 @@
 			"loading": "cargando...",
 			"available": "disponible, id del commit {commitId}",
 			"unavailable": "no disponible (¿has comprobado la url?)",
-			"description": "<code>vertd</code> es un proyecto que actúa como un servidor intermediario (\"wrapper\") para FFmpeg. Permite convertir vídeos sin dejar de lado la conveniente interfaz web de VERT y, a la vez, aprovecha la potencia de tu GPU para hacerlo lo más rápido posible.",
-			"hosting_info": "Alojamos una instancia pública para tu conveniencia, pero es bastante fácil alojar una propia en tu PC o servidor si sabes lo que estás haciendo. Puedes descargar los binarios del servidor [vertd_link]aquí[/vertd_link]. ¡El proceso de instalación será más fácil en el futuro, así que mantente atento!",
-			"instance": "Instancia",
-			"url_placeholder": "Ejemplo: http://localhost:24153",
-			"conversion_speed": "Velocidad de conversión",
-			"speed_description": "Esto describe el equilibrio entre velocidad y calidad. Velocidades más rápidas resultarán en una calidad más baja, pero harán el trabajo más rápido.",
-			"speeds": {
-				"very_slow": "Extremadamente lento",
-				"slower": "Muy lento",
-				"slow": "Lento",
-				"medium": "Medio",
-				"fast": "Rápido",
-				"ultra_fast": "Súper rápido"
+			"description": {
+				"main": "<code>vertd</code> es un proyecto que actúa como un servidor intermediario (\"wrapper\") para FFmpeg. Permite convertir vídeos sin dejar de lado la conveniente interfaz web de VERT y, a la vez, aprovecha la potencia de tu GPU para hacerlo lo más rápido posible.",
+				"info": "Alojamos una instancia pública para tu conveniencia, pero es bastante fácil alojar una propia en tu PC o servidor si sabes lo que estás haciendo. Puedes descargar los binarios del servidor [vertd_link]aquí[/vertd_link]. ¡El proceso de instalación será más fácil en el futuro, así que mantente atento!"
 			},
-			"auto_instance": "Automático (recomendado)",
-			"eu_instance": "Falkenstein, Alemania",
-			"us_instance": "Washington, EE. UU.",
-			"custom_instance": "Personalizado"
+			"instance": {
+				"custom": "Personalizado",
+				"label": "Instancia",
+				"url_placeholder": "Ejemplo: http://localhost:24153",
+				"auto": "Automático (recomendado)",
+				"eu": "Falkenstein, Alemania",
+				"us": "Washington, EE. UU."
+			},
+			"conversion_speed": {
+				"speeds": {
+					"very_slow": "Extremadamente lento",
+					"slower": "Muy lento",
+					"slow": "Lento",
+					"medium": "Medio",
+					"fast": "Rápido",
+					"ultra_fast": "Súper rápido"
+				},
+				"label": "Velocidad de conversión",
+				"description": "Esto describe el equilibrio entre velocidad y calidad. Velocidades más rápidas resultarán en una calidad más baja, pero harán el trabajo más rápido."
+			}
 		},
 		"privacy": {
 			"title": "Privacidad",
-			"plausible_title": "Analíticas de Plausible",
-			"plausible_description": "Usamos [plausible_link]Plausible[/plausible_link], una herramienta de analíticas orientada a la privacidad para recopilar estadísticas completamente anónimas. Toda la información que recopilamos es anonimizada y agregada, y en ningún momento se envía ni se almacena información que permita identificarte. Puedes ver las estadísticas [analytics_link]aquí[/analytics_link] y excluirte de ellas a continuación:",
-			"opt_in": "Participar",
-			"opt_out": "No participar",
-			"cache_title": "Administración de caché",
-			"cache_description": "Guardamos en caché los archivos del convertidor en su navegador para que no tenga que volver a descargarlos cada vez, mejorando el rendimiento y reduciendo el uso de datos.",
-			"refresh_cache": "Actualizar caché",
-			"clear_cache": "Borrar caché",
-			"files_cached": "{size} ({count} archivos)",
-			"loading_cache": "Cargando...",
-			"total_size": "Tamaño total",
-			"files_cached_label": "Archivos en caché",
-			"cache_cleared": "¡Caché borrada exitosamente!"
-		},
-		"language": {
-			"title": "Lenguaje",
-			"description": "Selecciona el lenguaje que prefieres usar para la interfaz de VERT."
+			"plausible": {
+				"title": "Analíticas de Plausible",
+				"description": "Usamos [plausible_link]Plausible[/plausible_link], una herramienta de analíticas orientada a la privacidad para recopilar estadísticas completamente anónimas. Toda la información que recopilamos es anonimizada y agregada, y en ningún momento se envía ni se almacena información que permita identificarte. Puedes ver las estadísticas [analytics_link]aquí[/analytics_link] y excluirte de ellas a continuación:",
+				"opt_in": "Participar",
+				"opt_out": "No participar"
+			},
+			"cache": {
+				"title": "Administración de caché",
+				"description": "Guardamos en caché los archivos del convertidor en su navegador para que no tenga que volver a descargarlos cada vez, mejorando el rendimiento y reduciendo el uso de datos.",
+				"refresh_cache": "Actualizar caché",
+				"clear_cache": "Borrar caché",
+				"files_cached": "{size} ({count} archivos)",
+				"loading_cache": "Cargando...",
+				"total_size": "Tamaño total",
+				"files_cached_label": "Archivos en caché",
+				"cache_cleared": "¡Caché borrada exitosamente!"
+			}
 		}
 	},
 	"about": {
@@ -228,7 +252,7 @@
 	"workers": {
 		"errors": {
 			"general": "Ocurrió un error mientras se convertía {file}: {message}",
-            "cancel": "Error al cancelar la conversión para {file}: {message}",
+			"cancel": "Error al cancelar la conversión para {file}: {message}",
 			"magick": "Ocurrió un error en el módulo de Magick, la conversión de imágenes puede que no funcione correctamente.",
 			"ffmpeg": "No se pudo cargar FFmpeg, algunas funciones podrían no funcionar.",
 			"no_audio": "No se encontró una pista de audio.",

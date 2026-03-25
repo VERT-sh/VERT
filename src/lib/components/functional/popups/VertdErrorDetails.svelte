@@ -35,31 +35,31 @@
 </script>
 
 <div class="flex flex-col gap-2">
-	<p>{@html sanitize(m["convert.errors.vertd_details_body"]())}</p>
+	<p>{@html sanitize(m["convert.errors.vertd.details.body"]())}</p>
 	<p>
 		<span class="text-black dynadark:text-white">
-			{@html sanitize(m["convert.errors.vertd_details_job_id"]({
+			{@html sanitize(m["convert.errors.vertd.details.job_id"]({
 				jobId: additional.jobId,
 			}))}
 		</span>
 	</p>
 	<p>
 		<span class="text-black dynadark:text-white">
-			{@html sanitize(m["convert.errors.vertd_details_from"]({
+			{@html sanitize(m["convert.errors.vertd.details.from"]({
 				from: additional.from,
 			}))}
 		</span>
 	</p>
 	<p>
 		<span class="text-black dynadark:text-white">
-			{@html sanitize(m["convert.errors.vertd_details_to"]({ to: additional.to }))}
+			{@html sanitize(m["convert.errors.vertd.details.to"]({ to: additional.to }))}
 		</span>
 	</p>
 	<p>
 		<span class="text-black dynadark:text-white">
 			{@html sanitize(link(
 				["view_link"],
-				m["convert.errors.vertd_details_error_message"](),
+				m["convert.errors.vertd.details.error_message"](),
 				[errorBlobUrl || "#"],
 				[true],
 				["text-blue-500 font-normal"],
@@ -69,7 +69,7 @@
 	<p>
 		{@html sanitize(link(
 			["privacy_link"],
-			m["convert.errors.vertd_details_footer"](),
+			m["convert.errors.vertd.details.footer"](),
 			"/privacy",
 			[true],
 		))}

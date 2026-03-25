@@ -55,13 +55,13 @@
 			await loadCacheInfo();
 			ToastManager.add({
 				type: "success",
-				message: m["settings.privacy.cache_cleared"](),
+				message: m["settings.privacy.cache.cache_cleared"](),
 			});
 		} catch (err) {
 			error(["privacy", "cache"], "Failed to clear cache:", err);
 			ToastManager.add({
 				type: "error",
-				message: m["settings.privacy.cache_clear_error"](),
+				message: m["settings.privacy.cache.cache_clear_error"](),
 			});
 		} finally {
 			isLoadingCache = false;
@@ -72,15 +72,15 @@
 		if (isLoadingCache) return;
 
 		addDialog(
-			m["settings.privacy.clear_all_data_confirm_title"](),
-			m["settings.privacy.clear_all_data_confirm"](),
+			m["settings.privacy.site_data.clear_all_data_confirm_title"](),
+			m["settings.privacy.site_data.clear_all_data_confirm"](),
 			[
 				{
-					text: m["settings.privacy.clear_all_data_cancel"](),
+					text: m["settings.privacy.site_data.clear_all_data_cancel"](),
 					action: () => {},
 				},
 				{
-					text: m["settings.privacy.clear_all_data"](),
+					text: m["settings.privacy.site_data.clear_all_data"](),
 					action: async () => {
 						isLoadingCache = true;
 						try {
@@ -95,7 +95,7 @@
 							ToastManager.add({
 								type: "success",
 								message:
-									m["settings.privacy.all_data_cleared"](),
+									m["settings.privacy.site_data.all_data_cleared"](),
 							});
 						} catch (err) {
 							error(
@@ -106,7 +106,7 @@
 								type: "error",
 								message:
 									m[
-										"settings.privacy.all_data_clear_error"
+										"settings.privacy.site_data.all_data_clear_error"
 									](),
 							});
 						} finally {
@@ -142,14 +142,14 @@
 				<div class="flex flex-col gap-4">
 					<div class="flex flex-col gap-2">
 						<p class="text-base font-bold">
-							{m["settings.privacy.plausible_title"]()}
+							{m["settings.privacy.plausible.title"]()}
 						</p>
 						<p class="text-sm text-muted font-normal">
 							{@html sanitize(
 								link(
 									["plausible_link", "analytics_link"],
 									m[
-										"settings.privacy.plausible_description"
+										"settings.privacy.plausible.description"
 									](),
 									[
 										"https://plausible.io/privacy-focused-web-analytics",
@@ -170,7 +170,7 @@
 									: ''} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
 							>
 								<PlayIcon size="24" class="inline-block mr-2" />
-								{m["settings.privacy.opt_in"]()}
+								{m["settings.privacy.plausible.opt_in"]()}
 							</button>
 
 							<button
@@ -185,7 +185,7 @@
 									size="24"
 									class="inline-block mr-2"
 								/>
-								{m["settings.privacy.opt_out"]()}
+								{m["settings.privacy.plausible.opt_out"]()}
 							</button>
 						</div>
 					</div>
@@ -194,22 +194,22 @@
 			<div class="flex flex-col gap-4">
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
-						{m["settings.privacy.cache_title"]()}
+						{m["settings.privacy.cache.title"]()}
 					</p>
 					<p class="text-sm text-muted font-normal">
-						{m["settings.privacy.cache_description"]()}
+						{m["settings.privacy.cache.description"]()}
 					</p>
 				</div>
 
 				<div class="grid grid-cols-2 gap-4">
 					<div class="bg-button p-4 rounded-lg">
 						<div class="text-sm text-muted">
-							{m["settings.privacy.total_size"]()}
+							{m["settings.privacy.cache.total_size"]()}
 						</div>
 						<div class="text-lg font-bold flex items-center gap-2">
 							{#if isLoadingCache}
 								<RefreshCwIcon size="16" class="animate-spin" />
-								{m["settings.privacy.loading_cache"]()}
+								{m["settings.privacy.cache.loading_cache"]()}
 							{:else}
 								{cacheInfo
 									? swManager.formatSize(cacheInfo.totalSize)
@@ -219,12 +219,12 @@
 					</div>
 					<div class="bg-button p-4 rounded-lg">
 						<div class="text-sm text-muted">
-							{m["settings.privacy.files_cached_label"]()}
+							{m["settings.privacy.cache.files_cached_label"]()}
 						</div>
 						<div class="text-lg font-bold flex items-center gap-2">
 							{#if isLoadingCache}
 								<RefreshCwIcon size="16" class="animate-spin" />
-								{m["settings.privacy.loading_cache"]()}
+								{m["settings.privacy.cache.loading_cache"]()}
 							{:else}
 								{cacheInfo?.fileCount ?? 0}
 							{/if}
@@ -241,7 +241,7 @@
 						disabled={isLoadingCache}
 					>
 						<RefreshCwIcon size="24" class="inline-block mr-2" />
-						{m["settings.privacy.refresh_cache"]()}
+						{m["settings.privacy.cache.refresh_cache"]()}
 					</button>
 					<button
 						onclick={clearCache}
@@ -251,7 +251,7 @@
 						disabled={isLoadingCache}
 					>
 						<Trash2Icon size="24" class="inline-block mr-2" />
-						{m["settings.privacy.clear_cache"]()}
+						{m["settings.privacy.cache.clear_cache"]()}
 					</button>
 				</div>
 			</div>
@@ -259,10 +259,10 @@
 			<div class="flex flex-col gap-4">
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
-						{m["settings.privacy.site_data_title"]()}
+						{m["settings.privacy.site_data.title"]()}
 					</p>
 					<p class="text-sm text-muted font-normal">
-						{m["settings.privacy.site_data_description"]()}
+						{m["settings.privacy.site_data.description"]()}
 					</p>
 				</div>
 
@@ -274,7 +274,7 @@
 					disabled={isLoadingCache}
 				>
 					<Trash2Icon size="24" class="inline-block mr-2" />
-					{m["settings.privacy.clear_all_data"]()}
+					{m["settings.privacy.site_data.clear_all_data"]()}
 				</button>
 			</div>
 		</div>

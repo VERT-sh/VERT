@@ -74,39 +74,39 @@
 		<div class="flex flex-col gap-8">
 			<div class="flex flex-col gap-4">
 				<p class="text-sm text-muted font-normal">
-					{@html sanitize(m["settings.vertd.description"]())}
+					{@html sanitize(m["settings.vertd.description.main"]())}
 				</p>
 				<p class="text-sm text-muted font-normal">
 					{@html sanitize(link(
 						"vertd_link",
-						m["settings.vertd.hosting_info"](),
+						m["settings.vertd.description.info"](),
 						GITHUB_URL_VERTD,
 					))}
 				</p>
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
-						{m["settings.vertd.instance"]()}
+						{m["settings.vertd.instance.label"]()}
 					</p>
 					<Dropdown
 						options={[
-							m["settings.vertd.auto_instance"](),
-							m["settings.vertd.eu_instance"](),
-							m["settings.vertd.us_instance"](),
-							m["settings.vertd.custom_instance"](),
+							m["settings.vertd.instance.auto"](),
+							m["settings.vertd.instance.eu"](),
+							m["settings.vertd.instance.us"](),
+							m["settings.vertd.instance.custom"](),
 						]}
 						onselect={(selected) => {
 							let inner: VertdInner;
 							switch (selected) {
-								case m["settings.vertd.auto_instance"]():
+								case m["settings.vertd.instance.auto"]():
 									inner = { type: "auto" };
 									break;
-								case m["settings.vertd.eu_instance"]():
+								case m["settings.vertd.instance.eu"]():
 									inner = { type: "eu" };
 									break;
-								case m["settings.vertd.us_instance"]():
+								case m["settings.vertd.instance.us"]():
 									inner = { type: "us" };
 									break;
-								case m["settings.vertd.custom_instance"]():
+								case m["settings.vertd.instance.custom"]():
 									inner = {
 										type: "custom",
 									};
@@ -119,14 +119,14 @@
 						selected={(() => {
 							switch (VertdInstance.instance.innerData().type) {
 								case "auto":
-									return m["settings.vertd.auto_instance"]();
+									return m["settings.vertd.instance.auto"]();
 								case "eu":
-									return m["settings.vertd.eu_instance"]();
+									return m["settings.vertd.instance.eu"]();
 								case "us":
-									return m["settings.vertd.us_instance"]();
+									return m["settings.vertd.instance.us"]();
 								case "custom":
 									return m[
-										"settings.vertd.custom_instance"
+										"settings.vertd.instance.custom"
 									]();
 							}
 						})()}
@@ -135,7 +135,7 @@
 					{#if VertdInstance.instance.innerData().type === "custom"}
 						<FancyInput
 							type="text"
-							placeholder={m["settings.vertd.url_placeholder"]()}
+							placeholder={m["settings.vertd.instance.url_placeholder"]()}
 							bind:value={settings.vertdURL}
 						/>
 					{/if}
@@ -143,60 +143,60 @@
 				<div class="flex flex-col gap-4">
 					<div class="flex flex-col gap-2">
 						<p class="text-base font-bold">
-							{m["settings.vertd.conversion_speed"]()}
+							{m["settings.vertd.conversion_speed.label"]()}
 						</p>
 						<p class="text-sm text-muted font-normal">
-							{m["settings.vertd.speed_description"]()}
+							{m["settings.vertd.conversion_speed.description"]()}
 						</p>
 					</div>
 					<Dropdown
 						options={[
-							m["settings.vertd.speeds.very_slow"](),
-							m["settings.vertd.speeds.slower"](),
-							m["settings.vertd.speeds.slow"](),
-							m["settings.vertd.speeds.medium"](),
-							m["settings.vertd.speeds.fast"](),
-							m["settings.vertd.speeds.ultra_fast"](),
+							m["settings.vertd.conversion_speed.speeds.very_slow"](),
+							m["settings.vertd.conversion_speed.speeds.slower"](),
+							m["settings.vertd.conversion_speed.speeds.slow"](),
+							m["settings.vertd.conversion_speed.speeds.medium"](),
+							m["settings.vertd.conversion_speed.speeds.fast"](),
+							m["settings.vertd.conversion_speed.speeds.ultra_fast"](),
 						]}
 						settingsStyle
 						selected={(() => {
 							switch (settings.vertdSpeed) {
 								case "verySlow":
 									return m[
-										"settings.vertd.speeds.very_slow"
+										"settings.vertd.conversion_speed.speeds.very_slow"
 									]();
 								case "slower":
-									return m["settings.vertd.speeds.slower"]();
+									return m["settings.vertd.conversion_speed.speeds.slower"]();
 								case "slow":
-									return m["settings.vertd.speeds.slow"]();
+									return m["settings.vertd.conversion_speed.speeds.slow"]();
 								case "medium":
-									return m["settings.vertd.speeds.medium"]();
+									return m["settings.vertd.conversion_speed.speeds.medium"]();
 								case "fast":
-									return m["settings.vertd.speeds.fast"]();
+									return m["settings.vertd.conversion_speed.speeds.fast"]();
 								case "ultraFast":
 									return m[
-										"settings.vertd.speeds.ultra_fast"
+										"settings.vertd.conversion_speed.speeds.ultra_fast"
 									]();
 							}
 						})()}
 						onselect={(selected) => {
 							switch (selected) {
-								case m["settings.vertd.speeds.very_slow"]():
+								case m["settings.vertd.conversion_speed.speeds.very_slow"]():
 									settings.vertdSpeed = "verySlow";
 									break;
-								case m["settings.vertd.speeds.slower"]():
+								case m["settings.vertd.conversion_speed.speeds.slower"]():
 									settings.vertdSpeed = "slower";
 									break;
-								case m["settings.vertd.speeds.slow"]():
+								case m["settings.vertd.conversion_speed.speeds.slow"]():
 									settings.vertdSpeed = "slow";
 									break;
-								case m["settings.vertd.speeds.medium"]():
+								case m["settings.vertd.conversion_speed.speeds.medium"]():
 									settings.vertdSpeed = "medium";
 									break;
-								case m["settings.vertd.speeds.fast"]():
+								case m["settings.vertd.conversion_speed.speeds.fast"]():
 									settings.vertdSpeed = "fast";
 									break;
-								case m["settings.vertd.speeds.ultra_fast"]():
+								case m["settings.vertd.conversion_speed.speeds.ultra_fast"]():
 									settings.vertdSpeed = "ultraFast";
 									break;
 							}

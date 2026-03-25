@@ -71,15 +71,17 @@
 		},
 		"errors": {
 			"cant_convert": "Nous ne pouvons pas convertir ce fichier",
-			"vertd_server": "Que fais-tu ? Tu es censé exécuter sur le serveur vertd !",
 			"unsupported_format": "Seuls les fichiers image, vidéo, audio et document sont pris en charge",
-			"vertd_not_found": "Impossible de trouver l'instance vertd pour démarrer la conversion vidéo. Êtes-vous sûr que l'URL de l'instance est correctement définie ?",
 			"worker_downloading": "Le convertisseur de {type} est en cours d'initialisation, veuillez patienter quelques instants.",
 			"worker_error": "Le convertisseur de {type} a rencontré une erreur lors de l'initialisation, veuillez réessayer plus tard.",
 			"worker_timeout": "Le convertisseur de {type} prend plus de temps que prévu pour s'initialiser, veuillez patienter quelques instants de plus ou actualiser la page.",
 			"audio": "audio",
 			"doc": "document",
-			"image": "image"
+			"image": "image",
+			"vertd": {
+				"server": "Que fais-tu ? Tu es censé exécuter sur le serveur vertd !",
+				"not_found": "Impossible de trouver l'instance vertd pour démarrer la conversion vidéo. Êtes-vous sûr que l'URL de l'instance est correctement définie ?"
+			}
 		}
 	},
 	"settings": {
@@ -89,39 +91,55 @@
 		},
 		"appearance": {
 			"title": "Appearance",
-			"brightness_theme": "Luminosité du thème",
-			"brightness_description": "Envie d'une soirée ensoleillée ou d'une nuit tranquille et solitaire ?",
 			"light": "Lumineux",
 			"dark": "Sombre",
-			"effect_settings": "Paramètres des effets",
-			"effect_description": "Vous aimez les effets sophistiqués ou préférez une expérience plus statique ?",
 			"enable": "Activer",
-			"disable": "Désactiver"
+			"disable": "Désactiver",
+			"brightness": {
+				"theme": "Luminosité du thème",
+				"description": "Envie d'une soirée ensoleillée ou d'une nuit tranquille et solitaire ?"
+			},
+			"effect": {
+				"settings": "Paramètres des effets",
+				"description": "Vous aimez les effets sophistiqués ou préférez une expérience plus statique ?"
+			},
+			"language": {
+				"title": "Langue",
+				"description": "Sélectionnez votre langue préférée pour l'interface de VERT"
+			}
 		},
 		"conversion": {
 			"title": "Conversion",
 			"advanced_settings": "Paramètres avancés",
-			"filename_format": "Format du nom de fichier",
-			"filename_description": "Cela déterminera le nom du fichier lors du téléchargement, <b>sans inclure l'extension du fichier.</b> Vous pouvez mettre les modèles suivants dans le format, qui seront remplacés par les informations pertinentes: <b>%name%</b> pour le nom du fichier d'origine, <b>%extension%</b> pour l'extension du fichier d'origine et <b>%date%</b> pour une chaîne de date indiquant quand le fichier a été converti.",
-			"placeholder": "VERT_%name%",
-			"default_format": "Format de conversion par défaut",
-			"default_format_enable": "Activer",
-			"default_format_disable": "Désactiver",
-			"default_format_description": "Cela modifiera le format par défaut sélectionné lorsque vous téléchargez un fichier de ce type de format.",
-			"default_format_image": "Images",
-			"default_format_video": "Videos",
-			"default_format_audio": "Audio",
-			"default_format_document": "Documents",
-			"metadata": "Métadonnées du fichier",
-			"metadata_description": "Cela modifie si les métadonnées (EXIF, informations sur la chanson, etc.) du fichier d'origine sont conservées dans les fichiers convertis.",
-			"keep": "Conserver",
-			"remove": "Retirer",
-			"quality": "Qualité de conversion",
-			"quality_description": "Cela modifie la qualité de sortie par défaut des fichiers convertis (de son format). Des valeurs plus élevées peuvent entraîner des temps de conversion et une taille de fichier plus longs.",
-			"quality_video": "Cela modifie la qualité de sortie par défaut des fichiers vidéo convertis. Des valeurs plus élevées peuvent allonger le temps de conversion et la taille du fichier.",
-			"quality_audio": "Audio (kbps)",
-			"quality_images": "Image (%)",
-			"rate": "Taux d'échantillonnage (Hz)"
+			"default_format": {
+				"image": "Images",
+				"audio": "Audio",
+				"document": "Documents",
+				"enable": "Activer",
+				"disable": "Désactiver",
+				"label": "Format de conversion par défaut",
+				"description": "Cela modifiera le format par défaut sélectionné lorsque vous téléchargez un fichier de ce type de format.",
+				"video": "Videos"
+			},
+			"metadata": {
+				"label": "Métadonnées du fichier",
+				"description": "Cela modifie si les métadonnées (EXIF, informations sur la chanson, etc.) du fichier d'origine sont conservées dans les fichiers convertis.",
+				"keep": "Conserver",
+				"remove": "Retirer"
+			},
+			"quality": {
+				"label": "Qualité de conversion",
+				"description": "Cela modifie la qualité de sortie par défaut des fichiers convertis (de son format). Des valeurs plus élevées peuvent entraîner des temps de conversion et une taille de fichier plus longs.",
+				"video": "Cela modifie la qualité de sortie par défaut des fichiers vidéo convertis. Des valeurs plus élevées peuvent allonger le temps de conversion et la taille du fichier.",
+				"audio": "Audio (kbps)",
+				"images": "Image (%)"
+			},
+			"rate": "Taux d'échantillonnage (Hz)",
+			"filename": {
+				"format": "Format du nom de fichier",
+				"description": "Cela déterminera le nom du fichier lors du téléchargement, <b>sans inclure l'extension du fichier.</b> Vous pouvez mettre les modèles suivants dans le format, qui seront remplacés par les informations pertinentes: <b>%name%</b> pour le nom du fichier d'origine, <b>%extension%</b> pour l'extension du fichier d'origine et <b>%date%</b> pour une chaîne de date indiquant quand le fichier a été converti.",
+				"placeholder": "VERT_%name%"
+			}
 		},
 		"vertd": {
 			"title": "Conversion vidéo",
@@ -129,31 +147,35 @@
 			"loading": "Chargement...",
 			"available": "disponible, identifiant de validation {commitId}",
 			"unavailable": "indisponible (l'url est-elle correcte ?)",
-			"description": "Le projet <code>vertd</code> est un serveur de wrapper utilisant FFmpeg. Il vous permet de convertir des vidéos grâce à l'interface web pratique de VERT'tout en exploitant la puissance de votre GPU pour une exécution rapide.",
-			"hosting_info": "Nous hébergeons une instance publique pour vous faciliter la tâche, mais il est assez facile d'héberger la vôtre sur votre PC ou votre serveur si vous savez ce que vous faites. Vous pouvez télécharger les binaires pour serveur [vertd_link]ici[/vertd_link] - le processus de mise en place deviendra plus facile à l'avenir, alors restez à l'écoute !",
+			"description": {
+				"main": "Le projet <code>vertd</code> est un serveur de wrapper utilisant FFmpeg. Il vous permet de convertir des vidéos grâce à l'interface web pratique de VERT'tout en exploitant la puissance de votre GPU pour une exécution rapide.",
+				"info": "Nous hébergeons une instance publique pour vous faciliter la tâche, mais il est assez facile d'héberger la vôtre sur votre PC ou votre serveur si vous savez ce que vous faites. Vous pouvez télécharger les binaires pour serveur [vertd_link]ici[/vertd_link] - le processus de mise en place deviendra plus facile à l'avenir, alors restez à l'écoute !"
+			},
 			"instance_url": "URL de l'instance",
-			"url_placeholder": "Exemple: http://localhost:24153",
-			"conversion_speed": "Vitesse de conversion",
-			"speed_description": "Ceci décrit le compromis entre vitesse et qualité. Des vitesses plus élevées entraîneront une qualité moindre, mais permettront d'effectuer le travail plus rapidement.",
-			"speeds": {
-				"very_slow": "Très lent",
-				"slower": "Plus lent",
-				"slow": "Lent",
-				"medium": "Moyen",
-				"fast": "Rapide",
-				"ultra_fast": "Ultra Rapide"
+			"conversion_speed": {
+				"speeds": {
+					"very_slow": "Très lent",
+					"slower": "Plus lent",
+					"slow": "Lent",
+					"medium": "Moyen",
+					"fast": "Rapide",
+					"ultra_fast": "Ultra Rapide"
+				},
+				"label": "Vitesse de conversion",
+				"description": "Ceci décrit le compromis entre vitesse et qualité. Des vitesses plus élevées entraîneront une qualité moindre, mais permettront d'effectuer le travail plus rapidement."
+			},
+			"instance": {
+				"url_placeholder": "Exemple: http://localhost:24153"
 			}
 		},
 		"privacy": {
 			"title": "Confidentialité",
-			"plausible_title": "Analyses plausibles",
-			"plausible_description": "Nous utilisons [plausible_link]Plausible[/plausible_link], un outil d'analyse axé sur la confidentialité, pour recueillir des statistiques totalement anonymes. Toutes les données sont anonymisées et agrégées, et aucune information identifiable n'est transmise ni stockée. Vous pouvez consulter les analyses [analytics_link]ici[/analytics_link] et choisir de vous désinscrire ci-dessous.",
-			"opt_in": "Inscription",
-			"opt_out": "Désinscription"
-		},
-		"language": {
-			"title": "Langue",
-			"description": "Sélectionnez votre langue préférée pour l'interface de VERT"
+			"plausible": {
+				"title": "Analyses plausibles",
+				"description": "Nous utilisons [plausible_link]Plausible[/plausible_link], un outil d'analyse axé sur la confidentialité, pour recueillir des statistiques totalement anonymes. Toutes les données sont anonymisées et agrégées, et aucune information identifiable n'est transmise ni stockée. Vous pouvez consulter les analyses [analytics_link]ici[/analytics_link] et choisir de vous désinscrire ci-dessous.",
+				"opt_in": "Inscription",
+				"opt_out": "Désinscription"
+			}
 		}
 	},
 	"about": {

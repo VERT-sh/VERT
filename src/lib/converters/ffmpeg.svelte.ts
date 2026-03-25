@@ -124,7 +124,7 @@ export class FFmpegConverter extends Converter {
 
 		const bitrate: SettingDefinition = {
 			key: "bitrate",
-			label: m["convert.settings.audio.bitrate"](),
+			label: m["convert.settings.audio.bitrate.label"](),
 			type: "select",
 			default: global.ffmpegQuality,
 			options: CONVERSION_BITRATES.map((b) => ({
@@ -136,12 +136,12 @@ export class FFmpegConverter extends Converter {
 			})),
 			hasCustomInput: true,
 			customInputKey: "customBitrate",
-			placeholder: m["convert.settings.audio.bitrate_placeholder"](),
+			placeholder: m["convert.settings.audio.bitrate.placeholder"](),
 		};
 
 		const sampleRate: SettingDefinition = {
 			key: "sampleRate",
-			label: m["convert.settings.audio.sample_rate"](),
+			label: m["convert.settings.audio.sample_rate.label"](),
 			type: "select",
 			default:
 				global.ffmpegSampleRate === "custom"
@@ -156,26 +156,26 @@ export class FFmpegConverter extends Converter {
 			})),
 			hasCustomInput: true,
 			customInputKey: "customSampleRate",
-			placeholder: m["convert.settings.audio.sample_rate_placeholder"](),
+			placeholder: m["convert.settings.audio.sample_rate.placeholder"](),
 		};
 
 		const tracks: SettingDefinition = {
 			key: "tracks",
-			label: m["convert.settings.audio.tracks"](),
+			label: m["convert.settings.audio.tracks.label"](),
 			type: "number",
 			default: 1,
 			min: 1,
-			placeholder: m["convert.settings.audio.tracks_placeholder"](),
+			placeholder: m["convert.settings.audio.tracks.placeholder"](),
 		};
 
 		const channels: SettingDefinition = {
 			key: "channels",
-			label: m["convert.settings.audio.channels"](),
+			label: m["convert.settings.audio.channels.label"](),
 			type: "number",
 			default: 2,
 			min: 1,
 			max: 8,
-			placeholder: m["convert.settings.audio.channels_placeholder"](),
+			placeholder: m["convert.settings.audio.channels.placeholder"](),
 		};
 
 		/*

@@ -477,27 +477,27 @@ export class VertdConverter extends Converter {
 		const qualityOptions = [
 			{
 				value: 0, // very slow
-				label: m["convert.settings.video.speed_very_slow"](),
+				label: m["convert.settings.video.speed.very_slow"](),
 			},
 			{
 				value: 1, // slower
-				label: m["convert.settings.video.speed_slower"](),
+				label: m["convert.settings.video.speed.slower"](),
 			},
 			{
 				value: 2, // slow
-				label: m["convert.settings.video.speed_slow"](),
+				label: m["convert.settings.video.speed.slow"](),
 			},
 			{
 				value: 3, // medium
-				label: m["convert.settings.video.speed_medium"](),
+				label: m["convert.settings.video.speed.medium"](),
 			},
 			{
 				value: 4, // faster
-				label: m["convert.settings.video.speed_fast"](),
+				label: m["convert.settings.video.speed.fast"](),
 			},
 			{
 				value: 5, // fastest
-				label: m["convert.settings.video.speed_ultra_fast"](),
+				label: m["convert.settings.video.speed.ultra_fast"](),
 			},
 		];
 
@@ -525,8 +525,8 @@ export class VertdConverter extends Converter {
 		const defaultSpeedIndex = vertdSpeedValues.indexOf(defaultSpeed);
 		const qualitySpeedRange: SettingDefinition = {
 			key: "vertdSpeed",
-			label: m["convert.settings.video.speed"](),
-			description: m["convert.settings.video.speed_description"](),
+			label: m["convert.settings.video.speed.title"](),
+			description: m["convert.settings.video.speed.description"](),
 			type: "range",
 			min: 0,
 			max: qualityOptions.length - 1,
@@ -541,7 +541,7 @@ export class VertdConverter extends Converter {
 
 		const fps: SettingDefinition = {
 			key: "fps",
-			label: m["convert.settings.video.fps"](),
+			label: m["convert.settings.video.fps.label"](),
 			type: "select",
 			default: "auto",
 			options: [
@@ -559,12 +559,12 @@ export class VertdConverter extends Converter {
 			],
 			hasCustomInput: true,
 			customInputKey: "customFps",
-			placeholder: m["convert.settings.video.fps_placeholder"](),
+			placeholder: m["convert.settings.video.fps.placeholder"](),
 		};
 
 		const resolution: SettingDefinition = {
 			key: "resolution",
-			label: m["convert.settings.video.resolution"](),
+			label: m["convert.settings.video.resolution.label"](),
 			type: "select",
 			default: "auto",
 			options: [
@@ -585,12 +585,12 @@ export class VertdConverter extends Converter {
 			],
 			hasCustomInput: true,
 			customInputKey: "customResolution",
-			placeholder: m["convert.settings.video.resolution_placeholder"](),
+			placeholder: m["convert.settings.video.resolution.placeholder"](),
 		};
 
 		const videoCodec: SettingDefinition = {
 			key: "videoCodec",
-			label: m["convert.settings.video.video_codec"](),
+			label: m["convert.settings.video.codec.video"](),
 			type: "select",
 			default: "auto",
 			options: [
@@ -605,7 +605,7 @@ export class VertdConverter extends Converter {
 		// TODO: allow CRF for consistent quality?
 		const videoBitrate: SettingDefinition = {
 			key: "videoBitrate",
-			label: m["convert.settings.video.video_bitrate"](),
+			label: m["convert.settings.video.bitrate.video"](),
 			type: "select",
 			default: "auto",
 			options: [
@@ -623,7 +623,7 @@ export class VertdConverter extends Converter {
 			],
 			hasCustomInput: true,
 			customInputKey: "customVideoBitrate",
-			placeholder: m["convert.settings.video.bitrate_placeholder"](),
+			placeholder: m["convert.settings.video.bitrate.placeholder"](),
 		};
 
 		/*
@@ -631,7 +631,7 @@ export class VertdConverter extends Converter {
 		 */
 		const audioCodec: SettingDefinition = {
 			key: "audioCodec",
-			label: m["convert.settings.video.audio_codec"](),
+			label: m["convert.settings.video.codec.audio"](),
 			type: "select",
 			default: "auto",
 			options: [
@@ -645,7 +645,7 @@ export class VertdConverter extends Converter {
 
 		const audioBitrate: SettingDefinition = {
 			key: "audioBitrate",
-			label: m["convert.settings.video.audio_bitrate"](),
+			label: m["convert.settings.video.bitrate.audio"](),
 			type: "select",
 			default: "auto",
 			options: CONVERSION_BITRATES.map((b) => ({
@@ -659,12 +659,12 @@ export class VertdConverter extends Converter {
 			})),
 			hasCustomInput: true,
 			customInputKey: "customAudioBitrate",
-			placeholder: m["convert.settings.audio.bitrate_placeholder"](),
+			placeholder: m["convert.settings.audio.bitrate.placeholder"](),
 		};
 
 		const sampleRate: SettingDefinition = {
 			key: "sampleRate",
-			label: m["convert.settings.audio.sample_rate"](),
+			label: m["convert.settings.audio.sample_rate.label"](),
 			type: "select",
 			default: "auto",
 			options: SAMPLE_RATES.map((r) => ({
@@ -678,7 +678,7 @@ export class VertdConverter extends Converter {
 			})),
 			hasCustomInput: true,
 			customInputKey: "customSampleRate",
-			placeholder: m["convert.settings.audio.sample_rate_placeholder"](),
+			placeholder: m["convert.settings.audio.sample_rate.placeholder"](),
 		};
 
 		/*
@@ -762,7 +762,7 @@ export class VertdConverter extends Converter {
 			if (this.blocked(hash)) {
 				this.log(`conversion blocked for file ${input.name}`);
 				throw new Error(
-					m["convert.errors.vertd_ratelimit"]({
+					m["convert.errors.vertd.ratelimit"]({
 						filename: input.name,
 					}),
 				);
@@ -777,7 +777,7 @@ export class VertdConverter extends Converter {
 				`blocked upload for ${input.name}: ${fileUpload.file.size} bytes exceeds server limit of ${sizeLimit} bytes`,
 			);
 			throw new Error(
-				m["convert.errors.vertd_file_too_large"]({
+				m["convert.errors.vertd.file_too_large"]({
 					fileSize: formatBytes(fileUpload.file.size),
 					limit: formatBytes(sizeLimit),
 				}),
@@ -895,7 +895,7 @@ export class VertdConverter extends Converter {
 						this.log(`job retrying for file ${input.name}`);
 						ToastManager.add({
 							type: "error",
-							message: m["convert.errors.vertd_retry"]({
+							message: m["convert.errors.vertd.retry"]({
 								filename: input.name,
 							}),
 						});

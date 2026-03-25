@@ -83,30 +83,36 @@
 		},
 		"errors": {
 			"cant_convert": "이 파일을 변환할 수 없습니다.",
-			"vertd_server": "뭐 하는거임? vertd 서버부터 실행하셈",
-			"vertd_generic_view": "오류 세부정보 보기",
-			"vertd_generic_body": "비디오 변환 중 오류가 발생했습니다. 이 비디오를 개발자에게 전송해서 이 버그를 수정하는 데 도움을 주시겠습니까? 오직 비디오 파일만 전송됩니다. 익명으로 처리되며, 다른 개인 정보는 포함되지 않습니다.",
-			"vertd_generic_title": "비디오 변환 오류",
-			"vertd_generic_yes": "비디오 전송",
-			"vertd_generic_no": "전송 안 함",
-			"vertd_failed_to_keep": "영상을 서버에 저장하는데 실패했습니다: {error}",
-			"vertd_details": "오류 세부정보 보기",
-			"vertd_details_body": "제출을 누르면, 검토를 위해 항상 보고되는 오류 로그와 함께 <b>동영상도 첨부</b>됩니다. 아래 정보는 우리가 자동으로 받는 로그입니다:",
-			"vertd_details_footer": "이 정보는 문제 해결 목적으로만 사용되며 절대 공유되지 않습니다. 자세한 내용은 [privacy_link]개인정보 처리방침[/privacy_link]을 확인하세요.",
-			"vertd_details_job_id": "<b>작업 ID:</b> {jobId}",
-			"vertd_details_from": "<b>원본 포맷:</b> {from}",
-			"vertd_details_to": "<b>변환 포맷:</b> {to}",
-			"vertd_details_error_message": "<b>오류 메시지:</b> [view_link]오류 로그 보기[/view_link]",
-			"vertd_details_close": "닫기",
 			"unsupported_format": "이미지, 비디오, 오디오 및 문서 파일만 지원됩니다.",
 			"format_output_only": "이 포맷은 현재 입력으로 사용할 수 없으며 (변환된)출력으로만 사용할 수 있습니다.",
-			"vertd_not_found": "비디오 변환을 시작할 vertd 인스턴스를 찾을 수 없습니다. 인스턴스 URL이 올바르게 설정되었는지 확인해주세요.",
 			"worker_downloading": "현재 {type} 변환기를 준비하고 있습니다. 잠시 기다려 주십시오.",
 			"worker_error": "현재 {type} 변환기 준비 중 오류가 발생했습니다. 나중에 다시 시도해 주십시오.",
 			"worker_timeout": "{type} 변환기를 준비하는데 예상보다 오래 걸리고 있습니다. 잠시 더 기다리거나 페이지를 새로고침해 주세요.",
 			"audio": "오디오",
 			"doc": "문서",
-			"image": "이미지"
+			"image": "이미지",
+			"vertd": {
+				"server": "뭐 하는거임? vertd 서버부터 실행하셈",
+				"details": {
+					"view": "오류 세부정보 보기",
+					"body": "제출을 누르면, 검토를 위해 항상 보고되는 오류 로그와 함께 <b>동영상도 첨부</b>됩니다. 아래 정보는 우리가 자동으로 받는 로그입니다:",
+					"footer": "이 정보는 문제 해결 목적으로만 사용되며 절대 공유되지 않습니다. 자세한 내용은 [privacy_link]개인정보 처리방침[/privacy_link]을 확인하세요.",
+					"job_id": "<b>작업 ID:</b> {jobId}",
+					"from": "<b>원본 포맷:</b> {from}",
+					"to": "<b>변환 포맷:</b> {to}",
+					"error_message": "<b>오류 메시지:</b> [view_link]오류 로그 보기[/view_link]",
+					"close": "닫기"
+				},
+				"generic": {
+					"view": "오류 세부정보 보기",
+					"body": "비디오 변환 중 오류가 발생했습니다. 이 비디오를 개발자에게 전송해서 이 버그를 수정하는 데 도움을 주시겠습니까? 오직 비디오 파일만 전송됩니다. 익명으로 처리되며, 다른 개인 정보는 포함되지 않습니다.",
+					"title": "비디오 변환 오류",
+					"yes": "비디오 전송",
+					"no": "전송 안 함"
+				},
+				"failed_to_keep": "영상을 서버에 저장하는데 실패했습니다: {error}",
+				"not_found": "비디오 변환을 시작할 vertd 인스턴스를 찾을 수 없습니다. 인스턴스 URL이 올바르게 설정되었는지 확인해주세요."
+			}
 		}
 	},
 	"settings": {
@@ -116,37 +122,53 @@
 		},
 		"appearance": {
 			"title": "테마",
-			"brightness_theme": "테마 변경",
-			"brightness_description": "걍 알아서",
 			"light": "라이트 모드",
 			"dark": "다크 모드",
-			"effect_settings": "이펙트(효과) 설정",
-			"effect_description": "동적인 애니메이션이나 이펙트, 아님 정적인거?",
 			"enable": "켜기",
-			"disable": "끄기"
+			"disable": "끄기",
+			"brightness": {
+				"theme": "테마 변경",
+				"description": "걍 알아서"
+			},
+			"effect": {
+				"settings": "이펙트(효과) 설정",
+				"description": "동적인 애니메이션이나 이펙트, 아님 정적인거?"
+			},
+			"language": {
+				"title": "언어",
+				"description": "선호하시는 언어를 선택하세요."
+			}
 		},
 		"conversion": {
 			"title": "변환",
 			"advanced_settings": "고급 설정",
-			"filename_format": "파일 이름 형식",
-			"filename_description": "다운로드할 파일의 이름을 설정합니다. <b>파일 확장자(포맷)는 포함되지 않습니다.</b> 다음 템플릿을 형식에 넣을 수 있으며, 관련 정보로 대체됩니다: <b>%name%</b> 원본 파일 이름, <b>%extension%</b> 원본 파일 확장자, <b>%date%</b> 파일이 변환된 날짜 문자열.",
-			"placeholder": "VERT_%name%",
-			"default_format": "기본 변환 형식",
-			"default_format_description": "파일 유형의 파일을 업로드할 때 선택되는 기본 형식을 변경합니다.",
-			"default_format_image": "이미지",
-			"default_format_video": "비디오",
-			"default_format_audio": "오디오",
-			"default_format_document": "문서",
-			"metadata": "파일 메타데이터",
-			"metadata_description": "원본 파일의 메타데이터(EXIF, 노래 정보 등)가 변환된 파일에 유지되는지 선택할 수 있습니다.",
-			"keep": "유지",
-			"remove": "제거",
-			"quality": "변환 품질",
-			"quality_description": "변환된 파일의 기본 출력 품질을 변경합니다(카테고리 내에서). 더 높은 값은 더 긴 변환 시간과 파일 크기를 초래할 수 있습니다.",
-			"quality_video": "변환된 비디오 파일의 기본 출력 품질을 변경합니다. 높은 값은 더 긴시간과 파일 크기를 초래할 수 있습니다.",
-			"quality_audio": "오디오 (kbps)",
-			"quality_images": "이미지 (%)",
-			"rate": "샘플링 주파수 (Hz)"
+			"default_format": {
+				"image": "이미지",
+				"audio": "오디오",
+				"document": "문서",
+				"label": "기본 변환 형식",
+				"description": "파일 유형의 파일을 업로드할 때 선택되는 기본 형식을 변경합니다.",
+				"video": "비디오"
+			},
+			"metadata": {
+				"label": "파일 메타데이터",
+				"description": "원본 파일의 메타데이터(EXIF, 노래 정보 등)가 변환된 파일에 유지되는지 선택할 수 있습니다.",
+				"keep": "유지",
+				"remove": "제거"
+			},
+			"quality": {
+				"label": "변환 품질",
+				"description": "변환된 파일의 기본 출력 품질을 변경합니다(카테고리 내에서). 더 높은 값은 더 긴 변환 시간과 파일 크기를 초래할 수 있습니다.",
+				"video": "변환된 비디오 파일의 기본 출력 품질을 변경합니다. 높은 값은 더 긴시간과 파일 크기를 초래할 수 있습니다.",
+				"audio": "오디오 (kbps)",
+				"images": "이미지 (%)"
+			},
+			"rate": "샘플링 주파수 (Hz)",
+			"filename": {
+				"format": "파일 이름 형식",
+				"description": "다운로드할 파일의 이름을 설정합니다. <b>파일 확장자(포맷)는 포함되지 않습니다.</b> 다음 템플릿을 형식에 넣을 수 있으며, 관련 정보로 대체됩니다: <b>%name%</b> 원본 파일 이름, <b>%extension%</b> 원본 파일 확장자, <b>%date%</b> 파일이 변환된 날짜 문자열.",
+				"placeholder": "VERT_%name%"
+			}
 		},
 		"vertd": {
 			"title": "비디오 변환 서버",
@@ -154,45 +176,51 @@
 			"loading": "로딩중...",
 			"available": "사용 가능, 커밋 ID {commitId}",
 			"unavailable": "사용 불가 (URL를 다시 확인해주세요.)",
-			"description": "<code>vertd</code> 프로젝트는 FFmpeg를 위한 서버 래퍼입니다. 이를 통해 VERT의 웹 인터페이스를 통해 비디오를 변환할 수 있으며, GPU를 활용하여 가능한 한 빠르게 작업을 수행할 수 있습니다.",
-			"hosting_info": "편의를 위해 공개 인스턴스를 호스팅하지만, PC나 서버에서 직접 호스팅하는 것도 매우 쉽습니다. 서버 바이너리를 [vertd_link]여기[/vertd_link]에서 다운로드할 수 있습니다. 이 설정 프로세스는 앞으로 더 쉬워질 것이므로 기대해 주세요!",
-			"instance": "인스턴스",
-			"url_placeholder": "예시: http://localhost:24153",
-			"conversion_speed": "변환 속도",
-			"speed_description": "이는 속도와 품질 사이의 균형을 설명합니다. 속도를 높일수록 품질은 낮아지지만 작업 속도는 더 빨라집니다.",
-			"speeds": {
-				"very_slow": "매우 느림",
-				"slower": "느림",
-				"slow": "조금 느림",
-				"medium": "보통",
-				"fast": "빠름",
-				"ultra_fast": "매우 빠름"
+			"description": {
+				"main": "<code>vertd</code> 프로젝트는 FFmpeg를 위한 서버 래퍼입니다. 이를 통해 VERT의 웹 인터페이스를 통해 비디오를 변환할 수 있으며, GPU를 활용하여 가능한 한 빠르게 작업을 수행할 수 있습니다.",
+				"info": "편의를 위해 공개 인스턴스를 호스팅하지만, PC나 서버에서 직접 호스팅하는 것도 매우 쉽습니다. 서버 바이너리를 [vertd_link]여기[/vertd_link]에서 다운로드할 수 있습니다. 이 설정 프로세스는 앞으로 더 쉬워질 것이므로 기대해 주세요!"
 			},
-			"auto_instance": "자동 (권장됨)",
-			"eu_instance": "Falkenstein, Germany",
-			"us_instance": "Washington, USA",
-			"custom_instance": "사용자 지정"
+			"instance": {
+				"custom": "사용자 지정",
+				"label": "인스턴스",
+				"url_placeholder": "예시: http://localhost:24153",
+				"auto": "자동 (권장됨)",
+				"eu": "Falkenstein, Germany",
+				"us": "Washington, USA"
+			},
+			"conversion_speed": {
+				"speeds": {
+					"very_slow": "매우 느림",
+					"slower": "느림",
+					"slow": "조금 느림",
+					"medium": "보통",
+					"fast": "빠름",
+					"ultra_fast": "매우 빠름"
+				},
+				"label": "변환 속도",
+				"description": "이는 속도와 품질 사이의 균형을 설명합니다. 속도를 높일수록 품질은 낮아지지만 작업 속도는 더 빨라집니다."
+			}
 		},
 		"privacy": {
 			"title": "개인정보 및 데이터",
-			"plausible_title": "Plausible analytics",
-			"plausible_description": "우리는 개인정보 보호에 초점을 둔 분석 도구인 [plausible_link]Plausible[/plausible_link]를 사용해 완전히 익명화된 통계를 수집합니다. 모든 데이터는 익명화되어 집계되며, 식별 가능한 정보는 전송되거나 보관되지 않습니다. 분석 결과는 [analytics_link]여기[/analytics_link]에서 확인할 수 있고, 아래에서 수집을 거부(opt-out)할 수 있습니다",
-			"opt_in": "수락",
-			"opt_out": "거부",
-			"cache_title": "캐시 정리",
-			"cache_description": "브라우저에 변환기 파일을 캐시하여 매번 다시 다운로드할 필요가 없도록 하여 최적화와 데이터 사용량을 줄입니다.",
-			"refresh_cache": "캐시 새로고침",
-			"clear_cache": "캐시 지우기",
-			"files_cached": "{size} ({count} files)",
-			"loading_cache": "로딩중...",
-			"total_size": "총 크기",
-			"files_cached_label": "캐시된 파일",
-			"cache_cleared": "캐시를 성공적으로 지웠습니다!",
-			"cache_clear_error": "캐시를 지우는 중 오류가 발생했습니다"
-		},
-		"language": {
-			"title": "언어",
-			"description": "선호하시는 언어를 선택하세요."
+			"plausible": {
+				"title": "Plausible analytics",
+				"description": "우리는 개인정보 보호에 초점을 둔 분석 도구인 [plausible_link]Plausible[/plausible_link]를 사용해 완전히 익명화된 통계를 수집합니다. 모든 데이터는 익명화되어 집계되며, 식별 가능한 정보는 전송되거나 보관되지 않습니다. 분석 결과는 [analytics_link]여기[/analytics_link]에서 확인할 수 있고, 아래에서 수집을 거부(opt-out)할 수 있습니다",
+				"opt_in": "수락",
+				"opt_out": "거부"
+			},
+			"cache": {
+				"title": "캐시 정리",
+				"description": "브라우저에 변환기 파일을 캐시하여 매번 다시 다운로드할 필요가 없도록 하여 최적화와 데이터 사용량을 줄입니다.",
+				"refresh_cache": "캐시 새로고침",
+				"clear_cache": "캐시 지우기",
+				"files_cached": "{size} ({count} files)",
+				"loading_cache": "로딩중...",
+				"total_size": "총 크기",
+				"files_cached_label": "캐시된 파일",
+				"cache_cleared": "캐시를 성공적으로 지웠습니다!",
+				"cache_clear_error": "캐시를 지우는 중 오류가 발생했습니다"
+			}
 		}
 	},
 	"about": {

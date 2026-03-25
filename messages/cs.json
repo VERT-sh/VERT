@@ -92,31 +92,37 @@
 		},
 		"errors": {
 			"cant_convert": "Tento soubor nelze konvertovat.",
-			"vertd_server": "co to děláte...? měli byste spustit vertd server!",
-			"vertd_generic_view": "Zobrazit podrobnosti chyby",
-			"vertd_generic_body": "Při pokusu o konverzi vašeho videa došlo k chybě. Chcete odeslat toto video vývojářům, abyste pomohli opravit tuto chybu? Bude odeslán pouze váš video soubor. Žádné identifikátory nebudou nahrány.",
-			"vertd_generic_title": "Chyba při konverzi videa",
-			"vertd_generic_yes": "Odeslat video",
-			"vertd_generic_no": "Neposílat",
-			"vertd_failed_to_keep": "Selhalo uchování videa na serveru: {error}",
-			"vertd_details": "Zobrazit podrobnosti chyby",
-			"vertd_details_body": "Pokud stisknete odeslat, <b>vaše video bude také připojeno</b> spolu s protokolem chyb, který je nám vždy hlášen ke kontrole. Následující informace jsou protokol, který automaticky obdržíme:",
-			"vertd_details_footer": "Tyto informace budou použity pouze pro účely řešení problémů a nebudou nikdy sdíleny. Prohlédněte si naše [privacy_link]zásady ochrany osobních údajů[/privacy_link] pro více informací.",
-			"vertd_details_job_id": "<b>ID úlohy:</b> {jobId}",
-			"vertd_details_from": "<b>Z formátu:</b> {from}",
-			"vertd_details_to": "<b>Do formátu:</b> {to}",
-			"vertd_details_error_message": "<b>Chybová zpráva:</b> [view_link]Zobrazit protokol chyb[/view_link]",
-			"vertd_details_close": "Zavřít",
-			"vertd_ratelimit": "Vaše video '{filename}' se nepodařilo konvertovat několikrát. Aby nedošlo k přetížení serveru, další pokusy o konverzi tohoto souboru byly dočasně zablokovány. Zkuste to prosím později.",
 			"unsupported_format": "Podporovány jsou pouze soubory obrázků, videa, audia a dokumentů",
 			"format_output_only": "Tento formát lze v současné době použít pouze jako výstup (konvertovat do), nikoli jako vstup.",
-			"vertd_not_found": "Nelze najít instanci vertd pro zahájení konverze videa. Jste si jisti, že je URL instance nastavena správně?",
 			"worker_downloading": "Konvertor {type} se právě inicializuje, počkejte prosím chvíli.",
 			"worker_error": "Konvertor {type} měl při inicializaci chybu, zkuste to prosím později.",
 			"worker_timeout": "Inicializace konvertoru {type} trvá déle než obvykle, počkejte prosím ještě chvíli nebo obnovte stránku.",
 			"audio": "audia",
 			"doc": "dokumentů",
-			"image": "obrázků"
+			"image": "obrázků",
+			"vertd": {
+				"server": "co to děláte...? měli byste spustit vertd server!",
+				"details": {
+					"view": "Zobrazit podrobnosti chyby",
+					"body": "Pokud stisknete odeslat, <b>vaše video bude také připojeno</b> spolu s protokolem chyb, který je nám vždy hlášen ke kontrole. Následující informace jsou protokol, který automaticky obdržíme:",
+					"footer": "Tyto informace budou použity pouze pro účely řešení problémů a nebudou nikdy sdíleny. Prohlédněte si naše [privacy_link]zásady ochrany osobních údajů[/privacy_link] pro více informací.",
+					"job_id": "<b>ID úlohy:</b> {jobId}",
+					"from": "<b>Z formátu:</b> {from}",
+					"to": "<b>Do formátu:</b> {to}",
+					"error_message": "<b>Chybová zpráva:</b> [view_link]Zobrazit protokol chyb[/view_link]",
+					"close": "Zavřít"
+				},
+				"generic": {
+					"view": "Zobrazit podrobnosti chyby",
+					"body": "Při pokusu o konverzi vašeho videa došlo k chybě. Chcete odeslat toto video vývojářům, abyste pomohli opravit tuto chybu? Bude odeslán pouze váš video soubor. Žádné identifikátory nebudou nahrány.",
+					"title": "Chyba při konverzi videa",
+					"yes": "Odeslat video",
+					"no": "Neposílat"
+				},
+				"failed_to_keep": "Selhalo uchování videa na serveru: {error}",
+				"ratelimit": "Vaše video '{filename}' se nepodařilo konvertovat několikrát. Aby nedošlo k přetížení serveru, další pokusy o konverzi tohoto souboru byly dočasně zablokovány. Zkuste to prosím později.",
+				"not_found": "Nelze najít instanci vertd pro zahájení konverze videa. Jste si jisti, že je URL instance nastavena správně?"
+			}
 		}
 	},
 	"settings": {
@@ -126,39 +132,55 @@
 		},
 		"appearance": {
 			"title": "Vzhled",
-			"brightness_theme": "Barevný motiv",
-			"brightness_description": "Chcete slunečný blesk, nebo tiché osamělé noci?",
 			"light": "Světlý",
 			"dark": "Tmavý",
-			"effect_settings": "Nastavení efektů",
-			"effect_description": "Chcete efektní efekty, nebo statičtější prostředí?",
 			"enable": "Zapnout",
-			"disable": "Vypnout"
+			"disable": "Vypnout",
+			"brightness": {
+				"theme": "Barevný motiv",
+				"description": "Chcete slunečný blesk, nebo tiché osamělé noci?"
+			},
+			"effect": {
+				"settings": "Nastavení efektů",
+				"description": "Chcete efektní efekty, nebo statičtější prostředí?"
+			},
+			"language": {
+				"title": "Jazyk",
+				"description": "Vyberte preferovaný jazyk pro rozhraní VERT."
+			}
 		},
 		"conversion": {
 			"title": "Konverze",
 			"advanced_settings": "Pokročilá nastavení",
-			"filename_format": "Formát názvu souboru",
-			"filename_description": "Toto určí název souboru při stažení, <b>bez přípony souboru.</b> Do formátu můžete vložit následující šablony, které budou nahrazeny příslušnými informacemi: <b>%name%</b> pro původní název souboru, <b>%extension%</b> pro původní příponu souboru a <b>%date%</b> pro datum, kdy byl soubor konvertován.",
-			"placeholder": "VERT_%name%",
-			"default_format": "Výchozí formát konverze",
-			"default_format_enable": "Zapnout",
-			"default_format_disable": "Vypnout",
-			"default_format_description": "Toto změní výchozí formát vybraný při nahrání souboru tohoto typu.",
-			"default_format_image": "Obrázky",
-			"default_format_video": "Videa",
-			"default_format_audio": "Audio",
-			"default_format_document": "Dokumenty",
-			"metadata": "Metadata souboru",
-			"metadata_description": "Toto mění, zda budou metadata (EXIF, informace o skladbě atd.) z původního souboru zachována v konvertovaných souborech.",
-			"keep": "Zachovat",
-			"remove": "Odebrat",
-			"quality": "Kvalita konverze",
-			"quality_description": "Toto mění výchozí výstupní kvalitu konvertovaných souborů (v jejich kategorii). Vyšší hodnoty mohou vést k delšímu času konverze a větší velikosti souboru.",
-			"quality_video": "Toto mění výchozí výstupní kvalitu konvertovaných video souborů. Vyšší hodnoty mohou vést k delšímu času konverze a větší velikosti souboru.",
-			"quality_audio": "Audio (kbps)",
-			"quality_images": "Obrázek (%)",
-			"rate": "Vzorkovací frekvence (Hz)"
+			"default_format": {
+				"image": "Obrázky",
+				"audio": "Audio",
+				"document": "Dokumenty",
+				"enable": "Zapnout",
+				"disable": "Vypnout",
+				"label": "Výchozí formát konverze",
+				"description": "Toto změní výchozí formát vybraný při nahrání souboru tohoto typu.",
+				"video": "Videa"
+			},
+			"metadata": {
+				"label": "Metadata souboru",
+				"description": "Toto mění, zda budou metadata (EXIF, informace o skladbě atd.) z původního souboru zachována v konvertovaných souborech.",
+				"keep": "Zachovat",
+				"remove": "Odebrat"
+			},
+			"quality": {
+				"label": "Kvalita konverze",
+				"description": "Toto mění výchozí výstupní kvalitu konvertovaných souborů (v jejich kategorii). Vyšší hodnoty mohou vést k delšímu času konverze a větší velikosti souboru.",
+				"video": "Toto mění výchozí výstupní kvalitu konvertovaných video souborů. Vyšší hodnoty mohou vést k delšímu času konverze a větší velikosti souboru.",
+				"audio": "Audio (kbps)",
+				"images": "Obrázek (%)"
+			},
+			"rate": "Vzorkovací frekvence (Hz)",
+			"filename": {
+				"format": "Formát názvu souboru",
+				"description": "Toto určí název souboru při stažení, <b>bez přípony souboru.</b> Do formátu můžete vložit následující šablony, které budou nahrazeny příslušnými informacemi: <b>%name%</b> pro původní název souboru, <b>%extension%</b> pro původní příponu souboru a <b>%date%</b> pro datum, kdy byl soubor konvertován.",
+				"placeholder": "VERT_%name%"
+			}
 		},
 		"vertd": {
 			"title": "Konverze videa",
@@ -166,53 +188,61 @@
 			"loading": "načítání...",
 			"available": "dostupné, commit id {commitId}",
 			"unavailable": "nedostupné (je URL správná?)",
-			"description": "Projekt <code>vertd</code> je serverový obal pro FFmpeg. To vám umožňuje konvertovat videa prostřednictvím pohodlného webového rozhraní VERT a zároveň využívat sílu vašeho GPU, abyste to udělali co nejrychleji.",
-			"hosting_info": "Pro vaše pohodlí hostujeme veřejnou instanci, ale pokud víte, co děláte, je docela snadné si ji hostovat sami na vašem PC nebo serveru. Serverové binárky si můžete stáhnout [vertd_link]zde[/vertd_link] - proces nastavení bude v budoucnu jednodušší, takže zůstaňte naladěni!",
-			"instance": "Instance",
-			"url_placeholder": "Příklad: http://localhost:24153",
-			"conversion_speed": "Rychlost konverze",
-			"speed_description": "Toto popisuje kompromis mezi rychlostí a kvalitou. Vyšší rychlosti povedou k nižší kvalitě, ale práci udělají rychleji.",
-			"speeds": {
-				"very_slow": "Velmi pomalá",
-				"slower": "Pomalejší",
-				"slow": "Pomalá",
-				"medium": "Střední",
-				"fast": "Rychlá",
-				"ultra_fast": "Ultra rychlá"
+			"description": {
+				"main": "Projekt <code>vertd</code> je serverový obal pro FFmpeg. To vám umožňuje konvertovat videa prostřednictvím pohodlného webového rozhraní VERT a zároveň využívat sílu vašeho GPU, abyste to udělali co nejrychleji.",
+				"info": "Pro vaše pohodlí hostujeme veřejnou instanci, ale pokud víte, co děláte, je docela snadné si ji hostovat sami na vašem PC nebo serveru. Serverové binárky si můžete stáhnout [vertd_link]zde[/vertd_link] - proces nastavení bude v budoucnu jednodušší, takže zůstaňte naladěni!"
 			},
-			"auto_instance": "Automaticky (doporučeno)",
-			"eu_instance": "Falkenstein, Německo",
-			"us_instance": "Washington, USA",
-			"custom_instance": "Vlastní"
+			"instance": {
+				"custom": "Vlastní",
+				"label": "Instance",
+				"url_placeholder": "Příklad: http://localhost:24153",
+				"auto": "Automaticky (doporučeno)",
+				"eu": "Falkenstein, Německo",
+				"us": "Washington, USA"
+			},
+			"conversion_speed": {
+				"speeds": {
+					"very_slow": "Velmi pomalá",
+					"slower": "Pomalejší",
+					"slow": "Pomalá",
+					"medium": "Střední",
+					"fast": "Rychlá",
+					"ultra_fast": "Ultra rychlá"
+				},
+				"label": "Rychlost konverze",
+				"description": "Toto popisuje kompromis mezi rychlostí a kvalitou. Vyšší rychlosti povedou k nižší kvalitě, ale práci udělají rychleji."
+			}
 		},
 		"privacy": {
 			"title": "Soukromí a data",
-			"plausible_title": "Plausible analytika",
-			"plausible_description": "Používáme [plausible_link]Plausible[/plausible_link], nástroj pro analytiku zaměřený na ochranu soukromí, ke shromažďování zcela anonymních statistik. Všechna data jsou anonymizována a agregována a nikdy nejsou odesílány nebo ukládány žádné identifikovatelné informace. Analytiku můžete zobrazit [analytics_link]zde[/analytics_link] a níže se můžete rozhodnout odhlásit.",
-			"opt_in": "Souhlasím",
-			"opt_out": "Odhlásit se",
-			"cache_title": "Správa mezipaměti",
-			"cache_description": "Ukládáme soubory konvertoru do mezipaměti vašeho prohlížeče, abyste je nemuseli stahovat pokaždé znovu, což zlepšuje výkon a snižuje využití dat.",
-			"refresh_cache": "Obnovit mezipaměť",
-			"clear_cache": "Vymazat mezipaměť",
-			"files_cached": "{size} ({count} souborů)",
-			"loading_cache": "Načítání...",
-			"total_size": "Celková velikost",
-			"files_cached_label": "Souborů v mezipaměti",
-			"cache_cleared": "Mezipaměť byla úspěšně vymazána!",
-			"cache_clear_error": "Selhalo vymazání mezipaměti.",
-			"site_data_title": "Správa dat webu",
-			"site_data_description": "Vymažte všechna data webu včetně nastavení a souborů v mezipaměti, resetujte VERT do výchozího stavu a znovu načtěte stránku.",
-			"clear_all_data": "Vymazat všechna data webu",
-			"clear_all_data_confirm_title": "Vymazat všechna data webu?",
-			"clear_all_data_confirm": "Toto resetuje všechna nastavení a mezipaměť a poté znovu načte stránku. Tuto akci nelze vrátit zpět.",
-			"clear_all_data_cancel": "Zrušit",
-			"all_data_cleared": "Všechna data webu byla vymazána! Načítání stránky...",
-			"all_data_clear_error": "Selhalo vymazání všech dat webu."
-		},
-		"language": {
-			"title": "Jazyk",
-			"description": "Vyberte preferovaný jazyk pro rozhraní VERT."
+			"plausible": {
+				"title": "Plausible analytika",
+				"description": "Používáme [plausible_link]Plausible[/plausible_link], nástroj pro analytiku zaměřený na ochranu soukromí, ke shromažďování zcela anonymních statistik. Všechna data jsou anonymizována a agregována a nikdy nejsou odesílány nebo ukládány žádné identifikovatelné informace. Analytiku můžete zobrazit [analytics_link]zde[/analytics_link] a níže se můžete rozhodnout odhlásit.",
+				"opt_in": "Souhlasím",
+				"opt_out": "Odhlásit se"
+			},
+			"cache": {
+				"title": "Správa mezipaměti",
+				"description": "Ukládáme soubory konvertoru do mezipaměti vašeho prohlížeče, abyste je nemuseli stahovat pokaždé znovu, což zlepšuje výkon a snižuje využití dat.",
+				"refresh_cache": "Obnovit mezipaměť",
+				"clear_cache": "Vymazat mezipaměť",
+				"files_cached": "{size} ({count} souborů)",
+				"loading_cache": "Načítání...",
+				"total_size": "Celková velikost",
+				"files_cached_label": "Souborů v mezipaměti",
+				"cache_cleared": "Mezipaměť byla úspěšně vymazána!",
+				"cache_clear_error": "Selhalo vymazání mezipaměti."
+			},
+			"site_data": {
+				"title": "Správa dat webu",
+				"description": "Vymažte všechna data webu včetně nastavení a souborů v mezipaměti, resetujte VERT do výchozího stavu a znovu načtěte stránku.",
+				"clear_all_data": "Vymazat všechna data webu",
+				"clear_all_data_confirm_title": "Vymazat všechna data webu?",
+				"clear_all_data_confirm": "Toto resetuje všechna nastavení a mezipaměť a poté znovu načte stránku. Tuto akci nelze vrátit zpět.",
+				"clear_all_data_cancel": "Zrušit",
+				"all_data_cleared": "Všechna data webu byla vymazána! Načítání stránky...",
+				"all_data_clear_error": "Selhalo vymazání všech dat webu."
+			}
 		}
 	},
 	"about": {

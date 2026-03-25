@@ -243,7 +243,7 @@
 						{m["convert.errors.cant_convert"]()}
 					</p>
 					<p class="font-normal">
-						{m["convert.errors.vertd_server"]()}
+						{m["convert.errors.vertd.server"]()}
 					</p>
 				</div>
 			{:else}

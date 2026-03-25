@@ -8,6 +8,7 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"migrate:messages": "node scripts/migrate-language-keys.mjs",
 		"format": "prettier --write .",
 		"lint": "prettier --check .; p=$?; eslint .; e=$?; [ $p -eq 0 ] && [ $e -eq 0 ]"
 	},

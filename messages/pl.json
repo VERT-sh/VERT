@@ -92,31 +92,37 @@
 		},
 		"errors": {
 			"cant_convert": "Nie możemy przekonwertować tego pliku.",
-			"vertd_server": "co robisz..? powinieneś uruchomić serwer vertd!",
-			"vertd_generic_view": "Wyświetl szczegóły błędu",
-			"vertd_generic_body": "Wystąpił błąd podczas próby konwersji twojego wideo. Czy chcesz przesłać to wideo deweloperom w celu pomocy w naprawie tego błędu? Przesłane zostanie jedynie wideo. Żadne identyfikatory nie zostaną przesłane.",
-			"vertd_generic_title": "Błąd konwersji wideo",
-			"vertd_generic_yes": "Prześlij wideo",
-			"vertd_generic_no": "Nie przesyłaj",
-			"vertd_failed_to_keep": "Nie udało się przechować wideo na serwerze: {error}",
-			"vertd_details": "Wyświetl szczegóły błędu",
-			"vertd_details_body": "Jeśli wciśniesz przycisk prześlij, <b>twoje wideo również zostanie dołączone</b> wraz z wpisem błędu, który zawsze jest do nas wysyłany do sprawdzenia. Następująca informacja jest wpisem, który automatycznie otrzymujemy:",
-			"vertd_details_footer": "Informacja ta użyta zostanie jedynie w celu rozwiązywania błędów oraz nigdy nie zostanie udostępniona. Zobacz naszą [privacy_link]politykę prywatności[/privacy_link] po więcej szczegółów.",
-			"vertd_details_job_id": "<b>Job ID:</b> {jobId}",
-			"vertd_details_from": "<b>Z formatu:</b> {from}",
-			"vertd_details_to": "<b>Do formatu:</b> {to}",
-			"vertd_details_error_message": "<b>Wiadomość błędu:</b> [view_link]Wyświetl wpis błędu[/view_link]",
-			"vertd_details_close": "Zamknij",
-			"vertd_ratelimit": "Nie udało się przekonwertować twojego wideo '{filename}' kilkukrotnie. Aby zapobiec przeciążeniom serwera, dalsze próby konwersji tego pliku zostały chwilowo zablokowane. Spróbuj ponownie później.",
 			"unsupported_format": "Wspierane są jedynie pliki obrazów, wideo, audio oraz dokumentów",
 			"format_output_only": "Obecnie, ten format może być używany jedynie jako wyjście (konwersja do), nie jako wejście.",
-			"vertd_not_found": "Nie udało się znaleźć instancji vertd w celu uruchomienia konwersji wideo. Czy jesteś pewny, że instancja URL jest ustawiona poprawnie?",
 			"worker_downloading": "Konwerter {type} jest obecnie inicjowany, proszę czekać.",
 			"worker_error": "Konwerter {type} napotkał błąd podczas inicjacji, spróbuj ponownie później.",
 			"worker_timeout": "Konwerter {type} inicjowany jest dłużej niż oczekiwano, proszę odczekać kilka chwil lub odświeżyć stronę.",
 			"audio": "audio",
 			"doc": "dokumentów",
-			"image": "zdjęciowy"
+			"image": "zdjęciowy",
+			"vertd": {
+				"server": "co robisz..? powinieneś uruchomić serwer vertd!",
+				"details": {
+					"view": "Wyświetl szczegóły błędu",
+					"body": "Jeśli wciśniesz przycisk prześlij, <b>twoje wideo również zostanie dołączone</b> wraz z wpisem błędu, który zawsze jest do nas wysyłany do sprawdzenia. Następująca informacja jest wpisem, który automatycznie otrzymujemy:",
+					"footer": "Informacja ta użyta zostanie jedynie w celu rozwiązywania błędów oraz nigdy nie zostanie udostępniona. Zobacz naszą [privacy_link]politykę prywatności[/privacy_link] po więcej szczegółów.",
+					"job_id": "<b>Job ID:</b> {jobId}",
+					"from": "<b>Z formatu:</b> {from}",
+					"to": "<b>Do formatu:</b> {to}",
+					"error_message": "<b>Wiadomość błędu:</b> [view_link]Wyświetl wpis błędu[/view_link]",
+					"close": "Zamknij"
+				},
+				"generic": {
+					"view": "Wyświetl szczegóły błędu",
+					"body": "Wystąpił błąd podczas próby konwersji twojego wideo. Czy chcesz przesłać to wideo deweloperom w celu pomocy w naprawie tego błędu? Przesłane zostanie jedynie wideo. Żadne identyfikatory nie zostaną przesłane.",
+					"title": "Błąd konwersji wideo",
+					"yes": "Prześlij wideo",
+					"no": "Nie przesyłaj"
+				},
+				"failed_to_keep": "Nie udało się przechować wideo na serwerze: {error}",
+				"ratelimit": "Nie udało się przekonwertować twojego wideo '{filename}' kilkukrotnie. Aby zapobiec przeciążeniom serwera, dalsze próby konwersji tego pliku zostały chwilowo zablokowane. Spróbuj ponownie później.",
+				"not_found": "Nie udało się znaleźć instancji vertd w celu uruchomienia konwersji wideo. Czy jesteś pewny, że instancja URL jest ustawiona poprawnie?"
+			}
 		}
 	},
 	"settings": {
@@ -126,39 +132,55 @@
 		},
 		"appearance": {
 			"title": "Wygląd",
-			"brightness_theme": "Motyw",
-			"brightness_description": "Wolisz motyw jasny jak słońce czy ciemny jak cicha, spokojna noc?",
 			"light": "Jasny",
 			"dark": "Ciemny",
-			"effect_settings": "Ustawienia efektów",
-			"effect_description": "Chciałbyś włączyć szalone efekty czy preferujesz bardziej statyczne doświadczenie?",
 			"enable": "Włącz",
-			"disable": "Wyłącz"
+			"disable": "Wyłącz",
+			"brightness": {
+				"theme": "Motyw",
+				"description": "Wolisz motyw jasny jak słońce czy ciemny jak cicha, spokojna noc?"
+			},
+			"effect": {
+				"settings": "Ustawienia efektów",
+				"description": "Chciałbyś włączyć szalone efekty czy preferujesz bardziej statyczne doświadczenie?"
+			},
+			"language": {
+				"title": "Język",
+				"description": "Wybierz swój preferowany język dla interfejsu VERT."
+			}
 		},
 		"conversion": {
 			"title": "Konwersja",
 			"advanced_settings": "Zaawansowane ustawienia",
-			"filename_format": "Format nazwy pliku",
-			"filename_description": "To ustawienie pozwoli ci określić nazwę pliku przy jego pobieraniu <b>z wyłączeniem jego rozszerzenia.</b> Możesz w formacie umieścić następujące wzorce, które następnie zostaną zamienione na odpowiednią informację: <b>%name%</b> zostanie zamieniony na oryginalną nazwę pliku, <b>%extension%</b> zostanie zamieniony na oryginalne rozszerzenie pliku oraz <b>%date%</b> zamieniony zostanie na datę kiedy plik został przekonwertowany.",
-			"placeholder": "VERT_%name%",
-			"default_format": "Domyślny format konwersji",
-			"default_format_enable": "Włączony",
-			"default_format_disable": "Wyłączony",
-			"default_format_description": "To ustawienie zmieni domyślnie wybrany format przy przesyłaniu pliku danego typu.",
-			"default_format_image": "Zdjęcia",
-			"default_format_video": "Wideo",
-			"default_format_audio": "Audio",
-			"default_format_document": "Dokumenty",
-			"metadata": "Metadane pliku",
-			"metadata_description": "To ustawienie pozwala ci ustalić czy metadane (EXIF, informacje o piosence, itp.) oryginalnego pliku zostaną zachowane w przekonwertowanym pliku.",
-			"keep": "Zachowaj",
-			"remove": "Usuń",
-			"quality": "Jakość konwersji",
-			"quality_description": "To ustawienie pozwala ci ustalić domyślną jakość wyjściową przekonwertowanego pliku (w danej kategorii). Wyższe wartości mogą skutkować dłuższym czasem konwersji oraz większym rozmiarem pliku.",
-			"quality_video": "To ustawienie pozwala ustalić domyślną jakość wyjściową przekonwertowanego pliku wideo. Wyższe wartości mogą skutkować dłuższym czasem konwersji oraz większym rozmiarem pliku.",
-			"quality_audio": "Audio (kbps)",
-			"quality_images": "Zdjęcia (%)",
-			"rate": "Częstotliwość próbkowania (Hz)"
+			"default_format": {
+				"image": "Zdjęcia",
+				"audio": "Audio",
+				"document": "Dokumenty",
+				"enable": "Włączony",
+				"disable": "Wyłączony",
+				"label": "Domyślny format konwersji",
+				"description": "To ustawienie zmieni domyślnie wybrany format przy przesyłaniu pliku danego typu.",
+				"video": "Wideo"
+			},
+			"metadata": {
+				"label": "Metadane pliku",
+				"description": "To ustawienie pozwala ci ustalić czy metadane (EXIF, informacje o piosence, itp.) oryginalnego pliku zostaną zachowane w przekonwertowanym pliku.",
+				"keep": "Zachowaj",
+				"remove": "Usuń"
+			},
+			"quality": {
+				"label": "Jakość konwersji",
+				"description": "To ustawienie pozwala ci ustalić domyślną jakość wyjściową przekonwertowanego pliku (w danej kategorii). Wyższe wartości mogą skutkować dłuższym czasem konwersji oraz większym rozmiarem pliku.",
+				"video": "To ustawienie pozwala ustalić domyślną jakość wyjściową przekonwertowanego pliku wideo. Wyższe wartości mogą skutkować dłuższym czasem konwersji oraz większym rozmiarem pliku.",
+				"audio": "Audio (kbps)",
+				"images": "Zdjęcia (%)"
+			},
+			"rate": "Częstotliwość próbkowania (Hz)",
+			"filename": {
+				"format": "Format nazwy pliku",
+				"description": "To ustawienie pozwoli ci określić nazwę pliku przy jego pobieraniu <b>z wyłączeniem jego rozszerzenia.</b> Możesz w formacie umieścić następujące wzorce, które następnie zostaną zamienione na odpowiednią informację: <b>%name%</b> zostanie zamieniony na oryginalną nazwę pliku, <b>%extension%</b> zostanie zamieniony na oryginalne rozszerzenie pliku oraz <b>%date%</b> zamieniony zostanie na datę kiedy plik został przekonwertowany.",
+				"placeholder": "VERT_%name%"
+			}
 		},
 		"vertd": {
 			"title": "Konwersja wideo",
@@ -166,53 +188,61 @@
 			"loading": "ładowanie...",
 			"available": "dostępna, commit id {commitId}",
 			"unavailable": "niedostępna (czy url jest poprawny?)",
-			"description": "Projekt <code>vertd</code> jest serwerową nakładką na FFmpeg. To pozwala ci konwertować wideo za pomocą interfejsu sieciowego VERT, nadal będąc w stanie wykorzystywać moc swojego procesora graficznego (GPU) w celu jak najszybszej konwersji.",
-			"hosting_info": "Dla twojej wygody hostujemy publiczną instancję, jednak ustawienie hosta na twoim własnym komputerze lub serwerze jest stosunkowo proste, jeśli wiesz, co robisz. Możesz pobrać binaria serwera [vertd_link]tutaj[/vertd_link] - w przyszłości proces tej konfiguracji będzie łatwiejszy, więc czekajcie na więcej informacji!",
-			"instance": "Instancja",
-			"url_placeholder": "Przykładowo: http://localhost:24153",
-			"conversion_speed": "Prędkość konwersji",
-			"speed_description": "To opisuje kompromis pomiędzy prędkością a jakością. Większa prędkość może skutkować niższą jakością, ale wykona swoje zadanie szybciej.",
-			"speeds": {
-				"very_slow": "Najwolniejsza",
-				"slower": "Wolniejsza",
-				"slow": "Wolna",
-				"medium": "Średnia",
-				"fast": "Szybka",
-				"ultra_fast": "Ultra szybka"
+			"description": {
+				"main": "Projekt <code>vertd</code> jest serwerową nakładką na FFmpeg. To pozwala ci konwertować wideo za pomocą interfejsu sieciowego VERT, nadal będąc w stanie wykorzystywać moc swojego procesora graficznego (GPU) w celu jak najszybszej konwersji.",
+				"info": "Dla twojej wygody hostujemy publiczną instancję, jednak ustawienie hosta na twoim własnym komputerze lub serwerze jest stosunkowo proste, jeśli wiesz, co robisz. Możesz pobrać binaria serwera [vertd_link]tutaj[/vertd_link] - w przyszłości proces tej konfiguracji będzie łatwiejszy, więc czekajcie na więcej informacji!"
 			},
-			"auto_instance": "Auto (zalecana)",
-			"eu_instance": "Falkenstein, Niemcy",
-			"us_instance": "Washington, USA",
-			"custom_instance": "Własna"
+			"instance": {
+				"custom": "Własna",
+				"label": "Instancja",
+				"url_placeholder": "Przykładowo: http://localhost:24153",
+				"auto": "Auto (zalecana)",
+				"eu": "Falkenstein, Niemcy",
+				"us": "Washington, USA"
+			},
+			"conversion_speed": {
+				"speeds": {
+					"very_slow": "Najwolniejsza",
+					"slower": "Wolniejsza",
+					"slow": "Wolna",
+					"medium": "Średnia",
+					"fast": "Szybka",
+					"ultra_fast": "Ultra szybka"
+				},
+				"label": "Prędkość konwersji",
+				"description": "To opisuje kompromis pomiędzy prędkością a jakością. Większa prędkość może skutkować niższą jakością, ale wykona swoje zadanie szybciej."
+			}
 		},
 		"privacy": {
 			"title": "Prywatność i dane",
-			"plausible_title": "Analityka Plausible",
-			"plausible_description": "Używamy [plausible_link]Plausible[/plausible_link], skupionego na prywatności narzędzia analitycznego, w celu zebrania w pełni anonimowych statystyk. Wszystkie dane są anonimizowane i agregowane, a żadne wrażliwe informacje nigdy nie są przesyłane ani przechowywane. Możesz zobaczyć analitykę [analytics_link]tutaj[/analytics_link] oraz podjąć decyzję o zbieraniu danych poniżej.",
-			"opt_in": "Wyrażam zgodę",
-			"opt_out": "Rezygnuję",
-			"cache_title": "Zarządzanie pamięcią podręczną",
-			"cache_description": "W pamięci podręcznej przeglądarki przechowujemy pliki konwertera, abyś nie musiał ich ponownie pobierać za każdym razem, usprawniając wydajność i redukując wykorzystanie danych.",
-			"refresh_cache": "Odśwież pamięć podręczną",
-			"clear_cache": "Wyczyść pamięć podręczną",
-			"files_cached": "{size} ({count} plików)",
-			"loading_cache": "Ładowanie...",
-			"total_size": "Łączny rozmiar",
-			"files_cached_label": "Przechowywane pliki",
-			"cache_cleared": "Pomyślnie wyczyszczono pamięć podręczną!",
-			"cache_clear_error": "Nie udało się wyczyścić pamięci podręcznej.",
-			"site_data_title": "Zarządzanie danymi strony",
-			"site_data_description": "Wyczyść wszystkie dane strony wliczając ustawienia i przechowywane pliki, przywracając VERT do swojego domyślnego stanu oraz odświeżając stronę.",
-			"clear_all_data": "Wyczyść wszystkie dane strony",
-			"clear_all_data_confirm_title": "Wyczyścić wszystkie dane strony?",
-			"clear_all_data_confirm": "To zresetuje wszystkie ustawienia i przechowywane pliki, a następnie odświeży stronę. To działanie jest nieodwracalne.",
-			"clear_all_data_cancel": "Anuluj",
-			"all_data_cleared": "Wszystkie dane strony wyczyszczone! Odświeżanie strony...",
-			"all_data_clear_error": "Nie udało się wyczyścić wszystkich danych strony."
-		},
-		"language": {
-			"title": "Język",
-			"description": "Wybierz swój preferowany język dla interfejsu VERT."
+			"plausible": {
+				"title": "Analityka Plausible",
+				"description": "Używamy [plausible_link]Plausible[/plausible_link], skupionego na prywatności narzędzia analitycznego, w celu zebrania w pełni anonimowych statystyk. Wszystkie dane są anonimizowane i agregowane, a żadne wrażliwe informacje nigdy nie są przesyłane ani przechowywane. Możesz zobaczyć analitykę [analytics_link]tutaj[/analytics_link] oraz podjąć decyzję o zbieraniu danych poniżej.",
+				"opt_in": "Wyrażam zgodę",
+				"opt_out": "Rezygnuję"
+			},
+			"cache": {
+				"title": "Zarządzanie pamięcią podręczną",
+				"description": "W pamięci podręcznej przeglądarki przechowujemy pliki konwertera, abyś nie musiał ich ponownie pobierać za każdym razem, usprawniając wydajność i redukując wykorzystanie danych.",
+				"refresh_cache": "Odśwież pamięć podręczną",
+				"clear_cache": "Wyczyść pamięć podręczną",
+				"files_cached": "{size} ({count} plików)",
+				"loading_cache": "Ładowanie...",
+				"total_size": "Łączny rozmiar",
+				"files_cached_label": "Przechowywane pliki",
+				"cache_cleared": "Pomyślnie wyczyszczono pamięć podręczną!",
+				"cache_clear_error": "Nie udało się wyczyścić pamięci podręcznej."
+			},
+			"site_data": {
+				"title": "Zarządzanie danymi strony",
+				"description": "Wyczyść wszystkie dane strony wliczając ustawienia i przechowywane pliki, przywracając VERT do swojego domyślnego stanu oraz odświeżając stronę.",
+				"clear_all_data": "Wyczyść wszystkie dane strony",
+				"clear_all_data_confirm_title": "Wyczyścić wszystkie dane strony?",
+				"clear_all_data_confirm": "To zresetuje wszystkie ustawienia i przechowywane pliki, a następnie odświeży stronę. To działanie jest nieodwracalne.",
+				"clear_all_data_cancel": "Anuluj",
+				"all_data_cleared": "Wszystkie dane strony wyczyszczone! Odświeżanie strony...",
+				"all_data_clear_error": "Nie udało się wyczyścić wszystkich danych strony."
+			}
 		}
 	},
 	"about": {

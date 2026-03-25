@@ -99,37 +99,57 @@
 				"transparency": "Transparency"
 			},
 			"audio": {
-				"bitrate": "Bitrate (kbps)",
-				"bitrate_placeholder": "Custom bitrate",
-				"sample_rate": "Sample rate (Hz)",
-				"sample_rate_placeholder": "Custom sample rate",
-				"channels": "Audio channels",
-				"channels_placeholder": "Custom audio channels",
-				"tracks": "Audio tracks",
-				"tracks_placeholder": "Custom audio tracks"
+				"bitrate": {
+					"label": "Bitrate (kbps)",
+					"placeholder": "Custom bitrate"
+				},
+				"sample_rate": {
+					"label": "Sample rate (Hz)",
+					"placeholder": "Custom sample rate"
+				},
+				"channels": {
+					"label": "Audio channels",
+					"placeholder": "Custom audio channels"
+				},
+				"tracks": {
+					"label": "Audio tracks",
+					"placeholder": "Custom audio tracks"
+				}
 			},
 			"video": {
 				"quality": "Quality",
 				"metadata": "Metadata",
-				"speed": "Conversion speed",
-				"speed_description": "This will be overridden if you manually set the bitrate or resolution below - selecting options other than \"auto\".",
-				"speed_very_slow": "Highest quality (slowest)",
-				"speed_slower": "Higher quality (slower)",
-				"speed_slow": "High quality (slow)",
-				"speed_medium": "Medium quality (average)",
-				"speed_fast": "Lower quality (faster)",
-				"speed_ultra_fast": "Lowest quality (fastest)",
-				"fps": "Frame rate (FPS)",
-				"fps_placeholder": "Custom frame rate",
-				"resolution": "Resolution",
-				"resolution_placeholder": "Custom resolution",
-				"video_bitrate": "Video bitrate (kbps)",
-				"audio_bitrate": "Audio bitrate (kbps)",
-				"bitrate_placeholder": "Custom bitrate",
-				"sample_rate": "Audio sample rate (Hz)",
-				"sample_rate_placeholder": "Custom sample rate",
-				"video_codec": "Video codec",
-				"audio_codec": "Audio codec"
+				"speed": {
+					"title": "Conversion speed",
+					"description": "This will be overridden if you manually set the bitrate or resolution below - selecting options other than \"auto\".",
+					"very_slow": "Highest quality (slowest)",
+					"slower": "Higher quality (slower)",
+					"slow": "High quality (slow)",
+					"medium": "Medium quality (average)",
+					"fast": "Lower quality (faster)",
+					"ultra_fast": "Lowest quality (fastest)"
+				},
+				"fps": {
+					"label": "Frame rate (FPS)",
+					"placeholder": "Custom frame rate"
+				},
+				"resolution": {
+					"label": "Resolution",
+					"placeholder": "Custom resolution"
+				},
+				"bitrate": {
+					"video": "Video bitrate (kbps)",
+					"audio": "Audio bitrate (kbps)",
+					"placeholder": "Custom bitrate"
+				},
+				"sample_rate": {
+					"label": "Audio sample rate (Hz)",
+					"placeholder": "Custom sample rate"
+				},
+				"codec": {
+					"video": "Video codec",
+					"audio": "Audio codec"
+				}
 			},
 			"document": {
 				"something": "Something"
@@ -158,34 +178,40 @@
 				"no": "Cancel conversion",
 				"all_failed": "All compatible converters failed for {filename}. Conversion has been cancelled."
 			},
-			"vertd_server": "what are you doing..? you're supposed to run the vertd server!",
-			"vertd_generic_view": "View error details",
-			"vertd_generic_body": "An error occurred whilst whilst trying to convert your video. Would you like to submit this video to the developers to help fix this bug? Only your video file will be sent and no identifiers will be uploaded.",
-			"vertd_generic_title": "Video conversion error",
-			"vertd_generic_yes": "Submit video",
-			"vertd_generic_no": "Don't submit",
-			"vertd_failed_to_keep": "Failed to keep the video on the server: {error}",
-			"vertd_details": "View error details",
-			"vertd_details_body": "If you press submit, <b>your video will also be attached</b> alongside the error log which is always reported to us for review. The following information is the log that we automatically receive:",
-			"vertd_details_footer": "This information will only be used for troubleshooting purposes and will never be shared. View our [privacy_link]privacy policy[/privacy_link] for more details.",
-			"vertd_details_job_id": "<b>Job ID:</b> {jobId}",
-			"vertd_details_from": "<b>From format:</b> {from}",
-			"vertd_details_to": "<b>To format:</b> {to}",
-			"vertd_details_error_message": "<b>Error message:</b> [view_link]View error logs[/view_link]",
-			"vertd_details_close": "Close",
-			"vertd_ratelimit": "Your video, '{filename}', has failed to convert a few times. To prevent server overload, further conversion attempts for this file have been temporarily blocked. Please try again later.",
-			"vertd_file_too_large": "This file is too big for the specified vertd server ({fileSize}/{limit}). Please choose a smaller file or use another converter/server.",
-			"vertd_retry": "Retrying video conversion for {filename} with different settings due to failure. This may take longer than usual.",
 			"unsupported_format": "Only image, video, audio, and document files are supported",
 			"format_output_only": "This format can currently only be used as output (converted to), not as input.",
-			"vertd_not_found": "Could not find the vertd instance to start video conversion. Are you sure the instance URL is set correctly?",
 			"worker_downloading": "The {type} converter is currently being initialized, please wait a few moments.",
 			"worker_error": "The {type} converter had an error during initialization, please try again later.",
 			"worker_timeout": "The {type} converter is taking longer than expected to initialize, please wait a few more moments or refresh the page.",
 			"audio": "audio",
 			"doc": "document",
 			"image": "image",
-			"video": "video"
+			"video": "video",
+			"vertd": {
+				"server": "what are you doing..? you're supposed to run the vertd server!",
+				"not_found": "Could not find the vertd instance to start video conversion. Are you sure the instance URL is set correctly?",
+				"ratelimit": "Your video, '{filename}', has failed to convert a few times. To prevent server overload, further conversion attempts for this file have been temporarily blocked. Please try again later.",
+				"file_too_large": "This file is too big for the specified vertd server ({fileSize}/{limit}). Please choose a smaller file or use another converter/server.",
+				"failed_to_keep": "Failed to keep the video on the server: {error}",
+				"retry": "Retrying video conversion for {filename} with different settings due to failure. This may take longer than usual.",
+				"generic": {
+					"title": "Video conversion error",
+					"view": "View error details",
+					"body": "An error occurred whilst whilst trying to convert your video. Would you like to submit this video to the developers to help fix this bug? Only your video file will be sent and no identifiers will be uploaded.",
+					"yes": "Submit video",
+					"no": "Don't submit"
+				},
+				"details": {
+					"view": "View error details",
+					"body": "If you press submit, <b>your video will also be attached</b> alongside the error log which is always reported to us for review. The following information is the log that we automatically receive:",
+					"footer": "This information will only be used for troubleshooting purposes and will never be shared. View our [privacy_link]privacy policy[/privacy_link] for more details.",
+					"close": "Close",
+					"job_id": "<b>Job ID:</b> {jobId}",
+					"from": "<b>From format:</b> {from}",
+					"to": "<b>To format:</b> {to}",
+					"error_message": "<b>Error message:</b> [view_link]View error logs[/view_link]"
+				}
+			}
 		}
 	},
 	"settings": {
@@ -195,38 +221,54 @@
 		},
 		"appearance": {
 			"title": "Appearance",
-			"brightness_theme": "Brightness theme",
-			"brightness_description": "Want a sunny flash-bang, or a quiet lonely night?",
+			"brightness": {
+				"theme": "Brightness theme",
+				"description": "Want a sunny flash-bang, or a quiet lonely night?"
+			},
 			"light": "Light",
 			"dark": "Dark",
-			"effect_settings": "Effect settings",
-			"effect_description": "Would you like fancy effects, or a more static experience?",
+			"effect": {
+				"settings": "Effect settings",
+				"description": "Would you like fancy effects, or a more static experience?"
+			},
 			"enable": "Enable",
-			"disable": "Disable"
+			"disable": "Disable",
+			"language": {
+				"title": "Language",
+				"description": "Select your preferred language for the VERT interface."
+			}
 		},
 		"conversion": {
 			"title": "Conversion",
 			"advanced_settings": "Advanced settings",
-			"filename_format": "File name format",
-			"filename_description": "This will determine the name of the file on download, <b>not including the file extension.</b> You can put the following templates in the format, which will be replaced with the relevant information: <b>%name%</b> for the original file name, <b>%extension%</b> for the original file extension, <b>%datetime%</b> for the full ISO 8601 timestamp, <b>%date%</b> for the date, <b>%time%</b> for the time, and <b>%unix%</b> for the unix timestamp.",
-			"placeholder": "VERT_%name%",
-			"default_format": "Default conversion format",
-			"default_format_enable": "Enable",
-			"default_format_disable": "Disable",
-			"default_format_description": "This will change the default format selected when you upload a file of this file type.",
-			"default_format_image": "Images",
-			"default_format_video": "Videos",
-			"default_format_audio": "Audio",
-			"default_format_document": "Documents",
-			"metadata": "File metadata",
-			"metadata_description": "This changes whether any metadata (EXIF, song info, etc.) on the original file is preserved in converted files.",
-			"keep": "Keep",
-			"remove": "Remove",
-			"quality": "Conversion quality",
-			"quality_description": "This changes the default output quality of the converted files (in its category). Higher values may result in longer conversion times and file size.",
-			"quality_video": "This changes the default output quality of the converted video files. Higher values may result in longer conversion times and file size.",
-			"quality_audio": "Audio (kbps)",
-			"quality_images": "Image (%)",
+			"filename": {
+				"format": "File name format",
+				"description": "This will determine the name of the file on download, <b>not including the file extension.</b> You can put the following templates in the format, which will be replaced with the relevant information: <b>%name%</b> for the original file name, <b>%extension%</b> for the original file extension, <b>%datetime%</b> for the full ISO 8601 timestamp, <b>%date%</b> for the date, <b>%time%</b> for the time, and <b>%unix%</b> for the unix timestamp.",
+				"placeholder": "VERT_%name%"
+			},
+			"default_format": {
+				"label": "Default conversion format",
+				"enable": "Enable",
+				"disable": "Disable",
+				"description": "This will change the default format selected when you upload a file of this file type.",
+				"image": "Images",
+				"video": "Videos",
+				"audio": "Audio",
+				"document": "Documents"
+			},
+			"metadata": {
+				"label": "File metadata",
+				"description": "This changes whether any metadata (EXIF, song info, etc.) on the original file is preserved in converted files.",
+				"keep": "Keep",
+				"remove": "Remove"
+			},
+			"quality": {
+				"label": "Conversion quality",
+				"description": "This changes the default output quality of the converted files (in its category). Higher values may result in longer conversion times and file size.",
+				"video": "This changes the default output quality of the converted video files. Higher values may result in longer conversion times and file size.",
+				"audio": "Audio (kbps)",
+				"images": "Image (%)"
+			},
 			"rate": "Sample rate (Hz)"
 		},
 		"vertd": {
@@ -235,53 +277,61 @@
 			"loading": "loading...",
 			"available": "available, commit id {commitId}",
 			"unavailable": "unavailable (is the url right?)",
-			"description": "When possible, VERT converts videos locally in your browser, however some conversions may require the use of the <code>vertd</code> project, a server wrapper for FFmpeg. This allows you to convert videos through the convenience of VERT's web interface, while still being able to harness the power of your GPU to do it as quickly as possible.",
-			"hosting_info": "We host a public instance for your convenience, but it is quite easy to host your own on your PC or server if you know what you are doing. You can download the server binaries [vertd_link]here[/vertd_link] - the process of setting this up will become easier in the future, so stay tuned!",
-			"instance": "Instance",
-			"url_placeholder": "Example: http://localhost:24153",
-			"conversion_speed": "Conversion speed",
-			"speed_description": "This describes the tradeoff between speed and quality. Faster speeds will result in lower quality, but will get the job done quicker.",
-			"speeds": {
-				"very_slow": "Very Slow",
-				"slower": "Slower",
-				"slow": "Slow",
-				"medium": "Medium",
-				"fast": "Fast",
-				"ultra_fast": "Ultra Fast"
+			"description": {
+				"main": "When possible, VERT converts videos locally in your browser, however some conversions may require the use of the <code>vertd</code> project, a server wrapper for FFmpeg. This allows you to convert videos through the convenience of VERT's web interface, while still being able to harness the power of your GPU to do it as quickly as possible.",
+				"info": "We host a public instance for your convenience, but it is quite easy to host your own on your PC or server if you know what you are doing. You can download the server binaries [vertd_link]here[/vertd_link] - the process of setting this up will become easier in the future, so stay tuned!"
 			},
-			"auto_instance": "Auto (recommended)",
-			"eu_instance": "Falkenstein, Germany",
-			"us_instance": "Washington, USA",
-			"custom_instance": "Custom"
+			"instance": {
+				"label": "Instance",
+				"url_placeholder": "Example: http://localhost:24153",
+				"auto": "Auto (recommended)",
+				"eu": "Falkenstein, Germany",
+				"us": "Washington, USA",
+				"custom": "Custom"
+			},
+			"conversion_speed": {
+				"label": "Conversion speed",
+				"description": "This describes the tradeoff between speed and quality. Faster speeds will result in lower quality, but will get the job done quicker.",
+				"speeds": {
+					"very_slow": "Very Slow",
+					"slower": "Slower",
+					"slow": "Slow",
+					"medium": "Medium",
+					"fast": "Fast",
+					"ultra_fast": "Ultra Fast"
+				}
+			}
 		},
 		"privacy": {
 			"title": "Privacy & data",
-			"plausible_title": "Plausible analytics",
-			"plausible_description": "We use [plausible_link]Plausible[/plausible_link], a privacy-focused analytics tool, to gather completely anonymous statistics. All data is anonymized and aggregated, and no identifiable information is ever sent or stored. You can view the analytics [analytics_link]here[/analytics_link] and choose to opt out below.",
-			"opt_in": "Opt-in",
-			"opt_out": "Opt-out",
-			"cache_title": "Cache management",
-			"cache_description": "We cache the converter files on your browser so you don't have to re-download them every time, improving performance and reducing data usage.",
-			"refresh_cache": "Refresh cache",
-			"clear_cache": "Clear cache",
-			"files_cached": "{size} ({count} files)",
-			"loading_cache": "Loading...",
-			"total_size": "Total Size",
-			"files_cached_label": "Files Cached",
-			"cache_cleared": "Cache cleared successfully!",
-			"cache_clear_error": "Failed to clear cache.",
-			"site_data_title": "Site data management",
-			"site_data_description": "Clear all site data including settings and cached files, resetting VERT to its default state and reloading the page.",
-			"clear_all_data": "Clear all site data",
-			"clear_all_data_confirm_title": "Clear all site data?",
-			"clear_all_data_confirm": "This will reset all settings & cache, then reload the page. This action cannot be undone.",
-			"clear_all_data_cancel": "Cancel",
-			"all_data_cleared": "All site data cleared! Reloading page...",
-			"all_data_clear_error": "Failed to clear all site data."
-		},
-		"language": {
-			"title": "Language",
-			"description": "Select your preferred language for the VERT interface."
+			"plausible": {
+				"title": "Plausible analytics",
+				"description": "We use [plausible_link]Plausible[/plausible_link], a privacy-focused analytics tool, to gather completely anonymous statistics. All data is anonymized and aggregated, and no identifiable information is ever sent or stored. You can view the analytics [analytics_link]here[/analytics_link] and choose to opt out below.",
+				"opt_in": "Opt-in",
+				"opt_out": "Opt-out"
+			},
+			"cache": {
+				"title": "Cache management",
+				"description": "We cache the converter files on your browser so you don't have to re-download them every time, improving performance and reducing data usage.",
+				"refresh_cache": "Refresh cache",
+				"clear_cache": "Clear cache",
+				"files_cached": "{size} ({count} files)",
+				"loading_cache": "Loading...",
+				"total_size": "Total Size",
+				"files_cached_label": "Files Cached",
+				"cache_cleared": "Cache cleared successfully!",
+				"cache_clear_error": "Failed to clear cache."
+			},
+			"site_data": {
+				"title": "Site data management",
+				"description": "Clear all site data including settings and cached files, resetting VERT to its default state and reloading the page.",
+				"clear_all_data": "Clear all site data",
+				"clear_all_data_confirm_title": "Clear all site data?",
+				"clear_all_data_confirm": "This will reset all settings & cache, then reload the page. This action cannot be undone.",
+				"clear_all_data_cancel": "Cancel",
+				"all_data_cleared": "All site data cleared! Reloading page...",
+				"all_data_clear_error": "Failed to clear all site data."
+			}
 		}
 	},
 	"about": {
@@ -345,9 +395,11 @@
 			"magick": "Error in Magick worker, image conversion may not work as expected.",
 			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
-			"mediabunny_init": "Error loading Mediabunny, video conversion may not work as expected.",
-			"mediabunny_webcodecs": "Some WebCodecs APIs are not supported in this browser, video conversion may not work as expected.",
-			"mediabunny_discarded": "Mediabunny discarded {count} track(s) for {file}. See the browser console for details.",
+			"mediabunny": {
+				"init": "Error loading Mediabunny, video conversion may not work as expected.",
+				"webcodecs": "Some WebCodecs APIs are not supported in this browser, video conversion may not work as expected.",
+				"discarded": "Mediabunny discarded {count} track(s) for {file}. See the browser console for details."
+			},
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."

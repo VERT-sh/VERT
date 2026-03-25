@@ -137,7 +137,7 @@ export class MagickConverter extends Converter {
 
 		const resolution: SettingDefinition = {
 			key: "resolution",
-			label: m["convert.settings.video.resolution"](),
+			label: m["convert.settings.video.resolution.label"](),
 			type: "select",
 			default: "auto",
 			options: [
@@ -158,7 +158,7 @@ export class MagickConverter extends Converter {
 			],
 			hasCustomInput: true,
 			customInputKey: "customResolution",
-			placeholder: m["convert.settings.video.resolution_placeholder"](),
+			placeholder: m["convert.settings.video.resolution.placeholder"](),
 		};
 
 		const depth: SettingDefinition = {

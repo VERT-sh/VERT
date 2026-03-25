@@ -108,10 +108,10 @@
 			<div class="flex flex-col gap-4">
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
-						{m["settings.appearance.brightness_theme"]()}
+						{m["settings.appearance.brightness.theme"]()}
 					</p>
 					<p class="text-sm text-muted font-normal italic">
-						{m["settings.appearance.brightness_description"]()}
+						{m["settings.appearance.brightness.description"]()}
 					</p>
 				</div>
 				<div class="flex flex-col gap-3 w-full">
@@ -143,10 +143,10 @@
 			<div class="flex flex-col gap-4">
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
-						{m["settings.appearance.effect_settings"]()}
+						{m["settings.appearance.effect.settings"]()}
 					</p>
 					<p class="text-sm text-muted font-normal italic">
-						{m["settings.appearance.effect_description"]()}
+						{m["settings.appearance.effect.description"]()}
 					</p>
 				</div>
 				<div class="flex flex-col gap-3 w-full">
@@ -178,11 +178,11 @@
 			<div class="flex flex-col gap-4">
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
-						{m["settings.language.title"]()}
+						{m["settings.appearance.language.title"]()}
 						{#if currentLocale !== "en"} (Language){/if}
 					</p>
 					<p class="text-sm text-muted font-normal italic">
-						{m["settings.language.description"]()}
+						{m["settings.appearance.language.description"]()}
 					</p>
 				</div>
 				<div class="flex flex-col gap-3 w-full">

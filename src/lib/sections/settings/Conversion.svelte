@@ -40,11 +40,11 @@
 			<div class="flex flex-col gap-4">
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
-						{m["settings.conversion.filename_format"]()}
+								{m["settings.conversion.filename.format"]()}
 					</p>
 					<p class="text-sm text-muted font-normal">
 						{@html sanitize(
-							m["settings.conversion.filename_description"](),
+									m["settings.conversion.filename.description"](),
 						)}
 					</p>
 				</div>
@@ -87,11 +87,11 @@
 						<div class="flex flex-col gap-4">
 							<div class="flex flex-col gap-2">
 								<p class="text-base font-bold">
-									{m["settings.conversion.default_format"]()}
+									{m["settings.conversion.default_format.label"]()}
 								</p>
 								<p class="text-sm text-muted font-normal">
 									{m[
-										"settings.conversion.default_format_description"
+										"settings.conversion.default_format.description"
 									]()}
 								</p>
 							</div>
@@ -111,7 +111,7 @@
 											class="inline-block mr-2"
 										/>
 										{m[
-											"settings.conversion.default_format_enable"
+											"settings.conversion.default_format.enable"
 										]()}
 									</button>
 
@@ -129,7 +129,7 @@
 											class="inline-block mr-2"
 										/>
 										{m[
-											"settings.conversion.default_format_disable"
+											"settings.conversion.default_format.disable"
 										]()}
 									</button>
 								</div>
@@ -141,7 +141,7 @@
 								<div class="flex flex-col gap-2">
 									<p class="text-sm font-bold">
 										{m[
-											"settings.conversion.default_format_image"
+											"settings.conversion.default_format.image"
 										]()}
 									</p>
 									<FormatDropdown
@@ -156,7 +156,7 @@
 								<div class="flex flex-col gap-2">
 									<p class="text-sm font-bold">
 										{m[
-											"settings.conversion.default_format_audio"
+											"settings.conversion.default_format.audio"
 										]()}
 									</p>
 									<FormatDropdown
@@ -171,7 +171,7 @@
 								<div class="flex flex-col gap-2">
 									<p class="text-sm font-bold">
 										{m[
-											"settings.conversion.default_format_video"
+											"settings.conversion.default_format.video"
 										]()}
 									</p>
 									<FormatDropdown
@@ -186,7 +186,7 @@
 								<div class="flex flex-col gap-2">
 									<p class="text-sm font-bold">
 										{m[
-											"settings.conversion.default_format_document"
+											"settings.conversion.default_format.document"
 										]()}
 									</p>
 									<FormatDropdown
@@ -203,11 +203,11 @@
 						<div class="flex flex-col gap-4">
 							<div class="flex flex-col gap-2">
 								<p class="text-base font-bold">
-									{m["settings.conversion.metadata"]()}
+									{m["settings.conversion.metadata.label"]()}
 								</p>
 								<p class="text-sm text-muted font-normal">
 									{m[
-										"settings.conversion.metadata_description"
+										"settings.conversion.metadata.description"
 									]()}
 								</p>
 							</div>
@@ -226,7 +226,7 @@
 											size="24"
 											class="inline-block mr-2"
 										/>
-										{m["settings.conversion.keep"]()}
+										{m["settings.conversion.metadata.keep"]()}
 									</button>
 
 									<button
@@ -242,7 +242,7 @@
 											size="24"
 											class="inline-block mr-2"
 										/>
-										{m["settings.conversion.remove"]()}
+										{m["settings.conversion.metadata.remove"]()}
 									</button>
 								</div>
 							</div>
@@ -250,11 +250,11 @@
 						<div class="flex flex-col gap-4">
 							<div class="flex flex-col gap-2">
 								<p class="text-base font-bold">
-									{m["settings.conversion.quality"]()}
+									{m["settings.conversion.quality.label"]()}
 								</p>
 								<p class="text-sm text-muted font-normal">
 									{m[
-										"settings.conversion.quality_description"
+										"settings.conversion.quality.description"
 									]()}
 								</p>
 							</div>
@@ -262,7 +262,7 @@
 								<div class="flex flex-col gap-2">
 									<p class="text-sm font-bold">
 										{m[
-											"settings.conversion.quality_images"
+											"settings.conversion.quality.images"
 										]()}
 									</p>
 									<FancyInput
@@ -279,7 +279,7 @@
 								<div class="flex flex-col gap-2">
 									<p class="text-sm font-bold">
 										{m[
-											"settings.conversion.quality_audio"
+											"settings.conversion.quality.audio"
 										]()}
 									</p>
 									<Dropdown
