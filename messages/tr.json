@@ -10,7 +10,8 @@
 	"footer": {
 		"copyright": "© {year} VERT.",
 		"source_code": "Kaynak kodu",
-		"discord_server": "Discord sunucusu"
+		"discord_server": "Discord sunucusu",
+		"privacy_policy": "Gizlilik politikası"
 	},
 	"upload": {
 		"title": "Sevdiğiniz dosya dönüştürücü.",
@@ -46,6 +47,18 @@
 		}
 	},
 	"convert": {
+		"archive_file": {
+			"extract": "Arşivi çıkar",
+			"extracting": "Arşiv algılandı: {filename}",
+			"extracted": "{filename} arşivinden {extract_count} dosya çıkarıldı. {ignore_count} öğe yoksayıldı.",
+			"detected": "{filename} içinde {type} dosyası algılandı.",
+			"audio": "ses",
+			"video": "video",
+			"doc": "belge",
+			"image": "görsel",
+			"extract_error": "{filename} çıkarılırken hata oluştu: {error}"
+		},
+		"large_file_warning": "Tarayıcı / cihaz kısıtlamaları nedeniyle, bu dosya için videodan sese dönüştürme devre dışı bırakıldı çünkü {limit}GB'dan daha büyük. Bu boyuttaki dosyalar için daha az kısıtlamaya sahip olan Firefox veya Safari kullanmanızı öneririz.",
 		"external_warning": {
 			"title": "Harici sunucu uyarısı",
 			"text": "Video formatına dönüştürmeyi seçerseniz, bu dosyalar dönüştürülmek üzere harici bir sunucuya yüklenecektir. Devam etmek istiyor musunuz?",
@@ -64,7 +77,9 @@
 			"video": "Video",
 			"doc": "Belge",
 			"image": "Görsel",
-			"placeholder": "Format ara"
+			"placeholder": "Format ara",
+			"no_formats": "Kullanılabilir format yok",
+			"no_results": "Aramanızla eşleşen format bulunamadı"
 		},
 		"tooltips": {
 			"unknown_file": "Bilinmeyen dosya türü",
@@ -78,7 +93,23 @@
 		"errors": {
 			"cant_convert": "Bu dosyayı dönüştüremiyoruz.",
 			"vertd_server": "Ne yapıyorsun..? vertd sunucusunu çalıştırman gerekiyordu!",
+			"vertd_generic_view": "Hata ayrıntılarını görüntüle",
+			"vertd_generic_body": "Videonuz dönüştürülmeye çalışılırken bir hata oluştu. Hatayı düzeltmeye yardımcı olmak için videoyu geliştiricilere göndermek ister misiniz? Yalnızca video dosyası gönderilecektir. Hiçbir kimlik bilgisi yüklenmeyecektir.",
+			"vertd_generic_title": "Video dönüştürme hatası",
+			"vertd_generic_yes": "Videoyu gönder",
+			"vertd_generic_no": "Gönderme",
+			"vertd_failed_to_keep": "Video sunucuda tutulamadı: {error}",
+			"vertd_details": "Hata ayrıntılarını görüntüle",
+			"vertd_details_body": "Gönder'e basarsanız, incelememiz için bize bildirilen hata kaydıyla birlikte <b>videonuz da eklenecektir</b>. Aşağıdaki bilgiler otomatik olarak aldığımız hata kaydıdır:",
+			"vertd_details_footer": "Bu bilgiler yalnızca sorun giderme amacıyla kullanılacak ve asla paylaşılmayacaktır. Daha fazla ayrıntı için [privacy_link]gizlilik politikamıza[/privacy_link] göz atın.",
+			"vertd_details_job_id": "<b>İş ID:</b> {jobId}",
+			"vertd_details_from": "<b>Kaynak format:</b> {from}",
+			"vertd_details_to": "<b>Hedef format:</b> {to}",
+			"vertd_details_error_message": "<b>Hata mesajı:</b> [view_link]Hata kayıtlarını görüntüle[/view_link]",
+			"vertd_details_close": "Kapat",
+			"vertd_ratelimit": "'{filename}' videonuz birkaç kez dönüştürülemedi. Sunucu aşırı yüklenmesini önlemek için, bu dosya için daha fazla dönüştürme denemesi geçici olarak engellendi. Lütfen daha sonra tekrar deneyin.",
 			"unsupported_format": "Yalnızca görüntü, video, ses ve belge dosyaları desteklenir.",
+			"format_output_only": "Bu format şu anda yalnızca çıktı (dönüştürülen format) olarak kullanılabilir, girdi olarak kullanılamaz.",
 			"vertd_not_found": "Video dönüştürme işlemini başlatmak için vertd örneği bulunamadı. Sunucu URL’sinin doğru ayarlandığından emin misiniz?",
 			"worker_downloading": "{type} dönüştürme işlemi şu anda başlatılıyor, lütfen birkaç saniye bekleyin.",
 			"worker_error": "{type} dönüştürme işlemi başlatılırken bir hata oluştu, lütfen daha sonra tekrar deneyin.",
@@ -111,6 +142,8 @@
 			"filename_description": "Bu ayar, <b>dosya uzantısını etkilemeden</b> indirilen dosyanın adını belirleyecektir. Aşağıdaki şablonları formata ekleyebilirsiniz, bunlar ilgili bilgilerle değiştirilecektir: orijinal dosya adı için <b>%name%</b>, orijinal dosya uzantısı için <b>%extension%</b> ve dosyanın dönüştürüldüğü tarihin tarih için <b>%date%</b>.",
 			"placeholder": "VERT_%name%",
 			"default_format": "Varsayılan dönüştürme formatı",
+			"default_format_enable": "Etkinleştir",
+			"default_format_disable": "Devre dışı bırak",
 			"default_format_description": "Bu ayar, bu dosya türünde bir dosya yüklediğinizde seçili olan varsayılan formatı değiştirecektir.",
 			"default_format_image": "Görsel",
 			"default_format_video": "Video",
@@ -166,7 +199,16 @@
 			"loading_cache": "Yükleniyor...",
 			"total_size": "Toplam Boyut",
 			"files_cached_label": "Önbelleğe Alınan Dosyalar",
-			"cache_cleared": "Önbellek başarıyla temizlendi."
+			"cache_cleared": "Önbellek başarıyla temizlendi!",
+			"cache_clear_error": "Önbellek temizlenemedi.",
+			"site_data_title": "Site verileri yönetimi",
+			"site_data_description": "Ayarlar ve önbelleğe alınmış dosyalar dahil olmak üzere tüm site verilerini temizleyerek VERT'i varsayılan durumuna sıfırlayın ve sayfayı yeniden yükleyin.",
+			"clear_all_data": "Tüm site verilerini temizle",
+			"clear_all_data_confirm_title": "Tüm site verileri temizlensin mi?",
+			"clear_all_data_confirm": "Bu işlem tüm ayarları ve önbelleği sıfırlayacak, ardından sayfayı yeniden yükleyecektir. Bu işlem geri alınamaz.",
+			"clear_all_data_cancel": "İptal",
+			"all_data_cleared": "Tüm site verileri temizlendi! Sayfa yeniden yükleniyor...",
+			"all_data_clear_error": "Site verileri temizlenemedi."
 		},
 		"language": {
 			"title": "Dil",
@@ -197,11 +239,13 @@
 			"monthly": "Aylık",
 			"custom": "Özel",
 			"pay_now": "Ödeme yap",
-			"donate_amount": "${amount} USD Bağış Yap",
+			"donate_amount": "{amount} USD Bağış Yap",
 			"thank_you": "Bağışınız için teşekkür ederiz!",
 			"payment_failed": "Ödeme başarısız: {message}{period} Kartınızdan para çekilmedi.",
 			"donation_error": "Bağışınız işlenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
-			"payment_error": "Ödeme bilgileri alınırken hata oluştu. Lütfen daha sonra tekrar deneyin."
+			"payment_error": "Ödeme bilgileri alınırken hata oluştu. Lütfen daha sonra tekrar deneyin.",
+			"donation_notice_official": "Bu bağışlarınız, resmi VERT uygulamasına (vert.sh) gider ve projenin gelişimini desteklemeye yardımcı olur.",
+			"donation_notice_unofficial": "Bu bağışlarınız, kullanmakta olduğunu VERT uygulamasının sahibine gider. Resmi VERT geliştiricilerini desteklemek istiyorsanız lütfen [official_link]vert.sh[/official_link] adresini ziyaret edin."
 		},
 		"credits": {
 			"title": "Katkıda bulunanlar",
@@ -231,8 +275,51 @@
 			"cancel": "{file} için dönüştürme işlemi iptal edilirken hata oluştu: {message}",
 			"magick": "Magick işlemi sırasında hata oluştu, görsel dönüştürme işlemi beklendiği gibi çalışmayabilir.",
 			"ffmpeg": "ffmpeg yüklenirken hata oluştu, bazı özellikler çalışmayabilir.",
+			"pandoc": "Pandoc işlemi sırasında hata oluştu, belge dönüştürme işlemi beklendiği gibi çalışmayabilir.",
 			"no_audio": "Ses akışı bulunamadı.",
-			"invalid_rate": "Geçersiz örnekleme hızı: {rate}Hz"
+			"invalid_rate": "Geçersiz örnekleme hızı: {rate}Hz",
+			"file_too_large": "Bu dosya {limit}GB olan tarayıcı / cihaz sınırını aşıyor. Bu büyük dosyayı dönüştürmek için genellikle daha yüksek sınırlara sahip olan Firefox veya Safari'yi deneyin."
 		}
+	},
+	"privacy": {
+		"title": "Gizlilik Politikası",
+		"summary": {
+			"title": "Özet",
+			"description": "VERT'in gizlilik politikası oldukça basittir: hakkınızda hiçbir veri toplamıyoruz veya saklamıyoruz. Çerez veya takipçi kullanmıyoruz, analizler tamamen gizlidir ve tüm dönüştürmeler (videolar hariç) yerel olarak tarayıcınızda gerçekleşir. Videolar, sorun giderme amacıyla saklanması için tarafınızca açıkça izin verilmedikçe, indirildikten sonra veya bir saat içinde silinir; yalnızca sorun giderme amacıyla kullanılacaktır. VERT, web sitesini ve vertd'yi (video dönüştürme için) barındırmak için kendi bünyesinde bir Coolify uygulaması ve tamamen anonim ve toplu analizler için bir Plausible uygulaması barındırır. Bağışları işlemek için Stripe kullanıyoruz, bu da dolandırıcılığı önlemek için kullanılan bazı verileri toplayabilir.<br/><br/>Not: Bu durum yalnızca [vert_link]vert.sh[/vert_link] adresindeki resmi VERT uygulaması için geçerli olabilir; üçüncü taraf uygulamalar verilerinizi farklı şekilde işleyebilir."
+		},
+		"conversions": {
+			"title": "Dönüştürmeler",
+			"description": "Çoğu dönüştürme (görüntüler, belgeler, ses) ilgili araçların (örn. ImageMagick, Pandoc, FFmpeg) WebAssembly sürümleri kullanılarak tamamen yerel olarak cihazınızda gerçekleşir. Bu, dosyalarınızın asla cihazınızdan çıkmadığı ve onlara asla erişemeyeceğimiz anlamına gelir.<br/><br/>Video dönüştürmeleri sunucularımızda gerçekleştirilir çünkü daha fazla işlem gücü gerektirirler ve henüz tarayıcıda yerel olarak hızlıca yapılması mümkün değildir. VERT ile dönüştürdüğünüz videolar, sorun giderme amacıyla saklamamız için açıkça izin vermediğiniz sürece indirildikten sonra silinir (indirilmeyen dosyalar, dönüştürme sonrası bir saatlik sürenin ardından silinir)."
+		},
+		"donations": {
+			"title": "Bağışlar",
+			"description": "Bağış toplamak için [about_link]hakkımızda[/about_link] sayfasında Stripe kullanıyoruz. Stripe, [gelişmiş dolandırıcılık tespiti hakkındaki belgelerinde] (https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) açıklandığı gibi dolandırıcılığı önlemek için ödeme ve cihaz hakkında belirli bilgiler toplayabilir. Stripe'a yönelik harici ağ istekleri, yalnızca ödeme yapılırken gerçekleşir."
+		},
+		"conversion_errors": {
+			"title": "Dönüştürme Hataları",
+			"description": "Bir video dönüştürme işlemi başarısız olduğunda, sorunu teşhis etmemize yardımcı olması için bazı anonim veriler toplayabiliriz. Bu veriler şunları içerebilir:",
+			"list_job_id": "Anonimleştirilmiş dosya adı olan iş ID'si",
+			"list_format_from": "Dönüştürdüğünüz kaynak format",
+			"list_format_to": "Dönüştürdüğünüz hedef format",
+			"list_stderr": "Dönüştürme işleminizin FFmpeg stderr çıktısı (hata mesajı)",
+			"list_video": "Gerçek video dosyası (açıkça izin verilmişse)",
+			"footer": "bu bilgiler yalnızca dönüştürme sorunlarını teşhis etmek amacıyla kullanılır. Gerçek video dosyası yalnızca bize izin verirseniz toplanır ve bu dosya yalnızca sorun giderme amacıyla kullanılır."
+		},
+		"analytics": {
+			"title": "Analitik",
+			"description": "Tamamen anonim ve toplu analizler için kendi bünyemizde barındırdığımız bir Plausible uygulaması kullanıyoruz. Plausible çerez kullanmaz ve tüm ana gizlilik düzenlemelerine (GDPR/CCPA/PECR) uygundur. [settings_link]ayarlar[/settings_link] içindeki \"Gizlilik ve veriler\" bölümünden analizlerden çıkabilir ve Plausible'ın gizlilik uygulamaları hakkında daha fazla bilgiyi [plausible_link]buradan[/plausible_link] okuyabilirsiniz."
+		},
+		"local_storage": {
+			"title": "Yerel Depolama",
+			"description": "Ayarlarınızı kaydetmek için tarayıcınızın yerel depolama alanını (local storage) ve tekrarlanan GitHub API isteklerini azaltmak için \"Hakkımızda\" bölümündeki GitHub katkıda bulunanlar listesini geçici olarak depolamak için tarayıcınızın oturum depolama alanını (session storage) kullanıyoruz. Hiçbir kişisel veri saklanmaz veya iletilmez.<br/><br/>Kullandığımız dönüştürme araçlarının (FFmpeg, ImageMagick, Pandoc) WebAssembly sürümleri de web sitesini ilk ziyaret ettiğinizde tarayıcınızda yerel olarak saklanır, böylece her ziyarette bunları yeniden indirmeniz gerekmez. Hiçbir kişisel veri saklanmaz veya iletilmez. Bu verileri istediğiniz zaman [settings_link]ayarlar[/settings_link] içindeki \"Gizlilik ve veriler\" bölümünden görüntüleyebilir veya silebilirsiniz."
+		},
+		"contact": {
+			"title": "İletişim",
+			"description": "Sorularınız için bize e-posta gönderin: [email_link]hello@vert.sh[/email_link]. Üçüncü taraf bir VERT uygulaması kullanıyorsanız, lütfen bunun yerine o uygulamanın barındırıcısıyla iletişime geçin."
+		},
+		"last_updated": "Son güncelleme: 29 Ekim 2025"
+	},
+	"toast": {
+		"insecure_context": "VERT'i güvenli olmayan bir bağlantıda ziyaret ediyorsunuz (örneğin HTTPS yerine HTTP üzerinden erişim). Bazı özellikler beklendiği gibi çalışmayabilir."
 	}
 }
