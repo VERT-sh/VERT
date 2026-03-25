@@ -27,6 +27,7 @@
 	let button = $state<HTMLButtonElement>();
 	let clickHandler: ((e: MouseEvent) => void) | null = null;
 	let resizeHandler: (() => void) | null = null;
+	let scrollHandler: (() => void) | null = null;
 
 	const getValue = (option: string | { value: string; label: string }) =>
 		typeof option === "string" ? option : option.value;
@@ -80,7 +81,12 @@
 	$effect(() => {
 		if (open && menuElement && button) {
 			resizeHandler = updateMenuPosition;
+			scrollHandler = updateMenuPosition;
 			window.addEventListener("resize", resizeHandler);
+			window.addEventListener("scroll", scrollHandler, {
+				capture: true,
+				passive: true,
+			});
 			document.body.appendChild(menuElement);
 			menuElement.style.position = "fixed";
 			updateMenuPosition();
@@ -89,6 +95,8 @@
 			return () => {
 				if (resizeHandler)
 					window.removeEventListener("resize", resizeHandler);
+				if (scrollHandler)
+					window.removeEventListener("scroll", scrollHandler, true);
 				if (menuElement?.parentNode === document.body)
 					document.body.removeChild(menuElement);
 			};
