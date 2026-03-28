@@ -239,14 +239,19 @@ const processSettings = (settings: ConversionSettings): ConversionSettings => {
 	return newSettings;
 };
 
-const uploadFile = async (file: VertFile): Promise<UploadResponse> => {
+interface UploadTask {
+	promise: Promise<UploadResponse>;
+	abort: () => void;
+}
+
+const createUploadTask = async (file: VertFile): Promise<UploadTask> => {
 	const apiUrl = await VertdInstance.instance.url();
 	const formData = new FormData();
 	formData.append("file", file.file, file.name);
 	const xhr = new XMLHttpRequest();
 	xhr.open("POST", `${apiUrl}/api/upload`, true);
 
-	return new Promise((resolve, reject) => {
+	const promise = new Promise<UploadResponse>((resolve, reject) => {
 		xhr.upload.addEventListener("progress", (e) => {
 			console.log(e);
 			if (e.lengthComputable) {
@@ -276,9 +281,18 @@ const uploadFile = async (file: VertFile): Promise<UploadResponse> => {
 			reject(xhr.statusText);
 		};
 
+		xhr.onabort = () => {
+			reject(new Error("Conversion cancelled"));
+		};
+
 		xhr.send(formData);
 		console.log("sent!");
 	});
+
+	return {
+		promise,
+		abort: () => xhr.abort(),
+	};
 };
 
 const downloadFile = async (url: string, file: VertFile): Promise<Blob> => {
@@ -325,6 +339,10 @@ export class VertdConverter extends Converter {
 			token: string;
 		}
 	>();
+
+	private activeUploads = new Map<string, UploadTask>();
+
+	private cancelledConversions = new Set<string>();
 
 	public supportedFormats = [
 		new FormatInfo("mp4", true, true),
@@ -784,7 +802,18 @@ export class VertdConverter extends Converter {
 			);
 		}
 
-		const uploadRes = await uploadFile(fileUpload);
+		const uploadTask = await createUploadTask(fileUpload);
+		this.activeUploads.set(input.id, uploadTask);
+
+		let uploadRes: UploadResponse;
+		try {
+			uploadRes = await uploadTask.promise;
+		} finally {
+			this.activeUploads.delete(input.id);
+		}
+
+		if (this.cancelledConversions.has(input.id))
+			throw new Error("Conversion cancelled");
 
 		return new Promise((resolve, reject) => {
 			let settled = false;
@@ -805,6 +834,8 @@ export class VertdConverter extends Converter {
 				if (settled) return;
 				settled = true;
 				clearTimeout(connectTimeout);
+				this.cancelledConversions.delete(input.id);
+				this.activeUploads.delete(input.id);
 				this.activeConversions.delete(input.id);
 				if (
 					ws.readyState === WebSocket.CONNECTING ||
@@ -819,6 +850,8 @@ export class VertdConverter extends Converter {
 				if (settled) return;
 				settled = true;
 				clearTimeout(connectTimeout);
+				this.cancelledConversions.delete(input.id);
+				this.activeUploads.delete(input.id);
 				this.activeConversions.delete(input.id);
 				resolve(value);
 			};
@@ -830,6 +863,11 @@ export class VertdConverter extends Converter {
 			});
 
 			ws.onopen = () => {
+				if (this.cancelledConversions.has(input.id)) {
+					rejectConversion(new Error("Conversion cancelled"));
+					return;
+				}
+
 				clearTimeout(connectTimeout);
 				this.log(
 					`opened ws connection to vertd for file ${input.name}`,
@@ -855,6 +893,11 @@ export class VertdConverter extends Converter {
 
 			ws.onclose = (event) => {
 				if (settled) return;
+				if (this.cancelledConversions.has(input.id)) {
+					rejectConversion(new Error("Conversion cancelled"));
+					return;
+				}
+
 				this.error(
 					`ws closed unexpectedly for file ${input.name} (code: ${event.code})`,
 				);
@@ -968,9 +1011,19 @@ export class VertdConverter extends Converter {
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
+		this.cancelledConversions.add(input.id);
+
+		const activeUpload = this.activeUploads.get(input.id);
+		if (activeUpload) {
+			this.log(`cancelling upload for file ${input.name}`);
+			activeUpload.abort();
+			this.activeUploads.delete(input.id);
+		}
+
 		const activeConversion = this.activeConversions.get(input.id);
 		if (!activeConversion) {
-			this.error(`no active conversion found for file ${input.name}`);
+			if (!activeUpload)
+				this.error(`no active conversion found for file ${input.name}`);
 			return;
 		}
 
