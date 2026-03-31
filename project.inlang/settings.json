@@ -2,7 +2,7 @@
 	"$schema": "https://inlang.com/schema/project-settings",
 	"baseLocale": "en",
 	"locales": [
-    "vi",
+		"vi",
 		"en",
 		"es",
 		"fr",
