@@ -4,7 +4,7 @@
 		"upload": "Tải lên",
 		"convert": "Chuyển đổi",
 		"settings": "Cài đặt",
-		"about": "About",
+		"about": "Về VERT",
 		"toggle_theme": "Toggle theme"
 	},
 	"footer": {
@@ -39,12 +39,12 @@
 			},
 			"supported_formats": "Hỗ trợ các định dạng:"
 		},
-    "tooltip": {
-      "partial_support": "Định dạng này chỉ hỗ trợ chuyển đổi ở đầu {direction}.",
-      "direction_input": "vào (từ)",
-      "direction_output": "ra (sang)",
-      "video_server_processing": "Theo mặc định, video sẽ được tải lên server để xử lý. Xem cách thiết lập xử lý ngay tại máy ở đây."
-    }
+		"tooltip": {
+			"partial_support": "Định dạng này chỉ hỗ trợ chuyển đổi ở đầu {direction}.",
+			"direction_input": "vào (từ)",
+			"direction_output": "ra (sang)",
+			"video_server_processing": "Theo mặc định, video sẽ được tải lên server để xử lý. Xem cách thiết lập xử lý ngay tại máy ở đây."
+		}
 	},
 	"convert": {
 		"archive_file": {
@@ -91,235 +91,235 @@
 			"download_file": "Tải xuống"
 		},
 		"errors": {
-			"cant_convert": "We can't convert this file.",
-			"vertd_server": "what are you doing..? you're supposed to run the vertd server!",
-			"vertd_generic_view": "View error details",
-			"vertd_generic_body": "An error occurred whilst whilst trying convert your video. Would you like to submit this video to the developers to help fix this bug? Only your video file will be sent. No identifiers will be uploaded.",
-			"vertd_generic_title": "Video conversion error",
-			"vertd_generic_yes": "Submit video",
-			"vertd_generic_no": "Don't submit",
-			"vertd_failed_to_keep": "Failed to keep the video on the server: {error}",
-			"vertd_details": "View error details",
-			"vertd_details_body": "If you press submit, <b>your video will also be attached</b> alongside the error log which is always reported to us for review. The following information is the log that we automatically receive:",
-			"vertd_details_footer": "This information will only be used for troubleshooting purposes and will never be shared. View our [privacy_link]privacy policy[/privacy_link] for more details.",
-			"vertd_details_job_id": "<b>Job ID:</b> {jobId}",
-			"vertd_details_from": "<b>From format:</b> {from}",
-			"vertd_details_to": "<b>To format:</b> {to}",
-			"vertd_details_error_message": "<b>Error message:</b> [view_link]View error logs[/view_link]",
-			"vertd_details_close": "Close",
-			"vertd_ratelimit": "Your video, '{filename}', has failed to convert a few times. To prevent server overload, further conversion attempts for this file have been temporarily blocked. Please try again later.",
-			"unsupported_format": "Only image, video, audio, and document files are supported",
-			"format_output_only": "This format can currently only be used as output (converted to), not as input.",
-			"vertd_not_found": "Could not find the vertd instance to start video conversion. Are you sure the instance URL is set correctly?",
-			"worker_downloading": "The {type} converter is currently being initialized, please wait a few moments.",
-			"worker_error": "The {type} converter had an error during initialization, please try again later.",
-			"worker_timeout": "The {type} converter is taking longer than expected to initialize, please wait a few more moments or refresh the page.",
-			"audio": "audio",
-			"doc": "document",
-			"image": "image"
+			"cant_convert": "Không thể chuyển đổi tệp này.",
+			"vertd_server": "ủa alo đang làm cái gì vậy..? Bạn phải chạy server VERT trước chứ!",
+			"vertd_generic_view": "Xem chi tiết lỗi",
+			"vertd_generic_body": "E rằng là đã có lỗi xảy ra trong lúc chuyển đổi video của bạn. Bạn có muốn gửi video này cho chúng mình fix không? Đừng lo về rò rỉ thông tin mật nhé, chúng mình chỉ nhận video bạn gửi thôi.",
+			"vertd_generic_title": "Có lỗi xảy ra trong lúc chuyển đổi video của bạn",
+			"vertd_generic_yes": "Gửi video",
+			"vertd_generic_no": "Đừng gửi",
+			"vertd_failed_to_keep": "Không thể lưu video lên hệ thống: {error}",
+			"vertd_details": "Xem chi tiết lỗi",
+			"vertd_details_body": "Nếu bạn ấn gửi, <b>video của bạn sẽ được gửi</b> cùng với báo cáo chi tiết lỗi đến chúng tôi để xem qua. Những thông tin mặc định chúng tôi sẽ được nhận trong bản báo cáo:",
+			"vertd_details_footer": "Thông tin này chỉ được sử dụng cho một mục đích duy nhất là sửa lỗi và cải thiện dịch vụ. Để biết thêm chi tiết, vui lòng xem [privacy_link]điều khoản bảo mật[/privacy_link] của chúng tôi.",
+			"vertd_details_job_id": "<b>Mã việc:</b> {jobId}",
+			"vertd_details_from": "<b>Chuyển từ:</b> {from}",
+			"vertd_details_to": "<b>sang:</b> {to}",
+			"vertd_details_error_message": "<b>Lỗi:</b> [view_link]Xem chi tiết lỗi[/view_link]",
+			"vertd_details_close": "Đóng",
+			"vertd_ratelimit": "Video của bạn, '{filename}', không thể chuyển đổi sau nhiều lần thử. Để tránh hệ thống quá tải, tính năng chuyển đổi cho file này tạm thời vô hiệu hóa. Xin thử lại sau ít phút.",
+			"unsupported_format": "Chỉ hỗ trợ hình ảnh, video, âm thanh, and tài liệu",
+			"format_output_only": "Hiện tại định dạng này chỉ hỗ trợ xuất file (chuyển đổi sang), không hỗ trợ làm file đầu vào.",
+			"vertd_not_found": "Lỗi kết nối với hệ thống vertd để chuyển đổi video. Hãy đảm bảo rằng đường dẫn (URL) bạn thiết lập đã đúng",
+			"worker_downloading": "Đang chuẩn bị công cụ chuyển cho loại tệp: {type}, bạn hãy chờ trong giây lát nhé.",
+			"worker_error": "Đã có lỗi trong lúc chuẩn bị công cụ chuyển cho loại tệp: {type}, vui lòng thử lại sau ít phút.",
+			"worker_timeout": "Có vẻ quá trình chuẩn bị chuyển đổi cho loại tệp {type} lâu hơn dự kiến, bạn vui lòng đợi trong giây lát hoặc truy cập lại trang.",
+			"audio": "âm thanh",
+			"doc": "tài liệu",
+			"image": "hình ảnh"
 		}
 	},
 	"settings": {
-		"title": "Settings",
+		"title": "Cài đặt",
 		"errors": {
-			"save_failed": "Failed to save settings!"
+			"save_failed": "Đã có lỗi trong lưu cài đặt!"
 		},
 		"appearance": {
-			"title": "Appearance",
-			"brightness_theme": "Brightness theme",
-			"brightness_description": "Want a sunny flash-bang, or a quiet lonely night?",
-			"light": "Light",
-			"dark": "Dark",
-			"effect_settings": "Effect settings",
-			"effect_description": "Would you like fancy effects, or a more static experience?",
-			"enable": "Enable",
-			"disable": "Disable"
+			"title": "Giao diện",
+			"brightness_theme": "Tone màu",
+			"brightness_description": "Sáng như hào quang chói lọi, hay tối như tiền đồ chị Dậu?",
+			"light": "Sáng",
+			"dark": "Tối",
+			"effect_settings": "Cài đặt hiệu ứng",
+			"effect_description": "Hệ hướng nội tĩnh lặng, hay hướng ngoại thích màu mè hoa lá hẹ?",
+			"enable": "Hướng ngoại (màu mè)",
+			"disable": "Hướng nội (tối giản)"
 		},
 		"conversion": {
-			"title": "Conversion",
-			"advanced_settings": "Advanced settings",
-			"filename_format": "File name format",
-			"filename_description": "This will determine the name of the file on download, <b>not including the file extension.</b> You can put these following templates in the format, which will be replaced with the relevant information: <b>%name%</b> for the original file name, <b>%extension%</b> for the original file extension, and <b>%date%</b> for a date string of when the file was converted.",
+			"title": "Chuyển đổi",
+			"advanced_settings": "Cài đặt nâng cao",
+			"filename_format": "Định dạng tên file",
+			"filename_description": "Cài đặt này áp dụng cho tên tệp, <b>không bao gồm phần mở rộng (đuôi file)</b>. Bạn có thể dùng các mẫu sau để tự động điền thông tin: %name% là tên gốc, %extension% là đuôi file gốc, và %date% là ngày giờ lúc bạn chuyển đổi file.",
 			"placeholder": "VERT_%name%",
-			"default_format": "Default conversion format",
-			"default_format_enable": "Enable",
-			"default_format_disable": "Disable",
-			"default_format_description": "This will change the default format selected when you upload a file of this file type.",
-			"default_format_image": "Images",
-			"default_format_video": "Videos",
-			"default_format_audio": "Audio",
-			"default_format_document": "Documents",
-			"metadata": "File metadata",
-			"metadata_description": "This changes whether any metadata (EXIF, song info, etc.) on the original file is preserved in converted files.",
-			"keep": "Keep",
-			"remove": "Remove",
-			"quality": "Conversion quality",
-			"quality_description": "This changes the default output quality of the converted files (in its category). Higher values may result in longer conversion times and file size.",
-			"quality_video": "This changes the default output quality of the converted video files. Higher values may result in longer conversion times and file size.",
-			"quality_audio": "Audio (kbps)",
-			"quality_images": "Image (%)",
-			"rate": "Sample rate (Hz)"
+			"default_format": "Định dạng mặc định",
+			"default_format_enable": "Bật",
+			"default_format_disable": "Tắt",
+			"default_format_description": "Điều này sẽ thay đổi định dạng mặc định để chuyển đổi khi bạn gửi một tệp thuộc loại này.",
+			"default_format_image": "Hình ảnh",
+			"default_format_video": "Video",
+			"default_format_audio": "Âm thanh",
+			"default_format_document": "Tài liệu",
+			"metadata": "Thông tin tệp (Metadata)",
+			"metadata_description": "Tùy chọn này xác định việc giữ lại hay xóa bỏ các thông tin ẩn (như dữ liệu ảnh EXIF, thông tin bài hát...) từ tệp gốc sang tệp mới.",
+			"keep": "Giữ lại",
+			"remove": "Xóa bỏ",
+			"quality": "Chất lượng chuyển đổi",
+			"quality_description": "Thay đổi chất lượng đầu ra mặc định cho tệp. Chỉ số càng cao thì tệp càng nét, nhưng thời gian xử lý sẽ lâu hơn và dung lượng file sẽ lớn hơn.",
+			"quality_video": "Thay đổi chất lượng mặc định cho video đầu ra. Chỉ số cao giúp video rõ nét hơn nhưng sẽ tốn thời gian xử lý và tăng dung lượng tệp.",
+			"quality_audio": "Âm thanh (kbps)",
+			"quality_images": "Hình ảnh (%)",
+			"rate": "Tần số lấy mẫu (Hz)"
 		},
 		"vertd": {
-			"title": "Video conversion",
-			"status": "status:",
-			"loading": "loading...",
-			"available": "available, commit id {commitId}",
-			"unavailable": "unavailable (is the url right?)",
-			"description": "The <code>vertd</code> project is a server wrapper for FFmpeg. This allows you to convert videos through the convenience of VERT's web interface, while still being able to harness the power of your GPU to do it as quickly as possible.",
-			"hosting_info": "We host a public instance for your convenience, but it is quite easy to host your own on your PC or server if you know what you are doing. You can download the server binaries [vertd_link]here[/vertd_link] - the process of setting this up will become easier in the future, so stay tuned!",
-			"instance": "Instance",
-			"url_placeholder": "Example: http://localhost:24153",
-			"conversion_speed": "Conversion speed",
-			"speed_description": "This describes the tradeoff between speed and quality. Faster speeds will result in lower quality, but will get the job done quicker.",
+			"title": "Chuyển đổi Video",
+			"status": "trạng thái:",
+			"loading": "đang tải...",
+			"available": "sẵn sàng, mã commit {commitId}",
+			"unavailable": "không khả dụng (kiểm tra lại URL nhé?)",
+			"description": "Dự án <code>vertd</code> đóng vai trò là trình chủ (server wrapper) cho FFmpeg. Điều này giúp bạn chuyển đổi video thuận tiện ngay trên giao diện web của VERT, mà vẫn tận dụng được sức mạnh GPU để xử lý nhanh nhất có thể.",
+			"hosting_info": "Chúng mình có sẵn một máy chủ công khai để bạn dùng ngay cho tiện, nhưng nếu bạn 'có nghề' thì việc tự chạy server riêng trên máy tính cá nhân cũng rất đơn giản. Bạn có thể tải bộ cài server [vertd_link]tại đây[/vertd_link] - quy trình cài đặt sẽ sớm được tối ưu hơn trong tương lai, cùng chờ xem nhé!",
+			"instance": "Máy chủ (Instance)",
+			"url_placeholder": "Ví dụ: http://localhost:24153",
+			"conversion_speed": "Tốc độ chuyển đổi",
+			"speed_description": "Đây là sự đánh đổi giữa tốc độ và chất lượng. Tốc độ càng nhanh thì chất lượng sẽ giảm nhẹ, nhưng bù lại bạn sẽ xong việc sớm hơn.",
 			"speeds": {
-				"very_slow": "Very Slow",
-				"slower": "Slower",
-				"slow": "Slow",
-				"medium": "Medium",
-				"fast": "Fast",
-				"ultra_fast": "Ultra Fast"
+				"very_slow": "Rất chậm",
+				"slower": "Chậm hơn",
+				"slow": "Chậm",
+				"medium": "Trung bình",
+				"fast": "Nhanh",
+				"ultra_fast": "Siêu tốc"
 			},
-			"auto_instance": "Auto (recommended)",
-			"eu_instance": "Falkenstein, Germany",
-			"us_instance": "Washington, USA",
-			"custom_instance": "Custom"
+			"auto_instance": "Tự động (khuyên dùng)",
+			"eu_instance": "Falkenstein, Đức",
+			"us_instance": "Washington, Hoa Kỳ",
+			"custom_instance": "Tùy chỉnh"
 		},
 		"privacy": {
-			"title": "Privacy & data",
-			"plausible_title": "Plausible analytics",
-			"plausible_description": "We use [plausible_link]Plausible[/plausible_link], a privacy-focused analytics tool, to gather completely anonymous statistics. All data is anonymized and aggregated, and no identifiable information is ever sent or stored. You can view the analytics [analytics_link]here[/analytics_link] and choose to opt out below.",
-			"opt_in": "Opt-in",
-			"opt_out": "Opt-out",
-			"cache_title": "Cache management",
-			"cache_description": "We cache the converter files on your browser so you don't have to re-download them every time, improving performance and reducing data usage.",
-			"refresh_cache": "Refresh cache",
-			"clear_cache": "Clear cache",
-			"files_cached": "{size} ({count} files)",
-			"loading_cache": "Loading...",
-			"total_size": "Total Size",
-			"files_cached_label": "Files Cached",
-			"cache_cleared": "Cache cleared successfully!",
-			"cache_clear_error": "Failed to clear cache.",
-			"site_data_title": "Site data management",
-			"site_data_description": "Clear all site data including settings and cached files, resetting VERT to its default state and reloading the page.",
-			"clear_all_data": "Clear all site data",
-			"clear_all_data_confirm_title": "Clear all site data?",
-			"clear_all_data_confirm": "This will reset all settings & cache, then reload the page. This action cannot be undone.",
-			"clear_all_data_cancel": "Cancel",
-			"all_data_cleared": "All site data cleared! Reloading page...",
-			"all_data_clear_error": "Failed to clear all site data."
+			"title": "Quyền riêng tư & Dữ liệu",
+			"plausible_title": "Phân tích Plausible",
+			"plausible_description": "Chúng mình sử dụng [plausible_link]Plausible[/plausible_link], một công cụ phân tích chú trọng quyền riêng tư, để thu thập số liệu thống kê hoàn toàn ẩn danh. Mọi dữ liệu đều được ẩn danh hóa và tổng hợp lại, cam kết không gửi hay lưu trữ bất kỳ thông tin định danh cá nhân nào. Bạn có thể xem bảng phân tích [analytics_link]tại đây[/analytics_link] và tùy chọn tham gia hoặc từ chối ở bên dưới.",
+			"opt_in": "Tham gia",
+			"opt_out": "Từ chối",
+			"cache_title": "Quản lý bộ nhớ đệm (Cache)",
+			"cache_description": "Các tệp tin chuyển đổi sẽ được lưu tạm thời trên trình duyệt của bạn để tránh việc phải tải lại nhiều lần, giúp tăng hiệu suất và tiết kiệm dữ liệu.",
+			"refresh_cache": "Làm mới bộ nhớ đệm",
+			"clear_cache": "Xóa bộ nhớ đệm",
+			"files_cached": "{size} ({count} tệp)",
+			"loading_cache": "Đang tải...",
+			"total_size": "Tổng dung lượng",
+			"files_cached_label": "Số tệp đã lưu",
+			"cache_cleared": "Đã xóa bộ nhớ đệm thành công!",
+			"cache_clear_error": "Xóa bộ nhớ đệm thất bại.",
+			"site_data_title": "Quản lý dữ liệu trang web",
+			"site_data_description": "Xóa toàn bộ dữ liệu trang web bao gồm các cài đặt và tệp tin đã lưu, đưa VERT về trạng thái mặc định ban đầu và tải lại trang.",
+			"clear_all_data": "Xóa tất cả dữ liệu",
+			"clear_all_data_confirm_title": "Xóa toàn bộ dữ liệu trang web?",
+			"clear_all_data_confirm": "Hành động này sẽ đặt lại toàn bộ cài đặt & bộ nhớ đệm, sau đó tải lại trang. Bạn sẽ không thể hoàn tác thao tác này.",
+			"clear_all_data_cancel": "Hủy",
+			"all_data_cleared": "Đã xóa toàn bộ dữ liệu! Đang tải lại trang...",
+			"all_data_clear_error": "Xóa toàn bộ dữ liệu thất bại."
 		},
 		"language": {
-			"title": "Language",
-			"description": "Select your preferred language for the VERT interface."
+			"title": "Ngôn ngữ",
+			"description": "Hãy chọn ngôn ngữ bạn muốn sử dụng cho giao diện VERT."
 		}
 	},
 	"about": {
-		"title": "About",
+		"title": "Về chúng tôi",
 		"why": {
-			"title": "Why VERT?",
-			"description": "<b>File converters have always disappointed us.</b> They're ugly, riddled with ads, and most importantly; slow. We decided to solve this problem once and for all by making an alternative that solves all those problems, and more.<br/><br/>All non-video files are converted completely on-device; this means that there's no delay between sending and receiving the files from a server, and we never get to snoop on the files you convert.<br/><br/>Video files get uploaded to our lightning-fast RTX 4000 Ada server. Your videos stay on there for an hour if you do not convert them. If you do convert the file, the video will stay on the server for an hour, or until it is downloaded. The file will then be deleted from our server."
+			"title": "Vì sao VERT được ra đời?",
+			"description": "<b>Mấy cái trình chuyển đổi file từ trước đến giờ toàn làm tụi mình thất vọng.</b> Giao diện thì lỗ thời, quảng cáo thì ngập mặt, mà quan trọng nhất là chậm như rùa. Tụi mình quyết định dẹp hết đống rắc rối đó bằng một phiên bản \"ao chình\" hơn hẳn, cân đẹp mọi vấn đề trên luôn.<br/><br/>Tất cả các tệp không phải video đều được xử lý 100% ngay trên máy bạn; điều này có nghĩa là không có độ trễ khi chờ đợi server, và quan trọng nhất là tụi mình không bao giờ xâm phạm được file của bạn đâu, riêng tư tuyệt đối!<br/><br/>Riêng file video sẽ được đẩy lên dàn server chạy card RTX 4000 Ada siêu bốc của tụi mình. Video sẽ nằm chờ trên đó trong 1 tiếng nếu bạn chưa nhấn chuyển đổi. Còn nếu đã chuyển xong, file sẽ tự động bị xóa sau khi bạn tải về hoặc sau tối đa 1 tiếng. Xóa sạch sành sanh không lưu luyến, uy tín luôn!"
 		},
 		"sponsors": {
-			"title": "Sponsors",
-			"description": "Want to support us? Contact a developer in the [discord_link]Discord[/discord_link] server, or send an email to",
-			"email_copied": "Email copied to clipboard!"
+			"title": "Nhà tài trợ",
+			"description": "Muốn tiếp thêm động lực cho tụi mình không? Inbox ngay cho developer trong server [discord_link]Discord[/discord_link], hoặc gửi email tới",
+			"email_copied": "Đã copy địa chỉ email!"
 		},
 		"resources": {
-			"title": "Resources",
-			"discord": "Discord",
+			"title": "Thông tin liên kết",
+			"discord": "Server Discord",
 			"source": "Source",
 			"email": "Email"
 		},
 		"donate": {
-			"title": "Donate to VERT",
-			"description": "With your support, we can keep maintaining and improving VERT.",
-			"one_time": "One-time",
-			"monthly": "Monthly",
-			"custom": "Custom",
-			"pay_now": "Pay now",
+			"title": "Donate cho VERT",
+			"description": "Sự hảo tâm của các bạn trở thành động lực lớn cho đội ngũ VERT ngày một phát triển.",
+			"one_time": "Một lần",
+			"monthly": "Hàng tháng",
+			"custom": "Tùy chọn",
+			"pay_now": "Donate",
 			"donate_amount": "Donate ${amount} USD",
-			"thank_you": "Thank you for your donation!",
-			"payment_failed": "Payment failed: {message}{period} You have not been charged.",
-			"donation_error": "An error occurred while processing your donation. Please try again later.",
-			"payment_error": "Error fetching payment details. Please try again later.",
-			"donation_notice_official": "Your donations here go to the official VERT instance (vert.sh), and helps to support the development of the project.",
-			"donation_notice_unofficial": "Your donations here go to the operator of this VERT instance. If you wish to support the official VERT developers, please visit [official_link]vert.sh[/official_link] instead."
+			"thank_you": "Công đức vô lượng!",
+			"payment_failed": "Thanh toán thất bại: {message}{period} Tài khoản của bạn chưa bị trừ tiền đâu nè.",
+			"donation_error": "Đã có lỗi xảy ra khi xử lý khoản donate của bạn. Vui lòng thử lại sau chút nhé.",
+			"payment_error": "Lỗi khi lấy thông tin thanh toán. Vui lòng thử lại sau nha.",
+			"donation_notice_official": "Khoản donate của bạn sẽ được gửi trực tiếp đến máy chủ VERT chính thức (vert.sh), giúp tụi mình có thêm kinh phí để phát triển dự án này.",
+			"donation_notice_unofficial": "Khoản donate này sẽ được gửi tới người vận hành máy chủ VERT này. Nếu bạn muốn ủng hộ đội ngũ phát triển VERT chính thức, vui lòng ghé qua [official_link]vert.sh[/official_link] nhé."
 		},
 		"credits": {
-			"title": "Credits",
-			"contact_team": "If you would like to contact the development team, please use the email found on the \"Resources\" card.",
-			"notable_contributors": "Notable contributors",
-			"notable_description": "We'd like to thank these people for their major contributions to VERT.",
-			"github_contributors": "GitHub contributors",
-			"github_description": "Big thanks to all these people for helping out! [github_link]Want to help too?[/github_link]",
-			"no_contributors": "Seems like no one has contributed yet... [contribute_link]be the first to contribute![/contribute_link]",
-			"libraries": "Libraries",
-			"libraries_description": "A big thanks to FFmpeg (audio, video), ImageMagick (images) and Pandoc (documents) for maintaining such excellent libraries for so many years. VERT relies on them to provide you with your conversions.",
+			"title": "Tri ân",
+			"contact_team": "Nếu bạn muốn liên hệ với đội ngũ phát triển, vui lòng sử dụng email trong mục \"Thông tin liên kết\" nhé.",
+			"notable_contributors": "Những gương mặt tiêu biểu",
+			"notable_description": "Tụi mình muốn gửi lời cảm ơn chân thành đến những người bạn này vì những đóng góp to lớn cho VERT.",
+			"github_contributors": "Đóng góp từ GitHub",
+			"github_description": "Cảm ơn tất cả mọi người đã chung tay giúp sức! [github_link]Bạn cũng muốn góp một tay chứ?[/github_link]",
+			"no_contributors": "Hình như vẫn chưa có ai góp sức hết... [contribute_link]hãy là người đầu tiên nhé![/contribute_link]",
+			"libraries": "Thư viện sử dụng",
+			"libraries_description": "Gửi lời cảm ơn lớn đến FFmpeg (âm thanh, video), ImageMagick (hình ảnh) và Pandoc (tài liệu) vì đã duy trì những thư viện tuyệt vời suốt bao năm qua. VERT hoạt động dựa trên sức mạnh của họ để mang đến cho bạn những bản chuyển đổi tốt nhất.",
 			"roles": {
-				"lead_developer": "Lead developer; conversion backend, UI implementation",
-				"developer": "Developer; UI implementation",
-				"designer": "Designer; UX, branding, marketing",
-				"docker_ci": "Maintaining Docker & CI support",
-				"former_cofounder": "Former co-founder & designer"
+				"lead_developer": "Lập trình viên trưởng; hệ thống chuyển đổi (backend), triển khai giao diện (UI)",
+				"developer": "Lập trình viên; triển khai giao diện (UI)",
+				"designer": "Thiết kế; trải nghiệm người dùng (UX), nhận diện thương hiệu, marketing",
+				"docker_ci": "Duy trì hệ thống Docker & CI",
+				"former_cofounder": "Cựu đồng sáng lập & thiết kế"
 			}
 		},
 		"errors": {
-			"github_contributors": "Error fetching GitHub contributors"
+			"github_contributors": "Đã có lỗi xảy ra trong lúc lấy dữ liệu thành viên đóng góp trên GitHub"
 		}
 	},
 	"workers": {
 		"errors": {
-			"general": "Error converting {file}: {message}",
-			"cancel": "Error canceling conversion for {file}: {message}",
-			"magick": "Error in Magick worker, image conversion may not work as expected.",
-			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
-			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
-			"no_audio": "No audio stream found.",
-			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
-			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
+			"general": "Lỗi khi chuyển đổi {file}: {message}",
+			"cancel": "Lỗi khi hủy quá trình chuyển đổi {file}: {message}",
+			"magick": "Lỗi hệ thống Magick, việc chuyển đổi hình ảnh có thể không hoạt động như mong đợi.",
+			"ffmpeg": "Lỗi khi tải FFmpeg, một số tính năng video/âm thanh có thể không hoạt động ổn định.",
+			"pandoc": "Lỗi khi tải hệ thống Pandoc, việc chuyển đổi tài liệu có thể gặp sự cố.",
+			"no_audio": "Không tìm thấy dữ liệu âm thanh (audio stream) trong tệp.",
+			"invalid_rate": "Tần số lấy mẫu không hợp lệ: {rate}Hz",
+			"file_too_large": "Tệp này vượt quá giới hạn {limit}GB của trình duyệt/thiết bị. Hãy thử dùng Firefox hoặc Safari để chuyển đổi các tệp lớn, vì những trình duyệt này thường hỗ trợ giới hạn cao hơn."
 		}
 	},
 	"privacy": {
-		"title": "Privacy Policy",
+		"title": "Điều khoản bảo mật",
 		"summary": {
-			"title": "Summary",
-			"description": "VERT's privacy policy is very simple: we do not collect or store any data on you at all. We don't use cookies or trackers, analytics are completely private, and all conversions (except videos) happen locally on your browser. Videos are deleted after being downloaded, or an hour, unless explicitly given permission by you to be stored; it will only be used for the purpose of troubleshooting. VERT self-hosts a Coolify instance for hosting the website and vertd (for video conversion), and a Plausible instance for completely anonymous and aggregated analytics. We use Stripe to process donations, which may collect some data used for fraud prevention.<br/><br/>Note this may only apply to the official VERT instance at [vert_link]vert.sh[/vert_link]; third-party instances may handle your data differently."
+			"title": "Tổng quan",
+			"description": "Chính sách bảo mật của VERT rất đơn giản: chúng tôi hoàn toàn không thu thập hay lưu trữ bất kỳ dữ liệu nào của bạn. Chúng tôi không sử dụng cookie hay các trình theo dõi (trackers), các phân tích đều mang tính riêng tư tuyệt đối và mọi quá trình chuyển đổi (ngoại trừ video) đều diễn ra cục bộ ngay trên trình duyệt của bạn. Các tệp video sẽ được xóa sau khi tải về hoặc sau một giờ, trừ khi bạn cho phép lưu trữ cụ thể; trường hợp này chỉ được sử dụng cho mục đích khắc phục sự cố. VERT tự vận hành một thực thể Coolify để lưu trữ trang web và vertd (phục vụ chuyển đổi video), cùng một thực thể Plausible để thu thập các phân tích tổng hợp và hoàn toàn ẩn danh. Chúng tôi sử dụng Stripe để xử lý các khoản quyên góp, đơn vị này có thể thu thập một số dữ liệu nhằm mục đích ngăn ngừa gian lận.<br/><br/>Lưu ý rằng các điều khoản này có thể chỉ áp dụng cho thực thể VERT chính thức tại [vert_link]vert.sh[/vert_link]; các thực thể của bên thứ ba có thể có cách xử lý dữ liệu khác."
 		},
 		"conversions": {
-			"title": "Conversions",
-			"description": "Most conversions (images, documents, audio) happen entirely locally on your device using WebAssembly versions of the relevant tools (e.g. ImageMagick, Pandoc, FFmpeg). This means your files never leave your device and we will never have access to them.<br/><br/>Video conversions are performed on our servers because they require more processing power and cannot be done very quickly on the browser yet. Videos you convert with VERT are deleted after being downloaded, or after one hour, unless you explicitly give permission for us to store them longer purely for troubleshooting purposes."
+			"title": "Chuyển đổi",
+			"description": "Hầu hết các quá trình chuyển đổi (hình ảnh, tài liệu, âm thanh) đều diễn ra hoàn toàn cục bộ trên thiết bị của bạn thông qua phiên bản WebAssembly của các công cụ chuyên dụng (như ImageMagick, Pandoc, FFmpeg). Điều này đồng nghĩa với việc tệp của bạn không bao giờ rời khỏi thiết bị và chúng tôi hoàn toàn không có quyền truy cập vào chúng.<br/><br/>Riêng việc chuyển đổi video sẽ được thực hiện trên máy chủ của chúng tôi vì chúng yêu cầu sức mạnh xử lý lớn hơn và hiện tại chưa thể xử lý nhanh chóng ngay trên trình duyệt. Các video bạn chuyển đổi qua VERT sẽ được xóa sau khi tải về hoặc sau một giờ, trừ khi bạn cho phép chúng tôi lưu trữ lâu hơn chỉ nhằm mục đích khắc phục sự cố."
 		},
 		"donations": {
-			"title": "Donations",
-			"description": "We use Stripe on the [about_link]about[/about_link] page to collect donations. Stripe may collect certain information about the payment and device for fraud prevention as described in [stripe_link]their documentation on advanced fraud detection[/stripe_link]. External network requests to Stripe are deferred, and are only made after you click the button to pay."
+			"title": "Doanh thu từ quyên góp",
+			"description": "Chúng tôi sử dụng Stripe tại trang [about_link]Giới thiệu[/about_link] để tiếp nhận các khoản quyên góp. Stripe có thể thu thập một số thông tin nhất định về giao dịch và thiết bị nhằm mục đích ngăn ngừa gian lận, như đã mô tả trong [stripe_link]tài liệu của họ về phát hiện gian lận nâng cao[/stripe_link]. Các yêu cầu mạng bên ngoài đến Stripe sẽ được trì hoãn và chỉ thực hiện sau khi bạn nhấn nút thanh toán."
 		},
 		"conversion_errors": {
-			"title": "Conversion Errors",
-			"description": "When a video conversion fails, we may collect some anonymous data to help us diagnose the issue. This data may include:",
-			"list_job_id": "The job ID, which is the anonymized file name",
-			"list_format_from": "The format you converted from",
-			"list_format_to": "The format you converted to",
-			"list_stderr": "The FFmpeg stderr output of your job (error message)",
-			"list_video": "The actual video file (if given explicit permission)",
-			"footer": "This information is used solely for the purpose of diagnosing conversion issues. The actual video file will only ever be collected if you give us permission to do so, where it will only be used for troubleshooting."
+			"title": "Lỗi chuyển đổi",
+			"description": "Khi quá trình chuyển đổi video thất bại, chúng tôi có thể thu thập một số dữ liệu ẩn danh để phục vụ việc chẩn đoán sự cố. Dữ liệu này có thể bao gồm:",
+			"list_job_id": "Mã định danh công việc (Job ID), chính là tên tệp đã được ẩn danh hóa",
+			"list_format_from": "Định dạng tệp gốc của bạn",
+			"list_format_to": "Định dạng tệp bạn muốn chuyển sang",
+			"list_stderr": "Thông tin đầu ra lỗi (stderr) từ FFmpeg của công việc đó",
+			"list_video": "Tệp video thực tế (chỉ khi có sự cho phép cụ thể từ bạn)",
+			"footer": "Thông tin này chỉ được sử dụng duy nhất cho mục đích chẩn đoán các lỗi chuyển đổi. Tệp video thực tế sẽ chỉ được thu thập nếu bạn cho phép, và cũng chỉ phục vụ cho việc khắc phục sự cố."
 		},
 		"analytics": {
-			"title": "Analytics",
-			"description": "We self-host a Plausible instance for completely anonymous and aggregated analytics. Plausible does not use cookies and complies with all major privacy regulations (GDPR/CCPA/PECR). You can opt out of analytics in the \"Privacy & data\" section in [settings_link]settings[/settings_link] and read more about Plausible's privacy practices [plausible_link]here[/plausible_link]."
+			"title": "Phân tích dữ liệu",
+			"description": "Chúng tôi tự vận hành một thực thể Plausible để thu thập các phân tích tổng hợp và hoàn toàn ẩn danh. Plausible không sử dụng cookie và tuân thủ mọi quy định chính về quyền riêng tư (GDPR/CCPA/PECR). Bạn có thể từ chối tham gia phân tích tại mục \"Quyền riêng tư & Dữ liệu\" trong phần [settings_link]Cài đặt[/settings_link] và tìm hiểu thêm về các chính sách bảo mật của Plausible [plausible_link]tại đây[/plausible_link]."
 		},
 		"local_storage": {
-			"title": "Local Storage",
-			"description": "We use your browser's local storage to save your settings, and your browser's session storage to temporarily store the GitHub contributors list for the \"About\" section to reduce repeated GitHub API requests. No personal data is stored or transmitted.<br/><br/>The WebAssembly versions of the conversion tools we use (FFmpeg, ImageMagick, Pandoc) are also stored locally on your browser when you first visit the website, so you don't need to redownload them each visit. No personal data is stored or transmitted. You may view or delete this data at any time in the \"Privacy & data\" section in [settings_link]settings[/settings_link]."
+			"title": "Lưu trữ cục bộ",
+			"description": "Chúng tôi sử dụng bộ nhớ cục bộ (Local Storage) của trình duyệt để lưu các cài đặt của bạn, và bộ nhớ phiên (Session Storage) để lưu tạm thời danh sách những người đóng góp từ GitHub cho phần \"Giới thiệu\" nhằm giảm bớt các yêu cầu lặp lại tới GitHub API. Không có dữ liệu cá nhân nào được lưu trữ hay truyền đi.<br/><br/>Các phiên bản WebAssembly của những công cụ chuyển đổi (FFmpeg, ImageMagick, Pandoc) cũng được lưu cục bộ trên trình duyệt trong lần đầu bạn truy cập, giúp bạn không phải tải lại chúng ở những lần sau. Không có dữ liệu cá nhân nào được lưu trữ hay truyền đi. Bạn có thể xem hoặc xóa dữ liệu này bất kỳ lúc nào tại mục \"Quyền riêng tư & Dữ liệu\" trong phần [settings_link]Cài đặt[/settings_link]."
 		},
 		"contact": {
-			"title": "Contact",
-			"description": "For questions, email us at: [email_link]hello@vert.sh[/email_link]. If you are using a third-party instance of VERT, please contact the hoster of that instance instead."
+			"title": "Liên hệ",
+			"description": "Nếu có thắc mắc, hãy gửi email cho tụi mình tại: [email_link]hello@vert.sh[/email_link]. Trong trường hợp bạn đang sử dụng VERT từ một máy chủ bên thứ ba, vui lòng liên hệ trực tiếp với người vận hành máy chủ đó nhé."
 		},
-		"last_updated": "Last updated: 2025-10-29"
+		"last_updated": "Lần cuối cập nhật: 29-10-2025"
 	},
 	"toast": {
-		"insecure_context": "You are visiting VERT in an insecure context (e.g. accessing over HTTP instead of HTTPS). Some features may not work as expected."
+		"insecure_context": "Bạn đang truy cập VERT qua kết nối không an toàn (ví dụ: HTTP thay vì HTTPS). Một số tính năng có thể sẽ không hoạt động ổn định hoặc bị lỗi."
 	}
 }

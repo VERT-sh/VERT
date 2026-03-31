@@ -439,7 +439,7 @@ export const effects = writable(true);
 export const theme = writable<"light" | "dark">("light");
 export const locale = writable(getLocale());
 export const availableLocales = {
-  vi: "Tieng Việt",
+  vi: "Tiếng Việt",
 	en: "English",
 	es: "Español",
 	fr: "Français",
