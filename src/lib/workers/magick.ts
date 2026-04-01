@@ -10,6 +10,12 @@ import { makeZip } from "client-zip";
 import { parseAni } from "$lib/util/parse/ani";
 import { parseIcns } from "vert-wasm";
 import type { WorkerMessage } from "$lib/types";
+import {
+	encodeIcns,
+	getRecommendedSizes,
+	ICNS_TYPES,
+	type IconEntry,
+} from "$lib/util/icns-encoder";
 
 let magickInitialized = false;
 
@@ -213,6 +219,89 @@ const handleMessage = async (
 					output: zipBytes,
 					zip: true,
 				};
+			}
+
+			// handle converting TO .icns
+			if (message.to === ".icns") {
+				const sourceImg = MagickImage.create(
+					new Uint8Array(buffer),
+					new MagickReadSettings({
+						format: from.slice(1).toUpperCase() as MagickFormat,
+					}),
+				);
+
+				try {
+					const iconEntries: IconEntry[] = [];
+					const sizes = getRecommendedSizes();
+
+					// Export source to PNG once and reuse for all sizes
+					const sourcePng = await new Promise<Uint8Array>(
+						(resolve, reject) => {
+							try {
+								sourceImg.write(
+									MagickFormat.Png,
+									(output: Uint8Array) => {
+										resolve(structuredClone(output));
+									},
+								);
+							} catch (error) {
+								reject(error);
+							}
+						},
+					);
+
+					// Cache resized PNGs by pixel size to avoid duplicate work
+					const pngBySize = new Map<number, Uint8Array>();
+
+					// Generate all recommended icon sizes
+					for (const iconType of sizes) {
+						const size = ICNS_TYPES[iconType].size;
+
+						let pngData = pngBySize.get(size);
+						if (!pngData) {
+							const resizedImg = MagickImage.create(
+								sourcePng,
+								new MagickReadSettings({
+									format: MagickFormat.Png,
+								}),
+							);
+
+							try {
+								resizedImg.resize(size, size);
+								pngData = await magickConvert(
+									resizedImg,
+									".png",
+									keepMetadata,
+									compression,
+								);
+							} finally {
+								resizedImg.dispose();
+							}
+
+							pngBySize.set(size, pngData);
+						}
+
+						iconEntries.push({
+							type: iconType,
+							data: pngData,
+						});
+					}
+
+					// Encode all icons into ICNS format
+					const icnsData = encodeIcns(iconEntries);
+
+					return {
+						type: "finished",
+						output: icnsData,
+					};
+				} catch (error) {
+					return {
+						type: "error",
+						error: `Failed to convert to ICNS -- ${error instanceof Error ? error.message : String(error)}`,
+					};
+				} finally {
+					sourceImg.dispose();
+				}
 			}
 
 			// build frames of animated formats (webp/gif)

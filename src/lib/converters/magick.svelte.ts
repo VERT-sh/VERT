@@ -34,7 +34,7 @@ export class MagickConverter extends Converter {
 		new FormatInfo("bmp", true, true),
 		new FormatInfo("cur", true, true),
 		new FormatInfo("ani", true, false),
-		new FormatInfo("icns", true, false),
+		new FormatInfo("icns", true, true),
 		new FormatInfo("nef", true, false),
 		new FormatInfo("cr2", true, false),
 		new FormatInfo("hdr", true, true),
