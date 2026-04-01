@@ -23,7 +23,7 @@
 			href={github}
 			target="_blank"
 			rel="noopener noreferrer"
-			class="flex-shrink-0"
+			class="shrink-0"
 		>
 			<img
 				src={avatar}

@@ -17,30 +17,30 @@
 	></div>
 {/if}
 
-<style lang="postcss">
+<style>
 	.dragoverlay {
 		animation: dragoverlay-animation 3s infinite linear;
 	}
 
 	@keyframes dragoverlay-animation {
 		0% {
-			@apply bg-accent-pink;
+			background-color: var(--accent-pink);
 		}
 
 		25% {
-			@apply bg-accent-blue;
+			background-color: var(--accent-blue);
 		}
 
 		50% {
-			@apply bg-accent-purple;
+			background-color: var(--accent-purple);
 		}
 
 		75% {
-			@apply bg-accent-red;
+			background-color: var(--accent-red);
 		}
 
 		100% {
-			@apply bg-accent-pink;
+			background-color: var(--accent-pink);
 		}
 	}
 </style>
