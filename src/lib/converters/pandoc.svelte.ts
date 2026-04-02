@@ -19,7 +19,8 @@ export class PandocConverter extends Converter {
 		(async () => {
 			try {
 				this.status = "downloading";
-				this.wasm = await fetch("/pandoc.wasm").then((r) =>
+				// currently fetching from unsafe origin due to CORS, needs to be changed before merge
+				this.wasm = await fetch("https://newjeans.cafe/pandoc.wasm").then((r) =>
 					r.arrayBuffer(),
 				);
 
