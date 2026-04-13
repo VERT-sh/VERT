@@ -450,6 +450,7 @@ export const availableLocales = {
 	tr: "Türkçe",
 	ja: "日本語",
 	ko: "한국어",
+	no: "Norsk",
 	el: "Ελληνικά",
 	"zh-Hans": "简体中文",
 	"zh-Hant": "繁體中文",
