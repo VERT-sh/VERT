@@ -16,6 +16,18 @@
 			"src": "lettermark.jpg",
 			"sizes": "512x512",
 			"type": "image/jpeg"
+		},
+		{
+			"src": "lettermark_maskable.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "lettermark_maskable.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
 		}
 	]
 }

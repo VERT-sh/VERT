@@ -20,8 +20,8 @@ jobs:
             - name: build
               env:
                   BASE_PATH: "/${{ github.event.repository.name }}"
-                  PUB_HOSTNAME: ""
-                  PUB_PLAUSIBLE_URL: ""
+                  PUB_HOSTNAME: "vert.sh"
+                  PUB_PLAUSIBLE_URL: "https://ats.vert.sh"
                   PUB_ENV: "production"
                   PUB_VERTD_URL: "https://vertd.vert.sh"
                   PUB_DISABLE_ALL_EXTERNAL_REQUESTS: "false"

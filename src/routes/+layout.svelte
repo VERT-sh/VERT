@@ -26,8 +26,9 @@
 	import { m } from "$lib/paraglide/messages.js";
 	import { log } from "$lib/util/logger.js";
 
-	let { children, data } = $props();
+	let { children } = $props();
 	let enablePlausible = $state(false);
+	let isAprilFools = $state(false);
 
 	let scrollPositions = new Map<string, number>();
 
@@ -67,6 +68,9 @@
 	};
 
 	onMount(() => {
+		const now = new Date();
+		isAprilFools = now.getDate() === 1 && now.getMonth() === 3;
+
 		initAnimStores();
 
 		const handleResize = () => {
@@ -166,7 +170,7 @@
 			src="{PUB_PLAUSIBLE_URL}/js/script.js"
 		></script>
 	{/if}
-	{#if data.isAprilFools}
+	{#if isAprilFools}
 		<style>
 			* {
 				font-family: "Comic Sans MS", "Comic Sans", cursive !important;
