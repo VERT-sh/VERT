@@ -947,7 +947,6 @@ export class VertdConverter extends Converter {
 
 					case "jobFinished": {
 						this.log(`job finished for file ${input.name}`);
-						ws.close();
 						try {
 							const url = `${apiUrl}/api/download/${msg.data.jobId}/${uploadRes.auth}`;
 							this.log(`downloading from ${url}`);
@@ -974,6 +973,8 @@ export class VertdConverter extends Converter {
 						} catch (e) {
 							if (hash) this.failure(hash);
 							rejectConversion(e);
+						} finally {
+							ws.close();
 						}
 						break;
 					}
