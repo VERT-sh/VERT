@@ -711,17 +711,22 @@ export class VertdConverter extends Converter {
 
 		// trim/crop/rotate - also have another ui for this prob
 
-		return [
-			qualitySpeedRange,
-			videoCodec,
-			audioCodec,
-			videoBitrate,
-			audioBitrate,
-			fps,
-			sampleRate,
-			resolution,
-			metadata,
-		];
+		const animatedImages = [".gif", ".webp", ".apng"];
+		if (animatedImages.includes(input.from)) {
+			return [fps, resolution, metadata];
+		} else {
+			return [
+				qualitySpeedRange,
+				videoCodec,
+				audioCodec,
+				videoBitrate,
+				audioBitrate,
+				fps,
+				sampleRate,
+				resolution,
+				metadata,
+			];
+		}
 	}
 
 	public async getDefaultSettings(
