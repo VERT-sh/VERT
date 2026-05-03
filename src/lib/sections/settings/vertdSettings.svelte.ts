@@ -13,6 +13,29 @@ export type VertdInner =
 	| { type: "us" }
 	| { type: "custom" };
 
+export const getVertdCustomHeaders = (): Record<string, string> => {
+	const raw = Settings.instance.settings.vertdCustomHeaders.trim();
+	if (!raw) return {};
+
+	const headers: Record<string, string> = {};
+
+	for (const line of raw.split(/\r?\n/)) {
+		const trimmed = line.trim();
+		if (!trimmed) continue;
+
+		const separatorIndex = trimmed.indexOf(":");
+		if (separatorIndex <= 0) continue;
+
+		const key = trimmed.slice(0, separatorIndex).trim();
+		const value = trimmed.slice(separatorIndex + 1).trim();
+		if (!key || !value) continue;
+
+		headers[key] = value;
+	}
+
+	return headers;
+};
+
 export class VertdInstance {
 	public static instance = new VertdInstance();
 
@@ -61,7 +84,8 @@ export class VertdInstance {
 				await fetch(url, {
 					method: "GET",
 					cache: "no-store",
-					mode: "no-cors",
+					mode: "cors",
+					headers: getVertdCustomHeaders(),
 				});
 				return performance.now() - start;
 			} catch {

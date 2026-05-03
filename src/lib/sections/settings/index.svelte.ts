@@ -25,11 +25,12 @@ export interface ISettings {
 	plausible: boolean;
 	vertdURL: string;
 	vertdSpeed: ConversionSpeed; // videos
+	vertdBlockedHashes: Map<string, Date[]>; // hashes of files blocked from vertd conversion
+	vertdCustomHeaders: string; // custom headers to send to the vertd server
 	magickQuality: number; // images
 	ffmpegQuality: ConversionBitrate; // audio (or audio <-> video)
 	ffmpegSampleRate: string; // audio (or audio <-> video)
 	ffmpegCustomSampleRate: number; // audio (or audio <-> video) - only used when ffmpegSampleRate is "custom"
-	vertdBlockedHashes: Map<string, Date[]>; // hashes of files blocked from vertd conversion
 }
 
 export class Settings {
@@ -48,11 +49,12 @@ export class Settings {
 		plausible: true,
 		vertdURL: PUB_VERTD_URL,
 		vertdSpeed: "slow",
+		vertdBlockedHashes: new Map<string, Date[]>(),
+		vertdCustomHeaders: "",
 		magickQuality: 100,
 		ffmpegQuality: "auto",
 		ffmpegSampleRate: "auto",
 		ffmpegCustomSampleRate: 44100, //TODO: make string to match for vertd
-		vertdBlockedHashes: new Map<string, Date[]>(),
 	});
 
 	public save() {

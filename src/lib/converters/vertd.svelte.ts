@@ -2,7 +2,10 @@ import VertdErrorComponent from "$lib/components/functional/popups/VertdError.sv
 import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
-import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte";
+import {
+	VertdInstance,
+	getVertdCustomHeaders,
+} from "$lib/sections/settings/vertdSettings.svelte";
 import { VertFile } from "$lib/types";
 import { Converter, FormatInfo } from "./converter.svelte";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
@@ -60,15 +63,17 @@ export const vertdFetch: {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 } = async (url: any, options: RequestInit, body?: any) => {
 	const domain = await VertdInstance.instance.url();
+	const headers = new Headers(options.headers);
+	for (const [key, value] of Object.entries(getVertdCustomHeaders()))
+		headers.set(key, value);
 
 	// if there is a body, insert a Content-Type: application/json header
 	if (body) {
-		options.headers = {
-			"Content-Type": "application/json",
-			...(options.headers || {}),
-		};
+		headers.set("Content-Type", "application/json");
 		options.body = JSON.stringify(body);
 	}
+
+	options.headers = headers;
 
 	const res = await fetch(domain + url, options);
 
@@ -250,6 +255,7 @@ const createUploadTask = async (file: VertFile): Promise<UploadTask> => {
 	formData.append("file", file.file, file.name);
 	const xhr = new XMLHttpRequest();
 	xhr.open("POST", `${apiUrl}/api/upload`, true);
+	const customHeaders = getVertdCustomHeaders();
 
 	const promise = new Promise<UploadResponse>((resolve, reject) => {
 		xhr.upload.addEventListener("progress", (e) => {
@@ -285,6 +291,9 @@ const createUploadTask = async (file: VertFile): Promise<UploadTask> => {
 			reject(new Error("Conversion cancelled"));
 		};
 
+		for (const [key, value] of Object.entries(customHeaders))
+			xhr.setRequestHeader(key, value);
+
 		xhr.send(formData);
 		console.log("sent!");
 	});
@@ -299,6 +308,7 @@ const downloadFile = async (url: string, file: VertFile): Promise<Blob> => {
 	const xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
 	xhr.responseType = "blob";
+	const customHeaders = getVertdCustomHeaders();
 
 	return new Promise((resolve, reject) => {
 		xhr.addEventListener("progress", (e) => {
@@ -321,6 +331,9 @@ const downloadFile = async (url: string, file: VertFile): Promise<Blob> => {
 		xhr.onerror = () => {
 			reject(xhr.statusText);
 		};
+
+		for (const [key, value] of Object.entries(customHeaders))
+			xhr.setRequestHeader(key, value);
 
 		xhr.send();
 	});
@@ -712,7 +725,7 @@ export class VertdConverter extends Converter {
 		// trim/crop/rotate - also have another ui for this prob
 
 		const animatedImages = [".gif", ".webp", ".apng"];
-		if (animatedImages.includes(input.from)) {
+		if (animatedImages.includes(input.to)) {
 			return [fps, resolution, metadata];
 		} else {
 			return [

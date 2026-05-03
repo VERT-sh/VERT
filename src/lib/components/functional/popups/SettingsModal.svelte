@@ -218,7 +218,7 @@
 													placeholder={setting.placeholder}
 													disabled={disabled ||
 														setting.disabled}
-													oninput={(e) =>
+													oninput={(e: any) =>
 														handleSettingChange(
 															setting.customInputKey!,
 															e.currentTarget
@@ -238,7 +238,7 @@
 													] ??
 													setting.default}
 												placeholder={setting.placeholder}
-												onchange={(e) =>
+												onchange={(e: any) =>
 													handleSettingChange(
 														setting.key,
 														e.currentTarget.checked,
@@ -295,7 +295,7 @@
 													] ??
 													setting.default}
 												placeholder={setting.placeholder}
-												oninput={(e) =>
+												oninput={(e: any) =>
 													handleSettingChange(
 														setting.key,
 														e.currentTarget.value,

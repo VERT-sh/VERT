@@ -289,6 +289,11 @@
 				"us": "Washington, USA",
 				"custom": "Custom"
 			},
+			"custom_headers": {
+				"label": "Custom headers",
+				"description": "Add custom headers to be sent with each request to the vertd instance, which could be used for authentication or other purposes (one per line).",
+				"placeholder": "Header-Name: Header Value"
+			},
 			"conversion_speed": {
 				"label": "Conversion speed",
 				"description": "This describes the tradeoff between speed and quality. Faster speeds will result in lower quality, but will get the job done quicker.",
