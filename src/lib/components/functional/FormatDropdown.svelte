@@ -10,6 +10,7 @@
 	import { VertFile } from "$lib/types";
 	import SettingsModal from "./popups/SettingsModal.svelte";
 	import { log } from "$lib/util/logger";
+	import FancyInput from "./FancyInput.svelte";
 
 	type Props = {
 		categories: Categories;
@@ -488,13 +489,34 @@
 			<!-- format options -->
 			<!-- TODO: image sequence & fps -->
 			{#if file?.name.toLowerCase().endsWith(".zip")}
-				<div class="border-t border-separator text-base p-2">
+				<div
+					class="flex flex-col gap-2 p-2 border-t border-separator text-base"
+				>
 					<button
 						class="w-full p-2 text-center rounded-lg bg-accent text-black"
 						onclick={() => extract()}
 					>
 						{m["convert.archive_file.extract"]()}
 					</button>
+					<div class="flex items-center gap-3">
+						<div
+							class="flex items-center gap-2 flex-1 min-w-0 h-full"
+						>
+							<FancyInput type="checkbox" class="!w-fit" />
+							<label for="extract-sequence" class="text-sm">
+								{m["convert.image_sequence.image_sequence"]()}
+							</label>
+						</div>
+						<div class="w-[80px] shrink-0">
+							<FancyInput
+								thin
+								inputClass="!h-9 !text-xs"
+								type="number"
+								extension="FPS"
+								placeholder="15"
+							/>
+						</div>
+					</div>
 				</div>
 			{:else}
 				<div class="border-t border-separator text-base p-2">

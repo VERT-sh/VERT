@@ -398,7 +398,7 @@ body {
 	}
 
 	input[type="checkbox"] {
-		@apply appearance-none w-5 h-5 rounded-md bg-button border-2 border-button cursor-pointer transition-colors duration-200;
+		@apply appearance-none w-5 h-5 rounded-md border-2 border-button cursor-pointer transition-colors duration-200;
 	}
 
 	input[type="checkbox"]:hover {

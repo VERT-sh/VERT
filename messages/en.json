@@ -59,6 +59,10 @@
 			"image": "image",
 			"extract_error": "Error extracting {filename}: {error}"
 		},
+		"image_sequence": {
+			"image_sequence": "Image Sequence",
+			"fps": "FPS"
+		},
 		"large_file_warning": "Due to browser / device limitations, video to audio conversion is disabled for this file as it is larger than {limit}GB. We recommend using Firefox or Safari for files of this size since they have less limitations.",
 		"external_warning": {
 			"title": "External server warning",
