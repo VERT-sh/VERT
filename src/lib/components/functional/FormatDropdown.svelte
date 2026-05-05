@@ -41,6 +41,9 @@
 	let searchQuery = $state("");
 	let rootCategory: string | null = null;
 
+	let imageSequence = $state(false);
+	let imageSequenceFPS = $state(15);
+
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
 
 	const shouldExclude = (format: string): boolean =>
@@ -49,8 +52,19 @@
 			format === ".gif"
 		);
 
-	const getFormats = (cat: string) =>
-		(categories[cat]?.formats ?? []).filter((f) => !shouldExclude(f));
+	const getFormats = (cat: string) => {
+		let formats = (categories[cat]?.formats ?? []).filter(
+			(f) => !shouldExclude(f),
+		);
+
+		// if imageSequence is checked, filter image category to animated formats only
+		if (imageSequence && cat === "image") {
+			const animatedFormats = [".webp", ".gif"]; // .apng not supported by magick-wasm rn
+			formats = formats.filter((f) => animatedFormats.includes(f));
+		}
+
+		return formats;
+	};
 
 	const detectCategory = (): string => {
 		if (from) {
@@ -103,16 +117,23 @@
 				categories[rootCategory!]?.canConvertTo?.includes(cat),
 		);
 
-		// handle special cases
-		if (from === ".gif" || from === ".webp") cats.push("video");
-		if (from === ".apng") {
-			//cats.push("image"); // -- buggy, magick can't convert from or to apng properly
-			cats = cats.filter((cat) => cat !== "audio");
-		}
+		if (imageSequence) {
+			// this is to allow image sequence -> video on vertd (soon:tm:)
+			// though i feel like this could also be done with ffmpeg-wasm in the browser? or mediabunny?
+			// TODO: image sequence locally w/ ffmpeg-wasm or mediabunny
+			cats.push("video");
+		} else {
+			// handle special cases
+			if (from === ".gif" || from === ".webp") cats.push("video");
+			if (from === ".apng") {
+				//cats.push("image"); // -- buggy, magick can't convert from or to apng properly
+				cats = cats.filter((cat) => cat !== "audio");
+			}
 
-		// large videos can't be extracted to audio (browser/device limitations)
-		if (file && file.isLarge() && rootCategory === "video")
-			cats = cats.filter((cat) => cat !== "audio");
+			// large videos can't be extracted to audio (browser/device limitations)
+			if (file && file.isLarge() && rootCategory === "video")
+				cats = cats.filter((cat) => cat !== "audio");
+		}
 
 		return cats.filter(
 			(cat) => (categories[cat]?.formats?.length ?? 0) > 0,
@@ -120,9 +141,14 @@
 	});
 
 	const filteredData = $derived.by(() => {
+		const activeCategory =
+			currentCategory && availableCategories.includes(currentCategory)
+				? currentCategory
+				: availableCategories[0];
+
 		// if no query, return formats for current category
 		if (!searchQuery) {
-			const formats = getFormats(currentCategory ?? "");
+			const formats = getFormats(activeCategory ?? "");
 
 			// if no formats & categories for some reason, fall back and show all categories/formats
 			if (formats.length === 0 && availableCategories.length === 0) {
@@ -142,16 +168,24 @@
 				categories: availableCategories,
 				formats,
 				isFallback: false,
-				resolvedCategory: currentCategory,
+				resolvedCategory: activeCategory ?? currentCategory,
 			};
 		}
 
 		const query = normalize(searchQuery);
-		const matches = (f: string) =>
-			normalize(f).includes(query) && !shouldExclude(f);
+		const animatedFormats = [".webp", ".apng", ".gif"];
+
+		const matches = (f: string, cat?: string) => {
+			if (!normalize(f).includes(query) || shouldExclude(f)) return false;
+			// if imageSequence and image category, only show animated formats
+			if (imageSequence && (cat ?? activeCategory) === "image") {
+				return animatedFormats.includes(f);
+			}
+			return true;
+		};
 
 		const matchingCategories = availableCategories.filter((cat) =>
-			(categories[cat]?.formats ?? []).some(matches),
+			(categories[cat]?.formats ?? []).some((f) => matches(f, cat)),
 		);
 
 		if (matchingCategories.length === 0) {
@@ -170,7 +204,7 @@
 				: matchingCategories[0];
 
 		const formats = (categories[resolvedCategory ?? ""]?.formats ?? [])
-			.filter(matches)
+			.filter((f) => matches(f, resolvedCategory))
 			.sort((a, b) => {
 				// exact matches first, then original order
 				const aExact = normalize(a) === query;
@@ -194,6 +228,34 @@
 			filteredData.resolvedCategory !== currentCategory
 		)
 			currentCategory = filteredData.resolvedCategory;
+	});
+
+	$effect(() => {
+		// scroll automatically when opening dropdown so you don't have to scroll to see entire dropdown lol
+		if (!open || !dropdownMenu) return;
+		scrollView();
+	});
+
+	$effect(() => {
+		// this thing checks if selected format is still valid with the current filters (imageSequence or search query) and falls back if not
+		const allUnfilteredFormats = availableCategories.flatMap((cat) =>
+			getFormats(cat),
+		);
+
+		if (!allUnfilteredFormats.includes(selected)) {
+			// check if formats available in filteredData, else fall back to all available formats, else keep previous selection
+			if (filteredData.formats.length > 0) {
+				selected = filteredData.formats[0];
+				onselect?.(selected);
+			} else if (allUnfilteredFormats.length > 0) {
+				selected = allUnfilteredFormats[0];
+				onselect?.(allUnfilteredFormats[0]);
+			} else {
+				// no formats available, keeping previous selection
+
+				// i feel like this is all very scuffed and we need a better search and filtering system
+			}
+		}
 	});
 
 	const selectOption = (option: string) => {
@@ -487,7 +549,6 @@
 				{/if}
 			</div>
 			<!-- format options -->
-			<!-- TODO: image sequence & fps -->
 			{#if file?.name.toLowerCase().endsWith(".zip")}
 				<div
 					class="flex flex-col gap-2 p-2 border-t border-separator text-base"
@@ -502,7 +563,11 @@
 						<div
 							class="flex items-center gap-2 flex-1 min-w-0 h-full"
 						>
-							<FancyInput type="checkbox" class="!w-fit" />
+							<FancyInput
+								type="checkbox"
+								class="!w-fit"
+								bind:checked={imageSequence}
+							/>
 							<label for="extract-sequence" class="text-sm">
 								{m["convert.image_sequence.image_sequence"]()}
 							</label>
@@ -514,6 +579,8 @@
 								type="number"
 								extension="FPS"
 								placeholder="15"
+								bind:value={imageSequenceFPS}
+								disabled={!imageSequence}
 							/>
 						</div>
 					</div>
