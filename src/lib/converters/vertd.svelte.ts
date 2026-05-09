@@ -15,7 +15,7 @@ import type {
 	SettingDefinition,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
-import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.svelte";
+import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.codecs";
 import { formatBytes } from "$lib/util/file";
 
 interface UploadResponse {

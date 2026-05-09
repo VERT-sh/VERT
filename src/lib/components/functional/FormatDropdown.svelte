@@ -41,8 +41,20 @@
 	let searchQuery = $state("");
 	let rootCategory: string | null = null;
 
-	let imageSequence = $state(false);
-	let imageSequenceFPS = $state(15);
+	// svelte-ignore state_referenced_locally
+	let imageSequence = $state(
+		file?.conversionSettings?.imageSequence ?? false,
+	);
+	// svelte-ignore state_referenced_locally
+	let imageSequenceFPS = $state(
+		file?.conversionSettings?.imageSequenceFPS ?? 15,
+	);
+
+	$effect(() => {
+		if (!file) return;
+		file.conversionSettings.imageSequence = imageSequence;
+		file.conversionSettings.imageSequenceFPS = imageSequenceFPS;
+	});
 
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
 
@@ -59,7 +71,7 @@
 
 		// if imageSequence is checked, filter image category to animated formats only
 		if (imageSequence && cat === "image") {
-			const animatedFormats = [".webp", ".gif"]; // .apng not supported by magick-wasm rn
+			const animatedFormats = [".webp", ".gif", ".apng"]; // .apng not supported by magick-wasm rn
 			formats = formats.filter((f) => animatedFormats.includes(f));
 		}
 
@@ -252,7 +264,6 @@
 				onselect?.(allUnfilteredFormats[0]);
 			} else {
 				// no formats available, keeping previous selection
-
 				// i feel like this is all very scuffed and we need a better search and filtering system
 			}
 		}

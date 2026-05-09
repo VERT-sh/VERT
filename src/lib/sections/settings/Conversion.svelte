@@ -13,7 +13,7 @@
 		type ConversionBitrate,
 		SAMPLE_RATES,
 		type SampleRate,
-	} from "$lib/converters/ffmpeg.svelte";
+	} from "$lib/converters/ffmpeg.codecs";
 	import { m } from "$lib/paraglide/messages";
 	import Dropdown from "$lib/components/functional/Dropdown.svelte";
 	import FancyInput from "$lib/components/functional/FancyInput.svelte";

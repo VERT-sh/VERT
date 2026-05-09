@@ -6,37 +6,21 @@ import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
+import {
+	videoFormats,
+	getCodecs,
+	toArgs,
+	lossless,
+	CONVERSION_BITRATES,
+	SAMPLE_RATES,
+} from "./ffmpeg.codecs";
+import { buildImageSequenceCommand } from "./ffmpeg.animated";
 import type {
 	SettingDefinition,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
 
 // TODO: differentiate in UI? (not native formats)
-const videoFormats = [
-	"mkv",
-	"mp4",
-	"avi",
-	"mov",
-	"webm",
-	"ts",
-	"mts",
-	"m2ts",
-	"wmv",
-	"mpg",
-	"mpeg",
-	"flv",
-	"f4v",
-	"vob",
-	"m4v",
-	"3gp",
-	"3g2",
-	"mxf",
-	"ogv",
-	"rm",
-	"rmvb",
-	"divx",
-];
-
 export class FFmpegConverter extends Converter {
 	private ffmpeg: FFmpeg = null!;
 	public name = "ffmpeg";
@@ -415,22 +399,61 @@ export class FFmpegConverter extends Converter {
 		const inputFormat = input.from.slice(1);
 		const outputFormat = to.slice(1);
 		const m4a = isAlac || to === ".m4a";
+		const isImageSequence = input.isZip() && settings.imageSequence;
 
-		const lossless = [
-			"flac",
-			"m4a",
-			"caf",
-			"alac",
-			"wav",
-			"dsd",
-			"dsf",
-			"dff",
-		];
 		const userBitrate = settings.bitrate;
 		const customBitrate = settings.customBitrate;
 		const userSampleRate = settings.sampleRate;
 		const customSampleRate = settings.customSampleRate;
 		const keepMetadata = settings.metadata;
+
+		// image sequences -> animated image // video
+		if (isImageSequence) {
+			this.log(`converting image sequence ${input.name} to ${to}`);
+
+			const { extractZip } = await import("$lib/util/file");
+			const entries = (await extractZip(input.file)).sort((a, b) =>
+				a.filename.localeCompare(b.filename, undefined, {
+					numeric: true,
+					sensitivity: "base",
+				}),
+			);
+
+			if (!entries.length)
+				throw new Error("No images found in zip archive");
+
+			const imageFiles: Array<{ name: string }> = [];
+
+			for (const [index, entry] of entries.entries()) {
+				const fileName =
+					entry.filename.split("/").pop() ?? entry.filename;
+				const ext = fileName.split(".").pop()?.toLowerCase();
+				if (!ext) continue;
+
+				const paddedName = `img${String(index + 1).padStart(5, "0")}.${ext}`;
+				await ffmpeg.writeFile(paddedName, entry.data);
+				imageFiles.push({ name: paddedName });
+			}
+
+			if (!imageFiles.length)
+				throw new Error("No images found in zip archive");
+
+			const listContent = imageFiles
+				.map(
+					(image) =>
+						`file '${image.name}'\nduration ${1 / (settings.imageSequenceFPS || 15)}`,
+				)
+				.join("\n");
+			await ffmpeg.writeFile(
+				"frames.txt",
+				`${listContent}\nfile '${imageFiles[imageFiles.length - 1].name}'\n`,
+			);
+			this.log(`wrote ${imageFiles.length} images to ffmpeg virtual fs`);
+
+			return buildImageSequenceCommand(outputFormat, settings, isAlac);
+		}
+
+		// else normal single file conversion
 
 		let audioBitrateArgs: string[] = [];
 		let sampleRateArgs: string[] = [];
@@ -683,138 +706,3 @@ export class FFmpegConverter extends Converter {
 		}
 	}
 }
-
-// and here i was, thinking i'd be done with ffmpeg after finishing vertd
-// but OH NO we just HAD to have someone suggest to allow album art video generation.
-//
-// i hate you SO much.
-// - love, maddie
-const toArgs = (ext: string, isAlac: boolean = false): string[] => {
-	const codecs = getCodecs(ext, isAlac);
-	const args = ["-c:v", codecs.video];
-
-	switch (codecs.video) {
-		case "libx264": {
-			args.push(
-				"-preset",
-				"ultrafast",
-				"-crf",
-				"18",
-				"-tune",
-				"stillimage",
-			);
-			break;
-		}
-
-		case "libvpx": {
-			args.push("-c:v", "libvpx-vp9");
-			break;
-		}
-
-		case "mpeg2video": {
-			// for mpeg, mpg, vob, mxf
-			if (ext === ".mxf") args.push("-ar", "48000"); // force 48kHz sample rate
-			break;
-		}
-	}
-
-	args.push("-c:a", codecs.audio);
-
-	if (codecs.audio === "aac") args.push("-strict", "experimental");
-
-	if (ext === ".divx") args.unshift("-f", "avi");
-	if (ext === ".mxf") args.push("-strict", "unofficial");
-
-	return args;
-};
-
-const getCodecs = (
-	ext: string,
-	isAlac: boolean = false,
-): { video: string; audio: string } => {
-	switch (ext) {
-		// video <-> audio
-		case ".mp4":
-		case ".mkv":
-		case ".mov":
-		case ".mts":
-		case ".ts":
-		case ".m2ts":
-		case ".flv":
-		case ".f4v":
-		case ".m4v":
-		case ".3gp":
-		case ".3g2":
-			return { video: "libx264", audio: "aac" };
-		case ".wmv":
-			return { video: "wmv2", audio: "wmav2" };
-		case ".webm":
-		case ".ogv":
-			return {
-				video: ext === ".webm" ? "libvpx" : "libtheora",
-				audio: "libvorbis",
-			};
-		case ".avi":
-		case ".divx":
-			return { video: "mpeg4", audio: "libmp3lame" };
-		case ".mpg":
-		case ".mpeg":
-		case ".vob":
-			return { video: "mpeg2video", audio: "mp2" };
-		case ".mxf":
-			return { video: "mpeg2video", audio: "pcm_s16le" };
-
-		// audio
-		case ".mp3":
-			return { video: "libx264", audio: "libmp3lame" };
-		case ".flac":
-			return { video: "libx264", audio: "flac" };
-		case ".wav":
-			return { video: "libx264", audio: "pcm_s16le" };
-		case ".ogg":
-		case ".oga":
-			return { video: "libx264", audio: "libvorbis" };
-		case ".opus":
-			return { video: "libx264", audio: "libopus" };
-		case ".aac":
-			return { video: "libx264", audio: "aac" };
-		case ".m4a":
-			return {
-				video: "libx264",
-				audio: isAlac ? "alac" : "aac",
-			};
-		case ".alac":
-			return { video: "libx264", audio: "alac" };
-		case ".wma":
-			return { video: "libx264", audio: "wmav2" };
-
-		default:
-			return { video: "libx264", audio: "aac" };
-	}
-};
-
-export const CONVERSION_BITRATES = [
-	"auto",
-	"custom",
-	320,
-	256,
-	192,
-	128,
-	96,
-	64,
-	32,
-] as const;
-export type ConversionBitrate = (typeof CONVERSION_BITRATES)[number];
-
-export const SAMPLE_RATES = [
-	"auto",
-	"custom",
-	48000,
-	44100,
-	32000,
-	22050,
-	16000,
-	11025,
-	8000,
-] as const;
-export type SampleRate = (typeof SAMPLE_RATES)[number];

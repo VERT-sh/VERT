@@ -175,33 +175,48 @@ export class VertFile {
 
 		if (!this.converters.length) throw new Error("No converters found");
 
-		const customConverter = this.converters.find(
-			(c) => c.name === this.conversionSettings.converter,
-		);
-		let converter = customConverter;
+		let converter: Converter | undefined;
+		const isImageSequence =
+			this.conversionSettings.imageSequence && this.isZip();
 
-		if (!converter) {
-			const compatibleConverters = this.findConverters([
-				this.from,
-				this.to,
-			]);
-			if (compatibleConverters.length) {
-				converter = compatibleConverters[0];
-				log(
-					["file", "convert"],
-					`found compatible converter: ${converter.name}`,
-				);
-			} else {
-				log(
-					["file", "convert"],
-					`no compatible converter found for ${this.from} to ${this.to}`,
+		// force ffmpeg for image sequences
+		// TODO: should allow vertd as well probably(?) but maybe in the future
+		if (isImageSequence) {
+			converter = converters.find((c) => c.name === "ffmpeg");
+			if (!converter) {
+				throw new Error(
+					"FFmpeg converter not found for image sequence conversion",
 				);
 			}
 		} else {
-			log(
-				["file", "convert"],
-				`using custom converter from settings: ${converter.name}`,
+			const customConverter = this.converters.find(
+				(c) => c.name === this.conversionSettings.converter,
 			);
+			converter = customConverter;
+
+			if (!converter) {
+				const compatibleConverters = this.findConverters([
+					this.from,
+					this.to,
+				]);
+				if (compatibleConverters.length) {
+					converter = compatibleConverters[0];
+					log(
+						["file", "convert"],
+						`found compatible converter: ${converter.name}`,
+					);
+				} else {
+					log(
+						["file", "convert"],
+						`no compatible converter found for ${this.from} to ${this.to}`,
+					);
+				}
+			} else {
+				log(
+					["file", "convert"],
+					`using custom converter from settings: ${converter.name}`,
+				);
+			}
 		}
 
 		if (!converter) throw new Error("No converter found");
@@ -224,14 +239,15 @@ export class VertFile {
 		try {
 			// for zips: extract > convert each > re-zip
 			// else convert normally
-			res = this.isZip()
-				? await this.convertZip(converter)
-				: await converter.convert(
-						this,
-						this.to,
-						this.conversionSettings,
-						...args,
-					);
+			res =
+				this.isZip() && !this.conversionSettings.imageSequence
+					? await this.convertZip(converter)
+					: await converter.convert(
+							this,
+							this.to,
+							this.conversionSettings,
+							...args,
+						);
 			this.result = res;
 			if (this.fallbackToastId !== null) {
 				ToastManager.remove(this.fallbackToastId);

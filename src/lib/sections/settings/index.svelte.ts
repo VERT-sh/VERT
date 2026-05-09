@@ -1,5 +1,5 @@
 import { PUB_VERTD_URL } from "$env/static/public";
-import type { ConversionBitrate } from "$lib/converters/ffmpeg.svelte";
+import type { ConversionBitrate } from "$lib/converters/ffmpeg.codecs";
 import type { ConversionSpeed } from "$lib/converters/vertd.svelte";
 import { readSettings } from "$lib/util/settings";
 import { VertdInstance } from "./vertdSettings.svelte";
