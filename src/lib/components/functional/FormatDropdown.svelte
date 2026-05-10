@@ -49,11 +49,16 @@
 	let imageSequenceFPS = $state(
 		file?.conversionSettings?.imageSequenceFPS ?? 15,
 	);
+	// svelte-ignore state_referenced_locally
+	let imageSequenceTransparency = $state(
+		file?.conversionSettings?.imageSequenceTransparency ?? false,
+	);
 
 	$effect(() => {
 		if (!file) return;
 		file.conversionSettings.imageSequence = imageSequence;
 		file.conversionSettings.imageSequenceFPS = imageSequenceFPS;
+		file.conversionSettings.imageSequenceTransparency = imageSequenceTransparency;
 	});
 
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
@@ -570,29 +575,52 @@
 					>
 						{m["convert.archive_file.extract"]()}
 					</button>
-					<div class="flex items-center gap-3">
-						<div
-							class="flex items-center gap-2 flex-1 min-w-0 h-full"
-						>
-							<FancyInput
-								type="checkbox"
-								class="!w-fit"
-								bind:checked={imageSequence}
-							/>
-							<label for="extract-sequence" class="text-sm">
-								{m["convert.image_sequence.image_sequence"]()}
-							</label>
+					<!-- FIXME this is terrible -->
+					<div class="flex flex-col flex-wrap gap-1">
+						<!-- first row -->
+						<div class="flex items-center gap-3">
+							<div
+								class="flex items-center gap-2 flex-1 min-w-0 h-full"
+							>
+								<FancyInput
+									type="checkbox"
+									class="!w-fit"
+									bind:checked={imageSequence}
+								/>
+								<label for="extract-sequence" class="text-sm">
+									{m[
+										"convert.image_sequence.image_sequence"
+									]()}
+								</label>
+							</div>
+							<div class="w-[80px] shrink-0">
+								<FancyInput
+									thin
+									inputClass="!h-9 !text-xs"
+									type="number"
+									extension="FPS"
+									placeholder="15"
+									bind:value={imageSequenceFPS}
+									disabled={!imageSequence}
+								/>
+							</div>
 						</div>
-						<div class="w-[80px] shrink-0">
-							<FancyInput
-								thin
-								inputClass="!h-9 !text-xs"
-								type="number"
-								extension="FPS"
-								placeholder="15"
-								bind:value={imageSequenceFPS}
-								disabled={!imageSequence}
-							/>
+
+						<!-- second row -->
+						<div class="flex items-center gap-3">
+							<div
+								class="flex items-center gap-2 flex-1 min-w-0 h-full"
+							>
+								<FancyInput
+									type="checkbox"
+									class="!w-fit"
+									bind:checked={imageSequenceTransparency}
+								/>
+								<label for="extract-sequence" class="text-sm">
+									{m["convert.image_sequence.transparency"]()}
+								</label>
+							</div>
+							<!-- second thing -->
 						</div>
 					</div>
 				</div>

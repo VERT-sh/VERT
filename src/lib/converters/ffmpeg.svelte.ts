@@ -7,7 +7,6 @@ import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
 import {
-	videoFormats,
 	getCodecs,
 	toArgs,
 	lossless,
@@ -19,6 +18,7 @@ import type {
 	SettingDefinition,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
+import { videoFormats } from "./vertd.svelte";
 
 // TODO: differentiate in UI? (not native formats)
 export class FFmpegConverter extends Converter {
@@ -58,7 +58,7 @@ export class FFmpegConverter extends Converter {
 		new FormatInfo("m4b", true, true),
 		new FormatInfo("voc", true, true),
 		new FormatInfo("weba", true, true),
-		...videoFormats.map((f) => new FormatInfo(f, true, true, false, 0)),
+		...videoFormats.map((f: string) => new FormatInfo(f, true, true, false, 0)),
 	];
 
 	public readonly reportsProgress = true;
@@ -194,7 +194,7 @@ export class FFmpegConverter extends Converter {
 		if (!to.startsWith(".")) to = `.${to}`;
 
 		const conversionSettings =
-			Object.keys(settings).length > 0
+			Object.keys(settings).length > 5 // TODO: find better way to do this lmfao, rn we are just assuming all settings are present if there's at least 5 keys but ts bad
 				? settings
 				: await this.getDefaultSettings(); // use defaults if not provided
 

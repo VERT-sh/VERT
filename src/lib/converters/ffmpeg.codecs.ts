@@ -5,9 +5,6 @@ export const CONVERSION_BITRATES = ["auto", "custom", 16, 32, 64, 96, 128, 160, 
 export const SAMPLE_RATES = ["auto", "custom", 8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000, 96000,] as const;
 
 // prettier-ignore
-export const videoFormats = ["mkv", "mp4", "avi", "mov", "webm", "ts", "mts", "m2ts", "wmv", "mpg", "mpeg", "flv", "f4v", "vob", "m4v", "3gp", "3g2", "mxf", "ogv", "rm", "rmvb", "divx"];
-
-// prettier-ignore
 export const animatedImageFormats = ["gif", "webp", "apng"];
 
 // prettier-ignore
@@ -30,6 +27,7 @@ export const getCodecs = (
 		case ".m4v":
 		case ".3gp":
 		case ".3g2":
+		case ".nut":
 			return { video: "libx264", audio: "aac" };
 		case ".wmv":
 			return { video: "wmv2", audio: "wmav2" };
@@ -48,6 +46,14 @@ export const getCodecs = (
 			return { video: "mpeg2video", audio: "mp2" };
 		case ".mxf":
 			return { video: "mpeg2video", audio: "pcm_s16le" };
+		case ".h264":
+			return { video: "libx264", audio: "none" };
+		case ".swf":
+			return { video: "flv1", audio: "mp3" };
+		case ".amv":
+			return { video: "amv", audio: "adpcm_ima_amv" };
+		case ".asf":
+			return { video: "wmv2", audio: "wmav2" };
 
 		// audio
 		case ".mp3":
@@ -76,7 +82,7 @@ export const getCodecs = (
 		// animated images
 		case ".gif":
 		case ".webp":
-			//case ".apng":
+		case ".apng":
 			return { video: ext.slice(1), audio: "none" };
 
 		default:

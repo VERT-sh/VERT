@@ -61,7 +61,8 @@
 		},
 		"image_sequence": {
 			"image_sequence": "Image Sequence",
-			"fps": "FPS"
+			"fps": "FPS",
+			"transparency": "Transparency"
 		},
 		"large_file_warning": "Due to browser / device limitations, video to audio conversion is disabled for this file as it is larger than {limit}GB. We recommend using Firefox or Safari for files of this size since they have less limitations.",
 		"external_warning": {

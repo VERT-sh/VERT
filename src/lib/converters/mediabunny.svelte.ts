@@ -492,7 +492,7 @@ export class MediabunnyConverter extends Converter {
 		});
 
 		const conversionSettings =
-			Object.keys(settings).length > 0
+			Object.keys(settings).length > 5
 				? settings // user-provided settings
 				: await this.getDefaultSettings(file); // use defaults if not provided
 

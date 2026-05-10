@@ -302,7 +302,7 @@ export class MagickConverter extends Converter {
 
 			// every other format handled by magick worker
 			const conversionSettings = JSON.stringify(
-				Object.keys(settings).length > 0
+				Object.keys(settings).length > 5
 					? settings // user-provided settings
 					: await this.getDefaultSettings(input), // use defaults if not provided
 			);

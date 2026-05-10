@@ -339,6 +339,11 @@ const downloadFile = async (url: string, file: VertFile): Promise<Blob> => {
 	});
 };
 
+// prettier-ignore
+export const videoFormats = ["mp4", "mkv", "webm", "avi", "wmv", "mov", "gif", "apng", "webp", "mts", "ts", "m2ts", "mpg", "mpeg", "flv", "f4v", "vob", "m4v", "3gp", "3g2", "mxf", "ogv", "rm", "rmvb", "h264", "divx", "swf", "amv", "asf", "nut"];
+const cantEncode = ["rm", "rmvb"];
+const cantDecode = [""];
+
 export class VertdConverter extends Converter {
 	public name = "vertd";
 	public ready = $state(false);
@@ -358,36 +363,12 @@ export class VertdConverter extends Converter {
 	private cancelledConversions = new Set<string>();
 
 	public supportedFormats = [
-		new FormatInfo("mp4", true, true),
-		new FormatInfo("mkv", true, true),
-		new FormatInfo("webm", true, true),
-		new FormatInfo("avi", true, true),
-		new FormatInfo("wmv", true, true),
-		new FormatInfo("mov", true, true),
-		new FormatInfo("gif", true, true),
-		new FormatInfo("apng", true, true),
-		new FormatInfo("webp", true, true),
-		new FormatInfo("mts", true, true),
-		new FormatInfo("ts", true, true),
-		new FormatInfo("m2ts", true, true),
-		new FormatInfo("mpg", true, true),
-		new FormatInfo("mpeg", true, true),
-		new FormatInfo("flv", true, true),
-		new FormatInfo("f4v", true, true),
-		new FormatInfo("vob", true, true),
-		new FormatInfo("m4v", true, true),
-		new FormatInfo("3gp", true, true),
-		new FormatInfo("3g2", true, true),
-		new FormatInfo("mxf", true, true),
-		new FormatInfo("ogv", true, true),
-		new FormatInfo("rm", true, false),
-		new FormatInfo("rmvb", true, false),
-		new FormatInfo("h264", true, true),
-		new FormatInfo("divx", true, true),
-		new FormatInfo("swf", true, true),
-		new FormatInfo("amv", true, true),
-		new FormatInfo("asf", true, true),
-		new FormatInfo("nut", true, true),
+		...videoFormats
+			.map((f: string) => new FormatInfo(f, true, true, true, 0))
+			.filter((format) => !cantEncode.includes(format.name.slice(1)))
+			.filter((format) => !cantDecode.includes(format.name.slice(1))),
+		...cantEncode.map((f) => new FormatInfo(f, true, false, true, 0)),
+		...cantDecode.map((f) => new FormatInfo(f, false, true, true, 0)),
 	];
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -404,6 +385,7 @@ export class VertdConverter extends Converter {
 		this.log("created converter");
 		this.log("not rly sure how to implement this :P");
 		this.status = "ready";
+		this.log(JSON.stringify(this.supportedFormats, null, 2));
 	}
 
 	private async getServerSizeLimit(apiUrl: string): Promise<number | null> {
@@ -763,7 +745,7 @@ export class VertdConverter extends Converter {
 
 		let fileUpload = input;
 		const conversionSettings = // vertd expects object not string json
-			Object.keys(settings).length > 0
+			Object.keys(settings).length > 5
 				? settings // user-provided settings
 				: await this.getDefaultSettings(input); // use defaults if not provided
 
