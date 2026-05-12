@@ -58,7 +58,9 @@ export class FFmpegConverter extends Converter {
 		new FormatInfo("m4b", true, true),
 		new FormatInfo("voc", true, true),
 		new FormatInfo("weba", true, true),
-		...videoFormats.map((f: string) => new FormatInfo(f, true, true, false, 0)),
+		...videoFormats.map(
+			(f: string) => new FormatInfo(f, true, true, false, 0),
+		),
 	];
 
 	public readonly reportsProgress = true;
@@ -194,9 +196,9 @@ export class FFmpegConverter extends Converter {
 		if (!to.startsWith(".")) to = `.${to}`;
 
 		const conversionSettings =
-			Object.keys(settings).length > 5 // TODO: find better way to do this lmfao, rn we are just assuming all settings are present if there's at least 5 keys but ts bad
+			Object.keys(settings).length > 4 // TODO: find better way to do this lmfao, rn we are just assuming all settings are present if there's at least 5 keys but ts bad
 				? settings
-				: await this.getDefaultSettings(); // use defaults if not provided
+				: Object.assign(settings, await this.getDefaultSettings()); // use defaults if not provided
 
 		const isAlac = to === ".alac";
 		if (isAlac) to = ".m4a";

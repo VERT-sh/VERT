@@ -745,10 +745,9 @@ export class VertdConverter extends Converter {
 
 		let fileUpload = input;
 		const conversionSettings = // vertd expects object not string json
-			Object.keys(settings).length > 5
+			Object.keys(settings).length > 4
 				? settings // user-provided settings
-				: await this.getDefaultSettings(input); // use defaults if not provided
-
+				: Object.assign(settings, await this.getDefaultSettings(input)); // use defaults if not provided
 		// if converting animated webp to video, first convert to gif
 		// ffmpeg (in vertd) doesn't support decoding animated webp still.. while supporting encoding animated webp for some reason
 		// https://trac.ffmpeg.org/ticket/4907
