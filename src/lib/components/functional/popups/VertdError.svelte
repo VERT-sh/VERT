@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-	import { vertdFetch } from "$lib/converters/vertd.svelte";
+	import { vertdFetch } from "$lib/converters/vertd/vertd.svelte";
 
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager, type ToastProps } from "$lib/util/toast.svelte";

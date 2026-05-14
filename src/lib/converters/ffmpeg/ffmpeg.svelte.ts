@@ -1,5 +1,5 @@
 import { VertFile } from "$lib/types";
-import { Converter, FormatInfo } from "./converter.svelte";
+import { Converter, FormatInfo } from "../converter.svelte";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { browser } from "$app/environment";
 import { error, log } from "$lib/util/logger";
@@ -18,7 +18,7 @@ import type {
 	SettingDefinition,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
-import { videoFormats } from "./vertd.svelte";
+import { videoFormats } from "../vertd/vertd.svelte";
 
 // TODO: differentiate in UI? (not native formats)
 export class FFmpegConverter extends Converter {

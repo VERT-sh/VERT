@@ -3,7 +3,7 @@ import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import { VertFile, type WorkerMessage } from "$lib/types";
 import MagickWorker from "$lib/workers/magick?worker&url";
-import { Converter, FormatInfo } from "./converter.svelte";
+import { Converter, FormatInfo } from "../converter.svelte";
 import { imageFormats } from "./magick-automated";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";

@@ -1,11 +1,11 @@
 import type { Categories } from "$lib/types";
 import type { Converter } from "./converter.svelte";
-import { FFmpegConverter } from "./ffmpeg.svelte";
-import { PandocConverter } from "./pandoc.svelte";
-import { VertdConverter } from "./vertd.svelte";
-import { MagickConverter } from "./magick.svelte";
+import { FFmpegConverter } from "./ffmpeg/ffmpeg.svelte";
+import { PandocConverter } from "./pandoc/pandoc.svelte";
+import { VertdConverter } from "./vertd/vertd.svelte";
+import { MagickConverter } from "./magick/magick.svelte";
+import { MediabunnyConverter } from "./mediabunny/mediabunny.svelte";
 import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
-import { MediabunnyConverter } from "./mediabunny.svelte";
 
 // TODO: change this to include category with initialization to replace converterCategories and maybe categories as well
 const getConverters = (): Converter[] => {

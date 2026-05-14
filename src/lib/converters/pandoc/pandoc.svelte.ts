@@ -1,5 +1,5 @@
 import { VertFile, type WorkerMessage } from "$lib/types";
-import { Converter, FormatInfo } from "./converter.svelte";
+import { Converter, FormatInfo } from "../converter.svelte";
 import { browser } from "$app/environment";
 import PandocWorker from "$lib/workers/pandoc?worker&url";
 import { error, log } from "$lib/util/logger";

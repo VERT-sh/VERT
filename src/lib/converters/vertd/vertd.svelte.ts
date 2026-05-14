@@ -7,15 +7,15 @@ import {
 	getVertdCustomHeaders,
 } from "$lib/sections/settings/vertdSettings.svelte";
 import { VertFile } from "$lib/types";
-import { Converter, FormatInfo } from "./converter.svelte";
+import { Converter, FormatInfo } from "../converter.svelte";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
 import { ToastManager } from "$lib/util/toast.svelte";
-import { converters } from "./index";
+import { converters } from "../";
 import type {
 	SettingDefinition,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
-import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.codecs";
+import { CONVERSION_BITRATES, SAMPLE_RATES } from "../ffmpeg/ffmpeg.codecs";
 import { formatBytes } from "$lib/util/file";
 
 interface UploadResponse {
@@ -385,7 +385,6 @@ export class VertdConverter extends Converter {
 		this.log("created converter");
 		this.log("not rly sure how to implement this :P");
 		this.status = "ready";
-		this.log(JSON.stringify(this.supportedFormats, null, 2));
 	}
 
 	private async getServerSizeLimit(apiUrl: string): Promise<number | null> {

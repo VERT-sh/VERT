@@ -1,4 +1,4 @@
-import { FormatInfo } from "./converter.svelte";
+import { FormatInfo } from "../converter.svelte";
 
 // formats added from maya's somewhat automated testing
 // placed into this file to easily differentiate (and also clean up the main magick file)

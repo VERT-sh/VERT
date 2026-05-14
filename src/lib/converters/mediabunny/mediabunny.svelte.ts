@@ -21,14 +21,14 @@ import {
 import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
 import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import { registerFlacEncoder } from "@mediabunny/flac-encoder";
-import { Converter, FormatInfo, type WorkerStatus } from "./converter.svelte";
+import { Converter, FormatInfo, type WorkerStatus } from "../converter.svelte";
 import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import type {
 	SettingDefinition,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
-import { CONVERSION_BITRATES, SAMPLE_RATES } from "./ffmpeg.codecs";
+import { CONVERSION_BITRATES, SAMPLE_RATES } from "../ffmpeg/ffmpeg.codecs";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { browser } from "$app/environment";
 
