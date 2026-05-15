@@ -276,7 +276,6 @@
 
 	const selectOption = (option: string) => {
 		selected = option;
-		open = false;
 
 		// save user's selection to dropdownStates for this session
 		if (file) {
