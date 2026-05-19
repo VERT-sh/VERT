@@ -448,6 +448,8 @@ export const availableLocales = {
 	hr: "Hrvatski",
 	id: "Bahasa Indonesia",
 	tr: "Türkçe",
+	ru: "Русский",
+	uk: "Українська",
 	ja: "日本語",
 	ko: "한국어",
 	el: "Ελληνικά",
