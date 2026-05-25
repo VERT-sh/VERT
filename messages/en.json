@@ -70,7 +70,7 @@
 			"text": "Converting {filename} with its current settings is not supported locally and requires server-side processing. Do you want to continue?",
 			"yes": "Convert on server",
 			"no": "Cancel conversion",
-			"dont_show_again": "Don't show again"
+			"dont_show_again": "Convert & don't show again"
 		},
 		"panel": {
 			"convert_all": "Convert all",

@@ -31,16 +31,16 @@
 		</button>
 		<div class="flex gap-4">
 			<button
-				onclick={toast.additional.onProceed}
-				class="btn rounded-lg h-fit py-2 w-full bg-accent-red-alt text-white"
-			>
-				{m["convert.external_warning.yes"]()}
-			</button>
-			<button
 				onclick={toast.additional.onCancel}
 				class="btn rounded-lg h-fit py-2 w-full"
 			>
 				{m["convert.external_warning.no"]()}
+			</button>
+			<button
+				onclick={toast.additional.onProceed}
+				class="btn rounded-lg h-fit py-2 w-full bg-accent-red-alt text-white"
+			>
+				{m["convert.external_warning.yes"]()}
 			</button>
 		</div>
 	</div>
