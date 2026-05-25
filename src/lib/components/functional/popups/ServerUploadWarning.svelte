@@ -19,8 +19,8 @@
 <div class="flex flex-col gap-4">
 	<p class="text-black">
 		{m["convert.external_warning.text"]({
-            filename: toast.additional.filename,
-        })}
+			filename: toast.additional.filename,
+		})}
 	</p>
 	<div class="flex flex-col gap-2">
 		<button

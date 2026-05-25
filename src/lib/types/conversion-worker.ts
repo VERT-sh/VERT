@@ -2,12 +2,14 @@ import { VertFile } from "./file.svelte";
 
 interface ConvertMessage {
 	type: "convert";
-	input: {
-		file: File;
-		name: string;
-		from: string;
-		to: string;
-	} | VertFile;
+	input:
+		| {
+				file: File;
+				name: string;
+				from: string;
+				to: string;
+		  }
+		| VertFile;
 	to: string;
 	conversionSettings: string; // JSON stringified ConversionSettings
 }

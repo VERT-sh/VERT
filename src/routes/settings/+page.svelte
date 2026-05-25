@@ -26,7 +26,10 @@
 		}
 
 		const parsedSettings = readSavedSettings();
-		if (parsedSettings && JSON.stringify(parsedSettings) === JSON.stringify(settings))
+		if (
+			parsedSettings &&
+			JSON.stringify(parsedSettings) === JSON.stringify(settings)
+		)
 			return;
 
 		try {

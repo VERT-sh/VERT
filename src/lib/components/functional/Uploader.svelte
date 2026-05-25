@@ -75,7 +75,7 @@
 		</div>
 		<h2 class="text-center text-2xl font-semibold mt-4">
 			{m["upload.uploader.text"]({
-				action: m["upload.uploader.convert"]()
+				action: m["upload.uploader.convert"](),
 			})}
 		</h2>
 	</Panel>

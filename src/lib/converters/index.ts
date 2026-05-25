@@ -27,7 +27,7 @@ export const converterCategories = {
 	video: ["mediabunny", "vertd"],
 	audio: ["ffmpeg"],
 	doc: ["pandoc"],
-}
+};
 
 export function getConverterByFormat(format: string) {
 	for (const converter of converters) {

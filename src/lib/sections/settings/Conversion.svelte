@@ -40,11 +40,11 @@
 			<div class="flex flex-col gap-4">
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
-								{m["settings.conversion.filename.format"]()}
+						{m["settings.conversion.filename.format"]()}
 					</p>
 					<p class="text-sm text-muted font-normal">
 						{@html sanitize(
-									m["settings.conversion.filename.description"](),
+							m["settings.conversion.filename.description"](),
 						)}
 					</p>
 				</div>
@@ -87,7 +87,9 @@
 						<div class="flex flex-col gap-4">
 							<div class="flex flex-col gap-2">
 								<p class="text-base font-bold">
-									{m["settings.conversion.default_format.label"]()}
+									{m[
+										"settings.conversion.default_format.label"
+									]()}
 								</p>
 								<p class="text-sm text-muted font-normal">
 									{m[
@@ -226,7 +228,9 @@
 											size="24"
 											class="inline-block mr-2"
 										/>
-										{m["settings.conversion.metadata.keep"]()}
+										{m[
+											"settings.conversion.metadata.keep"
+										]()}
 									</button>
 
 									<button
@@ -242,7 +246,9 @@
 											size="24"
 											class="inline-block mr-2"
 										/>
-										{m["settings.conversion.metadata.remove"]()}
+										{m[
+											"settings.conversion.metadata.remove"
+										]()}
 									</button>
 								</div>
 							</div>

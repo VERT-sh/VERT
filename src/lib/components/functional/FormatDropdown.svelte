@@ -58,7 +58,8 @@
 		if (!file) return;
 		file.conversionSettings.imageSequence = imageSequence;
 		file.conversionSettings.imageSequenceFPS = imageSequenceFPS;
-		file.conversionSettings.imageSequenceTransparency = imageSequenceTransparency;
+		file.conversionSettings.imageSequenceTransparency =
+			imageSequenceTransparency;
 	});
 
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();

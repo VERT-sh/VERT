@@ -179,7 +179,8 @@
 				<div class="flex flex-col gap-2">
 					<p class="text-base font-bold">
 						{m["settings.appearance.language.title"]()}
-						{#if currentLocale !== "en"} (Language){/if}
+						{#if currentLocale !== "en"}
+							(Language){/if}
 					</p>
 					<p class="text-sm text-muted font-normal italic">
 						{m["settings.appearance.language.description"]()}

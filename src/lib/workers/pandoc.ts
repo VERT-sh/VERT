@@ -279,7 +279,10 @@ const pandocToFiles = (entries: PandocEntries, parent = ""): File[] => {
 			const nestedFiles = pandocToFiles(entry.entries, fullPath);
 			flattened.push(...nestedFiles);
 		} else {
-			const file = new File([new Uint8Array(Array.from(entry.data))], fullPath);
+			const file = new File(
+				[new Uint8Array(Array.from(entry.data))],
+				fullPath,
+			);
 			flattened.push(file);
 		}
 	}

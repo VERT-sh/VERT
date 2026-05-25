@@ -1,7 +1,9 @@
 import { browser } from "$app/environment";
 import { error } from "$lib/util/logger";
 
-export function readSettings<T extends object = Record<string, unknown>>(): Partial<T> {
+export function readSettings<
+	T extends object = Record<string, unknown>,
+>(): Partial<T> {
 	if (!browser) return {};
 
 	const raw = localStorage.getItem("settings");

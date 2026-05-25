@@ -48,12 +48,14 @@
 			</a>
 		</div>
 		<p class="text-muted">
-			{@html sanitize(link(
-				"discord_link",
-				m["about.sponsors.description"](),
-				DISCORD_URL,
-				true
-			))}
+			{@html sanitize(
+				link(
+					"discord_link",
+					m["about.sponsors.description"](),
+					DISCORD_URL,
+					true,
+				),
+			)}
 			<span class="inline-block mx-[2px] relative top-[2px]">
 				<button
 					id="email"

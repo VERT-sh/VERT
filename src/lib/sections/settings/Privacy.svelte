@@ -76,7 +76,9 @@
 			m["settings.privacy.site_data.clear_all_data_confirm"](),
 			[
 				{
-					text: m["settings.privacy.site_data.clear_all_data_cancel"](),
+					text: m[
+						"settings.privacy.site_data.clear_all_data_cancel"
+					](),
 					action: () => {},
 				},
 				{
@@ -95,7 +97,9 @@
 							ToastManager.add({
 								type: "success",
 								message:
-									m["settings.privacy.site_data.all_data_cleared"](),
+									m[
+										"settings.privacy.site_data.all_data_cleared"
+									](),
 							});
 						} catch (err) {
 							error(

@@ -11,11 +11,11 @@ export interface SettingDefinition {
 	min?: number;
 	max?: number;
 	step?: number;
-	options?: Array<{ value: any; label: any; }>; // for select/range types
+	options?: Array<{ value: any; label: any }>; // for select/range types
 	description?: string;
 	hasCustomInput?: boolean; // for select types with a "custom" option
 	customInputKey?: string; // key to use for custom input value in settings object
-    forceFullWidth?: boolean; // force setting to take up full width (usually grid 2)
+	forceFullWidth?: boolean; // force setting to take up full width (usually grid 2)
 }
 
 export interface ConversionSettings {
