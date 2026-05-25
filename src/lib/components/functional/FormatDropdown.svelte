@@ -614,6 +614,7 @@
 									type="checkbox"
 									class="!w-fit"
 									bind:checked={imageSequenceTransparency}
+									disabled={!imageSequence}
 								/>
 								<label for="extract-sequence" class="text-sm">
 									{m["convert.image_sequence.transparency"]()}

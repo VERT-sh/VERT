@@ -112,11 +112,6 @@ export const toArgs = (ext: string, isAlac: boolean = false): string[] => {
 			break;
 		}
 
-		case "libvpx": {
-			args.push("-c:v", "libvpx-vp9");
-			break;
-		}
-
 		case "mpeg2video": {
 			// for mpeg, mpg, vob, mxf
 			if (ext === ".mxf") args.push("-ar", "48000"); // force 48kHz sample rate

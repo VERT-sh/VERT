@@ -22,7 +22,7 @@ export function buildImageSequenceCommand(
 	const isAnimatedImage = animatedImageFormats.includes(outputFormat);
 	const enableTransparency = settings.imageSequenceTransparency ?? false;
 
-	if (videoFormats.includes(outputFormat)) {
+	if (videoFormats.includes(outputFormat) && !isAnimatedImage) {
 		const fpsFilter = `fps=${settings.imageSequenceFPS || 15}`;
 		const blackCompositeFilter =
 			`color=c=black,format=rgb24[bg];` +
@@ -61,7 +61,7 @@ export function buildImageSequenceCommand(
 			baseArgs.push("-plays", "0");
 			if (enableTransparency) baseArgs.push("-pix_fmt", "rgba");
 		} else if (outputFormat === "webp") {
-			if (enableTransparency) baseArgs.push("-pix_fmt", "rgba");
+			if (enableTransparency) baseArgs.push("-pix_fmt", "bgra");
 		}
 	} else {
 		const pixFmt = enableTransparency ? "yuva420p" : "yuv420p";
