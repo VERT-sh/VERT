@@ -65,22 +65,12 @@ const handleMessage = async (
 			// special ico handling to split them all into separate images
 			if (from === ".ico") {
 				const imgs = MagickImageCollection.create();
-
-				while (true) {
-					try {
-						const img = MagickImage.create(
-							new Uint8Array(buffer),
-							new MagickReadSettings({
-								format: MagickFormat.Ico,
-								frameIndex: imgs.length,
-							}),
-						);
-						imgs.push(img);
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-					} catch (_) {
-						break;
-					}
-				}
+				imgs.read(
+					new Uint8Array(buffer),
+					new MagickReadSettings({
+						format: MagickFormat.Ico,
+					}),
+				);
 
 				if (imgs.length === 0) {
 					return {
