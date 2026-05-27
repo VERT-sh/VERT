@@ -136,9 +136,7 @@
 		);
 
 		if (imageSequence) {
-			// this is to allow image sequence -> video on vertd (soon:tm:)
-			// though i feel like this could also be done with ffmpeg-wasm in the browser? or mediabunny?
-			// TODO: image sequence locally w/ ffmpeg-wasm or mediabunny
+			// TODO: image sequence -> video on vertd?
 			cats.push("video");
 		} else {
 			// handle special cases

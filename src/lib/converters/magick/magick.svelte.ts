@@ -32,8 +32,6 @@ export class MagickConverter extends Converter {
 		new FormatInfo("avif", true, true),
 		new FormatInfo("heic", true, false), // seems to be unreliable? HEIC/HEIF is very weird if it will actually work
 		new FormatInfo("heif", true, false),
-		// TODO: .ico files can encode multiple images at various
-		// sizes, bitdepths, etc. we should support that in future
 		new FormatInfo("ico", true, true),
 		new FormatInfo("bmp", true, true),
 		new FormatInfo("cur", true, true),
@@ -125,6 +123,33 @@ export class MagickConverter extends Converter {
 	): Promise<SettingDefinition[]> {
 		// images - quality/compression/quantize/interlace/depth-DPI, resize, crop, rotate, flip/flop, autoOrient?, color space/bit depth, transparency settings
 		const global = Settings.instance.settings;
+		const settings: SettingDefinition[] = [];
+
+		let supportsMetadata = true;
+		let supportsTransparency = true;
+
+		const toIcon = input.to === ".ico";
+
+		// TODO: surely there's a better way to do this lol
+		switch (input.from) {
+			case ".jpg":
+			case ".jpeg":
+			case ".jfif":
+				supportsTransparency = false;
+				break;
+		}
+
+		switch (input.to) {
+			case ".ico":
+				supportsMetadata = false;
+				break;
+
+			case ".jpg":
+			case ".jpeg":
+			case ".jfif":
+				supportsTransparency = false;
+				break;
+		}
 
 		const quality: SettingDefinition = {
 			key: "quality",
@@ -134,7 +159,33 @@ export class MagickConverter extends Converter {
 			min: 0,
 			max: 100,
 		};
+		settings.push(quality);
 
+		// TODO: surely there's a better way to do this as well
+		const iconResolutions = [
+			{ value: "16x16", label: "16x16" },
+			{ value: "32x32", label: "32x32" },
+			{ value: "48x48", label: "48x48" },
+			{ value: "64x64", label: "64x64" },
+			{ value: "128x128", label: "128x128" },
+			{ value: "256x256", label: "256x256" },
+			{ value: "512x512", label: "512x512" },
+		];
+		const commonResolutions = [
+			{
+				value: "custom",
+				label: m["convert.settings.common.custom"](),
+			},
+			{ value: "426x240", label: "426x240" },
+			{ value: "640x360", label: "640x360" },
+			{ value: "854x480", label: "854x480" },
+			{ value: "720x1280", label: "720x1280 (V)" },
+			{ value: "1280x720", label: "1280x720" },
+			{ value: "1080x1920", label: "1080x1920 (V)" },
+			{ value: "1920x1080", label: "1920x1080" },
+			{ value: "2160x3840", label: "2160x3840 (V)" },
+			{ value: "3840x2160", label: "3840x2160" },
+		];
 		const resolution: SettingDefinition = {
 			key: "resolution",
 			label: m["convert.settings.video.resolution.label"](),
@@ -142,24 +193,21 @@ export class MagickConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				{
-					value: "custom",
-					label: m["convert.settings.common.custom"](),
-				},
-				{ value: "426x240", label: "426x240" },
-				{ value: "640x360", label: "640x360" },
-				{ value: "854x480", label: "854x480" },
-				{ value: "720x1280", label: "720x1280 (V)" },
-				{ value: "1280x720", label: "1280x720" },
-				{ value: "1080x1920", label: "1080x1920 (V)" },
-				{ value: "1920x1080", label: "1920x1080" },
-				{ value: "2160x3840", label: "2160x3840 (V)" },
-				{ value: "3840x2160", label: "3840x2160" },
+				...(toIcon ? iconResolutions : commonResolutions),
 			],
 			hasCustomInput: true,
 			customInputKey: "customResolution",
 			placeholder: m["convert.settings.video.resolution.placeholder"](),
 		};
+		settings.push(resolution);
+
+		const singleSize: SettingDefinition = {
+			key: "singleSize",
+			label: m["convert.settings.image.single_size"](),
+			type: "boolean",
+			default: false,
+		};
+		if (toIcon) settings.push(singleSize);
 
 		const depth: SettingDefinition = {
 			key: "depth",
@@ -174,6 +222,7 @@ export class MagickConverter extends Converter {
 				{ value: "32", label: "32-bit" },
 			],
 		};
+		settings.push(depth);
 
 		const colorSpace: SettingDefinition = {
 			key: "colorSpace",
@@ -193,21 +242,15 @@ export class MagickConverter extends Converter {
 				{ value: "gray", label: "Grayscale" },
 			],
 		};
+		settings.push(colorSpace);
 
-		// TODO: check other formats for transparency support
-		const fromJpeg =
-			input.from === ".jpg" ||
-			input.from === ".jpeg" ||
-			input.from === ".jfif";
-		const toJpeg =
-			input.to === ".jpg" || input.to === ".jpeg" || input.to === ".jfif";
 		const transparency: SettingDefinition = {
 			key: "transparency",
 			label: m["convert.settings.image.transparency"](),
 			type: "boolean",
 			default: true,
-			disabled: fromJpeg || toJpeg,
 		};
+		if (supportsTransparency) settings.push(transparency);
 
 		const metadata: SettingDefinition = {
 			key: "metadata",
@@ -215,10 +258,11 @@ export class MagickConverter extends Converter {
 			type: "boolean",
 			default: global.metadata ?? true,
 		};
+		if (supportsMetadata) settings.push(metadata);
 
 		// resize, crop, rotate - prob want a ui
 
-		return [quality, depth, colorSpace, resolution, transparency, metadata];
+		return settings;
 	}
 
 	public async getDefaultSettings(

@@ -282,9 +282,10 @@ const magickConvert = async (
 ) => {
 	let fmt = to.slice(1).toUpperCase();
 	if (fmt === "JFIF") fmt = "JPEG";
+	const singleSize = Boolean(conversionSettings?.singleSize);
 
 	const resolution = conversionSettings.resolution as string;
-	if (resolution && resolution !== "auto") {
+	if (!singleSize && resolution && resolution !== "auto") {
 		const actualResolution =
 			resolution === "custom"
 				? (conversionSettings.customResolution as string)
@@ -299,19 +300,57 @@ const magickConvert = async (
 		}
 	}
 
-	// ICO size clamp to avoid WidthOrHeightExceedsLimit
-	if (fmt === "ICO") {
-		const max = 256;
-		const w = img.width;
-		const h = img.height;
+	if (fmt === "ICO") && !singleSize) {
+		const standardSizes = [16, 24, 32, 48, 64, 128, 256, 512];
 
-		if (w > max || h > max) {
-			const scale = max / Math.max(w, h);
-			const newW = Math.max(1, Math.round(w * scale));
-			const newH = Math.max(1, Math.round(h * scale));
-
-			img.resize(newW, newH);
+		let desired = 0;
+		if (resolution && resolution !== "auto") {
+			const actualResolution =
+				resolution === "custom"
+					? (conversionSettings.customResolution as string)
+					: resolution;
+			const [wsel, hsel] = (actualResolution || "")
+				.split("x")
+				.map((d: string) => parseInt(d) || 0);
+			desired = Math.max(wsel || 0, hsel || 0);
+		} else {
+			desired = Math.max(img.width || 0, img.height || 0);
 		}
+
+		if (desired <= 0) desired = Math.max(...standardSizes);
+		if (desired > Math.max(...standardSizes)) desired = Math.max(...standardSizes);
+
+		const sizes = standardSizes.filter((s) => s <= desired);
+		if (sizes.length === 0) sizes.push(Math.min(...standardSizes));
+
+		const sourcePng = await new Promise<Uint8Array>((resolve) => {
+			img.write(MagickFormat.Png, (o: Uint8Array) => resolve(structuredClone(o)));
+		});
+
+		console.log(`encoding sizes for ico: ${sizes.join(", ")}`);
+
+		return await new Promise<Uint8Array>((resolve) => {
+			MagickImageCollection.use((collection) => {
+				for (const size of sizes) {
+					const variant = MagickImage.create(
+						sourcePng,
+						new MagickReadSettings({ format: MagickFormat.Png }),
+					);
+
+					const scale = size / Math.max(variant.width, variant.height);
+					const newW = Math.max(1, Math.round(variant.width * scale));
+					const newH = Math.max(1, Math.round(variant.height * scale));
+					variant.resize(newW, newH);
+
+					collection.push(variant);
+					console.log(`added size ${size}x${size} to MagickImageCollection`);
+				}
+
+				collection.write(fmt as unknown as MagickFormat, (o: Uint8Array) => {
+					resolve(structuredClone(o));
+				});
+			});
+		});
 	}
 
 	const result = await new Promise<Uint8Array>((resolve, reject) => {

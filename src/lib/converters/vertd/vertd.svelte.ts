@@ -340,9 +340,9 @@ const downloadFile = async (url: string, file: VertFile): Promise<Blob> => {
 };
 
 // prettier-ignore
-export const videoFormats = ["mp4", "mkv", "webm", "avi", "wmv", "mov", "gif", "apng", "webp", "mts", "ts", "m2ts", "mpg", "mpeg", "flv", "f4v", "vob", "m4v", "3gp", "3g2", "mxf", "ogv", "rm", "rmvb", "h264", "divx", "swf", "amv", "asf", "nut"];
-const cantEncode = ["rm", "rmvb"];
-const cantDecode = [""];
+export const videoFormats: string[] = ["mp4", "mkv", "webm", "avi", "wmv", "mov", "gif", "apng", "webp", "mts", "ts", "m2ts", "mpg", "mpeg", "flv", "f4v", "vob", "m4v", "3gp", "3g2", "mxf", "ogv", "rm", "rmvb", "h264", "divx", "swf", "amv", "asf", "nut"];
+const cantEncode: string[] = ["rm", "rmvb"];
+const cantDecode: string[] = [];
 
 export class VertdConverter extends Converter {
 	public name = "vertd";

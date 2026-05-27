@@ -101,7 +101,8 @@
 				"quality": "Quality",
 				"depth": "Color depth",
 				"color_space": "Color space",
-				"transparency": "Transparency"
+				"transparency": "Transparency",
+				"single_size": "Single size image"
 			},
 			"audio": {
 				"bitrate": {

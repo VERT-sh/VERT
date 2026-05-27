@@ -63,6 +63,7 @@
 	const showDetails = () => {
 		addDialog(
 			m["convert.errors.vertd.details.view"](),
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			VertdErrorDetails as any,
 			[
 				{
