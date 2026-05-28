@@ -8,6 +8,7 @@ This file covers frequently asked questions.
 - [What about analytics?](#what-about-analytics)
 - [What libraries does VERT use?](#what-libraries-does-vert-use)
 - [Is it possible to fully prevent VERT from making requests to external services?](#is-it-possible-to-fully-prevent-vert-from-making-requests-to-external-services)
+- [What about RAW camera files (DNG, NEF, CR2, etc.)?](#what-about-raw-camera-files-dng-nef-cr2-etc)
 
 ### Why VERT?
 
@@ -34,4 +35,9 @@ Yes! If you would prefer VERT to not make any requests to external services (vid
 The only external request VERT will make with this option is to `cdn.jsdelivr.net`, which is used to download FFmpeg's WebAssembly build.
 
 ### What libraries does VERT use?
+
 VERT uses FFmpeg for audio and video conversion, imagemagick for images and Pandoc for documents. A big thanks to them for maintaining such excellent libraries for so many years.
+
+### What about RAW camera files (DNG, NEF, CR2, etc.)?
+
+ImageMagick's WebAssembly build doesn't include the RAW demosaicing code (libraw/dcraw), so VERT can't develop sensor data directly in the browser. Instead, VERT extracts the full-resolution JPEG preview that cameras embed inside the RAW file and converts that. In practice this gives you the same image the camera would have produced as a JPEG — white balance, tone curve and all — which is what most people want. If a RAW file happens to have no embedded preview, the conversion will fail with a friendly error rather than producing a garbled image.
