@@ -8,6 +8,7 @@ import {
 } from "@imagemagick/magick-wasm";
 import { makeZip } from "client-zip";
 import { parseAni } from "$lib/util/parse/ani";
+import { extractRawPreview } from "$lib/util/parse/raw";
 import { parseIcns } from "vert-wasm";
 import type { WorkerMessage } from "$lib/types";
 
@@ -241,12 +242,46 @@ const handleMessage = async (
 				};
 			}
 
+			// Camera RAW formats: magick-wasm has no libraw/dcraw, so
+			// feeding it sensor data yields a rainbow CFA mosaic.
+			// Instead, extract the embedded JPEG preview that DNG (and
+			// nearly every other TIFF-based RAW) carries, and let the
+			// rest of the pipeline convert that.
+			const RAW_FORMATS = new Set([
+				"dng", "nef", "cr2", "arw", "raf", "orf", "pef", "rw2",
+				"nrw", "srw", "3fr", "erf", "mef", "mos", "mrw", "sr2",
+				"srf", "dcr", "crw", "raw",
+			]);
+			let readBuffer = new Uint8Array(buffer);
+			let readFrom = from;
+			let fromRaw = false;
+			if (RAW_FORMATS.has(from.slice(1))) {
+				try {
+					readBuffer = extractRawPreview(readBuffer);
+					readFrom = ".jpeg";
+					fromRaw = true;
+				} catch (e) {
+					return {
+						type: "error",
+						error: `Could not convert RAW file: ${(e as Error).message}`,
+					};
+				}
+			}
+
 			const img = MagickImage.create(
-				new Uint8Array(buffer),
+				readBuffer,
 				new MagickReadSettings({
-					format: from.slice(1).toUpperCase() as MagickFormat,
+					format: readFrom.slice(1).toUpperCase() as MagickFormat,
 				}),
 			);
+
+			// The embedded JPEG preview from a RAW carries an EXIF
+			// Orientation tag (e.g. portrait phone shots store landscape
+			// pixels + an "rotate 90" hint). JPEG output preserves that
+			// tag, but PNG/WebP/etc. have no orientation metadata --
+			// bake the rotation into the pixels so every target format
+			// looks right.
+			if (fromRaw) img.autoOrient();
 
 			const converted = await magickConvert(
 				img,
