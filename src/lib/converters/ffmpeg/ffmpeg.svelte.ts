@@ -14,6 +14,12 @@ import {
 	SAMPLE_RATES,
 } from "./ffmpeg.codecs";
 import { buildImageSequenceCommand } from "./ffmpeg.animated";
+import {
+	ffprobeValue,
+	detectAudioBitrate,
+	detectAudioSampleRate,
+} from "./utils/ffprobe";
+import { extractAlbumArt, avWithArt, avWithBg } from "./utils/ffmpeg";
 import type {
 	SettingDefinition,
 	ConversionSettings,
@@ -40,6 +46,7 @@ export class FFmpegConverter extends Converter {
 		new FormatInfo("alac", true, true), // outputted as m4a
 		new FormatInfo("m4a", true, true), // can be alac
 		new FormatInfo("caf", true, false), // can be alac
+		new FormatInfo("qoa", true, true),
 		new FormatInfo("wma", true, true),
 		new FormatInfo("amr", true, true),
 		new FormatInfo("ac3", true, true),
@@ -239,36 +246,62 @@ export class FFmpegConverter extends Converter {
 		ffmpeg.on("log", errorListener);
 
 		try {
-			const buf = new Uint8Array(await input.file.arrayBuffer());
+			let buf = new Uint8Array(await input.file.arrayBuffer());
+
+			if (input.from === ".qoa") {
+				const { decodeQoa, encodeWav } =
+					await import("$lib/util/parse/qoa");
+				const decoded = decodeQoa(buf);
+				buf = new Uint8Array(
+					encodeWav(
+						decoded.pcm,
+						decoded.sampleRate,
+						decoded.channels,
+						true,
+					),
+				);
+			}
+
 			await ffmpeg.writeFile("input", buf);
 			this.log(`wrote ${input.name} to ffmpeg virtual fs`);
 
-			const command = await this.buildConversionCommand(
+			const specialHandled = await handleSpecialOutput(
 				ffmpeg,
 				input,
 				to,
 				conversionSettings,
-				isAlac,
+				conversionError,
 			);
-			this.log(`FFmpeg command: ${command.join(" ")}`);
-			await ffmpeg.exec(command);
-			this.log("executed ffmpeg command");
+			if (specialHandled) {
+				return specialHandled;
+			} else {
+				const command = await this.buildConversionCommand(
+					ffmpeg,
+					input,
+					to,
+					conversionSettings,
+					isAlac,
+				);
+				this.log(`FFmpeg command: ${command.join(" ")}`);
+				await ffmpeg.exec(command);
+				this.log("executed ffmpeg command");
 
-			if (conversionError) throw new Error(conversionError);
+				if (conversionError) throw new Error(conversionError);
 
-			const output = (await ffmpeg.readFile(
-				"output" + to,
-			)) as unknown as Uint8Array;
+				const output = (await ffmpeg.readFile(
+					"output" + to,
+				)) as unknown as Uint8Array;
 
-			if (!output || output.length === 0)
-				throw new Error("empty file returned");
+				if (!output || output.length === 0)
+					throw new Error("empty file returned");
 
-			const outputFileName =
-				input.name.split(".").slice(0, -1).join(".") + to;
-			this.log(`read ${outputFileName} from ffmpeg virtual fs`);
+				const outputFileName =
+					input.name.split(".").slice(0, -1).join(".") + to;
+				this.log(`read ${outputFileName} from ffmpeg virtual fs`);
 
-			const outBuf = new Uint8Array(output).buffer.slice(0);
-			return new VertFile(new File([outBuf], outputFileName), to);
+				const outBuf = new Uint8Array(output).buffer.slice(0);
+				return new VertFile(new File([outBuf], outputFileName), to);
+			}
 		} finally {
 			ffmpeg.off("log", errorListener);
 			this.activeConversions.delete(input.id);
@@ -313,82 +346,6 @@ export class FFmpegConverter extends Converter {
 		});
 
 		return ffmpeg;
-	}
-
-	private async detectAudioBitrate(ffmpeg: FFmpeg): Promise<number | null> {
-		const args = [
-			"-v",
-			"quiet",
-			"-select_streams",
-			"a:0",
-			"-show_entries",
-			"stream=bit_rate",
-			"-of",
-			"default=noprint_wrappers=1:nokey=1",
-			"input",
-		];
-
-		try {
-			let bitrate: number | null = null;
-
-			const bitrateListener = (event: { message: string }) => {
-				if (bitrate !== null) return;
-				const n = parseInt(event.message.trim(), 10);
-				if (!n) return;
-				bitrate = Math.round(n / 1000);
-				this.log(`Detected stream audio bitrate: ${bitrate} kbps`);
-			};
-
-			ffmpeg.on("log", bitrateListener);
-
-			try {
-				await ffmpeg.ffprobe.call(ffmpeg, args);
-				return bitrate;
-			} finally {
-				ffmpeg.off("log", bitrateListener);
-			}
-		} catch {
-			return null;
-		}
-	}
-
-	private async detectAudioSampleRate(
-		ffmpeg: FFmpeg,
-	): Promise<number | null> {
-		const args = [
-			"-v",
-			"quiet",
-			"-select_streams",
-			"a:0",
-			"-show_entries",
-			"stream=sample_rate",
-			"-of",
-			"default=noprint_wrappers=1:nokey=1",
-			"input",
-		];
-
-		try {
-			let sampleRate: number | null = null;
-
-			const sampleRateListener = (event: { message: string }) => {
-				if (sampleRate !== null) return;
-				const n = parseInt(event.message.trim(), 10);
-				if (!n) return;
-				sampleRate = n;
-				this.log(`Detected stream audio sample rate: ${sampleRate} Hz`);
-			};
-
-			ffmpeg.on("log", sampleRateListener);
-
-			try {
-				await ffmpeg.ffprobe.call(ffmpeg, args);
-				return sampleRate;
-			} finally {
-				ffmpeg.off("log", sampleRateListener);
-			}
-		} catch {
-			return null;
-		}
 	}
 
 	private async buildConversionCommand(
@@ -494,7 +451,7 @@ export class FFmpegConverter extends Converter {
 					`converting from lossless to lossy, using default audio bitrate: 128k`,
 				);
 			} else {
-				const inputBitrate = await this.detectAudioBitrate(ffmpeg);
+				const inputBitrate = await detectAudioBitrate(ffmpeg);
 				audioBitrateArgs = inputBitrate
 					? ["-b:a", `${inputBitrate}k`]
 					: [];
@@ -519,7 +476,7 @@ export class FFmpegConverter extends Converter {
 				);
 				sampleRateArgs = ["-ar", defaultRate];
 			} else {
-				let inputSampleRate = await this.detectAudioSampleRate(ffmpeg);
+				let inputSampleRate = await detectAudioSampleRate(ffmpeg);
 				if (to === ".opus" && inputSampleRate === 44100) {
 					// special case: opus does not support 44100Hz which is more common - adjust to 48000Hz
 					this.log(
@@ -582,56 +539,32 @@ export class FFmpegConverter extends Converter {
 			this.log(`Converting audio ${input.from} to video ${to}`);
 
 			const hasAlbumArt = keepMetadata
-				? await this.extractAlbumArt(ffmpeg)
+				? await extractAlbumArt(ffmpeg)
 				: false;
 			const codecArgs = toArgs(to, isAlac);
 
 			if (hasAlbumArt) {
 				this.log("Using album art as video background");
-				return [
-					"-loop",
-					"1",
-					"-i",
-					"cover.jpg",
-					"-i",
-					"input",
-					"-vf",
-					"scale=trunc(iw/2)*2:trunc(ih/2)*2",
-					"-shortest",
-					"-pix_fmt",
-					"yuv420p",
-					"-r",
-					"1",
-					...codecArgs,
-					...metadataArgs,
-					...audioBitrateArgs,
-					...sampleRateArgs,
-					...channelsArgs,
-					...tracksArgs,
-					"output" + to,
-				];
+				return avWithArt(
+					to,
+					codecArgs,
+					metadataArgs,
+					audioBitrateArgs,
+					sampleRateArgs,
+					channelsArgs,
+					tracksArgs,
+				);
 			} else {
 				this.log("Using solid color background");
-				return [
-					"-f",
-					"lavfi",
-					"-i",
-					"color=c=black:s=512x512:rate=1",
-					"-i",
-					"input",
-					"-shortest",
-					"-pix_fmt",
-					"yuv420p",
-					"-r",
-					"1",
-					...toArgs(to, isAlac),
-					...metadataArgs,
-					...audioBitrateArgs,
-					...sampleRateArgs,
-					...channelsArgs,
-					...tracksArgs,
-					"output" + to,
-				];
+				return avWithBg(
+					to,
+					toArgs(to, isAlac),
+					metadataArgs,
+					audioBitrateArgs,
+					sampleRateArgs,
+					channelsArgs,
+					tracksArgs,
+				);
 			}
 		}
 
@@ -654,57 +587,97 @@ export class FFmpegConverter extends Converter {
 			"output" + to,
 		];
 	}
-
-	private async extractAlbumArt(ffmpeg: FFmpeg): Promise<boolean> {
-		//  extract using stream mapping (should work for most)
-		if (
-			await this.tryExtractAlbumArt(ffmpeg, [
-				"-i",
-				"input",
-				"-map",
-				"0:1",
-				"-c:v",
-				"copy",
-				"-update",
-				"1",
-				"cover.jpg",
-			])
-		) {
-			this.log("Successfully extracted album art from stream 0:1");
-			return true;
-		}
-
-		// fallback: extract without stream mapping (this probably won't happen)
-		if (
-			await this.tryExtractAlbumArt(ffmpeg, [
-				"-i",
-				"input",
-				"-an",
-				"-c:v",
-				"copy",
-				"-update",
-				"1",
-				"cover.jpg",
-			])
-		) {
-			this.log("Successfully extracted album art (fallback method)");
-			return true;
-		}
-
-		this.log("No album art found, will create solid color background");
-		return false;
-	}
-
-	private async tryExtractAlbumArt(
-		ffmpeg: FFmpeg,
-		command: string[],
-	): Promise<boolean> {
-		try {
-			await ffmpeg.exec(command);
-			const coverData = await ffmpeg.readFile("cover.jpg");
-			return !!(coverData && (coverData as Uint8Array).length > 0);
-		} catch {
-			return false;
-		}
-	}
 }
+
+// const handleSpecialInput = async (
+// 	ffmpeg: FFmpeg,
+// 	input: VertFile,
+// ): Promise<VertFile | null> => {
+//
+// }
+
+const handleSpecialOutput = async (
+	ffmpeg: FFmpeg,
+	input: VertFile,
+	to: string,
+	conversionSettings: ConversionSettings,
+	conversionError: string | null,
+): Promise<VertFile | null> => {
+	if (to === ".qoa") {
+		let sampleRate: number | null = null;
+		if (
+			conversionSettings.sampleRate &&
+			conversionSettings.sampleRate !== "auto"
+		) {
+			sampleRate =
+				conversionSettings.sampleRate === "custom"
+					? (conversionSettings.customSampleRate as number)
+					: (conversionSettings.sampleRate as number);
+		} else {
+			const args = [
+				"-v",
+				"quiet",
+				"-select_streams",
+				"a:0",
+				"-show_entries",
+				"stream=sample_rate",
+				"-of",
+				"default=noprint_wrappers=1:nokey=1",
+				"input",
+			];
+
+			const probed = await ffprobeValue(ffmpeg, args, (s) => {
+				const n = parseInt(s, 10);
+				return Number.isFinite(n) ? n : null;
+			});
+
+			sampleRate = probed ?? 48000;
+		}
+
+		let channels = 2;
+		if (
+			conversionSettings.channels &&
+			conversionSettings.channels !== "auto"
+		)
+			channels = conversionSettings.channels as number;
+
+		const pcmArgs = [
+			"-i",
+			"input",
+			"-f",
+			"f32le",
+			"-ar",
+			String(sampleRate),
+			"-ac",
+			String(channels),
+			"-c:a",
+			"pcm_f32le",
+			"output.raw",
+		];
+		await ffmpeg.exec(pcmArgs);
+
+		if (conversionError) throw new Error(conversionError);
+
+		const pcmRaw = (await ffmpeg.readFile(
+			"output.raw",
+		)) as unknown as Uint8Array;
+		const { encodeQoa } = await import("$lib/util/parse/qoa");
+		const qoaBytes = encodeQoa(
+			new Uint8Array(pcmRaw),
+			sampleRate!,
+			channels,
+		);
+		const outputFileName =
+			input.name.split(".").slice(0, -1).join(".") + ".qoa";
+		return new VertFile(
+			new File([new Uint8Array(qoaBytes)], outputFileName),
+			".qoa",
+		);
+	}
+
+	// if (whatever other formats need special parsing)
+
+	return null;
+};
+
+/* probeFfprobeValue moved to ./ffprobe.ts */

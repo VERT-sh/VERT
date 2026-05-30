@@ -53,6 +53,7 @@ export class MagickConverter extends Converter {
 		new FormatInfo("psd", true, true),
 
 		new FormatInfo("dcm", true, false),
+		new FormatInfo("qoi", true, false),
 
 		// raw camera formats
 		new FormatInfo("arw", true, false),

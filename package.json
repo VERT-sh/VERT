@@ -61,6 +61,7 @@
 		"overlayscrollbars": "^2.14.0",
 		"overlayscrollbars-svelte": "^0.5.5",
 		"p-queue": "^9.1.0",
+		"qoa-format": "^1.0.1",
 		"riff-file": "^1.0.3",
 		"sanitize-html": "^2.17.2",
 		"svelte-stripe": "^1.4.0",

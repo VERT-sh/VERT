@@ -170,7 +170,8 @@ const handleSpecialInput = async (
 			);
 		}
 	}
-	// else if (whatever other formats need special parsing)
+
+	// if (whatever other formats need special parsing)
 
 	return null;
 };
