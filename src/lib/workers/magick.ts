@@ -300,7 +300,7 @@ const magickConvert = async (
 		}
 	}
 
-	if (fmt === "ICO") && !singleSize) {
+	if (fmt === "ICO" && !singleSize) {
 		const standardSizes = [16, 24, 32, 48, 64, 128, 256, 512];
 
 		let desired = 0;
@@ -318,13 +318,16 @@ const magickConvert = async (
 		}
 
 		if (desired <= 0) desired = Math.max(...standardSizes);
-		if (desired > Math.max(...standardSizes)) desired = Math.max(...standardSizes);
+		if (desired > Math.max(...standardSizes))
+			desired = Math.max(...standardSizes);
 
 		const sizes = standardSizes.filter((s) => s <= desired);
 		if (sizes.length === 0) sizes.push(Math.min(...standardSizes));
 
 		const sourcePng = await new Promise<Uint8Array>((resolve) => {
-			img.write(MagickFormat.Png, (o: Uint8Array) => resolve(structuredClone(o)));
+			img.write(MagickFormat.Png, (o: Uint8Array) =>
+				resolve(structuredClone(o)),
+			);
 		});
 
 		console.log(`encoding sizes for ico: ${sizes.join(", ")}`);
@@ -337,18 +340,27 @@ const magickConvert = async (
 						new MagickReadSettings({ format: MagickFormat.Png }),
 					);
 
-					const scale = size / Math.max(variant.width, variant.height);
+					const scale =
+						size / Math.max(variant.width, variant.height);
 					const newW = Math.max(1, Math.round(variant.width * scale));
-					const newH = Math.max(1, Math.round(variant.height * scale));
+					const newH = Math.max(
+						1,
+						Math.round(variant.height * scale),
+					);
 					variant.resize(newW, newH);
 
 					collection.push(variant);
-					console.log(`added size ${size}x${size} to MagickImageCollection`);
+					console.log(
+						`added size ${size}x${size} to MagickImageCollection`,
+					);
 				}
 
-				collection.write(fmt as unknown as MagickFormat, (o: Uint8Array) => {
-					resolve(structuredClone(o));
-				});
+				collection.write(
+					fmt as unknown as MagickFormat,
+					(o: Uint8Array) => {
+						resolve(structuredClone(o));
+					},
+				);
 			});
 		});
 	}
@@ -362,6 +374,7 @@ const magickConvert = async (
 			const transparency = conversionSettings.transparency as boolean;
 			const metadata = conversionSettings.metadata as boolean;
 
+			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
 			if (quality) img.quality = quality;
 			if (bitDepth) img.depth = bitDepth;
 			if (!metadata) img.strip();
@@ -399,7 +412,6 @@ const magickConvert = async (
 				img.alpha(AlphaAction.Remove);
 			}
 
-			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
 			img.write(fmt as unknown as MagickFormat, (o: Uint8Array) => {
 				resolve(structuredClone(o));
 			});

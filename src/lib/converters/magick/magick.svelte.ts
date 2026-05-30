@@ -52,6 +52,8 @@ export class MagickConverter extends Converter {
 		new FormatInfo("eps", false, true),
 		new FormatInfo("psd", true, true),
 
+		new FormatInfo("dcm", true, false),
+
 		// raw camera formats
 		new FormatInfo("arw", true, false),
 		new FormatInfo("tif", true, true),
@@ -151,6 +153,20 @@ export class MagickConverter extends Converter {
 				break;
 		}
 
+		const toRes = (
+			w: number,
+			h?: number,
+		): { value: string; label: string } => {
+			if (w && h) {
+				if (w < h)
+					return { value: `${w}x${h}`, label: `${w}x${h} (V)` };
+				if (w > h) return { value: `${w}x${h}`, label: `${w}x${h}` };
+				return { value: `${w}x${h}`, label: `${w}x${h}` };
+			}
+			if (w) return { value: `${w}x${w}`, label: `${w}x${w}` };
+			return { value: "", label: "" };
+		};
+
 		const quality: SettingDefinition = {
 			key: "quality",
 			label: m["convert.settings.image.quality"](),
@@ -163,28 +179,29 @@ export class MagickConverter extends Converter {
 
 		// TODO: surely there's a better way to do this as well
 		const iconResolutions = [
-			{ value: "16x16", label: "16x16" },
-			{ value: "32x32", label: "32x32" },
-			{ value: "48x48", label: "48x48" },
-			{ value: "64x64", label: "64x64" },
-			{ value: "128x128", label: "128x128" },
-			{ value: "256x256", label: "256x256" },
-			{ value: "512x512", label: "512x512" },
+			toRes(16),
+			toRes(32),
+			toRes(48),
+			toRes(64),
+			toRes(128),
+			toRes(256),
+			toRes(512),
 		];
 		const commonResolutions = [
 			{
 				value: "custom",
 				label: m["convert.settings.common.custom"](),
 			},
-			{ value: "426x240", label: "426x240" },
-			{ value: "640x360", label: "640x360" },
-			{ value: "854x480", label: "854x480" },
-			{ value: "720x1280", label: "720x1280 (V)" },
-			{ value: "1280x720", label: "1280x720" },
-			{ value: "1080x1920", label: "1080x1920 (V)" },
-			{ value: "1920x1080", label: "1920x1080" },
-			{ value: "2160x3840", label: "2160x3840 (V)" },
-			{ value: "3840x2160", label: "3840x2160" },
+			toRes(320, 240),
+			toRes(426, 240),
+			toRes(640, 360),
+			toRes(854, 480),
+			toRes(720, 1280),
+			toRes(1280, 720),
+			toRes(1080, 1920),
+			toRes(1920, 1080),
+			toRes(2160, 3840),
+			toRes(3840, 2160),
 		];
 		const resolution: SettingDefinition = {
 			key: "resolution",
