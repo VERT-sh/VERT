@@ -19,6 +19,10 @@ let magickInitialized = false;
 
 self.postMessage({ type: "ready", id: "0" });
 
+let dicomPromise: Promise<
+	typeof import("$lib/converters/format-specific/dicom")
+> | null = null;
+
 const handleMessage = async (
 	message: WorkerMessage,
 ): Promise<Partial<WorkerMessage>> => {
@@ -233,12 +237,33 @@ const handleMessage = async (
 				};
 			}
 
-			const img = MagickImage.create(
-				new Uint8Array(buffer),
-				new MagickReadSettings({
-					format: from.slice(1).toUpperCase() as MagickFormat,
-				}),
-			);
+            // TODO: split into another function - planning to add more format-specific handling
+            // for formats that we need another library to parse
+			let img: IMagickImage;
+			if (from === ".dcm") {
+				try {
+					const { renderDicomToPng } = await loadDicomHelpers();
+					const pngBytes = await renderDicomToPng(
+						new Uint8Array(buffer),
+					);
+					img = MagickImage.create(
+						pngBytes,
+						new MagickReadSettings({ format: MagickFormat.Png }),
+					);
+				} catch (error) {
+					return {
+						type: "error",
+						error: `Failed to parse DICOM: ${(error as Error).message}`,
+					};
+				}
+			} else {
+				img = MagickImage.create(
+					new Uint8Array(buffer),
+					new MagickReadSettings({
+						format: from.slice(1).toUpperCase() as MagickFormat,
+					}),
+				);
+			}
 
 			const converted = await magickConvert(
 				img,
@@ -274,6 +299,9 @@ const readToEnd = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
 	const arrayBuffer = await blob.arrayBuffer();
 	return new Uint8Array(arrayBuffer);
 };
+
+const loadDicomHelpers = async () =>
+	(dicomPromise ??= import("$lib/converters/format-specific/dicom"));
 
 const magickConvert = async (
 	img: IMagickImage,
