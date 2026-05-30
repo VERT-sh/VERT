@@ -10,8 +10,6 @@ import {
 	type IMagickImage,
 } from "@imagemagick/magick-wasm";
 import { makeZip } from "client-zip";
-import { parseAni } from "$lib/util/parse/ani";
-import { parseIcns } from "vert-wasm";
 import type { WorkerMessage } from "$lib/types";
 import type { ConversionSettings } from "$lib/types/conversion-settings";
 
@@ -19,9 +17,10 @@ let magickInitialized = false;
 
 self.postMessage({ type: "ready", id: "0" });
 
-let dicomPromise: Promise<
-	typeof import("$lib/converters/format-specific/dicom")
-> | null = null;
+// formats requiring special parsing/handling we do
+let dicomPromise: Promise<typeof import("$lib/util/parse/dicom")> | null = null;
+let aniPromise: Promise<typeof import("$lib/util/parse/ani")> | null = null;
+let icnsPromise: Promise<typeof import("vert-wasm")> | null = null;
 
 const handleMessage = async (
 	message: WorkerMessage,
@@ -66,150 +65,13 @@ const handleMessage = async (
 			) as ConversionSettings;
 			const buffer = await message.input.file.arrayBuffer();
 
-			// special ico handling to split them all into separate images
-			if (from === ".ico") {
-				const imgs = MagickImageCollection.create();
-				imgs.read(
-					new Uint8Array(buffer),
-					new MagickReadSettings({
-						format: MagickFormat.Ico,
-					}),
-				);
-
-				if (imgs.length === 0) {
-					return {
-						type: "error",
-						error: `Failed to read ICO -- no images found inside?`,
-					};
-				}
-
-				const convertedImgs: Uint8Array[] = [];
-				await Promise.all(
-					imgs.map(async (img, i) => {
-						const output = await magickConvert(
-							img,
-							message.to,
-							conversionSettings,
-						);
-						convertedImgs[i] = output;
-					}),
-				);
-
-				const zip = makeZip(
-					convertedImgs.map(
-						(img, i) =>
-							new File(
-								[new Uint8Array(img)],
-								`image${i}.${message.to.slice(1)}`,
-							),
-					),
-					"images.zip",
-				);
-
-				// read the ReadableStream to the end
-				const zipBytes = await readToEnd(zip.getReader());
-
-				imgs.dispose();
-
-				return {
-					type: "finished",
-					output: zipBytes,
-					zip: true,
-				};
-			} else if (from === ".ani") {
-				console.log("Parsing ANI file");
-				try {
-					const parsedAni = parseAni(new Uint8Array(buffer));
-					const files: File[] = [];
-					await Promise.all(
-						parsedAni.images.map(async (img, i) => {
-							const blob = await magickConvert(
-								MagickImage.create(
-									img,
-									new MagickReadSettings({
-										format: MagickFormat.Ico,
-									}),
-								),
-								message.to,
-								conversionSettings,
-							);
-							files.push(
-								new File(
-									[new Uint8Array(blob)],
-									`image${i}${message.to}`,
-								),
-							);
-						}),
-					);
-
-					const zip = makeZip(files, "images.zip");
-					const zipBytes = await readToEnd(zip.getReader());
-
-					return {
-						type: "finished",
-						output: zipBytes,
-						zip: true,
-					};
-				} catch (e) {
-					console.error(e);
-				}
-			} else if (from === ".icns") {
-				const icns: Uint8Array[] = parseIcns(new Uint8Array(buffer));
-				if (typeof icns === "string") {
-					return {
-						type: "error",
-						error: `Failed to read ICNS -- ${icns}`,
-					};
-				}
-
-				const formats = [
-					MagickFormat.Png,
-					MagickFormat.Jpeg,
-					MagickFormat.Rgba,
-					MagickFormat.Rgb,
-				];
-				const outputs: Uint8Array[] = [];
-				for (const file of icns) {
-					for (const format of formats) {
-						try {
-							const img = MagickImage.create(
-								file,
-								new MagickReadSettings({
-									format: format,
-								}),
-							);
-							const converted = await magickConvert(
-								img,
-								message.to,
-								conversionSettings,
-							);
-							outputs.push(converted);
-							break;
-							// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						} catch (_) {
-							continue;
-						}
-					}
-				}
-
-				const zip = makeZip(
-					outputs.map(
-						(img, i) =>
-							new File(
-								[new Uint8Array(img)],
-								`image${i}.${message.to.slice(1)}`,
-							),
-					),
-					"images.zip",
-				);
-				const zipBytes = await readToEnd(zip.getReader());
-
-				return {
-					type: "finished",
-					output: zipBytes,
-					zip: true,
-				};
-			}
+			const specialResult = await handleSpecialOutput(
+				from,
+				message.to,
+				buffer,
+				conversionSettings,
+			);
+			if (specialResult) return specialResult;
 
 			// build frames of animated formats (webp/gif)
 			// APNG does not work on magick-wasm since it needs ffmpeg built-in (not in magick-wasm) - handle in ffmpeg
@@ -237,33 +99,18 @@ const handleMessage = async (
 				};
 			}
 
-            // TODO: split into another function - planning to add more format-specific handling
-            // for formats that we need another library to parse
-			let img: IMagickImage;
-			if (from === ".dcm") {
-				try {
-					const { renderDicomToPng } = await loadDicomHelpers();
-					const pngBytes = await renderDicomToPng(
-						new Uint8Array(buffer),
-					);
-					img = MagickImage.create(
-						pngBytes,
+			const parsedInput = await handleSpecialInput(from, buffer);
+			const img = parsedInput
+				? MagickImage.create(
+						parsedInput,
 						new MagickReadSettings({ format: MagickFormat.Png }),
+					)
+				: MagickImage.create(
+						new Uint8Array(buffer),
+						new MagickReadSettings({
+							format: from.slice(1).toUpperCase() as MagickFormat,
+						}),
 					);
-				} catch (error) {
-					return {
-						type: "error",
-						error: `Failed to parse DICOM: ${(error as Error).message}`,
-					};
-				}
-			} else {
-				img = MagickImage.create(
-					new Uint8Array(buffer),
-					new MagickReadSettings({
-						format: from.slice(1).toUpperCase() as MagickFormat,
-					}),
-				);
-			}
 
 			const converted = await magickConvert(
 				img,
@@ -301,7 +148,177 @@ const readToEnd = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
 };
 
 const loadDicomHelpers = async () =>
-	(dicomPromise ??= import("$lib/converters/format-specific/dicom"));
+	(dicomPromise ??= import("$lib/util/parse/dicom"));
+
+const loadAniHelpers = async () =>
+	(aniPromise ??= import("$lib/util/parse/ani"));
+
+const loadIcnsHelpers = async () => (icnsPromise ??= import("vert-wasm"));
+
+// formats that require an external library to parse
+const handleSpecialInput = async (
+	from: string,
+	buffer: ArrayBuffer,
+): Promise<Uint8Array | null> => {
+	if (from === ".dcm") {
+		try {
+			const { renderDicomToPng } = await loadDicomHelpers();
+			return await renderDicomToPng(new Uint8Array(buffer));
+		} catch (error) {
+			throw new Error(
+				`Failed to parse DICOM: ${(error as Error).message}`,
+			);
+		}
+	}
+	// else if (whatever other formats need special parsing)
+
+	return null;
+};
+
+// formats that have special handling for output (like multiple frames/images)
+const handleSpecialOutput = async (
+	from: string,
+	to: string,
+	buffer: ArrayBuffer,
+	conversionSettings: ConversionSettings,
+): Promise<Partial<WorkerMessage> | null> => {
+	if (from === ".ico") {
+		const imgs = MagickImageCollection.create();
+		imgs.read(
+			new Uint8Array(buffer),
+			new MagickReadSettings({ format: MagickFormat.Ico }),
+		);
+
+		if (imgs.length === 0) {
+			return {
+				type: "error",
+				error: `Failed to read ICO -- no images found inside?`,
+			};
+		}
+
+		const convertedImgs: Uint8Array[] = [];
+		await Promise.all(
+			imgs.map(async (img, i) => {
+				const output = await magickConvert(img, to, conversionSettings);
+				convertedImgs[i] = output;
+			}),
+		);
+
+		const zip = makeZip(
+			convertedImgs.map(
+				(img, i) =>
+					new File([new Uint8Array(img)], `image${i}.${to.slice(1)}`),
+			),
+			"images.zip",
+		);
+
+		// read the ReadableStream to the end
+		const zipBytes = await readToEnd(zip.getReader());
+		imgs.dispose();
+
+		return {
+			type: "finished",
+			output: zipBytes,
+			zip: true,
+		};
+	}
+
+	if (from === ".ani") {
+        console.log("Parsing ANI file");
+		try {
+			const { parseAni } = await loadAniHelpers();
+			const parsedAni = parseAni(new Uint8Array(buffer));
+			const files: File[] = [];
+
+			await Promise.all(
+				parsedAni.images.map(async (img, i) => {
+					const blob = await magickConvert(
+						MagickImage.create(
+							img,
+							new MagickReadSettings({
+								format: MagickFormat.Ico,
+							}),
+						),
+						to,
+						conversionSettings,
+					);
+					files.push(
+						new File([new Uint8Array(blob)], `image${i}${to}`),
+					);
+				}),
+			);
+
+			const zip = makeZip(files, "images.zip");
+			const zipBytes = await readToEnd(zip.getReader());
+
+			return {
+				type: "finished",
+				output: zipBytes,
+				zip: true,
+			};
+		} catch (error) {
+			return {
+				type: "error",
+				error: `Failed to parse ANI: ${(error as Error).message}`,
+			};
+		}
+	}
+
+	if (from === ".icns") {
+		const { parseIcns } = await loadIcnsHelpers();
+		const icns: Uint8Array[] = parseIcns(new Uint8Array(buffer));
+		if (typeof icns === "string") {
+			return {
+				type: "error",
+				error: `Failed to read ICNS -- ${icns}`,
+			};
+		}
+
+		const formats = [
+			MagickFormat.Png,
+			MagickFormat.Jpeg,
+			MagickFormat.Rgba,
+			MagickFormat.Rgb,
+		];
+		const outputs: Uint8Array[] = [];
+		for (const file of icns) {
+			for (const format of formats) {
+				try {
+					const img = MagickImage.create(
+						file,
+						new MagickReadSettings({ format }),
+					);
+					const converted = await magickConvert(
+						img,
+						to,
+						conversionSettings,
+					);
+					outputs.push(converted);
+					break;
+				} catch {
+					continue;
+				}
+			}
+		}
+
+		const zip = makeZip(
+			outputs.map(
+				(img, i) =>
+					new File([new Uint8Array(img)], `image${i}.${to.slice(1)}`),
+			),
+			"images.zip",
+		);
+		const zipBytes = await readToEnd(zip.getReader());
+
+		return {
+			type: "finished",
+			output: zipBytes,
+			zip: true,
+		};
+	}
+
+	return null;
+};
 
 const magickConvert = async (
 	img: IMagickImage,
