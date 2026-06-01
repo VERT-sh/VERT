@@ -414,8 +414,11 @@
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
+		},
+		"warnings": {
+			"settings_change": "Changed the setting '{setting}' from '{oldValue}' to '{newValue}' for {file} to prevent conversion failure."
 		}
-	},
+ 	},
 	"privacy": {
 		"title": "Privacy Policy",
 		"summary": {

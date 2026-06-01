@@ -48,7 +48,6 @@ export class FFmpegConverter extends Converter {
 		new FormatInfo("caf", true, false), // can be alac
 		new FormatInfo("qoa", true, true),
 		new FormatInfo("wma", true, true),
-		new FormatInfo("amr", true, true),
 		new FormatInfo("ac3", true, true),
 		new FormatInfo("aiff", true, true),
 		new FormatInfo("aifc", true, true),
@@ -64,7 +63,6 @@ export class FFmpegConverter extends Converter {
 		new FormatInfo("au", true, true),
 		new FormatInfo("m4b", true, true),
 		new FormatInfo("voc", true, true),
-		new FormatInfo("weba", true, true),
 		...videoFormats.map(
 			(f: string) => new FormatInfo(f, true, true, false, 0),
 		),
@@ -245,6 +243,12 @@ export class FFmpegConverter extends Converter {
 
 		ffmpeg.on("log", errorListener);
 
+		const logListener = (l: { message: string }) => {
+			this.log(l.message);
+		};
+
+		ffmpeg.on("log", logListener);
+
 		try {
 			let buf = new Uint8Array(await input.file.arrayBuffer());
 
@@ -304,6 +308,7 @@ export class FFmpegConverter extends Converter {
 			}
 		} finally {
 			ffmpeg.off("log", errorListener);
+			ffmpeg.off("log", logListener);
 			this.activeConversions.delete(input.id);
 			ffmpeg.terminate();
 		}
@@ -331,10 +336,6 @@ export class FFmpegConverter extends Converter {
 		if (!temporary) {
 			ffmpeg.on("progress", (progress) => {
 				input.progress = progress.progress * 100;
-			});
-
-			ffmpeg.on("log", (l) => {
-				this.log(l.message);
 			});
 		}
 
@@ -491,11 +492,12 @@ export class FFmpegConverter extends Converter {
 				this.log(
 					`using detected audio sample rate: ${inputSampleRate}Hz`,
 				);
+				// TODO: maybe have a hard cap for certain conversions - 3072kbps is very unrealistic for a mp3 for example lol (qoa -> mp3 detected as 3072kbps)
 			}
 		}
 
 		// channels setting
-		if (settings.channels !== "auto") {
+		if (settings.channels !== 2) {
 			channelsArgs = ["-ac", settings.channels];
 			this.log(
 				`using user setting for audio channels: ${settings.channels}`,
@@ -573,6 +575,54 @@ export class FFmpegConverter extends Converter {
 		const { audio: audioCodec } = getCodecs(to, isAlac);
 		if (m4a && keepMetadata) m4aArgs = ["-c:v", "copy"]; // for album art
 
+		/*
+		 * sanity check settings for certain formats, to prevent conversion failure
+		 */
+		const settingsChanged: SettingChange[] = [];
+
+		if (to === ".opus") {
+			// work around browser stereo+libopus wasm crash
+			// no idea why its broken like this in the browser only lol
+			if (settings.channels >= 2) {
+				channelsArgs = ["-ac", "1"];
+				settingsChanged.push({
+					setting: "channels",
+					oldValue: settings.channels,
+					newValue: 1,
+					file: input.name,
+				});
+			}
+
+			// TODO: surely better way to do this as well :sob:
+			if (
+				audioBitrateArgs[1] &&
+				parseInt(audioBitrateArgs[1], 10) > 256
+			) {
+				audioBitrateArgs = ["-b:a", "256k"];
+				settingsChanged.push({
+					setting: "bitrate",
+					oldValue: settings.bitrate,
+					newValue: 256,
+					file: input.name,
+				});
+			}
+		}
+
+		for (const change of settingsChanged) {
+			this.log(
+				`changed setting "${change.setting}" from "${change.oldValue}" to "${change.newValue}" for file ${change.file} to prevent conversion failure`,
+			);
+			ToastManager.add({
+				type: "warning",
+				message: m["workers.warnings.settings_change"]({
+					setting: change.setting,
+					oldValue: change.oldValue,
+					newValue: change.newValue,
+					file: change.file,
+				}),
+			});
+		}
+
 		return [
 			"-i",
 			"input",
@@ -584,6 +634,8 @@ export class FFmpegConverter extends Converter {
 			...sampleRateArgs,
 			...channelsArgs,
 			...tracksArgs,
+			"-strict",
+			"experimental",
 			"output" + to,
 		];
 	}
@@ -680,4 +732,9 @@ const handleSpecialOutput = async (
 	return null;
 };
 
-/* probeFfprobeValue moved to ./ffprobe.ts */
+interface SettingChange {
+	setting: string;
+	oldValue: string | number;
+	newValue: string | number;
+	file: string;
+}

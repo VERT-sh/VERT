@@ -79,6 +79,17 @@ export const getCodecs = (
 		case ".wma":
 			return { video: "libx264", audio: "wmav2" };
 
+		case ".aiff":
+		case ".aifc":
+		case ".aif":
+			return { video: "libx264", audio: "pcm_s16be" };
+		case ".au":
+			return { video: "libx264", audio: "pcm_mulaw" };
+		case ".m4b":
+			return { video: "libx264", audio: "aac" };
+		case ".voc":
+			return { video: "libx264", audio: "pcm_u8" };
+
 		// animated images
 		case ".gif":
 		case ".webp":
