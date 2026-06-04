@@ -339,83 +339,95 @@ const magickConvert = async (
 		}
 	}
 
-	if (fmt === "ICO" && !singleSize) {
-		const standardSizes = [16, 24, 32, 48, 64, 128, 256, 512];
-
-		let desired = 0;
-		if (resolution && resolution !== "auto") {
-			const actualResolution =
-				resolution === "custom"
-					? (conversionSettings.customResolution as string)
-					: resolution;
-			const [wsel, hsel] = (actualResolution || "")
-				.split("x")
-				.map((d: string) => parseInt(d) || 0);
-			desired = Math.max(wsel || 0, hsel || 0);
+	const icons = ["ICO", "ICON", "CUR"]; // TODO: icns (1024x1024 max)
+	if (icons.includes(fmt)) {
+		if (singleSize) {
+			// clamp to 256x256
+			clampRes(img, 256);
 		} else {
-			desired = Math.max(img.width || 0, img.height || 0);
-		}
+			// generate all standard sizes for icons
+			const standardSizes = [16, 24, 32, 48, 64, 128, 256];
 
-		if (desired <= 0) desired = Math.max(...standardSizes);
-		if (desired > Math.max(...standardSizes))
-			desired = Math.max(...standardSizes);
+			let desired = 0;
+			if (resolution && resolution !== "auto") {
+				const actualResolution =
+					resolution === "custom"
+						? (conversionSettings.customResolution as string)
+						: resolution;
+				const [wsel, hsel] = (actualResolution || "")
+					.split("x")
+					.map((d: string) => parseInt(d) || 0);
+				desired = Math.max(wsel || 0, hsel || 0);
+			} else {
+				desired = Math.max(img.width || 0, img.height || 0);
+			}
 
-		const sizes = standardSizes.filter((s) => s <= desired);
-		if (sizes.length === 0) sizes.push(Math.min(...standardSizes));
+			if (desired <= 0) desired = Math.max(...standardSizes);
+			if (desired > Math.max(...standardSizes))
+				desired = Math.max(...standardSizes);
 
-		const sourcePng = await new Promise<Uint8Array>((resolve) => {
-			img.write(MagickFormat.Png, (o: Uint8Array) =>
-				resolve(structuredClone(o)),
-			);
-		});
+			const sizes = standardSizes.filter((s) => s <= desired);
+			if (sizes.length === 0) sizes.push(Math.min(...standardSizes));
 
-		console.log(`encoding sizes for ico: ${sizes.join(", ")}`);
-
-		return await new Promise<Uint8Array>((resolve) => {
-			MagickImageCollection.use((collection) => {
-				for (const size of sizes) {
-					const variant = MagickImage.create(
-						sourcePng,
-						new MagickReadSettings({ format: MagickFormat.Png }),
-					);
-
-					const scale =
-						size / Math.max(variant.width, variant.height);
-					const newW = Math.max(1, Math.round(variant.width * scale));
-					const newH = Math.max(
-						1,
-						Math.round(variant.height * scale),
-					);
-					variant.resize(newW, newH);
-
-					collection.push(variant);
-					console.log(
-						`added size ${size}x${size} to MagickImageCollection`,
-					);
-				}
-
-				collection.write(
-					fmt as unknown as MagickFormat,
-					(o: Uint8Array) => {
-						resolve(structuredClone(o));
-					},
+			const sourcePng = await new Promise<Uint8Array>((resolve) => {
+				img.write(MagickFormat.Png, (o: Uint8Array) =>
+					resolve(structuredClone(o)),
 				);
 			});
-		});
-	}
+
+			console.log(`encoding sizes for ico: ${sizes.join(", ")}`);
+
+			return await new Promise<Uint8Array>((resolve) => {
+				MagickImageCollection.use((collection) => {
+					for (const size of sizes) {
+						const variant = MagickImage.create(
+							sourcePng,
+							new MagickReadSettings({
+								format: MagickFormat.Png,
+							}),
+						);
+
+						const scale =
+							size / Math.max(variant.width, variant.height);
+						const newW = Math.max(
+							1,
+							Math.round(variant.width * scale),
+						);
+						const newH = Math.max(
+							1,
+							Math.round(variant.height * scale),
+						);
+						variant.resize(newW, newH);
+
+						collection.push(variant);
+						console.log(
+							`added size ${size}x${size} to MagickImageCollection`,
+						);
+					}
+
+					collection.write(
+						fmt as unknown as MagickFormat,
+						(o: Uint8Array) => {
+							resolve(structuredClone(o));
+						},
+					);
+				});
+			});
+		}
+	} else if (fmt === "RGF") clampRes(img, 254); // max 254x254
 
 	const result = await new Promise<Uint8Array>((resolve, reject) => {
 		try {
 			// quality, depth, colorSpace, transparency, metadata
 			const quality = conversionSettings.quality as number;
-			const bitDepth = conversionSettings.depth as number;
+			const bitDepth = conversionSettings.depth;
 			const colorSpace = conversionSettings.colorSpace as string;
 			const transparency = conversionSettings.transparency as boolean;
 			const metadata = conversionSettings.metadata as boolean;
 
 			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
 			if (quality) img.quality = quality;
-			if (bitDepth) img.depth = bitDepth;
+			if (bitDepth !== "auto") img.depth = bitDepth;
 			if (!metadata) img.strip();
 			if (colorSpace) {
 				switch (colorSpace) {
@@ -460,6 +472,19 @@ const magickConvert = async (
 	});
 
 	return result;
+};
+
+const clampRes = (img: IMagickImage, maxSize: number) => {
+	const w = img.width;
+	const h = img.height;
+
+	if (w > maxSize || h > maxSize) {
+		const scale = maxSize / Math.max(w, h);
+		const newW = Math.max(1, Math.round(w * scale));
+		const newH = Math.max(1, Math.round(h * scale));
+
+		img.resize(newW, newH);
+	}
 };
 
 onmessage = async (e) => {

@@ -234,7 +234,7 @@ export class MagickConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: "Auto" },
-				{ value: "custom", label: "Custom" },
+				// { value: "custom", label: "Custom" },
 				{ value: "8", label: "8-bit" },
 				{ value: "16", label: "16-bit" },
 				{ value: "32", label: "32-bit" },
