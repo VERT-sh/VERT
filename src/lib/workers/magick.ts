@@ -55,9 +55,11 @@ const handleMessage = async (
 			message.to = message.to.toLowerCase();
 			if (message.to === ".jfif") message.to = ".jpeg";
 
+			let to = message.input.to;
 			let from = message.input.from;
 			if (from === ".jfif") from = ".jpeg";
 			if (from === ".fit") from = ".fits";
+			if (to === ".fit") to = ".fits";
 
 			console.log(JSON.stringify(message, null, 2));
 			const conversionSettings = JSON.parse(
@@ -67,37 +69,11 @@ const handleMessage = async (
 
 			const specialResult = await handleSpecialOutput(
 				from,
-				message.to,
+				to,
 				buffer,
 				conversionSettings,
 			);
 			if (specialResult) return specialResult;
-
-			// build frames of animated formats (webp/gif)
-			// APNG does not work on magick-wasm since it needs ffmpeg built-in (not in magick-wasm) - handle in ffmpeg
-			if (
-				(from === ".webp" || from === ".gif") &&
-				(message.to === ".gif" || message.to === ".webp")
-			) {
-				const collection = MagickImageCollection.create(
-					new Uint8Array(buffer),
-				);
-				const format =
-					message.to === ".gif"
-						? MagickFormat.Gif
-						: MagickFormat.WebP;
-				const result = await new Promise<Uint8Array>((resolve) => {
-					collection.write(format, (output) => {
-						resolve(structuredClone(output));
-					});
-				});
-				collection.dispose();
-
-				return {
-					type: "finished",
-					output: result,
-				};
-			}
 
 			const parsedInput = await handleSpecialInput(from, buffer);
 			const img = parsedInput
@@ -112,11 +88,7 @@ const handleMessage = async (
 						}),
 					);
 
-			const converted = await magickConvert(
-				img,
-				message.to,
-				conversionSettings,
-			);
+			const converted = await magickConvert(img, to, conversionSettings);
 
 			return {
 				type: "finished",
@@ -183,6 +155,27 @@ const handleSpecialOutput = async (
 	buffer: ArrayBuffer,
 	conversionSettings: ConversionSettings,
 ): Promise<Partial<WorkerMessage> | null> => {
+	// build frames of animated formats (webp/gif)
+	// APNG does not work on magick-wasm since it needs ffmpeg built-in (not in magick-wasm) - handle in ffmpeg
+	if (
+		(from === ".webp" || from === ".gif") &&
+		(to === ".gif" || to === ".webp")
+	) {
+		const collection = MagickImageCollection.create(new Uint8Array(buffer));
+		const format = to === ".gif" ? MagickFormat.Gif : MagickFormat.WebP;
+		const result = await new Promise<Uint8Array>((resolve) => {
+			collection.write(format, (output) => {
+				resolve(structuredClone(output));
+			});
+		});
+		collection.dispose();
+
+		return {
+			type: "finished",
+			output: result,
+		};
+	}
+
 	if (from === ".ico") {
 		const imgs = MagickImageCollection.create();
 		imgs.read(
@@ -225,7 +218,7 @@ const handleSpecialOutput = async (
 	}
 
 	if (from === ".ani") {
-        console.log("Parsing ANI file");
+		console.log("Parsing ANI file");
 		try {
 			const { parseAni } = await loadAniHelpers();
 			const parsedAni = parseAni(new Uint8Array(buffer));
