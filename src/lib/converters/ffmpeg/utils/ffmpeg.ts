@@ -56,7 +56,6 @@ export const avWithArt = (
 	audioBitrateArgs: string[],
 	sampleRateArgs: string[],
 	channelsArgs: string[],
-	tracksArgs: string[],
 ): string[] => {
 	return [
 		"-loop",
@@ -65,6 +64,8 @@ export const avWithArt = (
 		"cover.jpg",
 		"-i",
 		"input",
+		"-map",
+		"0:v:0",
 		"-vf",
 		"scale=trunc(iw/2)*2:trunc(ih/2)*2",
 		"-shortest",
@@ -72,12 +73,13 @@ export const avWithArt = (
 		"yuv420p",
 		"-r",
 		"1",
+		"-map",
+		"1:a:0",
 		...codecArgs,
 		...metadataArgs,
 		...audioBitrateArgs,
 		...sampleRateArgs,
 		...channelsArgs,
-		...tracksArgs,
 		"output" + to,
 	];
 };
@@ -90,7 +92,6 @@ export const avWithBg = (
 	audioBitrateArgs: string[],
 	sampleRateArgs: string[],
 	channelsArgs: string[],
-	tracksArgs: string[],
 ): string[] => {
 	return [
 		"-f",
@@ -99,17 +100,20 @@ export const avWithBg = (
 		"color=c=black:s=512x512:rate=1",
 		"-i",
 		"input",
+		"-map",
+		"0:v:0",
 		"-shortest",
 		"-pix_fmt",
 		"yuv420p",
 		"-r",
 		"1",
+		"-map",
+		"1:a:0",
 		...codecArgs,
 		...metadataArgs,
 		...audioBitrateArgs,
 		...sampleRateArgs,
 		...channelsArgs,
-		...tracksArgs,
 		"output" + to,
 	];
 };

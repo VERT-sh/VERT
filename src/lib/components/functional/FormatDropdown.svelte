@@ -156,11 +156,22 @@
 		);
 	});
 
+	// TODO: better hiddenFormats logic lol
 	const filteredData = $derived.by(() => {
 		const activeCategory =
 			currentCategory && availableCategories.includes(currentCategory)
 				? currentCategory
 				: availableCategories[0];
+
+		const hiddenFormats: string[] = [];
+
+		// if audio to video, hide these video formats (because they do not want audio tracks lol)
+		const nonAudioVideoFormats = [".gif", ".webp", ".apng", ".h264"];
+		if (
+			activeCategory === "video" &&
+			categories["audio"]?.formats.includes(from ?? "")
+		)
+			hiddenFormats.push(...nonAudioVideoFormats);
 
 		// if no query, return formats for current category
 		if (!searchQuery) {
@@ -182,7 +193,7 @@
 
 			return {
 				categories: availableCategories,
-				formats,
+				formats: formats.filter((f) => !hiddenFormats.includes(f)),
 				isFallback: false,
 				resolvedCategory: activeCategory ?? currentCategory,
 			};
@@ -192,7 +203,12 @@
 		const animatedFormats = [".webp", ".apng", ".gif"];
 
 		const matches = (f: string, cat?: string) => {
-			if (!normalize(f).includes(query) || shouldExclude(f)) return false;
+			if (
+				!normalize(f).includes(query) ||
+				shouldExclude(f) ||
+				hiddenFormats.includes(f)
+			)
+				return false;
 			// if imageSequence and image category, only show animated formats
 			if (imageSequence && (cat ?? activeCategory) === "image") {
 				return animatedFormats.includes(f);
@@ -232,7 +248,7 @@
 		// show categories with matches, formats from within resolved category
 		return {
 			categories: matchingCategories,
-			formats,
+			formats: formats.filter((f) => !hiddenFormats.includes(f)),
 			isFallback: false,
 			resolvedCategory,
 		};

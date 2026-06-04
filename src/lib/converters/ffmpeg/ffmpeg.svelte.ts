@@ -554,7 +554,6 @@ export class FFmpegConverter extends Converter {
 					audioBitrateArgs,
 					sampleRateArgs,
 					channelsArgs,
-					tracksArgs,
 				);
 			} else {
 				this.log("Using solid color background");
@@ -565,7 +564,6 @@ export class FFmpegConverter extends Converter {
 					audioBitrateArgs,
 					sampleRateArgs,
 					channelsArgs,
-					tracksArgs,
 				);
 			}
 		}
