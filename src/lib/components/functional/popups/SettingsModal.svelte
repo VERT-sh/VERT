@@ -1,6 +1,6 @@
 <script lang="ts">
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	import { SearchIcon } from "lucide-svelte";
+	import { SearchIcon } from "@lucide/svelte";
 	import Dropdown from "../Dropdown.svelte";
 	import FancyInput from "../FancyInput.svelte";
 	import Modal from "./Modal.svelte";

@@ -101,6 +101,7 @@ class Files {
 					const { common } = await parseBlob(file.file, {
 						skipPostHeaders: true,
 					});
+					console.log(JSON.stringify(common, null, 2));
 					const cover = selectCover(common.picture);
 					if (cover) {
 						const arrayBuffer =
@@ -111,6 +112,7 @@ class Files {
 							type: cover.format,
 						});
 						file.blobUrl = URL.createObjectURL(blob);
+						console.log(file.blobUrl)
 					}
 				} else if (isVideo) {
 					// video

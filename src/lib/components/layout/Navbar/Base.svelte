@@ -17,7 +17,7 @@
 		SunIcon,
 		UploadIcon,
 		type Icon as IconType,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import Panel from "../../visual/Panel.svelte";
 	import Logo from "../../visual/svg/Logo.svelte";

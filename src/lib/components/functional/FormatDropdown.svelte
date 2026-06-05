@@ -4,7 +4,7 @@
 	import { isMobile, files, dropdownStates } from "$lib/store/index.svelte";
 	import type { Categories } from "$lib/types";
 	import clsx from "clsx";
-	import { ChevronDown, SearchIcon } from "lucide-svelte";
+	import { ChevronDown, SearchIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";

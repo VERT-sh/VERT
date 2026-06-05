@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { duration, fade, fly } from "$lib/util/animation";
 	import { removeDialog } from "$lib/store/DialogProvider";
-	import { BanIcon, CheckIcon, InfoIcon, TriangleAlert } from "lucide-svelte";
+	import { BanIcon, CheckIcon, InfoIcon, TriangleAlert } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import type { Dialog as DialogType } from "$lib/store/DialogProvider";
 

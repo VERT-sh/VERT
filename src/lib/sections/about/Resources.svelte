@@ -7,11 +7,11 @@
 	} from "$lib/util/consts";
 	import { effects } from "$lib/store/index.svelte";
 	import {
-		GithubIcon,
+		CodeXmlIcon,
 		LinkIcon,
 		MailIcon,
 		MessageCircleMoreIcon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { m } from "$lib/paraglide/messages";
 </script>
 
@@ -44,7 +44,7 @@
 				? ''
 				: '!scale-100'} flex-1 gap-2 p-4 rounded-full bg-button text-black dynadark:text-white flex items-center justify-center"
 		>
-			<GithubIcon size="24" class="inline-block mr-2" />
+			<CodeXmlIcon size="24" class="inline-block mr-2" />
 			{m["about.resources.source"]()}
 		</a>
 		<a

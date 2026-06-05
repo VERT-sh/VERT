@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { error } from "$lib/util/logger";
 	import * as About from "$lib/sections/about";
-	import { InfoIcon } from "lucide-svelte";
+	import { InfoIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import avatarNullptr from "$lib/assets/avatars/nullptr.jpg";
 	import avatarLiam from "$lib/assets/avatars/liam.jpg";

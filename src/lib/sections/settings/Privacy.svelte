@@ -6,7 +6,7 @@
 		PlayIcon,
 		RefreshCwIcon,
 		Trash2Icon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import type { ISettings } from "./index.svelte";
 	import { effects } from "$lib/store/index.svelte";
 	import { m } from "$lib/paraglide/messages";

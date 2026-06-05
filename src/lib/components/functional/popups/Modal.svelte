@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { duration, fade } from "$lib/util/animation";
 	import { quintOut } from "svelte/easing";
-	import type { Icon as IconType } from "lucide-svelte";
+	import type { Icon as IconType } from "@lucide/svelte";
 
 	interface ModalButton {
 		text: string;

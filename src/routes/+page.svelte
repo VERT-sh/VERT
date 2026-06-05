@@ -4,7 +4,7 @@
 	import { converters } from "$lib/converters";
 	import { vertdLoaded } from "$lib/store/index.svelte";
 	import clsx from "clsx";
-	import { AudioLines, BookText, Check, Film, Image } from "lucide-svelte";
+	import { AudioLines, BookText, Check, Film, Image } from "@lucide/svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { OverlayScrollbarsComponent } from "overlayscrollbars-svelte";
 	import { browser } from "$app/environment";

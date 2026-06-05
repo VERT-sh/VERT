@@ -30,7 +30,7 @@
 		ImageOffIcon,
 		RotateCwIcon,
 		XIcon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { Settings } from "$lib/sections/settings/index.svelte";
 	import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";

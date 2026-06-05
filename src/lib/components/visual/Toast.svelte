@@ -6,7 +6,7 @@
 		InfoIcon,
 		TriangleAlert,
 		XIcon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import { ToastManager } from "$lib/util/toast.svelte";
 	import type { ToastProps } from "$lib/util/toast.svelte";

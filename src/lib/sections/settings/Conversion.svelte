@@ -6,7 +6,7 @@
 		PlayIcon,
 		RefreshCwIcon,
 		ChevronDownIcon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import type { ISettings } from "./index.svelte";
 	import {
 		CONVERSION_BITRATES,

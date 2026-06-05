@@ -14,7 +14,7 @@
 		PauseIcon,
 		PlayIcon,
 		SunIcon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { onMount, onDestroy } from "svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { getLocale } from "$lib/paraglide/runtime";

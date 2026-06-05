@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { effects, files, isMobile } from "$lib/store/index.svelte";
-	import { FolderArchiveIcon, RefreshCw, Trash2Icon } from "lucide-svelte";
+	import { FolderArchiveIcon, RefreshCw, Trash2Icon } from "@lucide/svelte";
 	import Panel from "../visual/Panel.svelte";
 	import Dropdown from "./Dropdown.svelte";
 	import Tooltip from "../visual/Tooltip.svelte";

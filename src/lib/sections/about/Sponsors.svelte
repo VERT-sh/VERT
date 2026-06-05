@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Panel from "$lib/components/visual/Panel.svelte";
-	import { PiggyBankIcon, CopyIcon, CheckIcon } from "lucide-svelte";
+	import { PiggyBankIcon, CopyIcon, CheckIcon } from "@lucide/svelte";
 	import HotMilk from "$lib/assets/hotmilk.svg?component";
 	import { DISCORD_URL } from "$lib/util/consts";
 	import { error } from "$lib/util/logger";

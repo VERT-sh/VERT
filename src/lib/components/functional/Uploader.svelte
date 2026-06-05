@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UploadIcon } from "lucide-svelte";
+	import { UploadIcon } from "@lucide/svelte";
 	import Panel from "../visual/Panel.svelte";
 	import clsx from "clsx";
 	import { onMount } from "svelte";

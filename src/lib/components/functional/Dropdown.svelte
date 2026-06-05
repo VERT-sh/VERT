@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { duration, fade, transition } from "$lib/util/animation";
-	import { ChevronDown } from "lucide-svelte";
+	import { ChevronDown } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 
 	type Props = {
