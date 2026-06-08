@@ -44,7 +44,7 @@ export const detectAudioBitrate = async (
 
 	return await ffprobeValue(ffmpeg, args, (s) => {
 		const n = parseInt(s, 10);
-		return Number.isFinite(n) ? Math.round(n / 1000) : null;
+		return Number.isFinite(n) ? Math.floor(n / 1000) : null;
 	});
 };
 

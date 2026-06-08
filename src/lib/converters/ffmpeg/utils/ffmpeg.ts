@@ -56,6 +56,7 @@ export const avWithArt = (
 	audioBitrateArgs: string[],
 	sampleRateArgs: string[],
 	channelsArgs: string[],
+	extraArgs: string[],
 ): string[] => {
 	return [
 		"-loop",
@@ -80,6 +81,7 @@ export const avWithArt = (
 		...audioBitrateArgs,
 		...sampleRateArgs,
 		...channelsArgs,
+		...extraArgs,
 		"output" + to,
 	];
 };
@@ -92,6 +94,7 @@ export const avWithBg = (
 	audioBitrateArgs: string[],
 	sampleRateArgs: string[],
 	channelsArgs: string[],
+	extraArgs: string[],
 ): string[] => {
 	return [
 		"-f",
@@ -114,6 +117,7 @@ export const avWithBg = (
 		...audioBitrateArgs,
 		...sampleRateArgs,
 		...channelsArgs,
+		...extraArgs,
 		"output" + to,
 	];
 };
