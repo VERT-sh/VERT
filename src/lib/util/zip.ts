@@ -41,9 +41,11 @@ export async function createZip(files: File[]): Promise<Uint8Array> {
 }
 
 export function ignoreEntry(filename: string): boolean {
+	const segments = filename.split("/");
 	return (
-		filename.startsWith(".") ||
-		filename.includes("/__MACOSX/") ||
-		filename.endsWith("/")
+		filename.endsWith("/") ||
+		segments.some(
+			(segment) => segment === "__MACOSX" || segment.startsWith("."),
+		)
 	);
 }
