@@ -9,7 +9,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint ."
+		"lint": "prettier --check . && eslint .",
+		"postinstall": "cp node_modules/mupdf/dist/mupdf-wasm.wasm static/mupdf-wasm.wasm"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "^2.5.0",
@@ -51,6 +52,7 @@
 		"clsx": "^2.1.1",
 		"fflate": "^0.8.2",
 		"lucide-svelte": "^0.554.0",
+		"mupdf": "^1.28.0",
 		"music-metadata": "^11.10.3",
 		"overlayscrollbars": "^2.12.0",
 		"overlayscrollbars-svelte": "^0.5.5",
