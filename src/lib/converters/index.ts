@@ -4,6 +4,7 @@ import { FFmpegConverter } from "./ffmpeg.svelte";
 import { PandocConverter } from "./pandoc.svelte";
 import { VertdConverter } from "./vertd.svelte";
 import { MagickConverter } from "./magick.svelte";
+import { MuPDFConverter } from "./mupdf.svelte";
 import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
 
 const getConverters = (): Converter[] => {
@@ -17,6 +18,7 @@ const getConverters = (): Converter[] => {
 	}
 
 	converters.push(new PandocConverter());
+	converters.push(new MuPDFConverter());
 	return converters;
 };
 
