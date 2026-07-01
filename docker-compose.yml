@@ -11,7 +11,7 @@ services:
         PUB_DISABLE_ALL_EXTERNAL_REQUESTS: ${PUB_DISABLE_ALL_EXTERNAL_REQUESTS:-false}
         PUB_VERTD_URL: ${PUB_VERTD_URL:-}
         PUB_DONATION_URL: ${PUB_DONATION_URL:-https://donations.vert.sh}
-        PUB_STRIPE_KEY: ${PUB_STRIPE_KEY:-pk_live_51RDVmAGSxPVad6bQwzVNnbc28nlmzA30krLWk1fefCMpUPiSRPkavMMbGqa8A3lUaOCMlsUEVy2CWDYg0ip3aPpL00ZJlsMkf2}
+        PUB_STRIPE_KEY: ${PUB_STRIPE_KEY:-pk_live_51TlrPaFTPjkhEGBSu5Kwy5jJQYxcX5yUUHXiH5g7Xzvb0NKzDqbooc126HjlW35uUkfAgQN2ruEoCuyQynoxpKaA00ojFgQ116}
     restart: unless-stopped
     ports:
       - ${PORT:-3000}:80
