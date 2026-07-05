@@ -1,0 +1,325 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"navbar": {
+		"upload": "Tải lên",
+		"convert": "Chuyển đổi",
+		"settings": "Cài đặt",
+		"about": "Về VERT",
+		"toggle_theme": "Chỉnh sáng / tối"
+	},
+	"footer": {
+		"copyright": "© {year} VERT.",
+		"source_code": "Source code",
+		"discord_server": "Server Discord",
+		"privacy_policy": "Điều khoản bảo mật"
+	},
+	"upload": {
+		"title": "Chuyển file siêu cuốn, dùng là yêu luôn.",
+		"subtitle": "Mọi khâu xử lý ảnh hay tài liệu đều diễn ra ngay trên thiết bị, video thì được đẩy lên server chạy nhanh như chớp. Thoải mái đổi file không lo giới hạn dung lượng, sạch bóng quảng cáo và quan trọng là open source 100%.",
+		"uploader": {
+			"text": "Kéo thả hoặc nhấn để {action}",
+			"convert": "chuyển đổi"
+		},
+		"cards": {
+			"title": "VERT hỗ trợ...",
+			"images": "Hình ảnh",
+			"audio": "Âm thanh",
+			"documents": "Tài liệu",
+			"video": "Video",
+			"video_server_processing": "Xử lý trên hệ thống",
+			"local_supported": "Xử lý ngay trên máy",
+			"status": {
+				"text": "<b>Trạng thái:</b> {status}",
+				"ready": "sẵn sàng",
+				"not_ready": "đang chuẩn bị",
+				"not_initialized": "chưa khởi động",
+				"downloading": "đang tải...",
+				"initializing": "đang chuẩn bị...",
+				"unknown": "không xác định"
+			},
+			"supported_formats": "Hỗ trợ các định dạng:"
+		},
+		"tooltip": {
+			"partial_support": "Định dạng này chỉ hỗ trợ chuyển đổi ở đầu {direction}.",
+			"direction_input": "vào (từ)",
+			"direction_output": "ra (sang)",
+			"video_server_processing": "Theo mặc định, video sẽ được tải lên server để xử lý. Xem cách thiết lập xử lý ngay tại máy ở đây."
+		}
+	},
+	"convert": {
+		"archive_file": {
+			"extract": "Giải nén file",
+			"extracting": "File được giải nén: {filename}",
+			"extracted": "Giải nén thành công {extract_count} tệp từ {filename}. {ignore_count} tệp bị bỏ qua.",
+			"detected": "Phát hiện tệp có loại {type} trong {filename}.",
+			"audio": "âm thanh",
+			"video": "video",
+			"doc": "tài liệu",
+			"image": "hình ảnh",
+			"extract_error": "Đã có lỗi trong lúc giải nén tệp {filename}: {error}"
+		},
+		"large_file_warning": "Do tài nguyên có hạng của trình duyệt / thiết bị, chức năng chuyển đổi từ video sang âm thanh không thực hiện được vì dung lượng tệp lớn hơn {limit}GB. Bạn nên dùng Firefox hoặc Safari cho tệp có dung lượng lớn vì những trình duyệt trên có nhiều tài nguyên hơn.",
+		"external_warning": {
+			"title": "Khuyến cáo từ hệ thống",
+			"text": "Nếu bạn muốn chuyển đổi tệp sang định dạng video, Những tệp sau sẽ được tải lên hệ thống để chuyển đổi. Bạn đồng ý tiếp tục chứ?",
+			"yes": "Có, tôi muốn tiếp tục",
+			"no": "Không"
+		},
+		"panel": {
+			"convert_all": "Chuyển tất cả",
+			"download_all": "Giải nén và tải xuống",
+			"remove_all": "Xóa tất cả tệp",
+			"set_all_to": "Chuyển tất cả sang",
+			"na": "Chưa chọn"
+		},
+		"dropdown": {
+			"audio": "Âm thanh",
+			"video": "Video",
+			"doc": "Tài liệu",
+			"image": "Hình ảnh",
+			"placeholder": "Tìm định dạng",
+			"no_formats": "Định dạng không tồn tại",
+			"no_results": "Không tìm thấy định dạng"
+		},
+		"tooltips": {
+			"unknown_file": "Loại tệp không xác định",
+			"audio_file": "Tệp âm thanh",
+			"video_file": "Tệp video",
+			"document_file": "Tệp tài liệu",
+			"image_file": "Hình ảnh",
+			"convert_file": "Chuyển đổi tệp",
+			"download_file": "Tải xuống"
+		},
+		"errors": {
+			"cant_convert": "Không thể chuyển đổi tệp này.",
+			"vertd_server": "ủa alo đang làm cái gì vậy..? Bạn phải chạy server VERT trước chứ!",
+			"vertd_generic_view": "Xem chi tiết lỗi",
+			"vertd_generic_body": "E rằng là đã có lỗi xảy ra trong lúc chuyển đổi video của bạn. Bạn có muốn gửi video này cho chúng mình fix không? Đừng lo về rò rỉ thông tin mật nhé, chúng mình chỉ nhận video bạn gửi thôi.",
+			"vertd_generic_title": "Có lỗi xảy ra trong lúc chuyển đổi video của bạn",
+			"vertd_generic_yes": "Gửi video",
+			"vertd_generic_no": "Đừng gửi",
+			"vertd_failed_to_keep": "Không thể lưu video lên hệ thống: {error}",
+			"vertd_details": "Xem chi tiết lỗi",
+			"vertd_details_body": "Nếu bạn ấn gửi, <b>video của bạn sẽ được gửi</b> cùng với báo cáo chi tiết lỗi đến chúng tôi để xem qua. Những thông tin mặc định chúng tôi sẽ được nhận trong bản báo cáo:",
+			"vertd_details_footer": "Thông tin này chỉ được sử dụng cho một mục đích duy nhất là sửa lỗi và cải thiện dịch vụ. Để biết thêm chi tiết, vui lòng xem [privacy_link]điều khoản bảo mật[/privacy_link] của chúng tôi.",
+			"vertd_details_job_id": "<b>Mã việc:</b> {jobId}",
+			"vertd_details_from": "<b>Chuyển từ:</b> {from}",
+			"vertd_details_to": "<b>sang:</b> {to}",
+			"vertd_details_error_message": "<b>Lỗi:</b> [view_link]Xem chi tiết lỗi[/view_link]",
+			"vertd_details_close": "Đóng",
+			"vertd_ratelimit": "Video của bạn, '{filename}', không thể chuyển đổi sau nhiều lần thử. Để tránh hệ thống quá tải, tính năng chuyển đổi cho file này tạm thời vô hiệu hóa. Xin thử lại sau ít phút.",
+			"unsupported_format": "Chỉ hỗ trợ hình ảnh, video, âm thanh, and tài liệu",
+			"format_output_only": "Hiện tại định dạng này chỉ hỗ trợ xuất file (chuyển đổi sang), không hỗ trợ làm file đầu vào.",
+			"vertd_not_found": "Lỗi kết nối với hệ thống vertd để chuyển đổi video. Hãy đảm bảo rằng đường dẫn (URL) bạn thiết lập đã đúng",
+			"worker_downloading": "Đang chuẩn bị công cụ chuyển cho loại tệp: {type}, bạn hãy chờ trong giây lát nhé.",
+			"worker_error": "Đã có lỗi trong lúc chuẩn bị công cụ chuyển cho loại tệp: {type}, vui lòng thử lại sau ít phút.",
+			"worker_timeout": "Có vẻ quá trình chuẩn bị chuyển đổi cho loại tệp {type} lâu hơn dự kiến, bạn vui lòng đợi trong giây lát hoặc truy cập lại trang.",
+			"audio": "âm thanh",
+			"doc": "tài liệu",
+			"image": "hình ảnh"
+		}
+	},
+	"settings": {
+		"title": "Cài đặt",
+		"errors": {
+			"save_failed": "Đã có lỗi trong lưu cài đặt!"
+		},
+		"appearance": {
+			"title": "Giao diện",
+			"brightness_theme": "Tone màu",
+			"brightness_description": "Sáng như hào quang chói lọi, hay tối như tiền đồ chị Dậu?",
+			"light": "Sáng",
+			"dark": "Tối",
+			"effect_settings": "Cài đặt hiệu ứng",
+			"effect_description": "Hệ hướng nội tĩnh lặng, hay hướng ngoại thích màu mè hoa lá hẹ?",
+			"enable": "Hướng ngoại (màu mè)",
+			"disable": "Hướng nội (tối giản)"
+		},
+		"conversion": {
+			"title": "Chuyển đổi",
+			"advanced_settings": "Cài đặt nâng cao",
+			"filename_format": "Định dạng tên file",
+			"filename_description": "Cài đặt này áp dụng cho tên tệp, <b>không bao gồm phần mở rộng (đuôi file)</b>. Bạn có thể dùng các mẫu sau để tự động điền thông tin: %name% là tên gốc, %extension% là đuôi file gốc, và %date% là ngày giờ lúc bạn chuyển đổi file.",
+			"placeholder": "VERT_%name%",
+			"default_format": "Định dạng mặc định",
+			"default_format_enable": "Bật",
+			"default_format_disable": "Tắt",
+			"default_format_description": "Điều này sẽ thay đổi định dạng mặc định để chuyển đổi khi bạn gửi một tệp thuộc loại này.",
+			"default_format_image": "Hình ảnh",
+			"default_format_video": "Video",
+			"default_format_audio": "Âm thanh",
+			"default_format_document": "Tài liệu",
+			"metadata": "Thông tin tệp (Metadata)",
+			"metadata_description": "Tùy chọn này xác định việc giữ lại hay xóa bỏ các thông tin ẩn (như dữ liệu ảnh EXIF, thông tin bài hát...) từ tệp gốc sang tệp mới.",
+			"keep": "Giữ lại",
+			"remove": "Xóa bỏ",
+			"quality": "Chất lượng chuyển đổi",
+			"quality_description": "Thay đổi chất lượng đầu ra mặc định cho tệp. Chỉ số càng cao thì tệp càng nét, nhưng thời gian xử lý sẽ lâu hơn và dung lượng file sẽ lớn hơn.",
+			"quality_video": "Thay đổi chất lượng mặc định cho video đầu ra. Chỉ số cao giúp video rõ nét hơn nhưng sẽ tốn thời gian xử lý và tăng dung lượng tệp.",
+			"quality_audio": "Âm thanh (kbps)",
+			"quality_images": "Hình ảnh (%)",
+			"rate": "Tần số lấy mẫu (Hz)"
+		},
+		"vertd": {
+			"title": "Chuyển đổi Video",
+			"status": "trạng thái:",
+			"loading": "đang tải...",
+			"available": "sẵn sàng, mã commit {commitId}",
+			"unavailable": "không khả dụng (kiểm tra lại URL nhé?)",
+			"description": "Dự án <code>vertd</code> đóng vai trò là trình chủ (server wrapper) cho FFmpeg. Điều này giúp bạn chuyển đổi video thuận tiện ngay trên giao diện web của VERT, mà vẫn tận dụng được sức mạnh GPU để xử lý nhanh nhất có thể.",
+			"hosting_info": "Chúng mình có sẵn một máy chủ công khai để bạn dùng ngay cho tiện, nhưng nếu bạn 'có nghề' thì việc tự chạy server riêng trên máy tính cá nhân cũng rất đơn giản. Bạn có thể tải bộ cài server [vertd_link]tại đây[/vertd_link] - quy trình cài đặt sẽ sớm được tối ưu hơn trong tương lai, cùng chờ xem nhé!",
+			"instance": "Máy chủ (Instance)",
+			"url_placeholder": "Ví dụ: http://localhost:24153",
+			"conversion_speed": "Tốc độ chuyển đổi",
+			"speed_description": "Đây là sự đánh đổi giữa tốc độ và chất lượng. Tốc độ càng nhanh thì chất lượng sẽ giảm nhẹ, nhưng bù lại bạn sẽ xong việc sớm hơn.",
+			"speeds": {
+				"very_slow": "Rất chậm",
+				"slower": "Chậm hơn",
+				"slow": "Chậm",
+				"medium": "Trung bình",
+				"fast": "Nhanh",
+				"ultra_fast": "Siêu tốc"
+			},
+			"auto_instance": "Tự động (khuyên dùng)",
+			"eu_instance": "Falkenstein, Đức",
+			"us_instance": "Washington, Hoa Kỳ",
+			"custom_instance": "Tùy chỉnh"
+		},
+		"privacy": {
+			"title": "Quyền riêng tư & Dữ liệu",
+			"plausible_title": "Phân tích Plausible",
+			"plausible_description": "Chúng mình sử dụng [plausible_link]Plausible[/plausible_link], một công cụ phân tích chú trọng quyền riêng tư, để thu thập số liệu thống kê hoàn toàn ẩn danh. Mọi dữ liệu đều được ẩn danh hóa và tổng hợp lại, cam kết không gửi hay lưu trữ bất kỳ thông tin định danh cá nhân nào. Bạn có thể xem bảng phân tích [analytics_link]tại đây[/analytics_link] và tùy chọn tham gia hoặc từ chối ở bên dưới.",
+			"opt_in": "Tham gia",
+			"opt_out": "Từ chối",
+			"cache_title": "Quản lý bộ nhớ đệm (Cache)",
+			"cache_description": "Các tệp tin chuyển đổi sẽ được lưu tạm thời trên trình duyệt của bạn để tránh việc phải tải lại nhiều lần, giúp tăng hiệu suất và tiết kiệm dữ liệu.",
+			"refresh_cache": "Làm mới bộ nhớ đệm",
+			"clear_cache": "Xóa bộ nhớ đệm",
+			"files_cached": "{size} ({count} tệp)",
+			"loading_cache": "Đang tải...",
+			"total_size": "Tổng dung lượng",
+			"files_cached_label": "Số tệp đã lưu",
+			"cache_cleared": "Đã xóa bộ nhớ đệm thành công!",
+			"cache_clear_error": "Xóa bộ nhớ đệm thất bại.",
+			"site_data_title": "Quản lý dữ liệu trang web",
+			"site_data_description": "Xóa toàn bộ dữ liệu trang web bao gồm các cài đặt và tệp tin đã lưu, đưa VERT về trạng thái mặc định ban đầu và tải lại trang.",
+			"clear_all_data": "Xóa tất cả dữ liệu",
+			"clear_all_data_confirm_title": "Xóa toàn bộ dữ liệu trang web?",
+			"clear_all_data_confirm": "Hành động này sẽ đặt lại toàn bộ cài đặt & bộ nhớ đệm, sau đó tải lại trang. Bạn sẽ không thể hoàn tác thao tác này.",
+			"clear_all_data_cancel": "Hủy",
+			"all_data_cleared": "Đã xóa toàn bộ dữ liệu! Đang tải lại trang...",
+			"all_data_clear_error": "Xóa toàn bộ dữ liệu thất bại."
+		},
+		"language": {
+			"title": "Ngôn ngữ",
+			"description": "Hãy chọn ngôn ngữ bạn muốn sử dụng cho giao diện VERT."
+		}
+	},
+	"about": {
+		"title": "Về chúng tôi",
+		"why": {
+			"title": "Vì sao VERT được ra đời?",
+			"description": "<b>Mấy cái trình chuyển đổi file từ trước đến giờ toàn làm tụi mình thất vọng.</b> Giao diện thì lỗ thời, quảng cáo thì ngập mặt, mà quan trọng nhất là chậm như rùa. Tụi mình quyết định dẹp hết đống rắc rối đó bằng một phiên bản \"ao chình\" hơn hẳn, cân đẹp mọi vấn đề trên luôn.<br/><br/>Tất cả các tệp không phải video đều được xử lý 100% ngay trên máy bạn; điều này có nghĩa là không có độ trễ khi chờ đợi server, và quan trọng nhất là tụi mình không bao giờ xâm phạm được file của bạn đâu, riêng tư tuyệt đối!<br/><br/>Riêng file video sẽ được đẩy lên dàn server chạy card RTX 4000 Ada siêu bốc của tụi mình. Video sẽ nằm chờ trên đó trong 1 tiếng nếu bạn chưa nhấn chuyển đổi. Còn nếu đã chuyển xong, file sẽ tự động bị xóa sau khi bạn tải về hoặc sau tối đa 1 tiếng. Xóa sạch sành sanh không lưu luyến, uy tín luôn!"
+		},
+		"sponsors": {
+			"title": "Nhà tài trợ",
+			"description": "Muốn tiếp thêm động lực cho tụi mình không? Inbox ngay cho developer trong server [discord_link]Discord[/discord_link], hoặc gửi email tới",
+			"email_copied": "Đã copy địa chỉ email!"
+		},
+		"resources": {
+			"title": "Thông tin liên kết",
+			"discord": "Server Discord",
+			"source": "Source",
+			"email": "Email"
+		},
+		"donate": {
+			"title": "Donate cho VERT",
+			"description": "Sự hảo tâm của các bạn trở thành động lực lớn cho đội ngũ VERT ngày một phát triển.",
+			"one_time": "Một lần",
+			"monthly": "Hàng tháng",
+			"custom": "Tùy chọn",
+			"pay_now": "Donate",
+			"donate_amount": "Donate ${amount} USD",
+			"thank_you": "Công đức vô lượng!",
+			"payment_failed": "Thanh toán thất bại: {message}{period} Tài khoản của bạn chưa bị trừ tiền đâu nè.",
+			"donation_error": "Đã có lỗi xảy ra khi xử lý khoản donate của bạn. Vui lòng thử lại sau chút nhé.",
+			"payment_error": "Lỗi khi lấy thông tin thanh toán. Vui lòng thử lại sau nha.",
+			"donation_notice_official": "Khoản donate của bạn sẽ được gửi trực tiếp đến máy chủ VERT chính thức (vert.sh), giúp tụi mình có thêm kinh phí để phát triển dự án này.",
+			"donation_notice_unofficial": "Khoản donate này sẽ được gửi tới người vận hành máy chủ VERT này. Nếu bạn muốn ủng hộ đội ngũ phát triển VERT chính thức, vui lòng ghé qua [official_link]vert.sh[/official_link] nhé."
+		},
+		"credits": {
+			"title": "Tri ân",
+			"contact_team": "Nếu bạn muốn liên hệ với đội ngũ phát triển, vui lòng sử dụng email trong mục \"Thông tin liên kết\" nhé.",
+			"notable_contributors": "Những gương mặt tiêu biểu",
+			"notable_description": "Tụi mình muốn gửi lời cảm ơn chân thành đến những người bạn này vì những đóng góp to lớn cho VERT.",
+			"github_contributors": "Đóng góp từ GitHub",
+			"github_description": "Cảm ơn tất cả mọi người đã chung tay giúp sức! [github_link]Bạn cũng muốn góp một tay chứ?[/github_link]",
+			"no_contributors": "Hình như vẫn chưa có ai góp sức hết... [contribute_link]hãy là người đầu tiên nhé![/contribute_link]",
+			"libraries": "Thư viện sử dụng",
+			"libraries_description": "Gửi lời cảm ơn lớn đến FFmpeg (âm thanh, video), ImageMagick (hình ảnh) và Pandoc (tài liệu) vì đã duy trì những thư viện tuyệt vời suốt bao năm qua. VERT hoạt động dựa trên sức mạnh của họ để mang đến cho bạn những bản chuyển đổi tốt nhất.",
+			"roles": {
+				"lead_developer": "Lập trình viên trưởng; hệ thống chuyển đổi (backend), triển khai giao diện (UI)",
+				"developer": "Lập trình viên; triển khai giao diện (UI)",
+				"designer": "Thiết kế; trải nghiệm người dùng (UX), nhận diện thương hiệu, marketing",
+				"docker_ci": "Duy trì hệ thống Docker & CI",
+				"former_cofounder": "Cựu đồng sáng lập & thiết kế"
+			}
+		},
+		"errors": {
+			"github_contributors": "Đã có lỗi xảy ra trong lúc lấy dữ liệu thành viên đóng góp trên GitHub"
+		}
+	},
+	"workers": {
+		"errors": {
+			"general": "Lỗi khi chuyển đổi {file}: {message}",
+			"cancel": "Lỗi khi hủy quá trình chuyển đổi {file}: {message}",
+			"magick": "Lỗi hệ thống Magick, việc chuyển đổi hình ảnh có thể không hoạt động như mong đợi.",
+			"ffmpeg": "Lỗi khi tải FFmpeg, một số tính năng video/âm thanh có thể không hoạt động ổn định.",
+			"pandoc": "Lỗi khi tải hệ thống Pandoc, việc chuyển đổi tài liệu có thể gặp sự cố.",
+			"no_audio": "Không tìm thấy dữ liệu âm thanh (audio stream) trong tệp.",
+			"invalid_rate": "Tần số lấy mẫu không hợp lệ: {rate}Hz",
+			"file_too_large": "Tệp này vượt quá giới hạn {limit}GB của trình duyệt/thiết bị. Hãy thử dùng Firefox hoặc Safari để chuyển đổi các tệp lớn, vì những trình duyệt này thường hỗ trợ giới hạn cao hơn."
+		}
+	},
+	"privacy": {
+		"title": "Điều khoản bảo mật",
+		"summary": {
+			"title": "Tổng quan",
+			"description": "Chính sách bảo mật của VERT rất đơn giản: chúng tôi hoàn toàn không thu thập hay lưu trữ bất kỳ dữ liệu nào của bạn. Chúng tôi không sử dụng cookie hay các trình theo dõi (trackers), các phân tích đều mang tính riêng tư tuyệt đối và mọi quá trình chuyển đổi (ngoại trừ video) đều diễn ra cục bộ ngay trên trình duyệt của bạn. Các tệp video sẽ được xóa sau khi tải về hoặc sau một giờ, trừ khi bạn cho phép lưu trữ cụ thể; trường hợp này chỉ được sử dụng cho mục đích khắc phục sự cố. VERT tự vận hành một thực thể Coolify để lưu trữ trang web và vertd (phục vụ chuyển đổi video), cùng một thực thể Plausible để thu thập các phân tích tổng hợp và hoàn toàn ẩn danh. Chúng tôi sử dụng Stripe để xử lý các khoản quyên góp, đơn vị này có thể thu thập một số dữ liệu nhằm mục đích ngăn ngừa gian lận.<br/><br/>Lưu ý rằng các điều khoản này có thể chỉ áp dụng cho thực thể VERT chính thức tại [vert_link]vert.sh[/vert_link]; các thực thể của bên thứ ba có thể có cách xử lý dữ liệu khác."
+		},
+		"conversions": {
+			"title": "Chuyển đổi",
+			"description": "Hầu hết các quá trình chuyển đổi (hình ảnh, tài liệu, âm thanh) đều diễn ra hoàn toàn cục bộ trên thiết bị của bạn thông qua phiên bản WebAssembly của các công cụ chuyên dụng (như ImageMagick, Pandoc, FFmpeg). Điều này đồng nghĩa với việc tệp của bạn không bao giờ rời khỏi thiết bị và chúng tôi hoàn toàn không có quyền truy cập vào chúng.<br/><br/>Riêng việc chuyển đổi video sẽ được thực hiện trên máy chủ của chúng tôi vì chúng yêu cầu sức mạnh xử lý lớn hơn và hiện tại chưa thể xử lý nhanh chóng ngay trên trình duyệt. Các video bạn chuyển đổi qua VERT sẽ được xóa sau khi tải về hoặc sau một giờ, trừ khi bạn cho phép chúng tôi lưu trữ lâu hơn chỉ nhằm mục đích khắc phục sự cố."
+		},
+		"donations": {
+			"title": "Doanh thu từ quyên góp",
+			"description": "Chúng tôi sử dụng Stripe tại trang [about_link]Giới thiệu[/about_link] để tiếp nhận các khoản quyên góp. Stripe có thể thu thập một số thông tin nhất định về giao dịch và thiết bị nhằm mục đích ngăn ngừa gian lận, như đã mô tả trong [stripe_link]tài liệu của họ về phát hiện gian lận nâng cao[/stripe_link]. Các yêu cầu mạng bên ngoài đến Stripe sẽ được trì hoãn và chỉ thực hiện sau khi bạn nhấn nút thanh toán."
+		},
+		"conversion_errors": {
+			"title": "Lỗi chuyển đổi",
+			"description": "Khi quá trình chuyển đổi video thất bại, chúng tôi có thể thu thập một số dữ liệu ẩn danh để phục vụ việc chẩn đoán sự cố. Dữ liệu này có thể bao gồm:",
+			"list_job_id": "Mã định danh công việc (Job ID), chính là tên tệp đã được ẩn danh hóa",
+			"list_format_from": "Định dạng tệp gốc của bạn",
+			"list_format_to": "Định dạng tệp bạn muốn chuyển sang",
+			"list_stderr": "Thông tin đầu ra lỗi (stderr) từ FFmpeg của công việc đó",
+			"list_video": "Tệp video thực tế (chỉ khi có sự cho phép cụ thể từ bạn)",
+			"footer": "Thông tin này chỉ được sử dụng duy nhất cho mục đích chẩn đoán các lỗi chuyển đổi. Tệp video thực tế sẽ chỉ được thu thập nếu bạn cho phép, và cũng chỉ phục vụ cho việc khắc phục sự cố."
+		},
+		"analytics": {
+			"title": "Phân tích dữ liệu",
+			"description": "Chúng tôi tự vận hành một thực thể Plausible để thu thập các phân tích tổng hợp và hoàn toàn ẩn danh. Plausible không sử dụng cookie và tuân thủ mọi quy định chính về quyền riêng tư (GDPR/CCPA/PECR). Bạn có thể từ chối tham gia phân tích tại mục \"Quyền riêng tư & Dữ liệu\" trong phần [settings_link]Cài đặt[/settings_link] và tìm hiểu thêm về các chính sách bảo mật của Plausible [plausible_link]tại đây[/plausible_link]."
+		},
+		"local_storage": {
+			"title": "Lưu trữ cục bộ",
+			"description": "Chúng tôi sử dụng bộ nhớ cục bộ (Local Storage) của trình duyệt để lưu các cài đặt của bạn, và bộ nhớ phiên (Session Storage) để lưu tạm thời danh sách những người đóng góp từ GitHub cho phần \"Giới thiệu\" nhằm giảm bớt các yêu cầu lặp lại tới GitHub API. Không có dữ liệu cá nhân nào được lưu trữ hay truyền đi.<br/><br/>Các phiên bản WebAssembly của những công cụ chuyển đổi (FFmpeg, ImageMagick, Pandoc) cũng được lưu cục bộ trên trình duyệt trong lần đầu bạn truy cập, giúp bạn không phải tải lại chúng ở những lần sau. Không có dữ liệu cá nhân nào được lưu trữ hay truyền đi. Bạn có thể xem hoặc xóa dữ liệu này bất kỳ lúc nào tại mục \"Quyền riêng tư & Dữ liệu\" trong phần [settings_link]Cài đặt[/settings_link]."
+		},
+		"contact": {
+			"title": "Liên hệ",
+			"description": "Nếu có thắc mắc, hãy gửi email cho tụi mình tại: [email_link]hello@vert.sh[/email_link]. Trong trường hợp bạn đang sử dụng VERT từ một máy chủ bên thứ ba, vui lòng liên hệ trực tiếp với người vận hành máy chủ đó nhé."
+		},
+		"last_updated": "Lần cuối cập nhật: 29-10-2025"
+	},
+	"toast": {
+		"insecure_context": "Bạn đang truy cập VERT qua kết nối không an toàn (ví dụ: HTTP thay vì HTTPS). Một số tính năng có thể sẽ không hoạt động ổn định hoặc bị lỗi."
+	}
+}
