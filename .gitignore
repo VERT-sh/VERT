@@ -22,3 +22,5 @@ vite.config.ts.timestamp-*
 
 # IDE
 .idea
+
+static/mupdf-wasm.wasm

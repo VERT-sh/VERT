@@ -93,3 +93,61 @@ export class Converter {
 		return this.supportedFormats.map((f) => f.name);
 	}
 }
+
+export interface ChainStep {
+	converter: Converter;
+	to: string; // intermediate format (last step uses the final target)
+}
+
+export class ChainedConverter extends Converter {
+	public override name: string;
+	private steps: ChainStep[];
+
+	constructor(steps: ChainStep[]) {
+		super(0);
+		if (steps.length < 2) throw new Error("Chain requires at least 2 steps");
+		this.steps = steps;
+		this.name = steps.map((s) => s.converter.name).join("+");
+		this.clearTimeout();
+		this.status = this.deriveStatus();
+		this.supportedFormats = [
+			...steps[0].converter.supportedFormats.filter((f) => f.fromSupported),
+			...steps[steps.length - 1].converter.supportedFormats.filter((f) => f.toSupported),
+		];
+	}
+
+	private deriveStatus(): WorkerStatus {
+		const statuses = this.steps.map((s) => s.converter.status);
+		if (statuses.some((s) => s === "error")) return "error";
+		if (statuses.every((s) => s === "ready")) return "ready";
+		if (statuses.some((s) => s === "downloading")) return "downloading";
+		return "not-ready";
+	}
+
+	public override async convert(input: VertFile, to: string): Promise<VertFile> {
+		this.status = this.deriveStatus();
+		const { VertFile: VF } = await import("$lib/types");
+		let current: VertFile = input;
+
+		for (let i = 0; i < this.steps.length; i++) {
+			const { converter, to: stepTo } = this.steps[i];
+			const isLast = i === this.steps.length - 1;
+			const target = isLast ? to : stepTo;
+			const result = await converter.convert(current, target);
+			if (!isLast) {
+				current = new VF(
+					new File([await result.file.arrayBuffer()], input.name.replace(/\.[^/.]+$/, target)),
+					target,
+				);
+			} else {
+				current = result;
+			}
+		}
+
+		return current;
+	}
+
+	public override async cancel(input: VertFile): Promise<void> {
+		await Promise.allSettled(this.steps.map((s) => s.converter.cancel(input)));
+	}
+}

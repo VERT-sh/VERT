@@ -1,5 +1,6 @@
 import { byNative, converters } from "$lib/converters";
 import type { Converter } from "$lib/converters/converter.svelte";
+import { ChainedConverter } from "$lib/converters/converter.svelte";
 import { m } from "$lib/paraglide/messages";
 import { ToastManager } from "$lib/util/toast.svelte";
 import type { Component } from "svelte";
@@ -65,7 +66,29 @@ export class VertFile {
 			if (!theirFrom.isNative && !theirTo.isNative) return false;
 			return true;
 		});
-		return converter;
+		if (converter) return converter;
+
+		for (const a of this.converters) {
+			for (const fmt of a.supportedFormats) {
+				if (!fmt.toSupported) continue;
+				const b = converters.find((c) => {
+					const cFrom = c.supportedFormats.find(
+						(f) => f.name === fmt.name && f.fromSupported,
+					);
+					const cTo = c.supportedFormats.find(
+						(f) => f.name === this.to && f.toSupported,
+					);
+					return cFrom && cTo;
+				});
+				if (b)
+					return new ChainedConverter([
+						{ converter: a, to: fmt.name },
+						{ converter: b, to: this.to },
+					]);
+			}
+		}
+
+		return undefined;
 	}
 
 	public isLarge(): boolean {
