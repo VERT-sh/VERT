@@ -296,7 +296,7 @@
 						class="row-start-1 col-start-1 flex w-full h-full flex-col gap-4"
 					>
 						<div
-							class="flex-grow max-h-full overflow-y-auto overflow-x-hidden"
+							class="grow max-h-full overflow-y-auto overflow-x-hidden"
 						>
 							{#if stripe && clientSecret}
 								<Elements {stripe} {clientSecret} bind:elements>
@@ -309,7 +309,7 @@
 							{/if}
 						</div>
 
-						<div class="flex-shrink-0">
+						<div class="shrink-0">
 							<button
 								disabled={!stripe ||
 									!clientSecret ||

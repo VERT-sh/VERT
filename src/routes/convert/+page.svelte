@@ -137,44 +137,44 @@
 	{@const isVideo = currentConverter?.name === "vertd"}
 	{@const isDocument = currentConverter?.name === "pandoc"}
 	<Panel class="p-5 flex flex-col min-w-0 gap-4 relative">
-		<div class="flex-shrink-0 h-8 w-full flex items-center gap-2">
+		<div class="shrink-0 h-8 w-full flex items-center gap-2">
 			{#if !converters.length}
 				<Tooltip
 					text={m["convert.tooltips.unknown_file"]()}
 					position="bottom"
 				>
-					<FileQuestionIcon size="24" class="flex-shrink-0" />
+					<FileQuestionIcon size="24" class="shrink-0" />
 				</Tooltip>
 			{:else if isAudio}
 				<Tooltip
 					text={m["convert.tooltips.audio_file"]()}
 					position="bottom"
 				>
-					<AudioLines size="24" class="flex-shrink-0" />
+					<AudioLines size="24" class="shrink-0" />
 				</Tooltip>
 			{:else if isVideo}
 				<Tooltip
 					text={m["convert.tooltips.video_file"]()}
 					position="bottom"
 				>
-					<FilmIcon size="24" class="flex-shrink-0" />
+					<FilmIcon size="24" class="shrink-0" />
 				</Tooltip>
 			{:else if isDocument}
 				<Tooltip
 					text={m["convert.tooltips.document_file"]()}
 					position="bottom"
 				>
-					<BookText size="24" class="flex-shrink-0" />
+					<BookText size="24" class="shrink-0" />
 				</Tooltip>
 			{:else}
 				<Tooltip
 					text={m["convert.tooltips.image_file"]()}
 					position="bottom"
 				>
-					<ImageIcon size="24" class="flex-shrink-0" />
+					<ImageIcon size="24" class="shrink-0" />
 				</Tooltip>
 			{/if}
-			<div class="flex-grow overflow-hidden">
+			<div class="grow overflow-hidden">
 				{#if file.processing}
 					<ProgressBar
 						min={0}
@@ -193,7 +193,7 @@
 				{/if}
 			</div>
 			<button
-				class="flex-shrink-0 w-8 rounded-full hover:bg-panel-alt h-full flex items-center justify-center"
+				class="shrink-0 w-8 rounded-full hover:bg-panel-alt h-full flex items-center justify-center"
 				onclick={async () => {
 					await file.cancel();
 					files.files = files.files.filter((_, i) => i !== index);

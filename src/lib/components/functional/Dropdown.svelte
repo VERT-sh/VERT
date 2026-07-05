@@ -65,14 +65,14 @@
 			? 'opacity-50 cursor-auto'
 			: 'cursor-pointer'} flex items-center {settingsStyle
 			? 'rounded-xl'
-			: 'rounded-full'} focus:!outline-none"
+			: 'rounded-full'} focus:!outline-hidden"
 		onclick={toggle}
 		onmouseenter={() => (hover = true)}
 		onmouseleave={() => (hover = false)}
 		{disabled}
 	>
 		<!-- <p>{selected}</p> -->
-		<div class="grid grid-cols-1 grid-rows-1 w-fit flex-grow-0">
+		<div class="grid grid-cols-1 grid-rows-1 w-fit grow-0">
 			{#key selected}
 				<p
 					in:fade={{
@@ -101,7 +101,7 @@
 			{/each}
 		</div>
 		<ChevronDown
-			class="w-4 h-4 ml-3 mt-0.5 flex-shrink-0"
+			class="w-4 h-4 ml-3 mt-0.5 shrink-0"
 			style="transform: rotate({open
 				? 180
 				: 0}deg); transition: transform {duration}ms {transition};"

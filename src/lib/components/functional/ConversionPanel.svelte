@@ -94,11 +94,11 @@
 		{#if files.files.length > 50}
 			<div class="w-full px-2 flex gap-4 items-center">
 				<div
-					class="flex-shrink-0 -mt-0.5 font-normal text-sm text-muted"
+					class="shrink-0 -mt-0.5 font-normal text-sm text-muted"
 				>
 					{progress}/{length}
 				</div>
-				<div class="flex-grow">
+				<div class="grow">
 					<ProgressBar min={0} max={length} {progress} />
 				</div>
 			</div>

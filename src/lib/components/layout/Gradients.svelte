@@ -75,7 +75,7 @@
 		}}
 	>
 		<VertVBig
-			class="fill-[--fg] opacity-10 dynadark:opacity-5 scale-[200%] md:scale-[80%]"
+			class="fill-(--fg) opacity-10 dynadark:opacity-5 scale-[200%] md:scale-[80%]"
 		/>
 	</div>
 {/if}

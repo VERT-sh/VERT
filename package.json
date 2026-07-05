@@ -15,11 +15,10 @@
 		"@inlang/paraglide-js": "^2.5.0",
 		"@poppanator/sveltekit-svg": "^5.0.1",
 		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.49.0",
-		"@sveltejs/vite-plugin-svelte": "^4.0.4",
+		"@sveltejs/kit": "^2.55.0",
+		"@sveltejs/vite-plugin-svelte": "7.0.0",
 		"@types/eslint": "^9.6.1",
 		"@types/sanitize-html": "^2.16.0",
-		"autoprefixer": "^10.4.22",
 		"css-select": "5.1.0",
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
@@ -27,15 +26,14 @@
 		"globals": "^15.15.0",
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
-		"prettier-plugin-tailwindcss": "^0.6.14",
-		"sass": "^1.94.2",
-		"svelte": "^5.43.14",
-		"svelte-check": "^4.3.4",
-		"tailwindcss": "^3.4.18",
+		"prettier-plugin-tailwindcss": "^0.7.2",
+		"svelte": "^5.54.1",
+		"svelte-check": "^4.4.5",
+		"@tailwindcss/vite": "^4.2.2",
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.47.0",
-		"vite": "^5.4.21",
-		"vite-plugin-top-level-await": "^1.6.0"
+		"vite": "^8.0.2",
+		"vite-plugin-top-level-await": "1.6.0"
 	},
 	"dependencies": {
 		"@bjorn3/browser_wasi_shim": "^0.4.2",
@@ -58,8 +56,9 @@
 		"riff-file": "^1.0.3",
 		"sanitize-html": "^2.17.0",
 		"svelte-stripe": "^1.4.0",
+		"tailwindcss": "^4.2.2",
 		"vert-wasm": "^0.0.2",
-		"vite-plugin-wasm": "^3.5.0"
+		"vite-plugin-wasm": "^3.6.0"
 	},
 	"trustedDependencies": [
 		"@parcel/watcher",
