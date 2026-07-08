@@ -48,10 +48,17 @@
 	},
 	"convert": {
 		"archive_file": {
+			"extract": "압축 해제",
 			"extracting": "ZIP파일 감지됨: {filename}",
 			"extracted": "{filename}압축 파일에서 {extract_count}개의 파일을 풀었습니다. {ignore_count}개 항목은 무시되었습니다.",
+			"detected": "{filename}에서 {type} 파일을 감지했습니다.",
+			"audio": "오디오",
+			"video": "비디오",
+			"doc": "문서",
+			"image": "이미지",
 			"extract_error": "{filename}압축 파일 풀던 중 오류 발생: {error}"
 		},
+		"large_file_warning": "브라우저/기기 제한으로 인해 이 파일은 {limit}GB보다 커서 비디오-오디오 변환이 비활성화되었습니다. 이 정도 크기의 파일에는 제한이 더 적은 Firefox 또는 Safari 사용을 권장합니다.",
 		"external_warning": {
 			"title": "외부 서버 경고",
 			"text": "동영상 형식으로 변환을 선택하면 해당 파일은 변환을 위해 지정한 외부 서버로 업로드됩니다. 계속하시겠습니까?",
@@ -70,7 +77,9 @@
 			"video": "비디오",
 			"doc": "문서",
 			"image": "이미지",
-			"placeholder": "포맷 검색"
+			"placeholder": "포맷 검색",
+			"no_formats": "사용 가능한 형식이 없습니다",
+			"no_results": "검색과 일치하는 형식이 없습니다"
 		},
 		"tooltips": {
 			"unknown_file": "알 수 없는 파일 포맷",
@@ -98,6 +107,7 @@
 			"vertd_details_to": "<b>변환 포맷:</b> {to}",
 			"vertd_details_error_message": "<b>오류 메시지:</b> [view_link]오류 로그 보기[/view_link]",
 			"vertd_details_close": "닫기",
+			"vertd_ratelimit": "'{filename}' 영상의 변환이 여러 번 실패했습니다. 서버 과부하를 방지하기 위해 이 파일에 대한 추가 변환 시도가 일시적으로 차단되었습니다. 나중에 다시 시도해 주세요.",
 			"unsupported_format": "이미지, 비디오, 오디오 및 문서 파일만 지원됩니다.",
 			"format_output_only": "이 포맷은 현재 입력으로 사용할 수 없으며 (변환된)출력으로만 사용할 수 있습니다.",
 			"vertd_not_found": "비디오 변환을 시작할 vertd 인스턴스를 찾을 수 없습니다. 인스턴스 URL이 올바르게 설정되었는지 확인해주세요.",
@@ -132,6 +142,8 @@
 			"filename_description": "다운로드할 파일의 이름을 설정합니다. <b>파일 확장자(포맷)는 포함되지 않습니다.</b> 다음 템플릿을 형식에 넣을 수 있으며, 관련 정보로 대체됩니다: <b>%name%</b> 원본 파일 이름, <b>%extension%</b> 원본 파일 확장자, <b>%date%</b> 파일이 변환된 날짜 문자열.",
 			"placeholder": "VERT_%name%",
 			"default_format": "기본 변환 형식",
+			"default_format_enable": "활성화",
+			"default_format_disable": "비활성화",
 			"default_format_description": "파일 유형의 파일을 업로드할 때 선택되는 기본 형식을 변경합니다.",
 			"default_format_image": "이미지",
 			"default_format_video": "비디오",
@@ -188,7 +200,15 @@
 			"total_size": "총 크기",
 			"files_cached_label": "캐시된 파일",
 			"cache_cleared": "캐시를 성공적으로 지웠습니다!",
-			"cache_clear_error": "캐시를 지우는 중 오류가 발생했습니다"
+			"cache_clear_error": "캐시를 지우는 중 오류가 발생했습니다",
+			"site_data_title": "사이트 데이터 관리",
+			"site_data_description": "설정 및 캐시된 파일을 포함한 모든 사이트 데이터를 지워 VERT를 기본 상태로 초기화하고 페이지를 새로고침합니다.",
+			"clear_all_data": "모든 사이트 데이터 지우기",
+			"clear_all_data_confirm_title": "모든 사이트 데이터를 지우시겠습니까?",
+			"clear_all_data_confirm": "이 작업은 모든 설정과 캐시를 초기화한 후 페이지를 새로고침합니다. 이 작업은 되돌릴 수 없습니다.",
+			"clear_all_data_cancel": "취소",
+			"all_data_cleared": "모든 사이트 데이터가 지워졌습니다! 페이지를 새로고침합니다...",
+			"all_data_clear_error": "모든 사이트 데이터를 지우는 데 실패했습니다."
 		},
 		"language": {
 			"title": "언어",
@@ -223,7 +243,9 @@
 			"thank_you": "후원해주셔서 감사합니다!",
 			"payment_failed": "결제 실패: {message}{period} 요금이 청구되지 않았습니다.",
 			"donation_error": "결제 처리 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
-			"payment_error": "결제 세부정보를 가져오는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요."
+			"payment_error": "결제 세부정보를 가져오는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
+			"donation_notice_official": "여기서의 후원은 공식 VERT 인스턴스(vert.sh)로 전달되며, 프로젝트 개발을 지원하는 데 도움이 됩니다.",
+			"donation_notice_unofficial": "여기서의 후원은 이 VERT 인스턴스의 운영자에게 전달됩니다. 공식 VERT 개발자를 지원하고 싶으시다면 대신 [official_link]vert.sh[/official_link]를 방문해 주세요."
 		},
 		"credits": {
 			"title": "Credits",
@@ -255,7 +277,8 @@
 			"ffmpeg": "FFmpeg 로드 중 오류 발생, 일부 기능이 예상대로 작동하지 않을 수 있습니다.",
 			"pandoc": "Pandoc 작업 로드 중 오류 발생, 문서 변환이 예상대로 작동하지 않을 수 있습니다.",
 			"no_audio": "오디오 스트림을 찾을 수 없습니다.",
-			"invalid_rate": "지정된 샘플 레이트가 유효하지 않습니다: {rate}Hz"
+			"invalid_rate": "지정된 샘플 레이트가 유효하지 않습니다: {rate}Hz",
+			"file_too_large": "이 파일은 브라우저/기기 제한인 {limit}GB를 초과합니다. 일반적으로 제한이 더 높은 Firefox 또는 Safari를 사용해 이 큰 파일을 변환해 보세요."
 		}
 	},
 	"privacy": {
@@ -267,6 +290,10 @@
 		"conversions": {
 			"title": "변환",
 			"description": "대부분의 변환(이미지, 문서, 오디오)은 관련 도구의 WebAssembly 버전(예: ImageMagick, Pandoc, FFmpeg)을 사용하여 여러분의 기기에서 로컬로 수행됩니다. 즉, 파일이 기기를 떠나지 않으며 우리가 파일에 접근할 일은 없습니다.<br/><br/>동영상 변환은 더 높은 연산 성능이 필요하고 아직 브라우저에서 충분히 빠르게 처리하기 어려워 서버에서 수행됩니다. VERT로 변환한 동영상은 다운로드 후 또는 1시간이 지나면 삭제되며, 문제 해결만을 위해 더 오래 보관하도록 명시적으로 허용한 경우에만 예외적으로 보관됩니다."
+		},
+		"donations": {
+			"title": "후원",
+			"description": "[about_link]소개[/about_link] 페이지에서 후원금을 모으기 위해 Stripe를 사용합니다. Stripe는 [stripe_link]고급 사기 탐지 관련 문서[/stripe_link]에 설명된 바와 같이 사기 방지를 위해 결제 및 기기에 관한 특정 정보를 수집할 수 있습니다. Stripe로의 외부 네트워크 요청은 지연되며, 결제 버튼을 클릭한 이후에만 이루어집니다."
 		},
 		"conversion_errors": {
 			"title": "변환 오류",
@@ -291,5 +318,8 @@
 			"description": "질문이 있으시면 다음 이메일로 문의해 주세요: [email_link]hello@vert.sh[/email_link]. 서드파티 VERT 인스턴스를 사용 중인 경우 해당 인스턴스의 호스트에게 문의해 주세요."
 		},
 		"last_updated": "Last updated: 2025-10-19"
+	},
+	"toast": {
+		"insecure_context": "현재 안전하지 않은 환경(예: HTTPS 대신 HTTP로 접속)에서 VERT를 이용하고 있습니다. 일부 기능이 예상대로 작동하지 않을 수 있습니다."
 	}
 }
