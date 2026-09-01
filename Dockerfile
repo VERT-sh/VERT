@@ -23,8 +23,8 @@ ENV PUB_DISABLE_FAILURE_BLOCKS=${PUB_DISABLE_FAILURE_BLOCKS}
 COPY package.json ./
 
 RUN apt-get update && \
-	apt-get install -y --no-install-recommends git && \
-	rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN bun install
 
@@ -34,11 +34,18 @@ RUN bun run build
 
 FROM nginx:stable-alpine
 
+RUN apk add --no-cache iproute2
+
 EXPOSE 80/tcp
 
-COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx/default.conf.template /etc/nginx/conf.d/default.conf
+COPY ./docker-entrypoint.sh /docker-entrypoint-custom.sh
+RUN chmod +x /docker-entrypoint-custom.sh
 
 COPY --from=builder /app/build /usr/share/nginx/html
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-	CMD curl --fail --silent --output /dev/null http://localhost || exit 1
+    CMD curl --fail --silent --output /dev/null http://localhost || exit 1
+
+ENTRYPOINT ["/docker-entrypoint-custom.sh"]
+CMD ["nginx", "-g", "daemon off;"]
