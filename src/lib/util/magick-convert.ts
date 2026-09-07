@@ -1,4 +1,12 @@
-import { MagickFormat, type IMagickImage } from "@imagemagick/magick-wasm";
+import {
+	ColorProfile,
+	ColorSpace,
+	MagickFormat,
+	type IMagickImage,
+} from "@imagemagick/magick-wasm";
+import { srgbProfileBytes } from "../assets/profiles/srgb";
+
+const srgbProfile = new ColorProfile(srgbProfileBytes);
 
 export const magickConvert = async (
 	img: IMagickImage,
@@ -28,7 +36,16 @@ export const magickConvert = async (
 		try {
 			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
 			if (compression) img.quality = compression;
-			if (!keepMetadata) img.strip();
+			if (!keepMetadata) {
+				// Removing an ICC profile without converting its pixels changes their appearance.
+				if (img.getColorProfile()) img.transformColorSpace(srgbProfile);
+				else if (
+					img.colorSpace !== ColorSpace.sRGB &&
+					img.colorSpace !== ColorSpace.Gray
+				)
+					img.colorSpace = ColorSpace.sRGB;
+				img.strip();
+			}
 
 			img.write(fmt as unknown as MagickFormat, (o: Uint8Array) => {
 				resolve(structuredClone(o));
