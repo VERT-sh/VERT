@@ -30,6 +30,11 @@ export const magickConvert = async (
 			if (compression) img.quality = compression;
 			if (!keepMetadata) img.strip();
 
+			if (fmt === "WEBP" && img.quality === 100) {
+				// libwebp otherwise discards RGB underneath fully transparent pixels.
+				img.settings.setDefine("webp:exact", "true");
+			}
+
 			img.write(fmt as unknown as MagickFormat, (o: Uint8Array) => {
 				resolve(structuredClone(o));
 			});
