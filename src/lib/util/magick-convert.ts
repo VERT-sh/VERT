@@ -1,7 +1,6 @@
 import {
 	AlphaAction,
-	ColorSpace,
-	MagickColor,
+	MagickImage,
 	MagickColors,
 	MagickFormat,
 	type IMagickImage,
@@ -39,11 +38,17 @@ export const magickConvert = async (
 
 			if (["JPEG", "JPG", "JPE"].includes(fmt) && img.hasAlpha) {
 				// JPEG has no alpha channel; composite edges instead of exposing hidden RGB.
-				// Alpha removal reads channel values in the image's color space.
-				img.backgroundColor =
-					img.colorSpace === ColorSpace.CMYK
-						? new MagickColor("cmyk(0,0,0,0)")
-						: MagickColors.White;
+				// Alpha removal reads channel values in the source color space.
+				// Transform a single white pixel so CMYK, Lab and RGB agree on white.
+				const background = MagickImage.create(MagickColors.White, 1, 1);
+				try {
+					background.colorSpace = img.colorSpace;
+					background.getPixels((pixels) => {
+						img.backgroundColor = pixels.getColor(0, 0)!;
+					});
+				} finally {
+					background.dispose();
+				}
 				img.alpha(AlphaAction.Remove);
 			}
 

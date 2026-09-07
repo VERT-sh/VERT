@@ -60,3 +60,41 @@ test("opaque CMYK keeps its color space and does not enter the alpha path", asyn
 		source.dispose();
 	}
 });
+
+for (const keep of [true, false]) {
+	test(`Lab transparency composites onto white (metadata ${keep})`, async () => {
+		const source = fixture(true);
+		let input, output;
+		try {
+			source.colorSpace = ColorSpace.Lab;
+			const tiff = write(source, MagickFormat.Tiff);
+			input = MagickImage.create(tiff);
+			assert.equal(input.colorSpace, ColorSpace.Lab);
+			assert.equal(input.hasAlpha, true);
+			input.colorSpace = ColorSpace.sRGB;
+			const opaque = input.getPixels(
+				(p) => new Uint8Array(p.toByteArray(40, 16, 1, 1, "RGB")),
+			);
+			output = MagickImage.create(
+				await convert(tiff, ".jpeg", keep, 100),
+			);
+			output.colorSpace = ColorSpace.sRGB;
+			for (const [x, expected] of [
+				[8, [255, 255, 255]],
+				[40, opaque],
+			]) {
+				const actual = output.getPixels((p) =>
+					p.toByteArray(x, 16, 1, 1, "RGB"),
+				);
+				assert.ok(
+					actual.every((v, i) => Math.abs(v - expected[i]) <= 2),
+					`${actual} != ${expected}`,
+				);
+			}
+		} finally {
+			output?.dispose();
+			input?.dispose();
+			source.dispose();
+		}
+	});
+}
