@@ -36,8 +36,16 @@ export const magickConvert = async (
 			if (!keepMetadata) img.strip();
 
 			// Source depth can describe palette indices or exceed the WASM quantum depth.
-			// Channel values (including alpha) need at least 8 bits after decoding.
-			img.depth = Math.min(Quantum.depth, Math.max(8, img.depth));
+			// Keep valid packed TIFF samples; palette indices alone cannot tell us
+			// whether the decoded RGB/alpha channels fit in that source depth.
+			const preserveTiffDepth =
+				(fmt === "TIFF" || fmt === "TIF") &&
+				img.depth < 8 &&
+				img.determineBitDepth() <= img.depth;
+			img.depth = Math.min(
+				Quantum.depth,
+				Math.max(preserveTiffDepth ? img.depth : 8, img.depth),
+			);
 			if (
 				fmt === "PSD" &&
 				img.hasAlpha &&
