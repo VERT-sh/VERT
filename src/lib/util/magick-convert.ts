@@ -1,4 +1,9 @@
-import { MagickFormat, type IMagickImage } from "@imagemagick/magick-wasm";
+import {
+	ColorType,
+	Quantum,
+	MagickFormat,
+	type IMagickImage,
+} from "@imagemagick/magick-wasm";
 
 export const magickConvert = async (
 	img: IMagickImage,
@@ -29,6 +34,22 @@ export const magickConvert = async (
 			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
 			if (compression) img.quality = compression;
 			if (!keepMetadata) img.strip();
+
+			// Source depth can describe palette indices or exceed the WASM quantum depth.
+			// Channel values (including alpha) need at least 8 bits after decoding.
+			img.depth = Math.min(Quantum.depth, Math.max(8, img.depth));
+			if (
+				fmt === "PSD" &&
+				img.hasAlpha &&
+				[
+					ColorType.Palette,
+					ColorType.PaletteAlpha,
+					ColorType.PaletteBilevelAlpha,
+				].some((type) => type === img.colorType)
+			) {
+				// The PSD writer cannot encode indexed images with an alpha channel.
+				img.colorType = ColorType.TrueColorAlpha;
+			}
 
 			img.write(fmt as unknown as MagickFormat, (o: Uint8Array) => {
 				resolve(structuredClone(o));
