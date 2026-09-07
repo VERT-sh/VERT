@@ -7,6 +7,7 @@
 	import { m } from "$lib/paraglide/messages";
 	import { link, sanitize } from "$lib/store/index.svelte";
 	import { ToastManager } from "$lib/util/toast.svelte";
+	import lily from "$lib/assets/lily.jpeg";
 
 	let copied = false;
 	let timeoutId: NodeJS.Timeout | null = null;
@@ -40,14 +41,26 @@
 	<div class="mt-2 [&>*]:font-normal h-full flex justify-between flex-col">
 		<div class="flex gap-3 justify-center text-lg">
 			<a
-				href="https://hotmilk.studio"
+				href="https://eva.pink"
 				target="_blank"
-				class="w-fit h-fit rounded-2xl py-4 btn gap-2 flex flex-col justify-center items-center"
+				class="w-48 h-24 rounded-2xl px-0 btn gap-2 flex flex-col justify-center items-center"
 			>
-				<HotMilk class="w-full h-16" />
+				<img
+					src={lily}
+					alt="Eva"
+					class="w-full h-full select-none object-cover"
+				/>
 			</a>
 		</div>
 		<p class="text-muted">
+			{@html sanitize(
+				link(
+					"discord_link",
+					m["about.sponsors.description"](),
+					DISCORD_URL,
+					true,
+				),
+			)}
 			{@html sanitize(
 				link(
 					"discord_link",

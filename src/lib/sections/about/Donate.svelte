@@ -10,9 +10,11 @@
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$env/static/public";
-	const OFFICIAL_DONATION_URL = "https://donations.vert.sh";
-	const OFFICIAL_STRIPE_KEY =
-		"pk_live_51RDVmAGSxPVad6bQwzVNnbc28nlmzA30krLWk1fefCMpUPiSRPkavMMbGqa8A3lUaOCMlsUEVy2CWDYg0ip3aPpL00ZJlsMkf2";
+	// please do not change these!
+	const OFFICIAL_DONATION_URL = atob("aHR0cHM6Ly9kb25hdGlvbnMudmVydC5zaA==");
+	const OFFICIAL_STRIPE_KEY = atob(
+		"cGtfbGl2ZV81MVRsclBhRlRQamtoRUdCU3U1S3d5NWpKUVl4Y1g1eVVVSFhpSDVnN1h6dmIwTkt6RHFib29jMTI2SGpsVzM1dVVrZkFnUU4ycnVFb0N1eVF5bm94cEthQTAwb2pGZ1ExMTY=",
+	);
 	const isOfficial =
 		PUB_DONATION_URL === OFFICIAL_DONATION_URL &&
 		PUB_STRIPE_KEY === OFFICIAL_STRIPE_KEY;

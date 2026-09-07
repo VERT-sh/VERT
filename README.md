@@ -37,10 +37,10 @@ This project is licensed under the AGPL-3.0 License, please see the [LICENSE](LI
 
 ## Star History
 
-<a href="https://www.star-history.com/#VERT-sh/VERT&Date">
+<a href="https://star-history.dera.page/#VERT-sh/VERT&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=VERT-sh/VERT&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=VERT-sh/VERT&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=VERT-sh/VERT&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=VERT-sh/VERT&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=VERT-sh/VERT&type=Date" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=VERT-sh/VERT&type=Date" />
  </picture>
 </a>
