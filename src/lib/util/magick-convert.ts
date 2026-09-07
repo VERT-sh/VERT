@@ -9,6 +9,9 @@ export const magickConvert = async (
 	let fmt = to.slice(1).toUpperCase();
 	if (fmt === "JFIF") fmt = "JPEG";
 
+	// Normalize rotated and mirrored pixels while orientation metadata is available.
+	img.autoOrient();
+
 	// ICO size clamp to avoid WidthOrHeightExceedsLimit
 	if (fmt === "ICO") {
 		const max = 256;
