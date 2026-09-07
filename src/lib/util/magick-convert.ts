@@ -1,4 +1,9 @@
-import { MagickFormat, type IMagickImage } from "@imagemagick/magick-wasm";
+import {
+	AlphaAction,
+	MagickColors,
+	MagickFormat,
+	type IMagickImage,
+} from "@imagemagick/magick-wasm";
 
 export const magickConvert = async (
 	img: IMagickImage,
@@ -29,6 +34,12 @@ export const magickConvert = async (
 			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
 			if (compression) img.quality = compression;
 			if (!keepMetadata) img.strip();
+
+			if (["JPEG", "JPG", "JPE"].includes(fmt) && img.hasAlpha) {
+				// JPEG has no alpha channel; composite edges instead of exposing hidden RGB.
+				img.backgroundColor = MagickColors.White;
+				img.alpha(AlphaAction.Remove);
+			}
 
 			img.write(fmt as unknown as MagickFormat, (o: Uint8Array) => {
 				resolve(structuredClone(o));
