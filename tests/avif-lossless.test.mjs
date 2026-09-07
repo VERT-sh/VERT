@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { MagickImage, MagickFormat, ColorType } from "@imagemagick/magick-wasm";
+import {
+	MagickImage,
+	MagickFormat,
+	ColorType,
+	ColorProfile,
+} from "@imagemagick/magick-wasm";
 import { fixture, write, rgba, convert } from "./helpers-magick.mjs";
 import { moduleUrl } from "./helpers-load-ts.mjs";
 
@@ -85,9 +90,11 @@ for (const keep of [true, false]) {
 				new URL("../src/lib/assets/avatars/liam.jpg", import.meta.url),
 			),
 		);
-		const profile = profileSource.getColorProfile();
+		const profileData = profileSource.getColorProfile()?.data;
+		assert.ok(profileData);
+		// Profile views may refer to WASM memory owned by the source image.
+		const profile = new ColorProfile(new Uint8Array(profileData));
 		profileSource.dispose();
-		assert.ok(profile);
 		const image = fixture();
 		let output;
 		try {
