@@ -1,5 +1,7 @@
 import {
 	AlphaAction,
+	ColorSpace,
+	MagickColor,
 	MagickColors,
 	MagickFormat,
 	type IMagickImage,
@@ -37,7 +39,11 @@ export const magickConvert = async (
 
 			if (["JPEG", "JPG", "JPE"].includes(fmt) && img.hasAlpha) {
 				// JPEG has no alpha channel; composite edges instead of exposing hidden RGB.
-				img.backgroundColor = MagickColors.White;
+				// Alpha removal reads channel values in the image's color space.
+				img.backgroundColor =
+					img.colorSpace === ColorSpace.CMYK
+						? new MagickColor("cmyk(0,0,0,0)")
+						: MagickColors.White;
 				img.alpha(AlphaAction.Remove);
 			}
 
