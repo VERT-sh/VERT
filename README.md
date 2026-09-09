@@ -33,7 +33,7 @@ VERT is built in Svelte and TypeScript.
 
 ## Contributing
 
-Refer to our contributing guidelines before opening an issue or pull request here: [Contributing](./CONTRIBUTING.md)
+Refer to our contributing guidelines before opening an issue or pull request here: [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## License
 
