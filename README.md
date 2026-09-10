@@ -31,6 +31,10 @@ VERT is built in Svelte and TypeScript.
 - [Using Docker](./docs/DOCKER.md)
 - [Video Conversion](./docs/VIDEO_CONVERSION.md)
 
+## Contributing
+
+Refer to our contributing guidelines before opening an issue or pull request here: [CONTRIBUTING.md](./CONTRIBUTING.md)
+
 ## License
 
 This project is licensed under the AGPL-3.0 License, please see the [LICENSE](LICENSE) file for details.
