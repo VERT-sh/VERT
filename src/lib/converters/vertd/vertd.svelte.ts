@@ -113,12 +113,7 @@ export const vertdFetch: {
 // ws types
 
 export type ConversionSpeed =
-	| "verySlow"
-	| "slower"
-	| "slow"
-	| "medium"
-	| "fast"
-	| "ultraFast";
+	"verySlow" | "slower" | "slow" | "medium" | "fast" | "ultraFast";
 
 const vertdSpeedValues: ConversionSpeed[] = [
 	"verySlow",

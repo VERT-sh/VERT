@@ -9,7 +9,7 @@
 	import lily from "$lib/assets/lily.jpeg";
 
 	let copied = false;
-	let timeoutId: NodeJS.Timeout | null = null;
+	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
 	function copyToClipboard() {
 		try {

@@ -15,7 +15,7 @@ function parseArgs(argv) {
 		dryRun: false,
 		verbose: false,
 		mapOut: "",
-		files: ""
+		files: "",
 	};
 
 	for (let i = 0; i < argv.length; i += 1) {
@@ -39,7 +39,7 @@ function parseArgs(argv) {
 		...args,
 		base: path.resolve(args.base),
 		target: path.resolve(args.target),
-		dir: path.resolve(args.dir)
+		dir: path.resolve(args.dir),
 	};
 }
 
@@ -147,9 +147,12 @@ function matchGroup(oldPaths, newPaths) {
 			.filter((candidate) => !usedNew.has(candidate))
 			.map((candidate) => ({
 				candidate,
-				score: scorePathSimilarity(oldPath, candidate)
+				score: scorePathSimilarity(oldPath, candidate),
 			}))
-			.sort((a, b) => b.score - a.score || a.candidate.localeCompare(b.candidate));
+			.sort(
+				(a, b) =>
+					b.score - a.score || a.candidate.localeCompare(b.candidate),
+			);
 
 		if (candidates.length === 0) continue;
 		const best = candidates[0];
@@ -197,7 +200,7 @@ function buildMigrationMap(baseJson, targetJson) {
 				unresolved.push({
 					oldPath,
 					value: JSON.parse(valueKey),
-					candidateCount: newPaths.length
+					candidateCount: newPaths.length,
 				});
 			}
 		}
@@ -266,7 +269,9 @@ function resolveTargetFiles(args) {
 		.filter((name) => name.endsWith(".json"))
 		.map((name) => path.join(args.dir, name));
 
-	return files.filter((filePath) => filePath !== args.base && filePath !== args.target);
+	return files.filter(
+		(filePath) => filePath !== args.base && filePath !== args.target,
+	);
 }
 
 function migrateLocaleFile(filePath, migrationMap, options) {
@@ -276,7 +281,9 @@ function migrateLocaleFile(filePath, migrationMap, options) {
 	let skippedConflicts = 0;
 	let unchanged = 0;
 
-	const entries = [...migrationMap.entries()].sort((a, b) => b[0].split(".").length - a[0].split(".").length);
+	const entries = [...migrationMap.entries()].sort(
+		(a, b) => b[0].split(".").length - a[0].split(".").length,
+	);
 	const planned = [];
 	const plannedNewPaths = [];
 
@@ -290,27 +297,45 @@ function migrateLocaleFile(filePath, migrationMap, options) {
 		const existingNew = getAtPath(original, newPath);
 		if (existingNew !== undefined) {
 			if (JSON.stringify(existingNew) === JSON.stringify(oldValue)) {
-				planned.push({ oldPath, newPath, oldValue, targetAlreadyMatched: true });
+				planned.push({
+					oldPath,
+					newPath,
+					oldValue,
+					targetAlreadyMatched: true,
+				});
 				plannedNewPaths.push(newPath);
 				continue;
 			}
 
 			skippedConflicts += 1;
-			if (options.verbose) console.warn(`[conflict] ${path.basename(filePath)}: ${oldPath} -> ${newPath}`);
+			if (options.verbose)
+				console.warn(
+					`[conflict] ${path.basename(filePath)}: ${oldPath} -> ${newPath}`,
+				);
 			continue;
 		}
 
-		planned.push({ oldPath, newPath, oldValue, targetAlreadyMatched: false });
+		planned.push({
+			oldPath,
+			newPath,
+			oldValue,
+			targetAlreadyMatched: false,
+		});
 		plannedNewPaths.push(newPath);
 	}
 
 	for (const plan of planned) {
 		if (!plan.targetAlreadyMatched) {
 			setAtPath(json, plan.newPath, plan.oldValue);
-			if (options.verbose) console.log(`[move] ${path.basename(filePath)}: ${plan.oldPath} -> ${plan.newPath}`);
+			if (options.verbose)
+				console.log(
+					`[move] ${path.basename(filePath)}: ${plan.oldPath} -> ${plan.newPath}`,
+				);
 		}
 
-		const becomesParentCategory = plannedNewPaths.some((newPath) => newPath.startsWith(`${plan.oldPath}.`));
+		const becomesParentCategory = plannedNewPaths.some((newPath) =>
+			newPath.startsWith(`${plan.oldPath}.`),
+		);
 		if (becomesParentCategory) {
 			moved += 1;
 			continue;
@@ -330,15 +355,22 @@ function main() {
 	const baseJson = readJson(args.base);
 	const targetJson = readJson(args.target);
 
-	const { migrationMap, unresolved } = buildMigrationMap(baseJson, targetJson);
+	const { migrationMap, unresolved } = buildMigrationMap(
+		baseJson,
+		targetJson,
+	);
 
 	if (args.mapOut) {
 		const output = {
 			base: args.base,
 			target: args.target,
 			generatedAt: new Date().toISOString(),
-			mapping: Object.fromEntries([...migrationMap.entries()].sort(([a], [b]) => a.localeCompare(b))),
-			unresolved
+			mapping: Object.fromEntries(
+				[...migrationMap.entries()].sort(([a], [b]) =>
+					a.localeCompare(b),
+				),
+			),
+			unresolved,
 		};
 		writeJson(path.resolve(args.mapOut), output);
 	}
@@ -358,7 +390,9 @@ function main() {
 		totalMoved += result.moved;
 		totalConflicts += result.skippedConflicts;
 		if (result.changed) filesChanged += 1;
-		console.log(`${path.basename(filePath)}: moved=${result.moved}, conflicts=${result.skippedConflicts}`);
+		console.log(
+			`${path.basename(filePath)}: moved=${result.moved}, conflicts=${result.skippedConflicts}`,
+		);
 	}
 
 	console.log(`\nGenerated mapping entries: ${migrationMap.size}`);
@@ -366,7 +400,8 @@ function main() {
 	console.log(`Files changed: ${filesChanged}/${files.length}`);
 	console.log(`Total keys moved: ${totalMoved}`);
 	console.log(`Conflicts skipped: ${totalConflicts}`);
-	if (args.dryRun) console.log("Dry run mode enabled: no files were written.");
+	if (args.dryRun)
+		console.log("Dry run mode enabled: no files were written.");
 }
 
 try {

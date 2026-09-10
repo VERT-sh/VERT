@@ -28,13 +28,13 @@ export default ts.config(
 		},
 	},
 	{
-		ignores: ["build/", ".svelte-kit/", "dist/"],
+		ignores: ["build/", ".svelte-kit/", "dist/", "src/lib/paraglide/"],
 	},
 	{
 		files: ["**/*.ts", "**/*.svelte.ts", "**/*.svelte"],
 		rules: {
 			"svelte/no-at-html-tags": "off",
-			"svelte/valid-compile": "off"
+			"svelte/valid-compile": "off",
 		},
 	},
 );

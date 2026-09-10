@@ -16,7 +16,6 @@
 		SettingsIcon,
 		SunIcon,
 		UploadIcon,
-		type Icon as IconType,
 	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import Panel from "../../visual/Panel.svelte";
@@ -30,7 +29,7 @@
 			name: string;
 			url: string;
 			activeMatch: (pathname: string) => boolean;
-			icon: typeof IconType;
+			icon: typeof UploadIcon;
 			badge?: number;
 		}[]
 	>([

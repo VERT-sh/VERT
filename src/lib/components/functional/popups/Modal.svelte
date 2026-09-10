@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { duration, fade } from "$lib/util/animation";
+	import type { SearchIcon } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
-	import type { Icon as IconType } from "@lucide/svelte";
 
 	interface ModalButton {
 		text: string;
@@ -10,10 +10,11 @@
 	}
 
 	interface Props {
-		icon: typeof IconType;
+		icon: typeof SearchIcon;
 		title: string;
 		color: string;
 		buttons: ModalButton[];
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		children: () => any;
 		onclose?: () => void;
 	}

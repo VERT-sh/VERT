@@ -7,11 +7,7 @@ import type {
 } from "$lib/types/conversion-settings";
 
 export type WorkerStatus =
-	| "not-ready"
-	| "downloading"
-	| "ready"
-	| "partially-ready"
-	| "error";
+	"not-ready" | "downloading" | "ready" | "partially-ready" | "error";
 
 export class FormatInfo {
 	public name: string;
@@ -50,7 +46,7 @@ export class Converter {
 	public status: WorkerStatus = $state("not-ready");
 	public readonly reportsProgress: boolean = false;
 
-	private timeoutId?: NodeJS.Timeout;
+	private timeoutId?: ReturnType<typeof setTimeout>;
 
 	constructor(public readonly timeout: number = 10) {
 		this.startTimeout();

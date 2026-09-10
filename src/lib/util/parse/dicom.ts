@@ -19,7 +19,9 @@ export const renderDicomToPng = async (input: Uint8Array) => {
 	try {
 		await renderer.render(image, 0);
 		return new Uint8Array(
-			await (await canvas.convertToBlob({ type: "image/png" })).arrayBuffer(),
+			await (
+				await canvas.convertToBlob({ type: "image/png" })
+			).arrayBuffer(),
 		);
 	} finally {
 		renderer.destroy();

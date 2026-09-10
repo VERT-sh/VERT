@@ -82,13 +82,17 @@ export const encodeWav = (
 
 	// copy pcm bytes
 	const uint8 = new Uint8Array(buffer);
-	uint8.set(new Uint8Array(pcm.buffer, pcm.byteOffset, pcm.byteLength), headerSize);
+	uint8.set(
+		new Uint8Array(pcm.buffer, pcm.byteOffset, pcm.byteLength),
+		headerSize,
+	);
 
 	return uint8;
 };
 
 const writeString = (view: DataView, offset: number, str: string) => {
-	for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+	for (let i = 0; i < str.length; i++)
+		view.setUint8(offset + i, str.charCodeAt(i));
 };
 
 const interleaveChannelData = (channelData: Float32Array[]) => {

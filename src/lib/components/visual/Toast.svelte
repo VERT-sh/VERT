@@ -43,10 +43,12 @@
 	let Icon = $derived(Icons[type]);
 
 	let msg = $state<SvelteComponent<ToastProps>>();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const title = $derived(((msg as any)?.title as string) ?? "");
 
 	// intentionally unused. this is so tailwind can generate the css for these colours as it doesn't detect if it's dynamically loaded
 	// this would lead to the colours not being generated in the final css file by tailwind
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const colourVariants = [
 		"border-accent-pink-alt",
 		"border-accent-red-alt",

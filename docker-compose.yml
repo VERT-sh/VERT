@@ -1,18 +1,18 @@
 services:
-  vert:
-    container_name: vert
-    image: ghcr.io/vert-sh/vert:latest
-    build:
-      context: .
-      args:
-        PUB_HOSTNAME: ${PUB_HOSTNAME:-localhost:5173}
-        PUB_PLAUSIBLE_URL: ${PUB_PLAUSIBLE_URL:-}
-        PUB_ENV: ${PUB_ENV:-production}
-        PUB_DISABLE_ALL_EXTERNAL_REQUESTS: ${PUB_DISABLE_ALL_EXTERNAL_REQUESTS:-false}
-        PUB_VERTD_URL: ${PUB_VERTD_URL:-https://vertd.vert.sh}
-        PUB_DONATION_URL: ${PUB_DONATION_URL:-https://donations.vert.sh}
-        PUB_STRIPE_KEY: ${PUB_STRIPE_KEY:-pk_live_51TlrPaFTPjkhEGBSu5Kwy5jJQYxcX5yUUHXiH5g7Xzvb0NKzDqbooc126HjlW35uUkfAgQN2ruEoCuyQynoxpKaA00ojFgQ116}
-        PUB_DISABLE_FAILURE_BLOCKS: ${PUB_DISABLE_FAILURE_BLOCKS:-false}
-    restart: unless-stopped
-    ports:
-      - ${PORT:-3000}:80
+    vert:
+        container_name: vert
+        image: ghcr.io/vert-sh/vert:latest
+        build:
+            context: .
+            args:
+                PUB_HOSTNAME: ${PUB_HOSTNAME:-localhost:5173}
+                PUB_PLAUSIBLE_URL: ${PUB_PLAUSIBLE_URL:-}
+                PUB_ENV: ${PUB_ENV:-production}
+                PUB_DISABLE_ALL_EXTERNAL_REQUESTS: ${PUB_DISABLE_ALL_EXTERNAL_REQUESTS:-false}
+                PUB_VERTD_URL: ${PUB_VERTD_URL:-https://vertd.vert.sh}
+                PUB_DONATION_URL: ${PUB_DONATION_URL:-https://donations.vert.sh}
+                PUB_STRIPE_KEY: ${PUB_STRIPE_KEY:-pk_live_51TlrPaFTPjkhEGBSu5Kwy5jJQYxcX5yUUHXiH5g7Xzvb0NKzDqbooc126HjlW35uUkfAgQN2ruEoCuyQynoxpKaA00ojFgQ116}
+                PUB_DISABLE_FAILURE_BLOCKS: ${PUB_DISABLE_FAILURE_BLOCKS:-false}
+        restart: unless-stopped
+        ports:
+            - ${PORT:-3000}:80

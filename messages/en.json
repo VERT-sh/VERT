@@ -418,7 +418,7 @@
 		"warnings": {
 			"settings_change": "Changed the setting '{setting}' from '{oldValue}' to '{newValue}' for {file} to prevent conversion failure."
 		}
- 	},
+	},
 	"privacy": {
 		"title": "Privacy Policy",
 		"summary": {
