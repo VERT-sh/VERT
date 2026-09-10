@@ -13,6 +13,7 @@ import type {
 import { log } from "$lib/util/logger";
 import { readSettings } from "$lib/util/settings";
 import { formatFilename } from "$lib/util/file";
+import { fileTypeFromBuffer } from "file-type";
 
 const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
 
@@ -20,24 +21,17 @@ export class VertFile {
 	public id: string = Math.random().toString(36).slice(2, 8);
 	public readonly file: File;
 
-	public get from() {
-		return ("." + this.file.name.split(".").pop() || "").toLowerCase();
-	}
-
-	public get name() {
-		return this.file.name;
-	}
+	public from = $state("");
+	public name = $state("");
+	public to = $state("");
+	public fileType = $state<Awaited<ReturnType<typeof fileTypeFromBuffer>>>();
+	public isZip = $state(() => this.from === ".zip");
 
 	public conversionSettings = $state<ConversionSettings>({}); // empty object / key = default
 	public progress = $state(0);
 	public result = $state<VertFile | null>(null);
-
-	public to = $state("");
-
 	public blobUrl = $state<string>();
-
 	public processing = $state(false);
-
 	public cancelled = $state(false);
 
 	public converters: Converter[] = [];
@@ -48,7 +42,30 @@ export class VertFile {
 	private postDownload: (() => Promise<void>) | null = null;
 	private activeConverterName: string | null = null;
 
-	public isZip = $state(() => this.from === ".zip");
+	constructor(file: File, to: string, blobUrl?: string) {
+		const ext = file.name.split(".").pop();
+		const newFile = new File(
+			[file],
+			`${file.name.split(".").slice(0, -1).join(".")}.${ext?.toLowerCase()}`,
+		);
+		this.file = newFile;
+		this.name = newFile.name;
+		this.from = ("." + ext || "").toLowerCase();
+		this.to = to.startsWith(".") ? to : `.${to}`;
+		this.converters = converters.filter((c) =>
+			c.formatStrings().includes(this.from),
+		);
+		this.convert = this.convert.bind(this);
+		this.download = this.download.bind(this);
+		this.blobUrl = blobUrl;
+
+		log(
+			["file", "init"],
+			`findConverters: ${this.findConverters()
+				.map((c) => c.name)
+				.join(", ")}`,
+		);
+	}
 
 	public setPostDownload(cleanup: (() => Promise<void>) | null) {
 		this.postDownload = cleanup;
@@ -144,32 +161,45 @@ export class VertFile {
 		);
 	}
 
-	constructor(file: File, to: string, blobUrl?: string) {
-		const ext = file.name.split(".").pop();
-		const newFile = new File(
-			[file],
-			`${file.name.split(".").slice(0, -1).join(".")}.${ext?.toLowerCase()}`,
-		);
-		this.file = newFile;
-		this.to = to.startsWith(".") ? to : `.${to}`;
-		this.converters = converters.filter((c) =>
-			c.formatStrings().includes(this.from),
-		);
-		this.convert = this.convert.bind(this);
-		this.download = this.download.bind(this);
-		this.blobUrl = blobUrl;
+	public async checkFileType() {
+		try {
+			this.fileType = await fileTypeFromBuffer(
+				await this.file.arrayBuffer(),
+			);
 
-		log(
-			["file", "init"],
-			`findConverters: ${this.findConverters()
-				.map((c) => c.name)
-				.join(", ")}`,
-		);
+			if (!this.fileType) return;
+
+			const aliases: Record<string, string> = {
+				jpg: "jpeg",
+				jfif: "jpeg",
+				tif: "tiff",
+				// TODO: is there more stuff
+			};
+			const fileExtension = this.from.slice(1);
+			const detectedExtension =
+				aliases[this.fileType.ext] ?? this.fileType.ext;
+			const expectedExtension = aliases[fileExtension] ?? fileExtension;
+
+			if (detectedExtension !== expectedExtension) {
+				// TODO: show a warning modal or message if detected type doesn't match name
+			}
+
+			this.from = `.${this.fileType.ext}`;
+			this.converters = converters.filter((converter) =>
+				converter.formatStrings().includes(this.from),
+			);
+		} catch (error) {
+			log(
+				["file", "type"],
+				`failed to detect file type for ${this.file.name}: ${error}`,
+			);
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
 		await this.runPostDownload();
+		await this.checkFileType();
 
 		if (!this.retryingFallback) this.attemptedConverters.clear();
 

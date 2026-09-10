@@ -96,10 +96,7 @@ const handleMessage = async (
 			};
 		}
 		default:
-			return {
-				type: "error",
-				error: `Unknown message type: ${message.type}`,
-			};
+			return { type: "error", error: "Unknown message type" };
 	}
 };
 
