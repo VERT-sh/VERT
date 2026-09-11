@@ -33,6 +33,7 @@ export const getCodecs = (
 			return { video: "wmv2", audio: "wmav2" };
 		case ".webm":
 		case ".ogv":
+		case ".ogx":
 			return {
 				video: ext === ".webm" ? "libvpx" : "libtheora",
 				audio: "libvorbis",
@@ -45,6 +46,7 @@ export const getCodecs = (
 		case ".vob":
 			return { video: "mpeg2video", audio: "mp2" };
 		case ".mxf":
+		case ".gxf":
 			return { video: "mpeg2video", audio: "pcm_s16le" };
 		case ".h264":
 			return { video: "libx264", audio: "none" };

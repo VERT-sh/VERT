@@ -170,9 +170,11 @@ export class VertFile {
 			if (!this.fileType) return;
 
 			const aliases: Record<string, string> = {
+				// original: alias
 				jpg: "jpeg",
 				jfif: "jpeg",
 				tif: "tiff",
+				ogx: "ogv",
 				// TODO: is there more stuff
 			};
 			const fileExtension = this.from.slice(1);
@@ -181,10 +183,11 @@ export class VertFile {
 			const expectedExtension = aliases[fileExtension] ?? fileExtension;
 
 			if (detectedExtension !== expectedExtension) {
+				console.warn(`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`);
 				// TODO: show a warning modal or message if detected type doesn't match name
 			}
 
-			this.from = `.${this.fileType.ext}`;
+			this.from = `.${detectedExtension}`;
 			this.converters = converters.filter((converter) =>
 				converter.formatStrings().includes(this.from),
 			);
@@ -203,6 +206,7 @@ export class VertFile {
 
 		if (!this.retryingFallback) this.attemptedConverters.clear();
 
+		console.log(`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`);
 		if (!this.converters.length) throw new Error("No converters found");
 
 		let converter: Converter | undefined;

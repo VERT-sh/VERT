@@ -34,6 +34,9 @@ export class FFmpegConverter extends Converter {
 
 	private activeConversions = new Map<string, FFmpeg>();
 
+	// non supported audio to video formats
+	private cantConvert: string[] = ["ogx"];
+
 	public supportedFormats = [
 		new FormatInfo("mp3", true, true),
 		new FormatInfo("wav", true, true),
@@ -64,7 +67,11 @@ export class FFmpegConverter extends Converter {
 		new FormatInfo("m4b", true, true),
 		new FormatInfo("voc", true, true),
 		...videoFormats.map(
-			(f: string) => new FormatInfo(f, true, true, false, 0),
+			//  exclude cantConvert from audio to video
+			(f: string) => {
+				const isCantConvert = this.cantConvert.includes(f);
+				return new FormatInfo(f, true, !isCantConvert, false, 0);
+			},
 		),
 	];
 
@@ -500,6 +507,21 @@ export class FFmpegConverter extends Converter {
 					setting: "bitrate",
 					oldValue: settings.bitrate,
 					newValue: newBitrate,
+					file: input.name,
+				});
+			} else if (to === ".gxf") {
+				sampleRateArgs = ["-ar", "48000"];
+				channelsArgs = ["-ac", "1"];
+				settingsChanged.push({
+					setting: "sampleRate",
+					oldValue: settings.sampleRate,
+					newValue: 48000,
+					file: input.name,
+				});
+				settingsChanged.push({
+					setting: "channels",
+					oldValue: settings.channels,
+					newValue: 1,
 					file: input.name,
 				});
 			}
