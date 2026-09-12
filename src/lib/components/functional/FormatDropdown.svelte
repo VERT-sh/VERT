@@ -54,6 +54,8 @@
 		file?.conversionSettings?.imageSequenceTransparency ?? false,
 	);
 
+	const sequenceFormats = [".webp", ".gif", ".apng", ".mpo"]; // .apng not supported by magick-wasm rn
+
 	$effect(() => {
 		if (!file) return;
 		file.conversionSettings.imageSequence = imageSequence;
@@ -75,10 +77,9 @@
 			(f) => !shouldExclude(f),
 		);
 
-		// if imageSequence is checked, filter image category to animated formats only
+		// if imageSequence is checked, filter image category to sequence formats only
 		if (imageSequence && cat === "image") {
-			const animatedFormats = [".webp", ".gif", ".apng"]; // .apng not supported by magick-wasm rn
-			formats = formats.filter((f) => animatedFormats.includes(f));
+			formats = formats.filter((f) => sequenceFormats.includes(f));
 		}
 
 		return formats;
@@ -145,6 +146,9 @@
 				//cats.push("image"); // -- buggy, magick can't convert from or to apng properly
 				cats = cats.filter((cat) => cat !== "audio");
 			}
+			if (from === ".mpo") {
+				cats = cats.filter((cat) => cat !== "audio");
+			}
 
 			// large videos can't be extracted to audio (browser/device limitations)
 			if (file && file.isLarge() && rootCategory === "video")
@@ -200,7 +204,6 @@
 		}
 
 		const query = normalize(searchQuery);
-		const animatedFormats = [".webp", ".apng", ".gif"];
 
 		const matches = (f: string, cat?: string) => {
 			if (
@@ -211,7 +214,7 @@
 				return false;
 			// if imageSequence and image category, only show animated formats
 			if (imageSequence && (cat ?? activeCategory) === "image") {
-				return animatedFormats.includes(f);
+				return sequenceFormats.includes(f);
 			}
 			return true;
 		};

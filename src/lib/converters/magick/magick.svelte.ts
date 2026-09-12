@@ -32,6 +32,7 @@ export class MagickConverter extends Converter {
 		new FormatInfo("avif", true, true),
 		new FormatInfo("heic", true, false), // seems to be unreliable? HEIC/HEIF is very weird if it will actually work
 		new FormatInfo("heif", true, false),
+		new FormatInfo("mpo", true, false),
 		new FormatInfo("ico", true, true),
 		new FormatInfo("bmp", true, true),
 		new FormatInfo("cur", true, true),

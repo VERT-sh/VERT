@@ -169,6 +169,7 @@ export class VertFile {
 
 			if (!this.fileType) return;
 
+			const forceKeep = ["mpo"];
 			const aliases: Record<string, string> = {
 				// original: alias
 				jpg: "jpeg",
@@ -178,8 +179,9 @@ export class VertFile {
 				// TODO: is there more stuff
 			};
 			const fileExtension = this.from.slice(1);
-			const detectedExtension =
-				aliases[this.fileType.ext] ?? this.fileType.ext;
+			const detectedExtension = forceKeep.includes(fileExtension)
+				? fileExtension
+				: aliases[this.fileType.ext] ?? this.fileType.ext;
 			const expectedExtension = aliases[fileExtension] ?? fileExtension;
 
 			if (detectedExtension !== expectedExtension) {

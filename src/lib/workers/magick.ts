@@ -116,6 +116,37 @@ const readToEnd = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
 	return new Uint8Array(arrayBuffer);
 };
 
+const convertCollectionToZip = async (
+	buffer: ArrayBuffer,
+	format: MagickFormat,
+	to: string,
+	conversionSettings: ConversionSettings,
+): Promise<Uint8Array> => {
+	const collection = MagickImageCollection.create();
+	try {
+		collection.read(
+			new Uint8Array(buffer),
+			new MagickReadSettings({ format }),
+		);
+		console.log(`read ${collection.length} images from ${format}`);
+
+		const convertedImages = await Promise.all(
+			collection.map((img) => magickConvert(img, to, conversionSettings)),
+		);
+		const zip = makeZip(
+			convertedImages.map(
+				(img, i) =>
+					new File([new Uint8Array(img)], `image${i}.${to.slice(1)}`),
+			),
+			"images.zip",
+		);
+
+		return await readToEnd(zip.getReader());
+	} finally {
+		collection.dispose();
+	}
+};
+
 const loadDicomHelpers = async () =>
 	(dicomPromise ??= import("$lib/util/parse/dicom"));
 
@@ -145,15 +176,37 @@ const handleSpecialInput = async (
 	return null;
 };
 
-// formats that have special handling for output (like multiple frames/images)
 const handleSpecialOutput = async (
 	from: string,
 	to: string,
 	buffer: ArrayBuffer,
 	conversionSettings: ConversionSettings,
 ): Promise<Partial<WorkerMessage> | null> => {
-	// build frames of animated formats (webp/gif)
-	// APNG does not work on magick-wasm since it needs ffmpeg built-in (not in magick-wasm) - handle in ffmpeg
+	// converting multi-image formats to individual files
+	const collectionFormats: Record<string, MagickFormat> = {
+		".gif": MagickFormat.Gif,
+		".webp": MagickFormat.WebP,
+		".ico": MagickFormat.Ico,
+		".mpo": MagickFormat.Mpo,
+	};
+	const collectionFormat = collectionFormats[from];
+	if (collectionFormat !== undefined) {
+		const zipBytes = await convertCollectionToZip(
+			buffer,
+			collectionFormat,
+			to,
+			conversionSettings,
+		);
+
+		return {
+			type: "finished",
+			output: zipBytes,
+			zip: true,
+		};
+	}
+
+	// converting from animated format to another animated format
+	// APNG does not work on magick-wasm since it needs ffmpeg built-in (not in magick-wasm) - should pass into ffmpeg.wasm instead
 	if (
 		(from === ".webp" || from === ".gif") &&
 		(to === ".gif" || to === ".webp")
@@ -170,47 +223,6 @@ const handleSpecialOutput = async (
 		return {
 			type: "finished",
 			output: result,
-		};
-	}
-
-	if (from === ".ico") {
-		const imgs = MagickImageCollection.create();
-		imgs.read(
-			new Uint8Array(buffer),
-			new MagickReadSettings({ format: MagickFormat.Ico }),
-		);
-
-		if (imgs.length === 0) {
-			return {
-				type: "error",
-				error: `Failed to read ICO -- no images found inside?`,
-			};
-		}
-
-		const convertedImgs: Uint8Array[] = [];
-		await Promise.all(
-			imgs.map(async (img, i) => {
-				const output = await magickConvert(img, to, conversionSettings);
-				convertedImgs[i] = output;
-			}),
-		);
-
-		const zip = makeZip(
-			convertedImgs.map(
-				(img, i) =>
-					new File([new Uint8Array(img)], `image${i}.${to.slice(1)}`),
-			),
-			"images.zip",
-		);
-
-		// read the ReadableStream to the end
-		const zipBytes = await readToEnd(zip.getReader());
-		imgs.dispose();
-
-		return {
-			type: "finished",
-			output: zipBytes,
-			zip: true,
 		};
 	}
 
