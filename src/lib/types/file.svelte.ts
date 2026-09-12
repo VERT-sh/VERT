@@ -608,8 +608,13 @@ export class VertFile {
 			}
 		}
 
+		// ensure it is a blob, so browsers don't change the filename
+		const downloadBlob = new Blob([resultFile], {
+			type: "application/octet-stream",
+		});
+
 		// fallback to blob URL download for smaller files or if the File System Access API isn't supported
-		const blob = URL.createObjectURL(resultFile);
+		const blob = URL.createObjectURL(downloadBlob);
 
 		// download
 		const a = document.createElement("a");
