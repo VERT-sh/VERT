@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { duration, fade, transition } from "$lib/util/animation";
-	import { ChevronDown } from "lucide-svelte";
-	import { onMount } from "svelte";
+	import { ChevronDown } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 
 	type Props = {
-		options: string[];
+		options: string[] | { value: string; label: string }[];
 		selected?: string;
 		onselect?: (option: string) => void;
 		disabled?: boolean;
@@ -14,39 +13,94 @@
 
 	let {
 		options,
-		selected = $bindable(options[0]),
+		selected = $bindable(
+			typeof options[0] === "string" ? options[0] : options[0].value,
+		),
 		onselect,
 		disabled,
 		settingsStyle,
 	}: Props = $props();
 
 	let open = $state(false);
-	let hover = $state(false);
-	let isUp = $state(false);
 	let dropdown = $state<HTMLDivElement>();
+	let menuElement = $state<HTMLDivElement>();
+	let button = $state<HTMLButtonElement>();
+	let clickHandler: ((e: MouseEvent) => void) | null = null;
+	let resizeHandler: (() => void) | null = null;
+	let scrollHandler: (() => void) | null = null;
+
+	const getValue = (option: string | { value: string; label: string }) =>
+		typeof option === "string" ? option : option.value;
+
+	const getLabel = (option: string | { value: string; label: string }) =>
+		typeof option === "string" ? option : option.label;
+
+	const select = (option: string | { value: string; label: string }) => {
+		const selectedValue = getValue(option);
+		selected = selectedValue;
+		onselect?.(selectedValue);
+		toggle();
+	};
 
 	const toggle = () => {
 		open = !open;
 	};
 
-	const select = (option: string) => {
-		const oldIndex = options.indexOf(selected || "");
-		const newIndex = options.indexOf(option);
-		isUp = oldIndex > newIndex;
-		selected = option;
-		onselect?.(option);
-		toggle();
+	const updateMenuPosition = () => {
+		if (open && menuElement && button) {
+			const rect = button.getBoundingClientRect();
+			menuElement.style.top = `${rect.bottom + 4}px`;
+			menuElement.style.left = `${rect.left}px`;
+			menuElement.style.width = `${rect.width}px`;
+		}
 	};
 
-	onMount(() => {
-		const click = (e: MouseEvent) => {
-			if (dropdown && !dropdown.contains(e.target as Node)) {
-				open = false;
-			}
+	const scrollView = () => {
+		if (!menuElement) return;
+		const selectedButton = menuElement.querySelector(
+			"[data-selected='true']",
+		) as HTMLButtonElement | null;
+		if (!selectedButton) return;
+		selectedButton.scrollIntoView({ block: "start" });
+	};
+
+	// outside clicks
+	$effect(() => {
+		clickHandler = (e: MouseEvent) => {
+			if (dropdown && !dropdown.contains(e.target as Node)) open = false;
 		};
 
-		window.addEventListener("click", click);
-		return () => window.removeEventListener("click", click);
+		window.addEventListener("click", clickHandler);
+
+		return () => {
+			if (clickHandler) window.removeEventListener("click", clickHandler);
+		};
+	});
+
+	// dropdown menu positioning
+	$effect(() => {
+		if (open && menuElement && button) {
+			resizeHandler = updateMenuPosition;
+			scrollHandler = updateMenuPosition;
+			window.addEventListener("resize", resizeHandler);
+			window.addEventListener("scroll", scrollHandler, {
+				capture: true,
+				passive: true,
+			});
+			document.body.appendChild(menuElement);
+			menuElement.style.position = "fixed";
+			updateMenuPosition();
+			requestAnimationFrame(scrollView);
+
+			return () => {
+				if (resizeHandler)
+					window.removeEventListener("resize", resizeHandler);
+				if (scrollHandler)
+					window.removeEventListener("scroll", scrollHandler, true);
+				if (menuElement?.parentNode === document.body)
+					document.body.removeChild(menuElement);
+			};
+		}
 	});
 </script>
 
@@ -57,6 +111,7 @@
 	bind:this={dropdown}
 >
 	<button
+		bind:this={button}
 		class="font-display w-full {settingsStyle
 			? 'justify-between'
 			: 'justify-center'} overflow-hidden relative cursor-pointer {settingsStyle
@@ -67,11 +122,8 @@
 			? 'rounded-xl'
 			: 'rounded-full'} focus:!outline-none"
 		onclick={toggle}
-		onmouseenter={() => (hover = true)}
-		onmouseleave={() => (hover = false)}
 		{disabled}
 	>
-		<!-- <p>{selected}</p> -->
 		<div class="grid grid-cols-1 grid-rows-1 w-fit flex-grow-0">
 			{#key selected}
 				<p
@@ -89,14 +141,17 @@
 						? 'font-normal'
 						: 'font-medium'}"
 				>
-					{selected}
+					{getLabel(
+						options.find((opt) => getValue(opt) === selected) ||
+							selected,
+					)}
 				</p>
 			{/key}
 			{#each options as option}
 				<p
 					class="col-start-1 row-start-1 invisible pointer-events-none"
 				>
-					{option}
+					{getLabel(option)}
 				</p>
 			{/each}
 		</div>
@@ -107,23 +162,26 @@
 				: 0}deg); transition: transform {duration}ms {transition};"
 		/>
 	</button>
-	{#if open}
-		<div
-			style={hover ? "will-change: opacity, fade, transform" : ""}
-			transition:fade={{
-				duration,
-				easing: quintOut,
-			}}
-			class="w-full shadow-xl bg-panel-alt shadow-black/25 absolute overflow-hidden top-full mt-1 left-0 z-50 bg-background rounded-xl max-h-[30vh] overflow-y-auto"
-		>
-			{#each options as option}
-				<button
-					class="w-full p-2 px-4 text-left hover:bg-panel"
-					onclick={() => select(option)}
-				>
-					{option}
-				</button>
-			{/each}
-		</div>
-	{/if}
 </div>
+
+{#if open}
+	<div
+		bind:this={menuElement}
+		transition:fade={{
+			duration,
+			easing: quintOut,
+		}}
+		class="shadow-xl bg-panel-alt shadow-black/25 overflow-hidden z-[9999] bg-background rounded-xl max-h-[23.5vh] overflow-y-auto"
+	>
+		{#each options as option}
+			<button
+				data-selected={getValue(option) === selected}
+				class={`w-full p-2 px-4 text-left hover:bg-panel font-normal text-sm text-muted
+				${getValue(option) === selected ? "bg-separator" : ""}`}
+				onclick={() => select(option)}
+			>
+				{getLabel(option)}
+			</button>
+		{/each}
+	</div>
+{/if}

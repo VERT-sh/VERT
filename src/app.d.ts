@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import "@poppanator/sveltekit-svg/dist/svg";
 
 type EventPayload = {
@@ -250,9 +251,7 @@ declare global {
 		// interface Platform {}
 	}
 }
-
 declare module "svelte/elements" {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	interface HTMLAttributes<T> {
 		[key: `event-${string}`]: string | undefined | null;
 	}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Panel from "$lib/components/visual/Panel.svelte";
-	import { MessageCircleQuestionIcon } from "lucide-svelte";
+	import { MessageCircleQuestionIcon } from "@lucide/svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { sanitize } from "$lib/store/index.svelte";
 </script>

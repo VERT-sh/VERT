@@ -34,7 +34,7 @@
 				"not_initialized": "nije inicijalizirano",
 				"downloading": "preuzimanje...",
 				"initializing": "inicijaliziranje...",
-				"unknown": "nepoznati status"    
+				"unknown": "nepoznati status"
 			},
 			"supported_formats": "Podržani formati:"
 		},
@@ -71,15 +71,17 @@
 		},
 		"errors": {
 			"cant_convert": "Ne možemo pretvoriti ovu datoteku.",
-			"vertd_server": "Sunce ti žarko, što ti radiš!? Moraš pokrenuti vertd server!",
 			"unsupported_format": "Podržane su samo slike, videozapisi, audio i dokumenti",
-			"vertd_not_found": "Nismo mogli pronači vertd da započnemo pretvaranje. Jeste li sigurni da je URL točno postavljen?",    
 			"worker_downloading": "{type} pretvarač se trenutno koristi, molimo pričekajte malo.",
 			"worker_error": "{type} pretvaraču se javila pogreška pri inicijalizaciji, molimo pokušajte ponovno kasnije.",
 			"worker_timeout": "{type} pretvaraču treba duže nego očekivano da se inicijalizira, molimo još malo pričekajte ili osvježite stranicu.",
 			"audio": "audio",
 			"doc": "dokument",
-			"image": "slika"
+			"image": "slika",
+			"vertd": {
+				"server": "Sunce ti žarko, što ti radiš!? Moraš pokrenuti vertd server!",
+				"not_found": "Nismo mogli pronači vertd da započnemo pretvaranje. Jeste li sigurni da je URL točno postavljen?"
+			}
 		}
 	},
 	"settings": {
@@ -89,36 +91,52 @@
 		},
 		"appearance": {
 			"title": "Izgled",
-			"brightness_theme": "Svjetlina",
-			"brightness_description": "Želite li da Vas Sunce oslijepi ili tihu umirujuću noć?",
 			"light": "Svijetlo",
 			"dark": "Tamno",
-			"effect_settings": "Efekti",
-			"effect_description": "Želite li zapanjujuće efekte ili miran doživljaj?",
 			"enable": "Uključeno",
-			"disable": "Isključeno"
+			"disable": "Isključeno",
+			"brightness": {
+				"theme": "Svjetlina",
+				"description": "Želite li da Vas Sunce oslijepi ili tihu umirujuću noć?"
+			},
+			"effect": {
+				"settings": "Efekti",
+				"description": "Želite li zapanjujuće efekte ili miran doživljaj?"
+			},
+			"language": {
+				"title": "Jezik",
+				"description": "Izaberi svoj preferirani jezik za VERTovo sučelje."
+			}
 		},
 		"conversion": {
 			"title": "Pretvaranje",
-			"filename_format": "Način imenovanja datoteke",
-			"filename_description": "Ovo će odrediti ime datoteke pri preuzimanju, <b>ali ne i nastavak.</b> Možete staviti navedene prijedloge u način imenovanja, koji će biti zamijenjeni sa relevatnim informacijama: <b>%name%</b> za originalni naziv datoteke, <b>%extension%</b> za originalni nastavak, i <b>%date%</b> za datum kada je datoteka bila pretvorena.",
-			"placeholder": "VERT_%name%",
-			"default_format": "Zadan format za pretvaranje",
-			"default_format_description": "Ovo će promijeniti zadani format koji je izabran kada prenesete datoteku te vrste.",
-			"default_format_image": "Slike",
-			"default_format_video": "Videozapisi",
-			"default_format_audio": "Audio",
-			"default_format_document": "Dokumenti",
-			"metadata": "Metapodatci datoteke",
-			"metadata_description": "Ovo mijenja spremaju li se ikakvi metapodatci (EXIF, informacije o pjesmi, itd.) sa originalne datoteke na pretvorenu datoteku",
-			"keep": "Ostavi",
-			"remove": "Obriši",
-			"quality": "Kvaliteta pretvaranja",
-			"quality_description": "Ovo mijenja zadanu izlaznu kvalitetu pretvorene datoteke (u svojoj kategoriji). Veći iznosi mogu uzrokovati duže vrijeme za pretvaranje i veličinu.",
-			"quality_video": "Ovo mijenja zadanu izlaznu kvalitetu pretvoranog videozapisa. Veći iznosi mogu uzrokovati duže vrijeme za pretvaranje i veličinu.",
-			"quality_audio": "Audio (kbps)",
-			"quality_images": "Slika (%)",
-			"rate": "Sample rate (Hz)"
+			"default_format": {
+				"image": "Slike",
+				"audio": "Audio",
+				"document": "Dokumenti",
+				"label": "Zadan format za pretvaranje",
+				"description": "Ovo će promijeniti zadani format koji je izabran kada prenesete datoteku te vrste.",
+				"video": "Videozapisi"
+			},
+			"metadata": {
+				"label": "Metapodatci datoteke",
+				"description": "Ovo mijenja spremaju li se ikakvi metapodatci (EXIF, informacije o pjesmi, itd.) sa originalne datoteke na pretvorenu datoteku",
+				"keep": "Ostavi",
+				"remove": "Obriši"
+			},
+			"quality": {
+				"label": "Kvaliteta pretvaranja",
+				"description": "Ovo mijenja zadanu izlaznu kvalitetu pretvorene datoteke (u svojoj kategoriji). Veći iznosi mogu uzrokovati duže vrijeme za pretvaranje i veličinu.",
+				"video": "Ovo mijenja zadanu izlaznu kvalitetu pretvoranog videozapisa. Veći iznosi mogu uzrokovati duže vrijeme za pretvaranje i veličinu.",
+				"audio": "Audio (kbps)",
+				"images": "Slika (%)"
+			},
+			"rate": "Sample rate (Hz)",
+			"filename": {
+				"format": "Način imenovanja datoteke",
+				"description": "Ovo će odrediti ime datoteke pri preuzimanju, <b>ali ne i nastavak.</b> Možete staviti navedene prijedloge u način imenovanja, koji će biti zamijenjeni sa relevatnim informacijama: <b>%name%</b> za originalni naziv datoteke, <b>%extension%</b> za originalni nastavak, i <b>%date%</b> za datum kada je datoteka bila pretvorena.",
+				"placeholder": "VERT_%name%"
+			}
 		},
 		"vertd": {
 			"title": "Pretvaranje videozapisa",
@@ -126,31 +144,35 @@
 			"loading": "učitavanje...",
 			"available": "dostupno, commit id {commitId}",
 			"unavailable": "nedostupno (Je li URL točan?)",
-			"description": "<code>vertd</code> projekt je serverski omot za FFmpeg. Ovo omogućuje da pretvarate videozapise sa lakoćom VERTovog web sučelja, dok još uvijek možete iskoristiti snagu vašeg GPU da odradi što brže moguće.",    
-			"hosting_info": "Mi držimo javnu instancu za Vašu lakoću, ali je veoma lako hostati na Vašem računalu ili serveru ako znate što radite. Možete preuzeti serverske programe [vertd_link]ovdje[/vertd_link] - Proces namještanja će biti lakši u budućnosti, pa njuškajte malo za nove vijesti!",
+			"description": {
+				"main": "<code>vertd</code> projekt je serverski omot za FFmpeg. Ovo omogućuje da pretvarate videozapise sa lakoćom VERTovog web sučelja, dok još uvijek možete iskoristiti snagu vašeg GPU da odradi što brže moguće.",
+				"info": "Mi držimo javnu instancu za Vašu lakoću, ali je veoma lako hostati na Vašem računalu ili serveru ako znate što radite. Možete preuzeti serverske programe [vertd_link]ovdje[/vertd_link] - Proces namještanja će biti lakši u budućnosti, pa njuškajte malo za nove vijesti!"
+			},
 			"instance_url": "URL instance",
-			"url_placeholder": "Na primjer: http://localhost:24153",
-			"conversion_speed": "Brzina pretvaranja",
-			"speed_description": "Ovo opisuje kompromis između brzine i kvalitete. Većom brzinom će izaći manja kvaliteta, ali će se posao brže odraditi.",
-			"speeds": {
-				"very_slow": "Jako Sporo",
-				"slower": "Sporije",
-				"slow": "Sporo",
-				"medium": "Umjereno",
-				"fast": "Brzo",
-				"ultra_fast": "Veoma Brzo"
+			"conversion_speed": {
+				"speeds": {
+					"very_slow": "Jako Sporo",
+					"slower": "Sporije",
+					"slow": "Sporo",
+					"medium": "Umjereno",
+					"fast": "Brzo",
+					"ultra_fast": "Veoma Brzo"
+				},
+				"label": "Brzina pretvaranja",
+				"description": "Ovo opisuje kompromis između brzine i kvalitete. Većom brzinom će izaći manja kvaliteta, ali će se posao brže odraditi."
+			},
+			"instance": {
+				"url_placeholder": "Na primjer: http://localhost:24153"
 			}
 		},
 		"privacy": {
 			"title": "Privatnost",
-			"plausible_title": "Plausible analitike",
-			"plausible_description": "Mi koristimo [plausible_link]Plausible[/plausible_link], alat za analitiku koji je fokusiran na privatnost, da prikupimo potpuno anonimne statistike. Svi podatci su anonimizirani i prikupljeni bez ikakvih identificirajućih informacija spremljeno i poslano. Možete vidjeti analitike [analytics_link]ovdje[/analytics_link] i izabrati da ne sudjelujete ispod.",
-			"opt_in": "Sudjelujem",
-			"opt_out": "Ne sudjelujem"
-		},
-		"language": {
-			"title": "Jezik",
-			"description": "Izaberi svoj preferirani jezik za VERTovo sučelje."
+			"plausible": {
+				"title": "Plausible analitike",
+				"description": "Mi koristimo [plausible_link]Plausible[/plausible_link], alat za analitiku koji je fokusiran na privatnost, da prikupimo potpuno anonimne statistike. Svi podatci su anonimizirani i prikupljeni bez ikakvih identificirajućih informacija spremljeno i poslano. Možete vidjeti analitike [analytics_link]ovdje[/analytics_link] i izabrati da ne sudjelujete ispod.",
+				"opt_in": "Sudjelujem",
+				"opt_out": "Ne sudjelujem"
+			}
 		}
 	},
 	"about": {

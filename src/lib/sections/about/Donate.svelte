@@ -32,7 +32,7 @@
 		HandCoinsIcon,
 		HeartIcon,
 		WalletIcon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import { Elements, PaymentElement } from "svelte-stripe";
 	import { quintOut } from "svelte/easing";
@@ -50,7 +50,7 @@
 	let paymentState = $state<"prepay" | "fetching" | "details">("prepay");
 	let enablePay = $state(false);
 	let clientSecret = $state<string | null>(null);
-	let elements: StripeElements | null = $state(null);
+	let elements: StripeElements | undefined = $state();
 
 	const amountClick = (preset: number) => {
 		amount = preset;
@@ -151,7 +151,7 @@
 
 		paymentState = "prepay";
 		clientSecret = null;
-		elements = null;
+		elements = undefined;
 		amount = 1;
 		customAmount = "";
 		type = "one-time";
@@ -301,8 +301,8 @@
 							{#if stripe && clientSecret}
 								<Elements {stripe} {clientSecret} bind:elements>
 									<PaymentElement
-										on:change={(e) => {
-											enablePay = e.detail.complete;
+										onchange={(e) => {
+											enablePay = e.complete;
 										}}
 									/>
 								</Elements>

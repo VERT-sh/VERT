@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade } from "$lib/util/animation";
 	interface Props {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		children: () => any;
 		text: string;
 		className?: string;
@@ -9,7 +10,7 @@
 
 	let { children, text, className, position = "top" }: Props = $props();
 	let showTooltip = $state(false);
-	let timeout: NodeJS.Timeout | null = null;
+	let timeout: ReturnType<typeof setTimeout> | null = null;
 	let triggerElement: HTMLElement;
 	let tooltipElement = $state<HTMLElement>();
 	let tooltipPosition = $state({ x: 0, y: 0 });
@@ -112,8 +113,8 @@
 <style lang="postcss">
 	.tooltip {
 		--border-size: 1px;
-		@apply fixed bg-panel-alt text-foreground border border-stone-400 dynadark:border-white drop-shadow-lg text-xs rounded-full pointer-events-none z-[999] max-w-xs break-words whitespace-normal;
-		@apply px-5 py-2.5;
+		@apply fixed bg-panel-alt text-foreground border border-stone-400 dynadark:border-white drop-shadow-lg text-xs pointer-events-none z-[999] max-w-[200px] break-words whitespace-normal;
+		@apply px-3.5 py-2 rounded-xl;
 	}
 
 	.tooltip-top {

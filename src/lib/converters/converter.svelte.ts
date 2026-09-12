@@ -1,6 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { VertFile } from "$lib/types";
+import type {
+	ConversionSettings,
+	SettingDefinition,
+} from "$lib/types/conversion-settings";
 
-export type WorkerStatus = "not-ready" | "downloading" | "ready" | "error";
+export type WorkerStatus =
+	"not-ready" | "downloading" | "ready" | "partially-ready" | "error";
 
 export class FormatInfo {
 	public name: string;
@@ -10,6 +17,7 @@ export class FormatInfo {
 		public fromSupported = true,
 		public toSupported = true,
 		public isNative = true,
+		public priority = 1,
 	) {
 		this.name = name;
 		if (!this.name.startsWith(".")) {
@@ -38,10 +46,36 @@ export class Converter {
 	public status: WorkerStatus = $state("not-ready");
 	public readonly reportsProgress: boolean = false;
 
-	private timeoutId?: NodeJS.Timeout;
+	private timeoutId?: ReturnType<typeof setTimeout>;
 
 	constructor(public readonly timeout: number = 10) {
 		this.startTimeout();
+	}
+
+	/**
+	 * Get available settings for this converter.
+	 * Can be overridden per converter for format-specific settings.
+	 * @param input The input file.
+	 */
+	public async getAvailableSettings(
+		input?: VertFile,
+	): Promise<SettingDefinition[]> {
+		return [];
+	}
+
+	/**
+	 * Get default settings for a conversion.
+	 * @param input The input file.
+	 */
+	public async getDefaultSettings(
+		input?: VertFile,
+	): Promise<ConversionSettings> {
+		const defaults: ConversionSettings = {};
+		const settings = await this.getAvailableSettings(input);
+		settings.forEach((setting) => {
+			defaults[setting.key] = setting.default;
+		});
+		return defaults;
 	}
 
 	private startTimeout() {
@@ -63,11 +97,9 @@ export class Converter {
 	 * @param to The format to convert to. Includes the dot.
 	 */
 	public async convert(
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		input: VertFile,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		to: string,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+		settings: ConversionSettings,
 		...args: any[]
 	): Promise<VertFile> {
 		throw new Error("Not implemented");
@@ -77,7 +109,6 @@ export class Converter {
 	 * Cancel the active conversion of a file.
 	 * @param input The input file.
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	public async cancel(input: VertFile): Promise<void> {
 		throw new Error("Not implemented");
 	}

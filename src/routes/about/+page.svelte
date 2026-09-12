@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { error } from "$lib/util/logger";
 	import * as About from "$lib/sections/about";
-	import { InfoIcon } from "lucide-svelte";
+	import { InfoIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import avatarNullptr from "$lib/assets/avatars/nullptr.jpg";
 	import avatarLiam from "$lib/assets/avatars/liam.jpg";
@@ -9,7 +9,10 @@
 	import avatarRealmy from "$lib/assets/avatars/realmy.jpg";
 	import avatarAzurejelly from "$lib/assets/avatars/azurejelly.jpg";
 	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$env/static/public";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS, GITHUB_API_URL } from "$lib/util/consts";
+	import {
+		DISABLE_ALL_EXTERNAL_REQUESTS,
+		GITHUB_API_URL,
+	} from "$lib/util/consts";
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager } from "$lib/util/toast.svelte";
 	// import { dev } from "$app/environment";
@@ -38,7 +41,7 @@
 			avatar: avatarNullptr,
 		},
 		{
-			name: "JovannMC",
+			name: "JovannMC // Maya",
 			github: "https://github.com/JovannMC",
 			role: m["about.credits.roles.developer"](),
 			avatar: avatarJovannMC,
@@ -69,15 +72,24 @@
 	let ghContribs: Contributor[] = [];
 
 	onMount(async () => {
-		if (DISABLE_ALL_EXTERNAL_REQUESTS) {
+		if (
+			DISABLE_ALL_EXTERNAL_REQUESTS ||
+			typeof sessionStorage === "undefined"
+		)
 			return;
-		}
 
 		// Check if the data is already in sessionStorage
 		const cachedContribs = sessionStorage.getItem("ghContribs");
 		if (cachedContribs) {
-			ghContribs = JSON.parse(cachedContribs);
-			return;
+			try {
+				const parsedContribs = JSON.parse(cachedContribs);
+				if (Array.isArray(parsedContribs)) {
+					ghContribs = parsedContribs;
+					return;
+				}
+			} catch {
+				sessionStorage.removeItem("ghContribs");
+			}
 		}
 
 		// Fetch GitHub contributors
@@ -104,30 +116,16 @@
 					!excludedNames.has(contrib.login),
 			);
 
-			// Fetch and cache avatar images as Base64
-			const fetchAvatar = async (url: string) => {
-				const res = await fetch(url);
-				const blob = await res.blob();
-				return new Promise<string>((resolve, reject) => {
-					const reader = new FileReader();
-					reader.onloadend = () => resolve(reader.result as string);
-					reader.onerror = reject;
-					reader.readAsDataURL(blob);
-				});
-			};
-
-			ghContribs = await Promise.all(
-				filteredContribs.map(
-					async (contrib: {
-						login: string;
-						avatar_url: string;
-						html_url: string;
-					}) => ({
-						name: contrib.login,
-						avatar: await fetchAvatar(contrib.avatar_url),
-						github: contrib.html_url,
-					}),
-				),
+			ghContribs = filteredContribs.map(
+				(contrib: {
+					login: string;
+					avatar_url: string;
+					html_url: string;
+				}) => ({
+					name: contrib.login,
+					avatar: contrib.avatar_url,
+					github: contrib.html_url,
+				}),
 			);
 
 			// Cache the data in sessionStorage
@@ -137,9 +135,8 @@
 		}
 	});
 
-	const donationsEnabled = PUB_STRIPE_KEY
-		&& PUB_DONATION_URL
-		&& !DISABLE_ALL_EXTERNAL_REQUESTS;
+	const donationsEnabled =
+		PUB_STRIPE_KEY && PUB_DONATION_URL && !DISABLE_ALL_EXTERNAL_REQUESTS;
 </script>
 
 <div class="flex flex-col h-full items-center">

@@ -1,14 +1,21 @@
 <script lang="ts">
 	import { duration, fade, fly } from "$lib/util/animation";
 	import { removeDialog } from "$lib/store/DialogProvider";
-	import { BanIcon, CheckIcon, InfoIcon, TriangleAlert } from "lucide-svelte";
+	import {
+		BanIcon,
+		CheckIcon,
+		InfoIcon,
+		TriangleAlert,
+	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import type { Dialog as DialogType } from "$lib/store/DialogProvider";
 
 	type Props = DialogType;
 
 	let props: Props = $props();
+	// svelte-ignore state_referenced_locally
 	const { id, title, message, buttons, type } = props;
+	// svelte-ignore state_referenced_locally
 	const additional = "additional" in props ? props.additional : undefined;
 
 	const colors = {
@@ -54,7 +61,9 @@
 	</div>
 	<div class="flex flex-col gap-1 w-full">
 		{#if typeof message === "string"}
-			<p class="text-sm font-normal text-muted whitespace-pre-wrap">{message}</p>
+			<p class="text-sm font-normal text-muted whitespace-pre-wrap">
+				{message}
+			</p>
 		{:else}
 			{@const MessageComponent = message}
 			<div class="text-sm font-normal text-muted">

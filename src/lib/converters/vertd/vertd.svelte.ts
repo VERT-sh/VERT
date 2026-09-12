@@ -1,0 +1,1062 @@
+import VertdErrorComponent from "$lib/components/functional/popups/VertdError.svelte";
+import { error, log } from "$lib/util/logger";
+import { m } from "$lib/paraglide/messages";
+import { Settings } from "$lib/sections/settings/index.svelte";
+import {
+	VertdInstance,
+	getVertdCustomHeaders,
+} from "$lib/sections/settings/vertdSettings.svelte";
+import { VertFile } from "$lib/types";
+import { Converter, FormatInfo } from "../converter.svelte";
+import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
+import { ToastManager } from "$lib/util/toast.svelte";
+import { converters } from "../";
+import type {
+	SettingDefinition,
+	ConversionSettings,
+} from "$lib/types/conversion-settings";
+import { CONVERSION_BITRATES, SAMPLE_RATES } from "../ffmpeg/ffmpeg.codecs";
+import { formatBytes } from "$lib/util/file";
+
+interface UploadResponse {
+	id: string;
+	auth: string;
+	from: string;
+	to: null;
+	completed: false;
+	totalFrames: number;
+}
+
+interface RouteRequestMap {
+	"/api/keep": {
+		id: string;
+		token: string;
+	};
+}
+
+interface CodecsResponse {
+	videoCodecs: string[];
+	audioCodecs: string[];
+}
+
+interface RouteResponseMap {
+	"/api/upload": UploadResponse;
+	"/api/version": string;
+	"/api/size_limit": number | null;
+	"/api/keep": void;
+	"/api/codecs": string[]; // get list of all codecs supported by vertd server
+	[key: `/api/codecs/${string}`]: unknown; // list of codecs for this format
+	[key: `/api/codecs/support/${string}`]: unknown; // list of formats supporting this codec -- i dont know how this works in ts, i have to put both as unknown since this and /api/codecs are different types (CodecsResponse & string[]) and TS errors
+	[key: `/api/confirm/${string}/${string}`]: void; // confirm download - job id, token
+}
+
+export const vertdFetch: {
+	<U extends keyof RouteRequestMap>(
+		url: U,
+		options: RequestInit,
+		body: RouteRequestMap[U],
+	): Promise<RouteResponseMap[U]>;
+	<U extends Exclude<keyof RouteResponseMap, keyof RouteRequestMap>>(
+		url: U,
+		options: RequestInit,
+	): Promise<RouteResponseMap[U]>;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+} = async (url: any, options: RequestInit, body?: any) => {
+	const domain = await VertdInstance.instance.url();
+	const headers = new Headers(options.headers);
+	for (const [key, value] of Object.entries(getVertdCustomHeaders()))
+		headers.set(key, value);
+
+	// if there is a body, insert a Content-Type: application/json header
+	if (body) {
+		headers.set("Content-Type", "application/json");
+		options.body = JSON.stringify(body);
+	}
+
+	options.headers = headers;
+
+	const res = await fetch(domain + url, options);
+
+	const text = await res.text();
+	const normalizedText = text.replace(/^\uFEFF/, "").trim();
+
+	if (!normalizedText.length) {
+		if (!res.ok) throw new Error(`vertd request failed (${res.status})`);
+		return undefined as RouteResponseMap[typeof url];
+	}
+
+	let json: unknown = null;
+	try {
+		json = JSON.parse(normalizedText);
+	} catch {
+		throw new Error(normalizedText);
+	}
+
+	if (json && typeof json === "object" && "type" in json && "data" in json) {
+		const envelope = json as { type: string; data: unknown };
+
+		if (envelope.type === "error") {
+			if (typeof envelope.data === "string")
+				throw new Error(envelope.data);
+			throw new Error(JSON.stringify(envelope.data));
+		}
+
+		if (envelope.type === "success")
+			return envelope.data as RouteResponseMap[typeof url];
+	}
+
+	if (!res.ok) throw new Error(normalizedText);
+
+	return json as RouteResponseMap[typeof url];
+};
+
+// ws types
+
+export type ConversionSpeed =
+	"verySlow" | "slower" | "slow" | "medium" | "fast" | "ultraFast";
+
+const vertdSpeedValues: ConversionSpeed[] = [
+	"verySlow",
+	"slower",
+	"slow",
+	"medium",
+	"fast",
+	"ultraFast",
+];
+
+interface StartJobMessage {
+	type: "startJob";
+	data: {
+		token: string;
+		jobId: string;
+		to: string;
+		settings: ConversionSettings;
+	};
+}
+
+interface ErrorMessage {
+	type: "error";
+	data: {
+		message: string;
+	};
+}
+
+interface ProgressMessage {
+	type: "progressUpdate";
+	data: ProgressData;
+}
+
+interface CompletedMessage {
+	type: "jobFinished";
+	data: {
+		jobId: string;
+	};
+}
+
+interface CancelJobMessage {
+	type: "cancelJob";
+	data: {
+		jobId: string;
+		token: string;
+	};
+}
+
+interface JobCancelledMessage {
+	type: "jobCancelled";
+	data: {
+		jobId: string;
+	};
+}
+
+interface JobRetriedMessage {
+	type: "jobRetried";
+	data: {
+		jobId: string;
+	};
+}
+
+interface FpsProgress {
+	type: "fps";
+	data: number;
+}
+
+interface FrameProgress {
+	type: "frame";
+	data: number;
+}
+
+type ProgressData = FpsProgress | FrameProgress;
+
+type VertdMessage =
+	| StartJobMessage
+	| ErrorMessage
+	| ProgressMessage
+	| CancelJobMessage
+	| JobCancelledMessage
+	| JobRetriedMessage
+	| CompletedMessage;
+
+const progressEstimates = {
+	upload: 25,
+	convert: 50,
+	download: 25,
+};
+
+const progressEstimate = (
+	progress: number,
+	type: keyof typeof progressEstimates,
+) => {
+	const previousValues = Object.values(progressEstimates)
+		.filter((_, i) => i < Object.keys(progressEstimates).indexOf(type))
+		.reduce((a, b) => a + b, 0);
+	return progress * progressEstimates[type] + previousValues;
+};
+
+const processSettings = (settings: ConversionSettings): ConversionSettings => {
+	const newSettings = { ...settings };
+
+	if (newSettings.fps === "custom") {
+		newSettings.fps = newSettings.customFps;
+		delete newSettings.customFps;
+	}
+	if (newSettings.resolution === "custom") {
+		newSettings.resolution = newSettings.customResolution;
+		delete newSettings.customResolution;
+	}
+	if (newSettings.videoBitrate === "custom") {
+		newSettings.videoBitrate = newSettings.customVideoBitrate;
+		delete newSettings.customVideoBitrate;
+	}
+	if (newSettings.audioBitrate === "custom") {
+		newSettings.audioBitrate = newSettings.customAudioBitrate;
+		delete newSettings.customAudioBitrate;
+	}
+	if (newSettings.sampleRate === "custom") {
+		newSettings.sampleRate = newSettings.customSampleRate;
+		delete newSettings.customSampleRate;
+	}
+
+	return newSettings;
+};
+
+interface UploadTask {
+	promise: Promise<UploadResponse>;
+	abort: () => void;
+}
+
+const createUploadTask = async (file: VertFile): Promise<UploadTask> => {
+	const apiUrl = await VertdInstance.instance.url();
+	const formData = new FormData();
+	formData.append("file", file.file, file.name);
+	const xhr = new XMLHttpRequest();
+	xhr.open("POST", `${apiUrl}/api/upload`, true);
+	const customHeaders = getVertdCustomHeaders();
+
+	const promise = new Promise<UploadResponse>((resolve, reject) => {
+		xhr.upload.addEventListener("progress", (e) => {
+			console.log(e);
+			if (e.lengthComputable) {
+				file.progress = progressEstimate(e.loaded / e.total, "upload");
+			}
+		});
+
+		console.log("meow");
+
+		xhr.onload = () => {
+			try {
+				console.log("xhr.responseText");
+				const res = JSON.parse(xhr.responseText);
+				if (res.type === "error") {
+					reject(res.data);
+					return;
+				}
+				resolve(res.data);
+			} catch {
+				console.log(xhr.responseText);
+				reject(xhr.statusText);
+			}
+		};
+
+		xhr.onerror = () => {
+			console.log(xhr.statusText);
+			reject(xhr.statusText);
+		};
+
+		xhr.onabort = () => {
+			reject(new Error("Conversion cancelled"));
+		};
+
+		for (const [key, value] of Object.entries(customHeaders))
+			xhr.setRequestHeader(key, value);
+
+		xhr.send(formData);
+		console.log("sent!");
+	});
+
+	return {
+		promise,
+		abort: () => xhr.abort(),
+	};
+};
+
+const downloadFile = async (url: string, file: VertFile): Promise<Blob> => {
+	const xhr = new XMLHttpRequest();
+	xhr.open("GET", url, true);
+	xhr.responseType = "blob";
+	const customHeaders = getVertdCustomHeaders();
+
+	return new Promise((resolve, reject) => {
+		xhr.addEventListener("progress", (e) => {
+			if (e.lengthComputable) {
+				file.progress = progressEstimate(
+					e.loaded / e.total,
+					"download",
+				);
+			}
+		});
+
+		xhr.onload = () => {
+			if (xhr.status === 200) {
+				resolve(xhr.response);
+			} else {
+				reject(xhr.statusText);
+			}
+		};
+
+		xhr.onerror = () => {
+			reject(xhr.statusText);
+		};
+
+		for (const [key, value] of Object.entries(customHeaders))
+			xhr.setRequestHeader(key, value);
+
+		xhr.send();
+	});
+};
+
+// prettier-ignore
+export const videoFormats: string[] = ["mp4", "mkv", "webm", "avi", "wmv", "mov", "gif", "apng", "webp", "mts", "ts", "m2ts", "mpg", "mpeg", "flv", "f4v", "vob", "m4v", "3gp", "3g2", "mxf", "ogx", "ogv", "gxf", "rm", "rmvb", "h264", "divx", "swf", "amv", "asf", "nut"];
+const cantEncode: string[] = ["rm", "rmvb"];
+const cantDecode: string[] = [];
+
+export class VertdConverter extends Converter {
+	public name = "vertd";
+	public ready = $state(false);
+	public reportsProgress = true;
+
+	private activeConversions = new Map<
+		string,
+		{
+			ws: WebSocket;
+			jobId: string;
+			token: string;
+		}
+	>();
+
+	private activeUploads = new Map<string, UploadTask>();
+
+	private cancelledConversions = new Set<string>();
+
+	public supportedFormats = [
+		...videoFormats
+			.map((f: string) => new FormatInfo(f, true, true, true, 0))
+			.filter((format) => !cantEncode.includes(format.name.slice(1)))
+			.filter((format) => !cantDecode.includes(format.name.slice(1))),
+		...cantEncode.map((f) => new FormatInfo(f, true, false, true, 0)),
+		...cantDecode.map((f) => new FormatInfo(f, false, true, true, 0)),
+	];
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private log: (...msg: any[]) => void = () => {};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private error: (...msg: any[]) => void = () => {};
+
+	private codecs: CodecsResponse = { videoCodecs: [], audioCodecs: [] };
+
+	constructor() {
+		super();
+		this.log = (msg) => log(["converters", this.name], msg);
+		this.error = (msg) => error(["converters", this.name], msg);
+		this.log("created converter");
+		this.log("not rly sure how to implement this :P");
+		this.status = "ready";
+	}
+
+	private async getServerSizeLimit(apiUrl: string): Promise<number | null> {
+		const cacheKey = `vertd:size-limit:${apiUrl}`;
+
+		if (typeof sessionStorage !== "undefined") {
+			try {
+				const cached = sessionStorage.getItem(cacheKey);
+				if (cached !== null) {
+					const parsedCached = Number(cached);
+					if (Number.isFinite(parsedCached) && parsedCached > 0) {
+						this.log(
+							`using cached vertd size limit: ${parsedCached} bytes`,
+						);
+						return parsedCached;
+					}
+					sessionStorage.removeItem(cacheKey);
+				}
+			} catch (e) {
+				this.error(
+					`failed to read vertd size limit from sessionStorage: ${e}`,
+				);
+			}
+		}
+
+		try {
+			const limit = await vertdFetch("/api/size_limit", {
+				method: "GET",
+			});
+			const parsed = Number(limit);
+			if (!Number.isFinite(parsed) || parsed <= 0) return null;
+
+			if (typeof sessionStorage !== "undefined") {
+				try {
+					sessionStorage.setItem(cacheKey, parsed.toString());
+				} catch (e) {
+					this.error(
+						`failed to cache vertd size limit in sessionStorage: ${e}`,
+					);
+				}
+			}
+
+			this.log(`fetched vertd size limit: ${parsed} bytes`);
+			return parsed;
+		} catch (e) {
+			this.error(`failed to fetch vertd size limit: ${e}`);
+			return null;
+		}
+	}
+
+	private blocked(hash: string): boolean {
+		let blockedHashes = Settings.instance.settings.vertdBlockedHashes;
+
+		// ensure it's a map
+		// this might fix the "e.get" isn't a function error, but i can't reproduce it
+		if (!(blockedHashes instanceof Map) || blockedHashes === null) {
+			blockedHashes = new Map(Object.entries(blockedHashes || {}));
+			Settings.instance.settings.vertdBlockedHashes = blockedHashes;
+			Settings.instance.save();
+		}
+
+		const now = new Date();
+		const dates = blockedHashes.get(hash) || [];
+		const filteredDates = dates.filter(
+			(date) => now.getTime() - date.getTime() < 60 * 60 * 1000,
+		);
+
+		if (filteredDates.length === 0) {
+			blockedHashes.delete(hash);
+			return false;
+		}
+
+		blockedHashes.set(hash, filteredDates);
+
+		Settings.instance.save();
+
+		return filteredDates.length >= 3;
+	}
+
+	private failure(hash: string): void {
+		let blockedHashes = Settings.instance.settings.vertdBlockedHashes;
+
+		// same as above (blocked())
+		if (!(blockedHashes instanceof Map) || blockedHashes === null) {
+			blockedHashes = new Map(Object.entries(blockedHashes || {}));
+			Settings.instance.settings.vertdBlockedHashes = blockedHashes;
+			Settings.instance.save();
+		}
+
+		const now = new Date();
+		const dates = blockedHashes.get(hash) || [];
+		dates.push(now);
+		blockedHashes.set(hash, dates);
+		Settings.instance.save();
+	}
+
+	public async getAvailableSettings(
+		input: VertFile,
+	): Promise<SettingDefinition[]> {
+		// video - bitrate, fps, resolution, trim, crop, rotate, flip/flop, audio settings?
+
+		const qualityOptions = [
+			{
+				value: 0, // very slow
+				label: m["convert.settings.video.speed.very_slow"](),
+			},
+			{
+				value: 1, // slower
+				label: m["convert.settings.video.speed.slower"](),
+			},
+			{
+				value: 2, // slow
+				label: m["convert.settings.video.speed.slow"](),
+			},
+			{
+				value: 3, // medium
+				label: m["convert.settings.video.speed.medium"](),
+			},
+			{
+				value: 4, // faster
+				label: m["convert.settings.video.speed.fast"](),
+			},
+			{
+				value: 5, // fastest
+				label: m["convert.settings.video.speed.ultra_fast"](),
+			},
+		];
+
+		// get codecs for this format from vertd
+		try {
+			const targetFormat = input.to.replace(/^\./, "");
+			const codecsJson = await vertdFetch(`/api/codecs/${targetFormat}`, {
+				method: "GET",
+			});
+
+			const previousCodecs = JSON.stringify(this.codecs);
+			const newCodecs = JSON.stringify(codecsJson);
+
+			if (previousCodecs !== newCodecs) {
+				this.codecs = codecsJson as CodecsResponse;
+				this.log(`updated codecs from vertd: ${newCodecs}`);
+			}
+		} catch (e) {
+			this.error(`failed to fetch codecs from vertd: ${e}`);
+			throw e;
+		}
+
+		// get default vertd speed
+		const defaultSpeed = Settings.instance.settings.vertdSpeed;
+		const defaultSpeedIndex = vertdSpeedValues.indexOf(defaultSpeed);
+		const qualitySpeedRange: SettingDefinition = {
+			key: "vertdSpeed",
+			label: m["convert.settings.video.speed.title"](),
+			description: m["convert.settings.video.speed.description"](),
+			type: "range",
+			min: 0,
+			max: qualityOptions.length - 1,
+			step: 1,
+			default: defaultSpeedIndex !== -1 ? defaultSpeedIndex : 3,
+			options: qualityOptions.map((option, index) => ({
+				value: index,
+				label: option.label,
+			})),
+			forceFullWidth: true,
+		};
+
+		const fps: SettingDefinition = {
+			key: "fps",
+			label: m["convert.settings.video.fps.label"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: "24", label: "24" },
+				{ value: "30", label: "30" },
+				{ value: "60", label: "60" },
+				{ value: "120", label: "120" },
+				{ value: "144", label: "144" },
+				{ value: "240", label: "240" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customFps",
+			placeholder: m["convert.settings.video.fps.placeholder"](),
+		};
+
+		const resolution: SettingDefinition = {
+			key: "resolution",
+			label: m["convert.settings.video.resolution.label"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: "426x240", label: "426x240" },
+				{ value: "640x360", label: "640x360" },
+				{ value: "854x480", label: "854x480" },
+				{ value: "720x1280", label: "720x1280 (V)" },
+				{ value: "1280x720", label: "1280x720" },
+				{ value: "1080x1920", label: "1080x1920 (V)" },
+				{ value: "1920x1080", label: "1920x1080" },
+				{ value: "2160x3840", label: "2160x3840 (V)" },
+				{ value: "3840x2160", label: "3840x2160" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customResolution",
+			placeholder: m["convert.settings.video.resolution.placeholder"](),
+		};
+
+		const videoCodec: SettingDefinition = {
+			key: "videoCodec",
+			label: m["convert.settings.video.codec.video"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				...(this.codecs.videoCodecs || []).map((codec) => ({
+					value: codec,
+					label: codec,
+				})),
+			],
+		};
+
+		// TODO: allow CRF for consistent quality?
+		const videoBitrate: SettingDefinition = {
+			key: "videoBitrate",
+			label: m["convert.settings.video.bitrate.video"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				{
+					value: "custom",
+					label: m["convert.settings.common.custom"](),
+				},
+				{ value: "1000", label: "1000 kbps" },
+				{ value: "2500", label: "2500 kbps" },
+				{ value: "5000", label: "5000 kbps" },
+				{ value: "8000", label: "8000 kbps" },
+				{ value: "12000", label: "12000 kbps" },
+				{ value: "18000", label: "18000 kbps" },
+			],
+			hasCustomInput: true,
+			customInputKey: "customVideoBitrate",
+			placeholder: m["convert.settings.video.bitrate.placeholder"](),
+		};
+
+		/*
+		 *	audio settings
+		 */
+		const audioCodec: SettingDefinition = {
+			key: "audioCodec",
+			label: m["convert.settings.video.codec.audio"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: m["convert.settings.common.auto"]() },
+				...(this.codecs.audioCodecs || []).map((codec) => ({
+					value: codec,
+					label: codec,
+				})),
+			],
+		};
+
+		const audioBitrate: SettingDefinition = {
+			key: "audioBitrate",
+			label: m["convert.settings.video.bitrate.audio"](),
+			type: "select",
+			default: "auto",
+			options: CONVERSION_BITRATES.map((b) => ({
+				value: b.toString(),
+				label:
+					b === "auto"
+						? m["convert.settings.common.auto"]()
+						: b === "custom"
+							? m["convert.settings.common.custom"]()
+							: `${b} kbps`,
+			})),
+			hasCustomInput: true,
+			customInputKey: "customAudioBitrate",
+			placeholder: m["convert.settings.audio.bitrate.placeholder"](),
+		};
+
+		const sampleRate: SettingDefinition = {
+			key: "sampleRate",
+			label: m["convert.settings.audio.sample_rate.label"](),
+			type: "select",
+			default: "auto",
+			options: SAMPLE_RATES.map((r) => ({
+				value: r.toString(),
+				label:
+					r === "auto"
+						? m["convert.settings.common.auto"]()
+						: r === "custom"
+							? m["convert.settings.common.custom"]()
+							: `${r} Hz`,
+			})),
+			hasCustomInput: true,
+			customInputKey: "customSampleRate",
+			placeholder: m["convert.settings.audio.sample_rate.placeholder"](),
+		};
+
+		/*
+		 *	common
+		 */
+		const metadata: SettingDefinition = {
+			key: "metadata",
+			label: m["convert.settings.common.metadata"](),
+			type: "boolean",
+			default: true,
+		};
+
+		// trim/crop/rotate - also have another ui for this prob
+
+		const animatedImages = [".gif", ".webp", ".apng"];
+		if (animatedImages.includes(input.to)) {
+			return [fps, resolution, metadata];
+		} else {
+			return [
+				qualitySpeedRange,
+				videoCodec,
+				audioCodec,
+				videoBitrate,
+				audioBitrate,
+				fps,
+				sampleRate,
+				resolution,
+				metadata,
+			];
+		}
+	}
+
+	public async getDefaultSettings(
+		input: VertFile,
+	): Promise<ConversionSettings> {
+		const defaults: ConversionSettings = {};
+		const settings = await this.getAvailableSettings(input);
+		settings.forEach((setting) => {
+			defaults[setting.key] = setting.default;
+		});
+
+		return defaults;
+	}
+
+	public async convert(
+		input: VertFile,
+		to: string,
+		settings: ConversionSettings,
+	): Promise<VertFile> {
+		if (to.startsWith(".")) to = to.slice(1);
+
+		let fileUpload = input;
+		const conversionSettings = // vertd expects object not string json
+			Object.keys(settings).length > 4
+				? settings // user-provided settings
+				: Object.assign(settings, await this.getDefaultSettings(input)); // use defaults if not provided
+		// if converting animated webp to video, first convert to gif
+		// ffmpeg (in vertd) doesn't support decoding animated webp still.. while supporting encoding animated webp for some reason
+		// https://trac.ffmpeg.org/ticket/4907
+		if (input.from === ".webp") {
+			this.log(`animated webp detected, converting to gif first`);
+			const magickConverter = converters.find(
+				(c) => c.name === "imagemagick",
+			);
+			if (magickConverter) {
+				try {
+					fileUpload = await magickConverter.convert(
+						input,
+						".gif",
+						conversionSettings,
+						100,
+					);
+					this.log(`successfully converted webp to gif`);
+				} catch (e) {
+					this.error(`failed to convert webp to gif: ${e}`);
+					throw e;
+				}
+			}
+		}
+
+		let hash: string;
+		if (PUB_DISABLE_FAILURE_BLOCKS === "false") {
+			hash = await fileUpload.hash();
+
+			if (this.blocked(hash)) {
+				this.log(`conversion blocked for file ${input.name}`);
+				throw new Error(
+					m["convert.errors.vertd.ratelimit"]({
+						filename: input.name,
+					}),
+				);
+			}
+		}
+
+		const apiUrl = await VertdInstance.instance.url();
+		const sizeLimit =
+			(await this.getServerSizeLimit(apiUrl)) || Number.POSITIVE_INFINITY; // fall back to no limit just in case - server will block if too large anyways
+		if (sizeLimit !== null && fileUpload.file.size > sizeLimit) {
+			this.log(
+				`blocked upload for ${input.name}: ${fileUpload.file.size} bytes exceeds server limit of ${sizeLimit} bytes`,
+			);
+			throw new Error(
+				m["convert.errors.vertd.file_too_large"]({
+					fileSize: formatBytes(fileUpload.file.size),
+					limit: formatBytes(sizeLimit),
+				}),
+			);
+		}
+
+		const uploadTask = await createUploadTask(fileUpload);
+		this.activeUploads.set(input.id, uploadTask);
+
+		let uploadRes: UploadResponse;
+		try {
+			uploadRes = await uploadTask.promise;
+		} finally {
+			this.activeUploads.delete(input.id);
+		}
+
+		if (this.cancelledConversions.has(input.id))
+			throw new Error("Conversion cancelled");
+
+		return new Promise((resolve, reject) => {
+			let settled = false;
+			const protocol = apiUrl.startsWith("https") ? "wss:" : "ws:";
+			const ws = new WebSocket(
+				`${protocol}//${apiUrl.replace("http://", "").replace("https://", "")}/api/ws`,
+			);
+
+			const connectTimeout = setTimeout(() => {
+				if (settled) return;
+				settled = true;
+				this.activeConversions.delete(input.id);
+				ws.close();
+				reject(new Error("vertd websocket connection timeout"));
+			}, 30000);
+
+			const rejectConversion = (reason: unknown) => {
+				if (settled) return;
+				settled = true;
+				clearTimeout(connectTimeout);
+				this.cancelledConversions.delete(input.id);
+				this.activeUploads.delete(input.id);
+				this.activeConversions.delete(input.id);
+				if (
+					ws.readyState === WebSocket.CONNECTING ||
+					ws.readyState === WebSocket.OPEN
+				) {
+					ws.close();
+				}
+				reject(reason);
+			};
+
+			const resolveConversion = (value: VertFile) => {
+				if (settled) return;
+				settled = true;
+				clearTimeout(connectTimeout);
+				this.cancelledConversions.delete(input.id);
+				this.activeUploads.delete(input.id);
+				this.activeConversions.delete(input.id);
+				resolve(value);
+			};
+
+			this.activeConversions.set(input.id, {
+				ws,
+				jobId: uploadRes.id,
+				token: uploadRes.auth,
+			});
+
+			ws.onopen = () => {
+				if (this.cancelledConversions.has(input.id)) {
+					rejectConversion(new Error("Conversion cancelled"));
+					return;
+				}
+
+				clearTimeout(connectTimeout);
+				this.log(
+					`opened ws connection to vertd for file ${input.name}`,
+				);
+				const msg: StartJobMessage = {
+					type: "startJob",
+					data: {
+						jobId: uploadRes.id,
+						token: uploadRes.auth,
+						to,
+						settings: processSettings(conversionSettings),
+					},
+				};
+				ws.send(JSON.stringify(msg));
+				this.log(JSON.stringify(msg, null, 2));
+				this.log(`sent startJob message for file ${input.name}`);
+			};
+
+			ws.onerror = () => {
+				this.error(`ws error for file ${input.name}`);
+				rejectConversion(new Error("vertd websocket error"));
+			};
+
+			ws.onclose = (event) => {
+				if (settled) return;
+				if (this.cancelledConversions.has(input.id)) {
+					rejectConversion(new Error("Conversion cancelled"));
+					return;
+				}
+
+				this.error(
+					`ws closed unexpectedly for file ${input.name} (code: ${event.code})`,
+				);
+				rejectConversion(
+					new Error("vertd websocket closed unexpectedly"),
+				);
+			};
+
+			ws.onmessage = async (e) => {
+				let msg: VertdMessage;
+				try {
+					if (typeof e.data !== "string") {
+						rejectConversion(
+							new Error("invalid websocket payload type"),
+						);
+						return;
+					}
+					msg = JSON.parse(e.data);
+				} catch {
+					rejectConversion(new Error("invalid websocket payload"));
+					return;
+				}
+
+				this.log(`received message ${msg.type} for file ${input.name}`);
+				switch (msg.type) {
+					case "progressUpdate": {
+						const data = msg.data;
+						if (data.type !== "frame") break;
+						const frame = data.data;
+						input.progress = progressEstimate(
+							frame / uploadRes.totalFrames,
+							"convert",
+						);
+						break;
+					}
+
+					case "jobRetried": {
+						this.log(`job retrying for file ${input.name}`);
+						ToastManager.add({
+							type: "error",
+							message: m["convert.errors.vertd.retry"]({
+								filename: input.name,
+							}),
+						});
+						break;
+					}
+
+					case "jobFinished": {
+						this.log(`job finished for file ${input.name}`);
+						try {
+							const url = `${apiUrl}/api/download/${msg.data.jobId}/${uploadRes.auth}`;
+							this.log(`downloading from ${url}`);
+							const res = await downloadFile(url, input);
+
+							// confirm download to clean up on server
+							try {
+								await vertdFetch(
+									`/api/confirm/${msg.data.jobId}/${uploadRes.auth}`,
+									{
+										method: "GET",
+									},
+								);
+								this.log(
+									`confirmed download for file ${input.name}`,
+								);
+							} catch (e) {
+								this.error(`failed to confirm download: ${e}`);
+							}
+
+							resolveConversion(
+								new VertFile(new File([res], input.name), to),
+							);
+						} catch (e) {
+							if (hash) this.failure(hash);
+							rejectConversion(e);
+						} finally {
+							ws.close();
+						}
+						break;
+					}
+
+					case "jobCancelled": {
+						this.log("job cancelled");
+						ws.close();
+						rejectConversion("Conversion cancelled");
+						break;
+					}
+
+					case "error": {
+						this.error(`error: ${msg.data.message}`);
+						if (hash) this.failure(hash);
+
+						rejectConversion({
+							component: VertdErrorComponent,
+							additional: {
+								jobId: uploadRes.id,
+								auth: uploadRes.auth,
+								from: input.from,
+								to: to,
+								errorMessage: msg.data.message,
+							},
+						});
+						break;
+					}
+
+					default: {
+						break;
+					}
+				}
+			};
+		});
+	}
+
+	public async cancel(input: VertFile): Promise<void> {
+		this.cancelledConversions.add(input.id);
+
+		const activeUpload = this.activeUploads.get(input.id);
+		if (activeUpload) {
+			this.log(`cancelling upload for file ${input.name}`);
+			activeUpload.abort();
+			this.activeUploads.delete(input.id);
+		}
+
+		const activeConversion = this.activeConversions.get(input.id);
+		if (!activeConversion) {
+			if (!activeUpload)
+				this.error(`no active conversion found for file ${input.name}`);
+			return;
+		}
+
+		log(
+			["converters", this.name],
+			`cancelling conversion for file ${input.name}`,
+		);
+
+		const { ws, jobId, token } = activeConversion;
+
+		if (ws.readyState === WebSocket.OPEN) {
+			const cancelMsg: CancelJobMessage = {
+				type: "cancelJob",
+				data: {
+					jobId,
+					token,
+				},
+			};
+			ws.send(JSON.stringify(cancelMsg));
+			this.log(`sent cancelJob message for file ${input.name}`);
+		}
+
+		ws.close();
+		this.activeConversions.delete(input.id);
+	}
+
+	public async valid(): Promise<boolean> {
+		if (!(await VertdInstance.instance.url())) {
+			return false;
+		}
+
+		try {
+			await vertdFetch("/api/version", {
+				method: "GET",
+			});
+			return true;
+		} catch (e) {
+			this.log(e as unknown as string);
+			return false;
+		}
+	}
+}

@@ -77,15 +77,17 @@
 		},
 		"errors": {
 			"cant_convert": "このファイルを変換できません。",
-			"vertd_server": "何してるの..? vertdサーバーを起動する必要があります！",
 			"unsupported_format": "画像、動画、音声、ドキュメントのみ対応しています",
-			"vertd_not_found": "動画変換を開始するためのvertdインスタンスが見つかりません。URLが正しいか確認してください。",
 			"worker_downloading": "{type}コンバーターを初期化中です。少々お待ちください。",
 			"worker_error": "{type}コンバーターの初期化中にエラーが発生しました。後でもう一度お試しください。",
 			"worker_timeout": "{type}コンバーターの初期化に予想以上の時間がかかっています。もう少しお待ちいただくか、ページを更新してください。",
 			"audio": "音声",
 			"doc": "ドキュメント",
-			"image": "画像"
+			"image": "画像",
+			"vertd": {
+				"server": "何してるの..? vertdサーバーを起動する必要があります！",
+				"not_found": "動画変換を開始するためのvertdインスタンスが見つかりません。URLが正しいか確認してください。"
+			}
 		}
 	},
 	"settings": {
@@ -95,37 +97,53 @@
 		},
 		"appearance": {
 			"title": "外観",
-			"brightness_theme": "明るさテーマ",
-			"brightness_description": "まぶしい昼間か、静かな夜か？",
 			"light": "ライト",
 			"dark": "ダーク",
-			"effect_settings": "エフェクト設定",
-			"effect_description": "派手な効果にしますか？それとも静的な体験にしますか？",
 			"enable": "有効",
-			"disable": "無効"
+			"disable": "無効",
+			"brightness": {
+				"theme": "明るさテーマ",
+				"description": "まぶしい昼間か、静かな夜か？"
+			},
+			"effect": {
+				"settings": "エフェクト設定",
+				"description": "派手な効果にしますか？それとも静的な体験にしますか？"
+			},
+			"language": {
+				"title": "言語",
+				"description": "VERTインターフェイスの表示言語を選択してください。"
+			}
 		},
 		"conversion": {
 			"title": "変換",
 			"advanced_settings": "詳細設定",
-			"filename_format": "ファイル名フォーマット",
-			"filename_description": "これはダウンロード時のファイル名を決定します（拡張子を除く）。以下のテンプレートを使用できます：<b>%name%</b>（元のファイル名）、<b>%extension%</b>（元の拡張子）、<b>%date%</b>（変換日時）。",
-			"placeholder": "VERT_%name%",
-			"default_format": "デフォルト変換フォーマット",
-			"default_format_description": "このファイルタイプをアップロードしたときに自動で選択される形式を変更します。",
-			"default_format_image": "画像",
-			"default_format_video": "動画",
-			"default_format_audio": "音声",
-			"default_format_document": "ドキュメント",
-			"metadata": "ファイルメタデータ",
-			"metadata_description": "変換後のファイルに元のメタデータ（EXIF、曲情報など）を保持するかどうかを変更します。",
-			"keep": "保持",
-			"remove": "削除",
-			"quality": "変換品質",
-			"quality_description": "出力ファイルの品質を変更します。値が高いほど処理時間とファイルサイズが増加します。",
-			"quality_video": "動画変換の品質を変更します。高品質ほど変換時間とサイズが増加します。",
-			"quality_audio": "音声（kbps）",
-			"quality_images": "画像（％）",
-			"rate": "サンプリングレート（Hz）"
+			"default_format": {
+				"image": "画像",
+				"audio": "音声",
+				"document": "ドキュメント",
+				"label": "デフォルト変換フォーマット",
+				"description": "このファイルタイプをアップロードしたときに自動で選択される形式を変更します。",
+				"video": "動画"
+			},
+			"metadata": {
+				"label": "ファイルメタデータ",
+				"description": "変換後のファイルに元のメタデータ（EXIF、曲情報など）を保持するかどうかを変更します。",
+				"keep": "保持",
+				"remove": "削除"
+			},
+			"quality": {
+				"label": "変換品質",
+				"description": "出力ファイルの品質を変更します。値が高いほど処理時間とファイルサイズが増加します。",
+				"video": "動画変換の品質を変更します。高品質ほど変換時間とサイズが増加します。",
+				"audio": "音声（kbps）",
+				"images": "画像（％）"
+			},
+			"rate": "サンプリングレート（Hz）",
+			"filename": {
+				"format": "ファイル名フォーマット",
+				"description": "これはダウンロード時のファイル名を決定します（拡張子を除く）。以下のテンプレートを使用できます：<b>%name%</b>（元のファイル名）、<b>%extension%</b>（元の拡張子）、<b>%date%</b>（変換日時）。",
+				"placeholder": "VERT_%name%"
+			}
 		},
 		"vertd": {
 			"title": "動画変換",
@@ -133,44 +151,50 @@
 			"loading": "読み込み中...",
 			"available": "利用可能（コミットID {commitId}）",
 			"unavailable": "利用不可（URLが正しいですか？）",
-			"description": "<code>vertd</code>プロジェクトはFFmpegのサーバーラッパーです。これにより、GPUの性能を活かして高速に変換しつつ、VERTのウェブインターフェイスから簡単に動画を変換できます。",
-			"hosting_info": "私たちは利便性のために公開インスタンスをホストしていますが、自分のPCやサーバーでも簡単にホストできます。バイナリは[vertd_link]こちら[/vertd_link]からダウンロードできます。今後さらにセットアップが簡単になる予定です！",
-			"instance": "インスタンス",
-			"url_placeholder": "例: http://localhost:24153",
-			"conversion_speed": "変換速度",
-			"speed_description": "速度と品質のバランスを設定します。高速化すると品質が低下しますが、処理は速くなります。",
-			"speeds": {
-				"very_slow": "非常に遅い",
-				"slower": "かなり遅い",
-				"slow": "遅い",
-				"medium": "普通",
-				"fast": "速い",
-				"ultra_fast": "超高速"
+			"description": {
+				"main": "<code>vertd</code>プロジェクトはFFmpegのサーバーラッパーです。これにより、GPUの性能を活かして高速に変換しつつ、VERTのウェブインターフェイスから簡単に動画を変換できます。",
+				"info": "私たちは利便性のために公開インスタンスをホストしていますが、自分のPCやサーバーでも簡単にホストできます。バイナリは[vertd_link]こちら[/vertd_link]からダウンロードできます。今後さらにセットアップが簡単になる予定です！"
 			},
-			"auto_instance": "自動（推奨）",
-			"eu_instance": "ドイツ・ファルケンシュタイン",
-			"us_instance": "アメリカ・ワシントン",
-			"custom_instance": "カスタム"
+			"instance": {
+				"custom": "カスタム",
+				"label": "インスタンス",
+				"url_placeholder": "例: http://localhost:24153",
+				"auto": "自動（推奨）",
+				"eu": "ドイツ・ファルケンシュタイン",
+				"us": "アメリカ・ワシントン"
+			},
+			"conversion_speed": {
+				"speeds": {
+					"very_slow": "非常に遅い",
+					"slower": "かなり遅い",
+					"slow": "遅い",
+					"medium": "普通",
+					"fast": "速い",
+					"ultra_fast": "超高速"
+				},
+				"label": "変換速度",
+				"description": "速度と品質のバランスを設定します。高速化すると品質が低下しますが、処理は速くなります。"
+			}
 		},
 		"privacy": {
 			"title": "プライバシーとデータ",
-			"plausible_title": "Plausible解析",
-			"plausible_description": "私たちはプライバシー重視の解析ツール[plausible_link]Plausible[/plausible_link]を使用しています。すべてのデータは匿名化・集計され、個人情報は一切収集・保存されません。統計情報は[analytics_link]こちら[/analytics_link]で確認でき、以下でオプトアウト可能です。",
-			"opt_in": "参加する",
-			"opt_out": "参加しない",
-			"cache_title": "キャッシュ管理",
-			"cache_description": "コンバーターファイルをブラウザにキャッシュして再ダウンロードを防ぎ、パフォーマンスを向上させます。",
-			"refresh_cache": "キャッシュを更新",
-			"clear_cache": "キャッシュをクリア",
-			"files_cached": "{size}（{count}ファイル）",
-			"loading_cache": "読み込み中...",
-			"total_size": "合計サイズ",
-			"files_cached_label": "キャッシュ済みファイル",
-			"cache_cleared": "キャッシュが正常にクリアされました！"
-		},
-		"language": {
-			"title": "言語",
-			"description": "VERTインターフェイスの表示言語を選択してください。"
+			"plausible": {
+				"title": "Plausible解析",
+				"description": "私たちはプライバシー重視の解析ツール[plausible_link]Plausible[/plausible_link]を使用しています。すべてのデータは匿名化・集計され、個人情報は一切収集・保存されません。統計情報は[analytics_link]こちら[/analytics_link]で確認でき、以下でオプトアウト可能です。",
+				"opt_in": "参加する",
+				"opt_out": "参加しない"
+			},
+			"cache": {
+				"title": "キャッシュ管理",
+				"description": "コンバーターファイルをブラウザにキャッシュして再ダウンロードを防ぎ、パフォーマンスを向上させます。",
+				"refresh_cache": "キャッシュを更新",
+				"clear_cache": "キャッシュをクリア",
+				"files_cached": "{size}（{count}ファイル）",
+				"loading_cache": "読み込み中...",
+				"total_size": "合計サイズ",
+				"files_cached_label": "キャッシュ済みファイル",
+				"cache_cleared": "キャッシュが正常にクリアされました！"
+			}
 		}
 	},
 	"about": {

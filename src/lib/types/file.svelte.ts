@@ -4,88 +4,53 @@ import { m } from "$lib/paraglide/messages";
 import { ToastManager } from "$lib/util/toast.svelte";
 import type { Component } from "svelte";
 import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
+import FallbackToast from "$lib/components/functional/popups/FallbackToast.svelte";
+import ServerUploadWarning from "$lib/components/functional/popups/ServerUploadWarning.svelte";
+import type {
+	ConversionSettings,
+	SettingDefinition,
+} from "./conversion-settings";
+import { log } from "$lib/util/logger";
+import { readSettings } from "$lib/util/settings";
+import { formatFilename } from "$lib/util/file";
+import { fileTypeFromBuffer } from "file-type";
+
+const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
 
 export class VertFile {
 	public id: string = Math.random().toString(36).slice(2, 8);
 	public readonly file: File;
 
-	public get from() {
-		return ("." + this.file.name.split(".").pop() || "").toLowerCase();
-	}
+	public from = $state("");
+	public name = $state("");
+	public to = $state("");
+	public fileType = $state<Awaited<ReturnType<typeof fileTypeFromBuffer>>>();
+	public isZip = $state(() => this.from === ".zip");
 
-	public get name() {
-		return this.file.name;
-	}
-
+	public conversionSettings = $state<ConversionSettings>({}); // empty object / key = default
 	public progress = $state(0);
 	public result = $state<VertFile | null>(null);
-
-	public to = $state("");
-
 	public blobUrl = $state<string>();
-
 	public processing = $state(false);
-
 	public cancelled = $state(false);
 
 	public converters: Converter[] = [];
-
-	public isZip = $state(() => this.from === ".zip");
-
-	public findConverters(supportedFormats: string[] = [this.from]) {
-		const converter = this.converters
-			.filter((converter) =>
-				converter
-					.formatStrings()
-					.map((f) => supportedFormats.includes(f)),
-			)
-			.sort(byNative(this.from));
-		return converter;
-	}
-
-	public findConverter() {
-		// zip will always only be added if there's one converter that supports all files - handled in store's _handleZipFile()
-		if (this.isZip()) return this.converters[0];
-
-		const converter = this.converters.find((converter) => {
-			if (
-				!converter.formatStrings().includes(this.from) ||
-				!converter.formatStrings().includes(this.to)
-			) {
-				return false;
-			}
-
-			const theirFrom = converter.supportedFormats.find(
-				(f) => f.name === this.from,
-			);
-			const theirTo = converter.supportedFormats.find(
-				(f) => f.name === this.to,
-			);
-			if (!theirFrom || !theirTo) return false;
-			if (!theirFrom.isNative && !theirTo.isNative) return false;
-			return true;
-		});
-		return converter;
-	}
-
-	public isLarge(): boolean {
-		return this.file.size > MAX_ARRAY_BUFFER_SIZE;
-	}
-
-	public supportsStreaming(): boolean {
-		// only vertd (video/gif -> video/gif) supports streaming
-		// rest of converters need entire file in memory, limited by ArrayBuffer limits
-		const converter = this.findConverter();
-		return converter?.name === "vertd";
-	}
+	private fallbackToastId: number | null = null;
+	private attemptedConverters = new Set<string>();
+	private retryingFallback = false;
+	private vertdWarningToastId: number | null = null;
+	private postDownload: (() => Promise<void>) | null = null;
+	private activeConverterName: string | null = null;
 
 	constructor(file: File, to: string, blobUrl?: string) {
 		const ext = file.name.split(".").pop();
 		const newFile = new File(
-			[file.slice(0, file.size, file.type)],
+			[file],
 			`${file.name.split(".").slice(0, -1).join(".")}.${ext?.toLowerCase()}`,
 		);
 		this.file = newFile;
+		this.name = newFile.name;
+		this.from = ("." + ext || "").toLowerCase();
 		this.to = to.startsWith(".") ? to : `.${to}`;
 		this.converters = converters.filter((c) =>
 			c.formatStrings().includes(this.from),
@@ -93,13 +58,213 @@ export class VertFile {
 		this.convert = this.convert.bind(this);
 		this.download = this.download.bind(this);
 		this.blobUrl = blobUrl;
+
+		log(
+			["file", "init"],
+			`findConverters: ${this.findConverters()
+				.map((c) => c.name)
+				.join(", ")}`,
+		);
+	}
+
+	public setPostDownload(cleanup: (() => Promise<void>) | null) {
+		this.postDownload = cleanup;
+	}
+
+	private async runPostDownload() {
+		if (!this.postDownload) return;
+
+		try {
+			await this.postDownload();
+		} catch (err) {
+			log(["file", "cleanup"], `post-download function failed: ${err}`);
+		} finally {
+			this.postDownload = null;
+		}
+	}
+
+	public getAvailableSettings(
+		input: VertFile,
+		converter: string | undefined = this.conversionSettings.converter,
+	): Promise<SettingDefinition[]> {
+		const converterInstance = this.converters.find(
+			(c) => c.name === converter,
+		);
+		if (!converterInstance) return Promise.resolve([]);
+		return converterInstance.getAvailableSettings(input);
+	}
+
+	public findConverters(supportedFormats: string[] = [this.from]) {
+		return this.converters
+			.filter((converter) => {
+				if (
+					!converter
+						.formatStrings()
+						.some((f) => supportedFormats.includes(f))
+				) {
+					return false;
+				}
+
+				if (
+					supportedFormats.includes(this.from) &&
+					supportedFormats.includes(this.to)
+				) {
+					if (!converter.formatStrings().includes(this.to)) {
+						return false;
+					}
+
+					const theirFrom = converter.supportedFormats.find(
+						(f) => f.name === this.from,
+					);
+					const theirTo = converter.supportedFormats.find(
+						(f) => f.name === this.to,
+					);
+					if (!theirFrom || !theirTo) return false;
+					if (!theirFrom.isNative && !theirTo.isNative) return false;
+				}
+
+				return true;
+			})
+			.sort(byNative(this.from))
+			.sort((a, b) => {
+				// sort by priority of format
+				const aFrom = a.supportedFormats.find(
+					(f) => f.name === this.from,
+				);
+				const bFrom = b.supportedFormats.find(
+					(f) => f.name === this.from,
+				);
+				const aPriority = aFrom ? aFrom.priority : 1;
+				const bPriority = bFrom ? bFrom.priority : 1;
+				return bPriority - aPriority;
+			});
+	}
+
+	public isLarge(): boolean {
+		return this.file.size > MAX_ARRAY_BUFFER_SIZE;
+	}
+
+	public supportsStreaming(): boolean {
+		// vertd supports server-side streaming; mediabunny can stream to OPFS if available
+		const opfsSupported =
+			typeof navigator !== "undefined" &&
+			"storage" in navigator &&
+			typeof navigator.storage.getDirectory === "function";
+
+		const availableConverters = this.isZip()
+			? this.converters
+			: this.findConverters();
+		return availableConverters.some(
+			(converter) =>
+				converter.name === "vertd" ||
+				(converter.name === "mediabunny" && opfsSupported),
+		);
+	}
+
+	public async checkFileType() {
+		try {
+			this.fileType = await fileTypeFromBuffer(
+				await this.file.arrayBuffer(),
+			);
+
+			if (!this.fileType) return;
+
+			const aliases: Record<string, string> = {
+				// original: alias
+				jpg: "jpeg",
+				jfif: "jpeg",
+				tif: "tiff",
+				ogx: "ogv",
+				// TODO: is there more stuff
+			};
+			const fileExtension = this.from.slice(1);
+			const detectedExtension =
+				aliases[this.fileType.ext] ?? this.fileType.ext;
+			const expectedExtension = aliases[fileExtension] ?? fileExtension;
+
+			if (detectedExtension !== expectedExtension) {
+				console.warn(`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`);
+				// TODO: show a warning modal or message if detected type doesn't match name
+			}
+
+			this.from = `.${detectedExtension}`;
+			this.converters = converters.filter((converter) =>
+				converter.formatStrings().includes(this.from),
+			);
+		} catch (error) {
+			log(
+				["file", "type"],
+				`failed to detect file type for ${this.file.name}: ${error}`,
+			);
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
+		await this.runPostDownload();
+		await this.checkFileType();
+
+		if (!this.retryingFallback) this.attemptedConverters.clear();
+
+		console.log(`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`);
 		if (!this.converters.length) throw new Error("No converters found");
-		const converter = this.findConverter();
+
+		let converter: Converter | undefined;
+		const isImageSequence =
+			this.conversionSettings.imageSequence && this.isZip();
+
+		// force ffmpeg for image sequences
+		// TODO: should allow vertd as well probably(?) but maybe in the future
+		if (isImageSequence) {
+			converter = converters.find((c) => c.name === "ffmpeg");
+			if (!converter) {
+				throw new Error(
+					"FFmpeg converter not found for image sequence conversion",
+				);
+			}
+		} else {
+			const customConverter = this.converters.find(
+				(c) => c.name === this.conversionSettings.converter,
+			);
+			converter = customConverter;
+
+			if (!converter) {
+				const compatibleConverters = this.findConverters([
+					this.from,
+					this.to,
+				]);
+				if (compatibleConverters.length) {
+					converter = compatibleConverters[0];
+					log(
+						["file", "convert"],
+						`found compatible converter: ${converter.name}`,
+					);
+				} else {
+					log(
+						["file", "convert"],
+						`no compatible converter found for ${this.from} to ${this.to}`,
+					);
+				}
+			} else {
+				log(
+					["file", "convert"],
+					`using custom converter from settings: ${converter.name}`,
+				);
+			}
+		}
+
 		if (!converter) throw new Error("No converter found");
+
+		const canProceed = await this.confirmServerWarning(converter);
+		if (!canProceed) {
+			this.cancelled = true;
+			return;
+		}
+
+		this.attemptedConverters.add(converter.name);
+		this.activeConverterName = converter.name;
+		log(["file", "convert"], `using converter: ${converter.name}`);
+
 		this.result = null;
 		this.progress = 0;
 		this.processing = true;
@@ -108,20 +273,132 @@ export class VertFile {
 		try {
 			// for zips: extract > convert each > re-zip
 			// else convert normally
-			res = this.isZip()
-				? await this.convertZip(converter)
-				: await converter.convert(this, this.to, ...args);
+			res =
+				this.isZip() && !this.conversionSettings.imageSequence
+					? await this.convertZip(converter)
+					: await converter.convert(
+							this,
+							this.to,
+							this.conversionSettings,
+							...args,
+						);
 			this.result = res;
+			if (this.fallbackToastId !== null) {
+				ToastManager.remove(this.fallbackToastId);
+				this.fallbackToastId = null;
+			}
 		} catch (err) {
 			if (!this.cancelled) this.toastErr(err);
+
+			const compatibleConverters = this.findConverters([
+				this.from,
+				this.to,
+			]);
+			const nextConverter = compatibleConverters.find(
+				(c) => !this.attemptedConverters.has(c.name),
+			);
+
+			// TODO: should figure out a cleaner way to do this
+			if (!this.cancelled && nextConverter) {
+				if (this.fallbackToastId !== null)
+					ToastManager.remove(this.fallbackToastId);
+
+				this.fallbackToastId = ToastManager.add({
+					type: "warning",
+					disappearing: false,
+					message: FallbackToast,
+					additional: {
+						filename: this.file.name,
+						nextConverter: nextConverter.name,
+						onNext: async () => {
+							if (this.fallbackToastId !== null)
+								ToastManager.remove(this.fallbackToastId);
+							this.fallbackToastId = null;
+
+							log(
+								["file", "convert"],
+								`retrying ${this.name} with next compatible converter: ${nextConverter.name}`,
+							);
+
+							this.conversionSettings = {
+								...this.conversionSettings,
+								converter: nextConverter.name,
+							};
+							this.retryingFallback = true;
+							try {
+								await this.convert(...args);
+							} finally {
+								this.retryingFallback = false;
+							}
+						},
+						onCancel: () => {
+							if (this.fallbackToastId !== null)
+								ToastManager.remove(this.fallbackToastId);
+							this.fallbackToastId = null;
+							this.cancelled = true;
+						},
+					},
+				});
+			} else if (!this.cancelled) {
+				this.cancelled = true;
+				ToastManager.add({
+					type: "error",
+					message: m["convert.errors.converter_fallback.all_failed"]({
+						filename: this.file.name,
+					}),
+				});
+			}
+
 			this.result = null;
 		}
 		this.processing = false;
+		this.activeConverterName = null;
 		return res;
 	}
 
+	private async confirmServerWarning(converter: Converter): Promise<boolean> {
+		if (converter.name !== "vertd") return true;
+		if (localStorage.getItem("acceptedExternalWarning") === "true")
+			return true;
+
+		return new Promise((resolve) => {
+			let resolved = false;
+
+			const finish = (shouldProceed: boolean) => {
+				if (resolved) return;
+				resolved = true;
+				if (this.vertdWarningToastId !== null)
+					ToastManager.remove(this.vertdWarningToastId);
+				this.vertdWarningToastId = null;
+				resolve(shouldProceed);
+			};
+
+			if (this.vertdWarningToastId !== null)
+				ToastManager.remove(this.vertdWarningToastId);
+
+			this.vertdWarningToastId = ToastManager.add({
+				type: "warning",
+				disappearing: false,
+				message: ServerUploadWarning,
+				additional: {
+					filename: this.file.name,
+					onProceed: () => {
+						finish(true);
+					},
+					onCancel: () => {
+						finish(false);
+					},
+					onDontShowAgain: () => {
+						localStorage.setItem("acceptedExternalWarning", "true");
+						finish(true);
+					},
+				},
+			});
+		});
+	}
+
 	private async convertZip(converter: Converter): Promise<VertFile> {
-		const { extractZip, createZip } = await import("$lib/util/zip");
+		const { extractZip, createZip } = await import("$lib/util/file");
 		const { default: PQueue } = await import("p-queue");
 
 		const entries = await extractZip(this.file);
@@ -162,6 +439,7 @@ export class VertFile {
 						const converted = await converter.convert(
 							tempVFile,
 							this.to,
+							this.conversionSettings,
 						);
 
 						let outputExt = this.to;
@@ -183,6 +461,7 @@ export class VertFile {
 					const converted = await converter.convert(
 						tempVFile,
 						this.to,
+						this.conversionSettings,
 					);
 
 					let outputExt = this.to;
@@ -211,15 +490,19 @@ export class VertFile {
 
 	public async cancel() {
 		if (!this.processing) return;
-		const converter = this.findConverter();
-		if (!converter) throw new Error("No converter found");
+		const selectedConverter = this.conversionSettings.converter;
+		const converterName = selectedConverter || this.activeConverterName;
+		const converter = this.converters.find((c) => c.name === converterName);
 		this.cancelled = true;
 		try {
+			if (!converter) return;
 			await converter.cancel(this);
-			this.processing = false;
-			this.result = null;
 		} catch (err) {
 			this.toastErr(err);
+		} finally {
+			this.processing = false;
+			this.result = null;
+			this.activeConverterName = null;
 		}
 	}
 
@@ -274,33 +557,69 @@ export class VertFile {
 		let to = this.result.to;
 		if (!to.startsWith(".")) to = `.${to}`;
 
-		const settings = JSON.parse(localStorage.getItem("settings") ?? "{}");
+		const settings = readSettings<{ filenameFormat?: string }>();
 		const filenameFormat = settings.filenameFormat || "VERT_%name%";
 
-		const format = (name: string) => {
-			const date = new Date().toISOString();
-			const baseName = this.file.name.replace(/\.[^/.]+$/, "");
-			const originalExtension = this.file.name.split(".").pop()!;
-			return name
-				.replace(/%date%/g, date)
-				.replace(/%name%/g, baseName)
-				.replace(/%extension%/g, originalExtension);
+		const filename = `${formatFilename(filenameFormat, this.file)}${to}`;
+		const resultFile = this.result.file;
+
+		const filePicker = window as Window & {
+			showSaveFilePicker?: (options?: {
+				suggestedName?: string;
+				types?: Array<{
+					description?: string;
+					accept: Record<string, string[]>;
+				}>;
+			}) => Promise<FileSystemFileHandle>;
 		};
 
-		const blob = URL.createObjectURL(
-			new Blob([await this.result.file.arrayBuffer()], {
-				// type: to.slice(1),
-				type: "application/octet-stream", // use generic type to prevent browsers changing extension
-			}),
-		);
+		const diskStreamSupported =
+			typeof filePicker.showSaveFilePicker === "function";
+		const shouldDiskStream =
+			diskStreamSupported && resultFile.size >= LARGE_FILE;
+
+		if (shouldDiskStream) {
+			// use the File System Access API to directly stream to disk, so we can actually save larger files
+			try {
+				const ext = to.slice(1);
+				const handle = await filePicker.showSaveFilePicker!({
+					suggestedName: filename,
+					types: [
+						{
+							description: "The VERT converted file",
+							accept: { "application/octet-stream": [`.${ext}`] },
+						},
+					],
+				});
+
+				const writable = await handle.createWritable();
+				await resultFile.stream().pipeTo(writable);
+				this.blobUrl = undefined;
+				return;
+			} catch (err) {
+				const casted = err as DOMException;
+				if (casted?.name === "AbortError") return;
+				log(
+					["file", "download"],
+					`disk-streaming download failed, falling back to blob URL: ${err}`,
+				);
+			}
+		}
+
+		// fallback to blob URL download for smaller files or if the File System Access API isn't supported
+		const blob = URL.createObjectURL(resultFile);
+
+		// download
 		const a = document.createElement("a");
 		a.href = blob;
-		a.download = `${format(filenameFormat)}${to}`;
+		a.download = filename;
 		// force it to not open in a new tab
 		a.target = "_blank";
 		a.style.display = "none";
 		a.click();
-		URL.revokeObjectURL(blob);
+		setTimeout(() => {
+			URL.revokeObjectURL(blob);
+		}, 30000);
 		a.remove();
 	}
 

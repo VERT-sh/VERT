@@ -1,4 +1,4 @@
-import { FormatInfo } from "./converter.svelte";
+import { FormatInfo } from "../converter.svelte";
 
 // formats added from maya's somewhat automated testing
 // placed into this file to easily differentiate (and also clean up the main magick file)
@@ -97,7 +97,6 @@ export const imageFormats = [
 	new FormatInfo("png64", true, true),
 	new FormatInfo("png8", true, true),
 	new FormatInfo("ps", false, true),
-	new FormatInfo("ps1", false, true),
 	new FormatInfo("ps2", false, true),
 	new FormatInfo("ps3", false, true),
 	new FormatInfo("psb", true, true),

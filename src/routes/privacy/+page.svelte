@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from "$lib/paraglide/messages";
 	import { link, sanitize } from "$lib/store/index.svelte";
-	import { ShieldCheckIcon } from "lucide-svelte";
+	import { ShieldCheckIcon } from "@lucide/svelte";
 </script>
 
 <div class="flex flex-col h-full items-center">
@@ -37,7 +37,10 @@
 					link(
 						["about_link", "stripe_link"],
 						m["privacy.donations.description"](),
-						["/about", "https://stripe.com/docs/disputes/prevention/advanced-fraud-detection"],
+						[
+							"/about",
+							"https://stripe.com/docs/disputes/prevention/advanced-fraud-detection",
+						],
 						[false, true],
 					),
 				)}

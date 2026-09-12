@@ -4,10 +4,13 @@
 	import { isMobile, files, dropdownStates } from "$lib/store/index.svelte";
 	import type { Categories } from "$lib/types";
 	import clsx from "clsx";
-	import { ChevronDown, SearchIcon } from "lucide-svelte";
+	import { ChevronDown, SearchIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
+	import SettingsModal from "./popups/SettingsModal.svelte";
+	import { log } from "$lib/util/logger";
+	import FancyInput from "./FancyInput.svelte";
 
 	type Props = {
 		categories: Categories;
@@ -28,187 +31,273 @@
 		dropdownSize = "default",
 		file,
 	}: Props = $props();
+
 	let open = $state(false);
 	let dropdown = $state<HTMLDivElement>();
-	let currentCategory = $state<string | null>();
-	let searchQuery = $state("");
 	let dropdownMenu: HTMLElement | undefined = $state();
-	let rootCategory: string | null = null;
 	let dropdownPosition = $state<"left" | "center" | "right">("center");
+	let showSettingsModal = $state(false);
+	let currentCategory = $state<string | null>(null);
+	let searchQuery = $state("");
+	let rootCategory: string | null = null;
 
-	// initialize current category
+	// svelte-ignore state_referenced_locally
+	let imageSequence = $state(
+		file?.conversionSettings?.imageSequence ?? false,
+	);
+	// svelte-ignore state_referenced_locally
+	let imageSequenceFPS = $state(
+		file?.conversionSettings?.imageSequenceFPS ?? 15,
+	);
+	// svelte-ignore state_referenced_locally
+	let imageSequenceTransparency = $state(
+		file?.conversionSettings?.imageSequenceTransparency ?? false,
+	);
+
+	$effect(() => {
+		if (!file) return;
+		file.conversionSettings.imageSequence = imageSequence;
+		file.conversionSettings.imageSequenceFPS = imageSequenceFPS;
+		file.conversionSettings.imageSequenceTransparency =
+			imageSequenceTransparency;
+	});
+
+	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
+
+	const shouldExclude = (format: string): boolean =>
+		!!(
+			categories["audio"]?.formats.includes(from ?? "") &&
+			format === ".gif"
+		);
+
+	const getFormats = (cat: string) => {
+		let formats = (categories[cat]?.formats ?? []).filter(
+			(f) => !shouldExclude(f),
+		);
+
+		// if imageSequence is checked, filter image category to animated formats only
+		if (imageSequence && cat === "image") {
+			const animatedFormats = [".webp", ".gif", ".apng"]; // .apng not supported by magick-wasm rn
+			formats = formats.filter((f) => animatedFormats.includes(f));
+		}
+
+		return formats;
+	};
+
+	const detectCategory = (): string => {
+		if (from) {
+			// find category containing the input format, if any
+			const match = Object.keys(categories).find((cat) =>
+				categories[cat].formats.includes(from),
+			);
+			if (match) return match;
+		}
+
+		// else, fall back by finding the category whose formats overlap most with the converters for this file
+		// this finds the best matching category based on the formats supported by the converters
+		const converters = file
+			? file.findConverters()
+			: files.files.flatMap((f) => f.findConverters());
+
+		let best: string | null = null;
+		let maxOverlap = 0;
+		for (const cat of Object.keys(categories)) {
+			const count = categories[cat].formats.filter((fmt) =>
+				converters.some((c) => c.formatStrings().includes(fmt)),
+			).length;
+			if (count > maxOverlap) {
+				maxOverlap = count;
+				best = cat;
+			}
+		}
+
+		return best ?? Object.keys(categories)[0];
+	};
+
 	$effect(() => {
 		if (currentCategory) return;
-
-		// find the category whose formats overlap most with the converters for this file (or all files)
-		// this finds the best matching category based on the formats supported by the converters
-		const pickCategoryFromConverters = (
-			convList: VertFile["converters"],
-		) => {
-			let bestCategory: string | null = null;
-			let maxOverlap = 0;
-
-			for (const cat of Object.keys(categories)) {
-				const overlapCount = categories[cat].formats.filter((fmt) =>
-					convList.some((conv) => conv.formatStrings().includes(fmt)),
-				).length;
-
-				if (overlapCount > maxOverlap) {
-					maxOverlap = overlapCount;
-					bestCategory = cat;
-				}
-			}
-
-			return bestCategory;
-		};
-
-		// decide which converters to use to detect category:
-		// - if file provided, prefer its primary converter -- individual file dropdown
-		// - if no file provided, use all converters from all files -- "set all to" dropdown
-		const convertersToCheck = file
-			? file.findConverter()
-				? [file.findConverter()!]
-				: file.converters
-			: files.files.flatMap((f) => f.converters);
-
-		// pick the best matching category, or fall back to first category
-		// TODO: if something fails for some reason, maybe show all categories?
-		const detectedCategory =
-			pickCategoryFromConverters(convertersToCheck) ||
-			Object.keys(categories)[0];
-
-		currentCategory = detectedCategory;
-		rootCategory = detectedCategory;
+		const detected = detectCategory();
+		log(
+			["dropdown", "init"],
+			`root category: ${detected} (file: ${file?.name}, from: ${from})`,
+		);
+		currentCategory = detected;
+		rootCategory = detected;
 	});
 
 	// other available categories based on current category (e.g. converting between video and audio)
 	const availableCategories = $derived.by(() => {
 		if (!rootCategory) return Object.keys(categories);
 
-		let finalCategories = Object.keys(categories).filter(
+		let cats = Object.keys(categories).filter(
 			(cat) =>
 				cat === rootCategory ||
 				categories[rootCategory!]?.canConvertTo?.includes(cat),
 		);
-		if (from === ".gif") finalCategories.push("video");
 
-		// filter out categories that can't handle large files (due to browser/device limitations)
-		if (file && file.isLarge()) {
-			// if file is large video, disable audio conversion
-			if (rootCategory === "video")
-				finalCategories = finalCategories.filter(
-					(cat) => cat !== "audio",
-				);
+		if (imageSequence) {
+			// TODO: image sequence -> video on vertd?
+			cats.push("video");
+		} else {
+			// handle special cases
+			if (from === ".gif" || from === ".webp") cats.push("video");
+			if (from === ".apng") {
+				//cats.push("image"); // -- buggy, magick can't convert from or to apng properly
+				cats = cats.filter((cat) => cat !== "audio");
+			}
+
+			// large videos can't be extracted to audio (browser/device limitations)
+			if (file && file.isLarge() && rootCategory === "video")
+				cats = cats.filter((cat) => cat !== "audio");
 		}
 
-		return finalCategories;
+		return cats.filter(
+			(cat) => (categories[cat]?.formats?.length ?? 0) > 0,
+		);
 	});
 
-	const shouldInclude = (format: string, category: string): boolean => {
-		// if converting from audio to video, dont show gifs
-		if (
-			categories["audio"]?.formats.includes(from ?? "") &&
-			format === ".gif"
-		) {
-			return false;
-		}
-
-		return true;
-	};
-
+	// TODO: better hiddenFormats logic lol
 	const filteredData = $derived.by(() => {
-		const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
+		const activeCategory =
+			currentCategory && availableCategories.includes(currentCategory)
+				? currentCategory
+				: availableCategories[0];
+
+		const hiddenFormats: string[] = [];
+
+		// if audio to video, hide these video formats (because they do not want audio tracks lol)
+		const nonAudioVideoFormats = [".gif", ".webp", ".apng", ".h264"];
+		if (
+			activeCategory === "video" &&
+			categories["audio"]?.formats.includes(from ?? "")
+		)
+			hiddenFormats.push(...nonAudioVideoFormats);
 
 		// if no query, return formats for current category
 		if (!searchQuery) {
-			let formats = currentCategory
-				? categories[currentCategory].formats.filter((format) =>
-						shouldInclude(format, currentCategory!),
-					)
-				: [];
+			const formats = getFormats(activeCategory ?? "");
+
+			// if no formats & categories for some reason, fall back and show all categories/formats
+			if (formats.length === 0 && availableCategories.length === 0) {
+				log(
+					["dropdown", "filter"],
+					`no formats or available categories found for file ${file?.name}, falling back to all categories and formats`,
+				);
+				return {
+					categories: Object.keys(categories),
+					formats: categories[currentCategory ?? ""]?.formats ?? [],
+					isFallback: true,
+					resolvedCategory: currentCategory,
+				};
+			}
 
 			return {
 				categories: availableCategories,
-				formats,
+				formats: formats.filter((f) => !hiddenFormats.includes(f)),
+				isFallback: false,
+				resolvedCategory: activeCategory ?? currentCategory,
 			};
 		}
-		const searchLower = normalize(searchQuery);
 
-		// find all categories that have formats matching the search query
+		const query = normalize(searchQuery);
+		const animatedFormats = [".webp", ".apng", ".gif"];
+
+		const matches = (f: string, cat?: string) => {
+			if (
+				!normalize(f).includes(query) ||
+				shouldExclude(f) ||
+				hiddenFormats.includes(f)
+			)
+				return false;
+			// if imageSequence and image category, only show animated formats
+			if (imageSequence && (cat ?? activeCategory) === "image") {
+				return animatedFormats.includes(f);
+			}
+			return true;
+		};
+
 		const matchingCategories = availableCategories.filter((cat) =>
-			categories[cat].formats.some(
-				(format) =>
-					normalize(format).includes(searchLower) &&
-					shouldInclude(format, cat),
-			),
+			(categories[cat]?.formats ?? []).some((f) => matches(f, cat)),
 		);
+
 		if (matchingCategories.length === 0) {
 			return {
 				categories: availableCategories,
 				formats: [],
+				isFallback: false,
+				resolvedCategory: currentCategory,
 			};
 		}
 
-		// if current category has no matches, switch to first category that does
-		const currentCategoryHasMatches =
-			currentCategory &&
-			matchingCategories.some((cat) => cat === currentCategory);
-		if (!currentCategoryHasMatches && matchingCategories.length > 0) {
-			const newCategory = matchingCategories[0];
-			currentCategory = newCategory;
-		}
+		// stay on current category if it matches, else move to first matched category
+		const resolvedCategory =
+			currentCategory && matchingCategories.includes(currentCategory)
+				? currentCategory
+				: matchingCategories[0];
 
-		// return formats only from the current category that match the search
-		let filteredFormats = currentCategory
-			? categories[currentCategory].formats.filter(
-					(format) =>
-						normalize(format).includes(searchLower) &&
-						shouldInclude(format, currentCategory!),
-				)
-			: [];
+		const formats = (categories[resolvedCategory ?? ""]?.formats ?? [])
+			.filter((f) => matches(f, resolvedCategory))
+			.sort((a, b) => {
+				// exact matches first, then original order
+				const aExact = normalize(a) === query;
+				const bExact = normalize(b) === query;
+				if (aExact !== bExact) return aExact ? -1 : 1;
+				return 0;
+			});
 
-		// sorting exact match first, then others
-		filteredFormats = filteredFormats.sort((a, b) => {
-			const aExact = normalize(a) === searchLower;
-			const bExact = normalize(b) === searchLower;
-			if (aExact && !bExact) return -1;
-			if (!aExact && bExact) return 1;
-			return 0;
-		});
-
+		// show categories with matches, formats from within resolved category
 		return {
-			categories:
-				matchingCategories.length > 0
-					? matchingCategories
-					: availableCategories,
-			formats: filteredFormats,
+			categories: matchingCategories,
+			formats: formats.filter((f) => !hiddenFormats.includes(f)),
+			isFallback: false,
+			resolvedCategory,
 		};
+	});
+
+	$effect(() => {
+		if (
+			filteredData.resolvedCategory &&
+			filteredData.resolvedCategory !== currentCategory
+		)
+			currentCategory = filteredData.resolvedCategory;
+	});
+
+	$effect(() => {
+		// scroll automatically when opening dropdown so you don't have to scroll to see entire dropdown lol
+		if (!open || !dropdownMenu) return;
+		scrollView();
+	});
+
+	$effect(() => {
+		// this thing checks if selected format is still valid with the current filters (imageSequence or search query) and falls back if not
+		const allUnfilteredFormats = availableCategories.flatMap((cat) =>
+			getFormats(cat),
+		);
+
+		if (!allUnfilteredFormats.includes(selected)) {
+			// check if formats available in filteredData, else fall back to all available formats, else keep previous selection
+			if (filteredData.formats.length > 0) {
+				selected = filteredData.formats[0];
+				onselect?.(selected);
+			} else if (allUnfilteredFormats.length > 0) {
+				selected = allUnfilteredFormats[0];
+				onselect?.(allUnfilteredFormats[0]);
+			} else {
+				// no formats available, keeping previous selection
+				// i feel like this is all very scuffed and we need a better search and filtering system
+			}
+		}
 	});
 
 	const selectOption = (option: string) => {
 		selected = option;
-		open = false;
 
 		// save user's selection to dropdownStates for this session
 		if (file) {
-			dropdownStates.update((states) => {
-				const updated = { ...states, [file.name]: option };
-				return updated;
-			});
-		}
-
-		// find the category of this option if it's not in the current category
-		if (
-			currentCategory &&
-			!categories[currentCategory].formats.includes(option)
-		) {
-			const formatCategory = Object.keys(categories).find((cat) =>
-				categories[cat].formats.includes(option),
-			);
-
-			if (formatCategory) {
-				currentCategory = formatCategory;
-			}
+			dropdownStates.update((states) => ({
+				...states,
+				[file.name]: option,
+			}));
 		}
 
 		onselect?.(option);
@@ -220,39 +309,23 @@
 	};
 
 	const handleSearch = (event: Event) => {
-		const query = (event.target as HTMLInputElement).value;
-		searchQuery = query;
-
-		// find which categories have matching formats & switch
-		if (query) {
-			const queryLower = query.toLowerCase();
-			const categoriesWithMatches = availableCategories.filter((cat) =>
-				categories[cat].formats.some((format) =>
-					format.toLowerCase().includes(queryLower),
-				),
-			);
-
-			if (categoriesWithMatches.length > 0) {
-				const currentHasMatches =
-					currentCategory &&
-					categories[currentCategory].formats.some((format) =>
-						format.toLowerCase().includes(queryLower),
-					);
-
-				if (!currentHasMatches) {
-					currentCategory = categoriesWithMatches[0];
-				}
-			}
-		}
+		searchQuery = (event.target as HTMLInputElement).value;
 	};
 
 	const onEnter = (event: KeyboardEvent) => {
-		if (event.key === "Enter") {
-			event.preventDefault();
-			if (filteredData.formats.length > 0) {
-				selectOption(filteredData.formats[0]);
-			}
-		}
+		if (event.key !== "Enter") return;
+		event.preventDefault();
+		if (filteredData.formats.length > 0)
+			selectOption(filteredData.formats[0]);
+	};
+
+	const scrollView = () => {
+		if (!dropdownMenu) return;
+		const selectedOption = dropdownMenu.querySelector(
+			"[data-selected='true']",
+		) as HTMLButtonElement | null;
+		if (!selectedOption) return;
+		selectedOption.scrollIntoView({ block: "start" });
 	};
 
 	const clickDropdown = () => {
@@ -265,25 +338,18 @@
 			const viewportWidth = window.innerWidth;
 
 			let dropdownWidth: number;
-			if (dropdownSize === "large") {
-				dropdownWidth = rect.width * 3.2;
-			} else if (dropdownSize === "default") {
+			if (dropdownSize === "large") dropdownWidth = rect.width * 3.2;
+			else if (dropdownSize === "default")
 				dropdownWidth = rect.width * 2.5;
-			} else {
-				dropdownWidth = rect.width * 1.5;
-			}
+			else dropdownWidth = rect.width * 1.5;
 
 			const centerX = rect.left + rect.width / 2;
 			const leftEdge = centerX - dropdownWidth / 2;
 			const rightEdge = centerX + dropdownWidth / 2;
 
-			if (leftEdge < 0) {
-				dropdownPosition = "left";
-			} else if (rightEdge > viewportWidth) {
-				dropdownPosition = "right";
-			} else {
-				dropdownPosition = "center";
-			}
+			if (leftEdge < 0) dropdownPosition = "left";
+			else if (rightEdge > viewportWidth) dropdownPosition = "right";
+			else dropdownPosition = "center";
 		}
 
 		setTimeout(() => {
@@ -295,13 +361,14 @@
 				searchInput.focus();
 				searchInput.select();
 			}
+			scrollView();
 		}, 0); // let dropdown open first
 	};
 
 	const extract = async () => {
 		// extract all files in zip, then add all extracted files to files store
 		if (!file) return;
-		const { extractZip } = await import("$lib/util/zip");
+		const { extractZip } = await import("$lib/util/file");
 		const extractedFiles = await extractZip(file.file);
 
 		if (!Array.isArray(extractedFiles) || extractedFiles.length === 0)
@@ -315,7 +382,7 @@
 					});
 					const ext = filename.split(".").pop() ?? "";
 					return new VertFile(f, ext);
-				} catch (err) {
+				} catch {
 					return null;
 				}
 			})
@@ -325,11 +392,17 @@
 		newFiles.forEach((f) => files.add(f));
 	};
 
+	const settings = () => {
+		log(
+			["dropdown", "settings"],
+			`opening settings modal for ${file?.name ?? "all files"}`,
+		);
+		showSettingsModal = true;
+	};
+
 	onMount(() => {
 		const handleClickOutside = (e: MouseEvent) => {
-			if (dropdown && !dropdown.contains(e.target as Node)) {
-				open = false;
-			}
+			if (dropdown && !dropdown.contains(e.target as Node)) open = false;
 		};
 
 		const handleResize = () => {
@@ -348,6 +421,10 @@
 		};
 	});
 </script>
+
+{#if showSettingsModal}
+	<SettingsModal {file} onclose={() => (showSettingsModal = false)} />
+{/if}
 
 <div
 	class="relative w-full min-w-fit text-xl font-medium text-center"
@@ -424,16 +501,21 @@
 					<input
 						type="text"
 						placeholder={m["convert.dropdown.placeholder"]()}
-						class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground"
+						class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground {filteredData.isFallback
+							? 'opacity-50 cursor-not-allowed'
+							: ''}"
 						bind:value={searchQuery}
 						oninput={handleSearch}
 						onkeydown={onEnter}
 						onfocus={() => {}}
 						id="format-search"
 						autocomplete="off"
+						disabled={filteredData.isFallback}
 					/>
 					<span
-						class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center"
+						class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center {filteredData.isFallback
+							? 'opacity-50'
+							: ''}"
 					>
 						<SearchIcon class="w-4 h-4" />
 					</span>
@@ -450,6 +532,12 @@
 					{/if}
 				</div>
 			</div>
+			<!-- fallback message -->
+			{#if filteredData.isFallback}
+				<div class="pb-4 text-center text-muted text-base">
+					{m["convert.dropdown.fallback"]()}
+				</div>
+			{/if}
 			<!-- available categories -->
 			<div class="flex items-center justify-between">
 				{#each filteredData.categories as category}
@@ -460,6 +548,7 @@
 							: 'border-b-separator text-muted'}"
 						onclick={() => selectCategory(category)}
 					>
+						<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
 						{(m as any)[`convert.dropdown.${category}`]?.()}
 					</button>
 				{/each}
@@ -469,6 +558,7 @@
 				{#if filteredData.formats.length > 0}
 					{#each filteredData.formats as format}
 						<button
+							data-selected={format === selected}
 							class="w-full p-2 text-center rounded-xl
 							{format === selected
 								? 'bg-accent text-black'
@@ -489,14 +579,73 @@
 				{/if}
 			</div>
 			<!-- format options -->
-			<!-- TODO: extract zip, image sequence & fps -->
 			{#if file?.name.toLowerCase().endsWith(".zip")}
-				<div class="border-t border-separator text-base p-2">
+				<div
+					class="flex flex-col gap-2 p-2 border-t border-separator text-base"
+				>
 					<button
 						class="w-full p-2 text-center rounded-lg bg-accent text-black"
 						onclick={() => extract()}
 					>
 						{m["convert.archive_file.extract"]()}
+					</button>
+					<!-- FIXME this is terrible -->
+					<div class="flex flex-col flex-wrap gap-1">
+						<!-- first row -->
+						<div class="flex items-center gap-3">
+							<div
+								class="flex items-center gap-2 flex-1 min-w-0 h-full"
+							>
+								<FancyInput
+									type="checkbox"
+									class="!w-fit"
+									bind:checked={imageSequence}
+								/>
+								<label for="extract-sequence" class="text-sm">
+									{m[
+										"convert.image_sequence.image_sequence"
+									]()}
+								</label>
+							</div>
+							<div class="w-[80px] shrink-0">
+								<FancyInput
+									thin
+									inputClass="!h-9 !text-xs"
+									type="number"
+									extension="FPS"
+									placeholder="15"
+									bind:value={imageSequenceFPS}
+									disabled={!imageSequence}
+								/>
+							</div>
+						</div>
+
+						<!-- second row -->
+						<div class="flex items-center gap-3">
+							<div
+								class="flex items-center gap-2 flex-1 min-w-0 h-full"
+							>
+								<FancyInput
+									type="checkbox"
+									class="!w-fit"
+									bind:checked={imageSequenceTransparency}
+									disabled={!imageSequence}
+								/>
+								<label for="extract-sequence" class="text-sm">
+									{m["convert.image_sequence.transparency"]()}
+								</label>
+							</div>
+							<!-- second thing -->
+						</div>
+					</div>
+				</div>
+			{:else}
+				<div class="border-t border-separator text-base p-2">
+					<button
+						class="w-full p-2 text-center rounded-lg bg-accent text-black"
+						onclick={() => settings()}
+					>
+						{m["convert.settings.settings"]()}
 					</button>
 				</div>
 			{/if}

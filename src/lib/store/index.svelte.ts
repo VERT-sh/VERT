@@ -1,30 +1,76 @@
 import { browser } from "$app/environment";
-import { byNative, converters } from "$lib/converters";
+import { byNative, converterCategories, converters } from "$lib/converters";
+import type { Converter } from "$lib/converters/converter.svelte";
 import { error, log } from "$lib/util/logger";
 import { VertFile } from "$lib/types";
 import { parseBlob, selectCover } from "music-metadata";
-import { writable } from "svelte/store";
-import { addDialog } from "./DialogProvider";
+import { get, writable } from "svelte/store";
 import PQueue from "p-queue";
 import { getLocale, setLocale } from "$lib/paraglide/runtime";
 import { m } from "$lib/paraglide/messages";
 import sanitizeHtml from "sanitize-html";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { GB } from "$lib/util/consts";
+import { readSettings } from "$lib/util/settings";
+import { formatFilename } from "$lib/util/file";
 
 class Files {
 	public files = $state<VertFile[]>([]);
 
+	private getRequiredConverters(file: VertFile): Converter[] {
+		if (file.isZip()) return file.converters;
+
+		const compatibleConverters = file.findConverters([file.from, file.to]);
+		const selectedConverterName = file.conversionSettings.converter;
+
+		if (!selectedConverterName) return compatibleConverters;
+
+		const selectedConverter = compatibleConverters.find(
+			(converter) => converter.name === selectedConverterName,
+		);
+
+		return selectedConverter ? [selectedConverter] : compatibleConverters;
+	}
+
+	private isConverterReady(converter: Converter): boolean {
+		return (
+			converter.status === "ready" ||
+			converter.status === "partially-ready" // no idea where this could be used actually in a real converter
+		);
+	}
+
+	public isReady(file: VertFile): boolean {
+		const requiredConverters = this.getRequiredConverters(file);
+		if (requiredConverters.length === 0) return false;
+
+		return (
+			!file.processing &&
+			requiredConverters.some((converter) =>
+				this.isConverterReady(converter),
+			)
+		);
+	}
+
 	public requiredConverters = $derived(
-		Array.from(new Set(files.files.map((f) => f.converters).flat())),
+		Array.from(
+			new Set(
+				this.files.flatMap((file) => this.getRequiredConverters(file)),
+			),
+		),
 	);
 
 	public ready = $derived(
 		this.files.length === 0
 			? false
-			: this.requiredConverters.every((f) => f?.status === "ready") &&
-					this.files.every((f) => !f.processing),
+			: this.files.some((file) => this.isReady(file)),
 	);
+
+	public allReady = $derived(
+		this.files.length === 0
+			? false
+			: this.files.every((file) => this.isReady(file)),
+	);
+
 	public results = $derived(
 		this.files.length === 0 ? false : this.files.every((f) => f.result),
 	);
@@ -36,17 +82,20 @@ class Files {
 	private _addThumbnail = async (file: VertFile) => {
 		this.thumbnailQueue.add(async () => {
 			const isAudio = converters
-				.find((c) => c.name === "ffmpeg")
+				.find((c) => converterCategories.audio.includes(c.name))
 				?.supportedFormats.filter((f) => f.isNative)
 				.map((f) => f.name)
 				?.includes(file.from.toLowerCase());
 			const isVideo = converters
-				.find((c) => c.name === "vertd")
+				.find((c) => converterCategories.video.includes(c.name))
 				?.supportedFormats.filter((f) => f.isNative)
 				.map((f) => f.name)
 				?.includes(file.from.toLowerCase());
 
 			try {
+				if (file.blobUrl?.startsWith("blob:"))
+					URL.revokeObjectURL(file.blobUrl);
+
 				if (isAudio) {
 					// try to get the thumbnail from the audio via music-metadata
 					const { common } = await parseBlob(file.file, {
@@ -54,11 +103,8 @@ class Files {
 					});
 					const cover = selectCover(common.picture);
 					if (cover) {
-						const arrayBuffer =
-							cover.data.buffer instanceof ArrayBuffer
-								? cover.data.buffer
-								: new Uint8Array(cover.data).buffer;
-						const blob = new Blob([new Uint8Array(arrayBuffer)], {
+						const coverData = new Uint8Array(cover.data);
+						const blob = new Blob([coverData.buffer], {
 							type: cover.format,
 						});
 						file.blobUrl = URL.createObjectURL(blob);
@@ -90,53 +136,65 @@ class Files {
 		const mediaElement = isVideo
 			? document.createElement("video")
 			: new Image();
-		mediaElement.src = URL.createObjectURL(file);
+		const mediaUrl = URL.createObjectURL(file);
+		mediaElement.src = mediaUrl;
 
-		await new Promise((resolve, reject) => {
-			if (isVideo) {
-				const video = mediaElement as HTMLVideoElement;
-				// seek to 10% of video time or 2 seconds in
-				video.onloadeddata = () => {
-					const seekTime = Math.min(video.duration * 0.1, 2);
-					video.currentTime = seekTime;
-				};
-				video.onseeked = resolve;
-				video.onerror = reject;
-			} else {
-				(mediaElement as HTMLImageElement).onload = resolve;
-				(mediaElement as HTMLImageElement).onerror = reject;
+		try {
+			await new Promise((resolve, reject) => {
+				if (isVideo) {
+					const video = mediaElement as HTMLVideoElement;
+					// seek to 10% of video time or 2 seconds in
+					video.onloadeddata = () => {
+						const seekTime = Math.min(video.duration * 0.1, 2);
+						video.currentTime = seekTime;
+					};
+					video.onseeked = resolve;
+					video.onerror = reject;
+				} else {
+					(mediaElement as HTMLImageElement).onload = resolve;
+					(mediaElement as HTMLImageElement).onerror = reject;
+				}
+			});
+
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			if (!ctx) return undefined;
+
+			const width = isVideo
+				? (mediaElement as HTMLVideoElement).videoWidth
+				: (mediaElement as HTMLImageElement).width;
+			const height = isVideo
+				? (mediaElement as HTMLVideoElement).videoHeight
+				: (mediaElement as HTMLImageElement).height;
+
+			const scale = Math.max(maxSize / width, maxSize / height);
+			canvas.width = width * scale;
+			canvas.height = height * scale;
+			ctx.drawImage(mediaElement, 0, 0, canvas.width, canvas.height);
+
+			// check if completely transparent
+			const imageData = ctx.getImageData(
+				0,
+				0,
+				canvas.width,
+				canvas.height,
+			);
+			const isTransparent = Array.from(imageData.data).every(
+				(value, index) => {
+					return (index + 1) % 4 !== 0 || value === 0;
+				},
+			);
+			if (isTransparent) {
+				canvas.remove();
+				return undefined;
 			}
-		});
 
-		const canvas = document.createElement("canvas");
-		const ctx = canvas.getContext("2d");
-		if (!ctx) return undefined;
-
-		const width = isVideo
-			? (mediaElement as HTMLVideoElement).videoWidth
-			: (mediaElement as HTMLImageElement).width;
-		const height = isVideo
-			? (mediaElement as HTMLVideoElement).videoHeight
-			: (mediaElement as HTMLImageElement).height;
-
-		const scale = Math.max(maxSize / width, maxSize / height);
-		canvas.width = width * scale;
-		canvas.height = height * scale;
-		ctx.drawImage(mediaElement, 0, 0, canvas.width, canvas.height);
-
-		// check if completely transparent
-		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		const isTransparent = Array.from(imageData.data).every((value, index) => {
-			return (index + 1) % 4 !== 0 || value === 0;
-		});
-		if (isTransparent) {
+			const url = canvas.toDataURL();
 			canvas.remove();
-			return undefined;
+			return url;
+		} finally {
+			URL.revokeObjectURL(mediaUrl);
 		}
-
-		const url = canvas.toDataURL();
-		canvas.remove();
-		return url;
 	}
 
 	private async _handleZipFile(file: File): Promise<void> {
@@ -149,7 +207,7 @@ class Files {
 				}),
 			});
 
-			const { extractZip } = await import("$lib/util/zip");
+			const { extractZip } = await import("$lib/util/file");
 			const entries = await extractZip(file);
 
 			const totalEntries = entries.length;
@@ -202,6 +260,13 @@ class Files {
 				this.files.push(vf);
 				this._addThumbnail(vf);
 
+				// set converter
+				// TODO: this is weird, we rely on conversionSettings for the right converter but zip archives obv dont have settings to change
+				vf.conversionSettings = {
+					...vf.conversionSettings,
+					converter: vf.converters[0].name,
+				};
+
 				ToastManager.add({
 					type: "success",
 					message: m["convert.archive_file.detected"]({
@@ -234,7 +299,6 @@ class Files {
 		}
 	}
 
-	private _warningShown = false;
 	private async _add(file: VertFile | File) {
 		if (file instanceof VertFile) {
 			this.files.push(file);
@@ -271,7 +335,9 @@ class Files {
 			}
 			const converter = converters
 				.sort(byNative(format))
-				.find((converter) => converter.formatStrings().includes(format));
+				.find((converter) =>
+					converter.formatStrings().includes(format),
+				);
 			if (!converter) {
 				log(["files"], `no converter found for ${file.name}`);
 				this.files.push(new VertFile(file, format));
@@ -287,7 +353,10 @@ class Files {
 			this._addThumbnail(vf);
 
 			const convName = converter.name;
-			if (file.size > MAX_ARRAY_BUFFER_SIZE && convName === "vertd") {
+			if (
+				file.size > MAX_ARRAY_BUFFER_SIZE &&
+				converterCategories.video.includes(convName)
+			) {
 				ToastManager.add({
 					type: "warning",
 					message: m["convert.large_file_warning"]({
@@ -298,36 +367,6 @@ class Files {
 					},
 				});
 			}
-
-			const isVideo = convName === "vertd";
-			const acceptedExternalWarning =
-				localStorage.getItem("acceptedExternalWarning") === "true";
-			if (isVideo && !acceptedExternalWarning && !this._warningShown) {
-				this._warningShown = true;
-				const title = m["convert.external_warning.title"]();
-				const message = m["convert.external_warning.text"]();
-				const buttons = [
-					{
-						text: m["convert.external_warning.no"](),
-						action: () => {
-							this.files = [
-								...this.files.filter(
-									(f) => !f.converters.map((c) => c.name).includes("vertd"),
-								),
-							];
-							this._warningShown = false;
-						},
-					},
-					{
-						text: m["convert.external_warning.yes"](),
-						action: () => {
-							localStorage.setItem("acceptedExternalWarning", "true");
-							this._warningShown = false;
-						},
-					},
-				];
-				addDialog(title, message, buttons, "warning");
-			}
 		}
 	}
 
@@ -337,7 +376,8 @@ class Files {
 	public add(file: VertFile[] | null | undefined): void;
 	public add(file: FileList | null | undefined): void;
 	public add(
-		file: VertFile | File | VertFile[] | File[] | FileList | null | undefined,
+		file:
+			VertFile | File | VertFile[] | File[] | FileList | null | undefined,
 	) {
 		if (!file) return;
 		if (Array.isArray(file) || file instanceof FileList) {
@@ -357,11 +397,14 @@ class Files {
 	}
 
 	public async downloadAll() {
-		if (files.files.length === 0) return;
+		if (this.files.length === 0) return;
+
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const dlFiles: any[] = [];
-		for (let i = 0; i < files.files.length; i++) {
-			const file = files.files[i];
+		const filenames: string[] = [];
+
+		for (let i = 0; i < this.files.length; i++) {
+			const file = this.files[i];
 			const result = file.result;
 
 			if (!result) {
@@ -372,30 +415,60 @@ class Files {
 			let to = result.to;
 			if (!to.startsWith(".")) to = `.${to}`;
 
+			filenames.push(file.file.name.replace(/\.[^/.]+$/, "") + to);
+		}
+
+		let totalSize = 0;
+
+		for (let i = 0; i < this.files.length; i++) {
+			const file = this.files[i];
+			const result = file.result;
+
+			if (!result) continue;
+
+			let filename = filenames[i];
+
+			// check if this filename appears more than once
+			const isDuplicate =
+				filenames.filter((name) => name === filename).length > 1;
+			if (isDuplicate) {
+				const nameParts = filename.lastIndexOf(".");
+				const nameWithoutExt = filename.substring(0, nameParts);
+				const ext = filename.substring(nameParts);
+				filename = `${nameWithoutExt} (${i + 1})${ext}`;
+			}
+
+			totalSize += result.file.size;
 			dlFiles.push({
-				name: file.file.name.replace(/\.[^/.]+$/, "") + to,
+				name: filename,
 				lastModified: Date.now(),
-				input: await result.file.arrayBuffer(),
+				input: result.file.stream(),
 			});
 		}
+
 		const { downloadZip } = await import("client-zip");
+		const size = (totalSize / (1024 * 1024)).toFixed(2);
+		log(
+			["files"],
+			`adding ${dlFiles.length} files into zip (size: ${size}MB)...`,
+		);
+		ToastManager.add({
+			type: "info",
+			message: m["convert.panel.download_all_toast"]({
+				count: dlFiles.length,
+				size,
+			}),
+		});
 		const blob = await downloadZip(dlFiles, "converted.zip").blob();
+
 		const url = URL.createObjectURL(blob);
 
-		const settings = JSON.parse(localStorage.getItem("settings") ?? "{}");
+		const settings = readSettings<{ filenameFormat?: string }>();
 		const filenameFormat = settings.filenameFormat || "VERT_%name%";
-
-		const format = (name: string) => {
-			const date = new Date().toISOString();
-			return name
-				.replace(/%date%/g, date)
-				.replace(/%name%/g, "Multi")
-				.replace(/%extension%/g, "");
-		};
 
 		const a = document.createElement("a");
 		a.href = url;
-		a.download = `${format(filenameFormat)}.zip`;
+		a.download = `${formatFilename(filenameFormat, "Multi")}.zip`;
 		a.click();
 		URL.revokeObjectURL(url);
 		a.remove();
@@ -450,6 +523,9 @@ export const availableLocales = {
 	tr: "Türkçe",
 	ja: "日本語",
 	ko: "한국어",
+	pl: "Polski",
+	cs: "Čeština",
+	no: "Norsk",
 	el: "Ελληνικά",
 	"zh-Hans": "简体中文",
 	"zh-Hant": "繁體中文",
@@ -547,11 +623,25 @@ function findFirstPositive(
 export const getMaxArrayBufferSize = (): number => {
 	if (typeof window === "undefined") return 2 * GB; // default for SSR
 
+	// lmao uh mobile devices definitely have a much lower limit and using binary search here
+	// was causing crashes especially on iOS, so just return 2GB to be safe :p
+	if (get(isMobile)) {
+		log(
+			["converters"],
+			`mobile device likely detected, using 2GB fallback for max ArrayBuffer size`,
+		);
+		// don't save to localStorage, since it can always be a false positive or the user's browser window is simply just small
+		return 2 * GB;
+	}
+
 	// check cache first
 	const cached = localStorage.getItem("maxArrayBufferSize");
 	if (cached) {
 		const parsed = Number(cached);
-		log(["converters"], `using cached max ArrayBuffer size: ${parsed} bytes`);
+		log(
+			["converters"],
+			`using cached max ArrayBuffer size: ${parsed} bytes`,
+		);
 		if (!isNaN(parsed) && parsed > 0) return parsed;
 	}
 

@@ -84,30 +84,36 @@
 		},
 		"errors": {
 			"cant_convert": "无法转换此文件。",
-			"vertd_server": "你在做什么...？你应该运行 vertd 服务器！",
-			"vertd_generic_view": "查看错误详情",
-			"vertd_generic_body": "尝试转换视频时发生错误。你想将此视频提交给开发者以帮助修复此错误吗？只会发送你的视频文件，不会上传任何标识符。",
-			"vertd_generic_title": "视频转换错误",
-			"vertd_generic_yes": "提交视频",
-			"vertd_generic_no": "不提交",
-			"vertd_failed_to_keep": "无法在服务器上保留视频：{error}",
-			"vertd_details": "查看错误详情",
-			"vertd_details_body": "如果你按下提交，<b>你的视频也会被附加</b>在错误日志旁边，日志会自动报告给我们审核。以下信息是我们自动接收的日志：",
-			"vertd_details_footer": "此信息仅用于故障排查，绝不会被共享。查看我们的[privacy_link]隐私政策[/privacy_link]了解更多详情。",
-			"vertd_details_job_id": "<b>任务 ID：</b>{jobId}",
-			"vertd_details_from": "<b>来源格式：</b>{from}",
-			"vertd_details_to": "<b>目标格式：</b>{to}",
-			"vertd_details_error_message": "<b>错误消息：</b>[view_link]查看错误日志[/view_link]",
-			"vertd_details_close": "关闭",
 			"unsupported_format": "仅支持图片、视频、音频和文档文件",
 			"format_output_only": "此格式目前只能用作输出（转换目标），不能用作输入。",
-			"vertd_not_found": "未找到 vertd 实例来开始视频转换。请确保实例 URL 设置正确。",
 			"worker_downloading": "{type}转换器正在初始化，请稍候。",
 			"worker_error": "{type}转换器初始化时出错，请稍后重试。",
 			"worker_timeout": "{type}转换器初始化时间超出预期，请再等待一会儿或刷新页面。",
 			"audio": "音频",
 			"doc": "文档",
-			"image": "图片"
+			"image": "图片",
+			"vertd": {
+				"server": "你在做什么...？你应该运行 vertd 服务器！",
+				"details": {
+					"view": "查看错误详情",
+					"body": "如果你按下提交，<b>你的视频也会被附加</b>在错误日志旁边，日志会自动报告给我们审核。以下信息是我们自动接收的日志：",
+					"footer": "此信息仅用于故障排查，绝不会被共享。查看我们的[privacy_link]隐私政策[/privacy_link]了解更多详情。",
+					"job_id": "<b>任务 ID：</b>{jobId}",
+					"from": "<b>来源格式：</b>{from}",
+					"to": "<b>目标格式：</b>{to}",
+					"error_message": "<b>错误消息：</b>[view_link]查看错误日志[/view_link]",
+					"close": "关闭"
+				},
+				"generic": {
+					"view": "查看错误详情",
+					"body": "尝试转换视频时发生错误。你想将此视频提交给开发者以帮助修复此错误吗？只会发送你的视频文件，不会上传任何标识符。",
+					"title": "视频转换错误",
+					"yes": "提交视频",
+					"no": "不提交"
+				},
+				"failed_to_keep": "无法在服务器上保留视频：{error}",
+				"not_found": "未找到 vertd 实例来开始视频转换。请确保实例 URL 设置正确。"
+			}
 		}
 	},
 	"settings": {
@@ -117,37 +123,53 @@
 		},
 		"appearance": {
 			"title": "外观",
-			"brightness_theme": "亮度主题",
-			"brightness_description": "想要阳光明媚的闪光弹，还是宁静孤独的夜晚？",
 			"light": "浅色",
 			"dark": "深色",
-			"effect_settings": "效果设置",
-			"effect_description": "你想要华丽的效果，还是更静态的体验？",
 			"enable": "启用",
-			"disable": "禁用"
+			"disable": "禁用",
+			"brightness": {
+				"theme": "亮度主题",
+				"description": "想要阳光明媚的闪光弹，还是宁静孤独的夜晚？"
+			},
+			"effect": {
+				"settings": "效果设置",
+				"description": "你想要华丽的效果，还是更静态的体验？"
+			},
+			"language": {
+				"title": "语言",
+				"description": "选择 VERT 界面的首选语言。"
+			}
 		},
 		"conversion": {
 			"title": "转换",
 			"advanced_settings": "高级设置",
-			"filename_format": "文件名格式",
-			"filename_description": "这将决定下载时的文件名，<b>不包括文件扩展名。</b>你可以在格式中使用以下模板，它们将被替换为相关信息：<b>%name%</b>表示原始文件名，<b>%extension%</b>表示原始文件扩展名，<b>%date%</b>表示文件转换时的日期字符串。",
-			"placeholder": "VERT_%name%",
-			"default_format": "默认转换格式",
-			"default_format_description": "这将更改上传此文件类型时自动选择的默认格式。",
-			"default_format_image": "图片",
-			"default_format_video": "视频",
-			"default_format_audio": "音频",
-			"default_format_document": "文档",
-			"metadata": "文件元数据",
-			"metadata_description": "这将更改转换后的文件是否保留原始文件的元数据（EXIF、歌曲信息等）。",
-			"keep": "保留",
-			"remove": "删除",
-			"quality": "转换质量",
-			"quality_description": "更改输出文件的质量。值越高，处理时间和文件大小越大。",
-			"quality_video": "更改视频转换的质量。质量越高，转换时间和文件大小越大。",
-			"quality_audio": "音频（kbps）",
-			"quality_images": "图片（%）",
-			"rate": "采样率（Hz）"
+			"default_format": {
+				"image": "图片",
+				"audio": "音频",
+				"document": "文档",
+				"label": "默认转换格式",
+				"description": "这将更改上传此文件类型时自动选择的默认格式。",
+				"video": "视频"
+			},
+			"metadata": {
+				"label": "文件元数据",
+				"description": "这将更改转换后的文件是否保留原始文件的元数据（EXIF、歌曲信息等）。",
+				"keep": "保留",
+				"remove": "删除"
+			},
+			"quality": {
+				"label": "转换质量",
+				"description": "更改输出文件的质量。值越高，处理时间和文件大小越大。",
+				"video": "更改视频转换的质量。质量越高，转换时间和文件大小越大。",
+				"audio": "音频（kbps）",
+				"images": "图片（%）"
+			},
+			"rate": "采样率（Hz）",
+			"filename": {
+				"format": "文件名格式",
+				"description": "这将决定下载时的文件名，<b>不包括文件扩展名。</b>你可以在格式中使用以下模板，它们将被替换为相关信息：<b>%name%</b>表示原始文件名，<b>%extension%</b>表示原始文件扩展名，<b>%date%</b>表示文件转换时的日期字符串。",
+				"placeholder": "VERT_%name%"
+			}
 		},
 		"vertd": {
 			"title": "视频转换",
@@ -155,53 +177,61 @@
 			"loading": "加载中...",
 			"available": "可用（提交 ID {commitId}）",
 			"unavailable": "不可用（URL 正确吗？）",
-			"description": "<code>vertd</code>项目是 FFmpeg 的服务器包装器。这允许你通过 VERT 网页界面方便地转换视频，同时仍能利用 GPU 的强大性能以尽可能快的速度完成转换。",
-			"hosting_info": "我们为你提供了一个公共实例以方便使用，但如果你知道如何操作，在自己的电脑或服务器上托管也很容易。你可以在[vertd_link]这里[/vertd_link]下载服务器二进制文件 - 设置过程将来会变得更简单，敬请期待！",
-			"instance": "实例",
-			"url_placeholder": "例如：http://localhost:24153",
-			"conversion_speed": "转换速度",
-			"speed_description": "这描述了速度和质量之间的权衡。速度越快质量越低，但完成工作的速度更快。",
-			"speeds": {
-				"very_slow": "非常慢",
-				"slower": "较慢",
-				"slow": "慢",
-				"medium": "中等",
-				"fast": "快",
-				"ultra_fast": "超快"
+			"description": {
+				"main": "<code>vertd</code>项目是 FFmpeg 的服务器包装器。这允许你通过 VERT 网页界面方便地转换视频，同时仍能利用 GPU 的强大性能以尽可能快的速度完成转换。",
+				"info": "我们为你提供了一个公共实例以方便使用，但如果你知道如何操作，在自己的电脑或服务器上托管也很容易。你可以在[vertd_link]这里[/vertd_link]下载服务器二进制文件 - 设置过程将来会变得更简单，敬请期待！"
 			},
-			"auto_instance": "自动（推荐）",
-			"eu_instance": "德国法尔肯施泰因",
-			"us_instance": "美国华盛顿",
-			"custom_instance": "自定义"
+			"instance": {
+				"custom": "自定义",
+				"label": "实例",
+				"url_placeholder": "例如：http://localhost:24153",
+				"auto": "自动（推荐）",
+				"eu": "德国法尔肯施泰因",
+				"us": "美国华盛顿"
+			},
+			"conversion_speed": {
+				"speeds": {
+					"very_slow": "非常慢",
+					"slower": "较慢",
+					"slow": "慢",
+					"medium": "中等",
+					"fast": "快",
+					"ultra_fast": "超快"
+				},
+				"label": "转换速度",
+				"description": "这描述了速度和质量之间的权衡。速度越快质量越低，但完成工作的速度更快。"
+			}
 		},
 		"privacy": {
 			"title": "隐私与数据",
-			"plausible_title": "Plausible 分析",
-			"plausible_description": "我们使用[plausible_link]Plausible[/plausible_link]，一个注重隐私的分析工具，来收集完全匿名的统计数据。所有数据都是匿名和聚合的，不会发送或存储任何可识别信息。你可以在[analytics_link]这里[/analytics_link]查看分析数据，并在下方选择退出。",
-			"opt_in": "选择加入",
-			"opt_out": "选择退出",
-			"cache_title": "缓存管理",
-			"cache_description": "我们在浏览器中缓存转换器文件，这样你就不必每次都重新下载，从而提高性能并减少数据使用。",
-			"refresh_cache": "刷新缓存",
-			"clear_cache": "清除缓存",
-			"files_cached": "{size}（{count}个文件）",
-			"loading_cache": "加载中...",
-			"total_size": "总大小",
-			"files_cached_label": "已缓存文件",
-			"cache_cleared": "缓存已成功清除！",
-			"cache_clear_error": "清除缓存失败。",
-			"site_data_title": "网站数据管理",
-			"site_data_description": "清除所有网站数据，包括设置和缓存文件，将 VERT 重置为默认状态并重新加载页面。",
-			"clear_all_data": "清除所有网站数据",
-			"clear_all_data_confirm_title": "清除所有网站数据？",
-			"clear_all_data_confirm": "这将重置所有设置和缓存，然后重新加载页面。此操作无法撤消。",
-			"clear_all_data_cancel": "取消",
-			"all_data_cleared": "所有网站数据已清除！正在重新加载页面...",
-			"all_data_clear_error": "清除所有网站数据失败。"
-		},
-		"language": {
-			"title": "语言",
-			"description": "选择 VERT 界面的首选语言。"
+			"plausible": {
+				"title": "Plausible 分析",
+				"description": "我们使用[plausible_link]Plausible[/plausible_link]，一个注重隐私的分析工具，来收集完全匿名的统计数据。所有数据都是匿名和聚合的，不会发送或存储任何可识别信息。你可以在[analytics_link]这里[/analytics_link]查看分析数据，并在下方选择退出。",
+				"opt_in": "选择加入",
+				"opt_out": "选择退出"
+			},
+			"cache": {
+				"title": "缓存管理",
+				"description": "我们在浏览器中缓存转换器文件，这样你就不必每次都重新下载，从而提高性能并减少数据使用。",
+				"refresh_cache": "刷新缓存",
+				"clear_cache": "清除缓存",
+				"files_cached": "{size}（{count}个文件）",
+				"loading_cache": "加载中...",
+				"total_size": "总大小",
+				"files_cached_label": "已缓存文件",
+				"cache_cleared": "缓存已成功清除！",
+				"cache_clear_error": "清除缓存失败。"
+			},
+			"site_data": {
+				"title": "网站数据管理",
+				"description": "清除所有网站数据，包括设置和缓存文件，将 VERT 重置为默认状态并重新加载页面。",
+				"clear_all_data": "清除所有网站数据",
+				"clear_all_data_confirm_title": "清除所有网站数据？",
+				"clear_all_data_confirm": "这将重置所有设置和缓存，然后重新加载页面。此操作无法撤消。",
+				"clear_all_data_cancel": "取消",
+				"all_data_cleared": "所有网站数据已清除！正在重新加载页面...",
+				"all_data_clear_error": "清除所有网站数据失败。"
+			}
 		}
 	},
 	"about": {
