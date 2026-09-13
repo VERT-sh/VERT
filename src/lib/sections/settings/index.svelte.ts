@@ -1,6 +1,7 @@
 import { PUB_VERTD_URL } from "$env/static/public";
-import type { ConversionBitrate } from "$lib/converters/ffmpeg.svelte";
-import type { ConversionSpeed } from "$lib/converters/vertd.svelte";
+import type { ConversionBitrate } from "$lib/converters/ffmpeg/ffmpeg.codecs";
+import type { ConversionSpeed } from "$lib/converters/vertd/vertd.svelte";
+import { readSettings } from "$lib/util/settings";
 import { VertdInstance } from "./vertdSettings.svelte";
 
 export { default as Appearance } from "./Appearance.svelte";
@@ -24,11 +25,12 @@ export interface ISettings {
 	plausible: boolean;
 	vertdURL: string;
 	vertdSpeed: ConversionSpeed; // videos
+	vertdBlockedHashes: Map<string, Date[]>; // hashes of files blocked from vertd conversion
+	vertdCustomHeaders: string; // custom headers to send to the vertd server
 	magickQuality: number; // images
 	ffmpegQuality: ConversionBitrate; // audio (or audio <-> video)
 	ffmpegSampleRate: string; // audio (or audio <-> video)
 	ffmpegCustomSampleRate: number; // audio (or audio <-> video) - only used when ffmpegSampleRate is "custom"
-	vertdBlockedHashes: Map<string, Date[]>; // hashes of files blocked from vertd conversion
 }
 
 export class Settings {
@@ -47,11 +49,12 @@ export class Settings {
 		plausible: true,
 		vertdURL: PUB_VERTD_URL,
 		vertdSpeed: "slow",
+		vertdBlockedHashes: new Map<string, Date[]>(),
+		vertdCustomHeaders: "",
 		magickQuality: 100,
 		ffmpegQuality: "auto",
 		ffmpegSampleRate: "auto",
-		ffmpegCustomSampleRate: 44100,
-		vertdBlockedHashes: new Map<string, Date[]>(),
+		ffmpegCustomSampleRate: 44100, //TODO: make string to match for vertd
 	});
 
 	public save() {
@@ -62,9 +65,9 @@ export class Settings {
 	public load() {
 		try {
 			VertdInstance.instance.load();
-			const ls = localStorage.getItem("settings");
-			if (!ls) return;
-			const settings: ISettings = JSON.parse(ls);
+			const persisted = readSettings<ISettings>();
+			if (!Object.keys(persisted).length) return;
+			const settings = persisted as ISettings;
 			const vertdBlockedHashes = new Map<string, Date[]>(
 				Object.entries(
 					settings.vertdBlockedHashes ||

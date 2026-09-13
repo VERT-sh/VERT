@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { UploadIcon } from "lucide-svelte";
+	import { UploadIcon } from "@lucide/svelte";
 	import Panel from "../visual/Panel.svelte";
 	import clsx from "clsx";
 	import { onMount } from "svelte";
 	import { effects, files } from "$lib/store/index.svelte";
-	import { converters } from "$lib/converters";
 	import { goto } from "$app/navigation";
-	import { page } from "$app/state";
 	import { m } from "$lib/paraglide/messages";
 
 	type Props = {
@@ -23,7 +21,7 @@
 		fileInput.click();
 	};
 
-	const handleFileChange = (e: Event) => {
+	const handleFileChange = () => {
 		if (!fileInput) return;
 		const oldLength = files.files.length;
 		files.add(fileInput.files);
@@ -75,7 +73,7 @@
 		</div>
 		<h2 class="text-center text-2xl font-semibold mt-4">
 			{m["upload.uploader.text"]({
-				action: m["upload.uploader.convert"]()
+				action: m["upload.uploader.convert"](),
 			})}
 		</h2>
 	</Panel>

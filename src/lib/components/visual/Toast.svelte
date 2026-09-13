@@ -6,7 +6,7 @@
 		InfoIcon,
 		TriangleAlert,
 		XIcon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import { ToastManager } from "$lib/util/toast.svelte";
 	import type { ToastProps } from "$lib/util/toast.svelte";
@@ -18,8 +18,10 @@
 		toast: ToastType<unknown>;
 	} = $props();
 
+	// svelte-ignore state_referenced_locally
 	const { id, type, message, durations } = props.toast;
 
+	// svelte-ignore state_referenced_locally
 	const additional =
 		"additional" in props.toast ? props.toast.additional : {};
 
@@ -41,10 +43,12 @@
 	let Icon = $derived(Icons[type]);
 
 	let msg = $state<SvelteComponent<ToastProps>>();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const title = $derived(((msg as any)?.title as string) ?? "");
 
 	// intentionally unused. this is so tailwind can generate the css for these colours as it doesn't detect if it's dynamically loaded
 	// this would lead to the colours not being generated in the final css file by tailwind
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const colourVariants = [
 		"border-accent-pink-alt",
 		"border-accent-red-alt",
