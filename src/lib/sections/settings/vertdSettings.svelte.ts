@@ -8,7 +8,10 @@ const LOCATIONS = [
 ];
 
 export type VertdInner =
-	{ type: "auto" } | { type: "eu" } | { type: "us" } | { type: "custom" };
+	| { type: "auto" }
+	| { type: "eu" }
+	| { type: "us" }
+	| { type: "custom" };
 
 export const getVertdCustomHeaders = (): Record<string, string> => {
 	const raw = Settings.instance.settings.vertdCustomHeaders.trim();

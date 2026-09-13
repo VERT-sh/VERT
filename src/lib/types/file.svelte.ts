@@ -8,6 +8,7 @@ import FallbackToast from "$lib/components/functional/popups/FallbackToast.svelt
 import ServerUploadWarning from "$lib/components/functional/popups/ServerUploadWarning.svelte";
 import type {
 	ConversionSettings,
+	NormalizedSettings,
 	SettingDefinition,
 } from "./conversion-settings";
 import { log } from "$lib/util/logger";
@@ -181,11 +182,13 @@ export class VertFile {
 			const fileExtension = this.from.slice(1);
 			const detectedExtension = forceKeep.includes(fileExtension)
 				? fileExtension
-				: aliases[this.fileType.ext] ?? this.fileType.ext;
+				: (aliases[this.fileType.ext] ?? this.fileType.ext);
 			const expectedExtension = aliases[fileExtension] ?? fileExtension;
 
 			if (detectedExtension !== expectedExtension) {
-				console.warn(`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`);
+				console.warn(
+					`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`,
+				);
 				// TODO: show a warning modal or message if detected type doesn't match name
 			}
 
@@ -208,7 +211,9 @@ export class VertFile {
 
 		if (!this.retryingFallback) this.attemptedConverters.clear();
 
-		console.log(`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`);
+		console.log(
+			`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`,
+		);
 		if (!this.converters.length) throw new Error("No converters found");
 
 		let converter: Converter | undefined;
@@ -263,6 +268,32 @@ export class VertFile {
 			return;
 		}
 
+		const normalizedSettings: NormalizedSettings =
+			await converter.normalizeSettings(this, this.to, {
+				...(await converter.getDefaultSettings(this)),
+				...Object.fromEntries(
+					Object.entries(this.conversionSettings).filter(
+						([, value]) => value !== undefined,
+					),
+				),
+			});
+
+		for (const change of normalizedSettings.changes) {
+			log(
+				["file", "settings"],
+				`changed setting "${change.setting}" from "${change.oldValue}" to "${change.newValue}" for file ${change.file}`,
+			);
+			ToastManager.add({
+				type: "warning",
+				message: m["workers.warnings.settings_change"]({
+					setting: change.setting,
+					oldValue: change.oldValue,
+					newValue: change.newValue,
+					file: change.file,
+				}),
+			});
+		}
+
 		this.attemptedConverters.add(converter.name);
 		this.activeConverterName = converter.name;
 		log(["file", "convert"], `using converter: ${converter.name}`);
@@ -277,11 +308,14 @@ export class VertFile {
 			// else convert normally
 			res =
 				this.isZip() && !this.conversionSettings.imageSequence
-					? await this.convertZip(converter)
+					? await this.convertZip(
+							converter,
+							normalizedSettings.settings,
+						)
 					: await converter.convert(
 							this,
 							this.to,
-							this.conversionSettings,
+							normalizedSettings.settings,
 							...args,
 						);
 			this.result = res;
@@ -399,7 +433,10 @@ export class VertFile {
 		});
 	}
 
-	private async convertZip(converter: Converter): Promise<VertFile> {
+	private async convertZip(
+		converter: Converter,
+		settings: ConversionSettings,
+	): Promise<VertFile> {
 		const { extractZip, createZip } = await import("$lib/util/file");
 		const { default: PQueue } = await import("p-queue");
 
@@ -441,7 +478,7 @@ export class VertFile {
 						const converted = await converter.convert(
 							tempVFile,
 							this.to,
-							this.conversionSettings,
+							settings,
 						);
 
 						let outputExt = this.to;
@@ -463,7 +500,7 @@ export class VertFile {
 					const converted = await converter.convert(
 						tempVFile,
 						this.to,
-						this.conversionSettings,
+						settings,
 					);
 
 					let outputExt = this.to;

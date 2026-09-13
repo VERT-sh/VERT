@@ -21,6 +21,7 @@ import {
 } from "./utils/ffprobe";
 import { extractAlbumArt, avWithArt, avWithBg } from "./utils/ffmpeg";
 import type {
+	NormalizedSettings,
 	SettingDefinition,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
@@ -200,6 +201,59 @@ export class FFmpegConverter extends Converter {
 		return defaults;
 	}
 
+	public async normalizeSettings(
+		input: VertFile,
+		to: string,
+		settings: ConversionSettings,
+	): Promise<NormalizedSettings> {
+		const normalized = { ...settings };
+		const changes: NormalizedSettings["changes"] = [];
+
+		const change = (setting: string, newValue: string | number) => {
+			const oldValue = normalized[setting];
+			if (oldValue === newValue) return;
+
+			normalized[setting] = newValue;
+			changes.push({
+				setting,
+				oldValue,
+				newValue,
+				file: input.name,
+			});
+		};
+
+		if (to === ".opus") {
+			// work around browser stereo+libopus wasm crash
+			// no idea why its broken like this in the browser only lol
+			if (normalized.channels >= 2) change("channels", 1);
+
+			const bitrate = Number(
+				normalized.bitrate === "custom"
+					? normalized.customBitrate
+					: normalized.bitrate,
+			);
+			if (Number.isFinite(bitrate) && bitrate > 256)
+				change("bitrate", 256);
+		} else if (to === ".amv") {
+			change("sampleRate", 22050);
+			change("channels", 1);
+			change("bitrate", 32);
+		} else if (to === ".mpg" || to === ".mpeg" || to === ".vob") {
+			const bitrate = Number(
+				normalized.bitrate === "custom"
+					? normalized.customBitrate
+					: normalized.bitrate,
+			);
+			if (Number.isFinite(bitrate) && bitrate > 0)
+				change("bitrate", Math.pow(2, Math.round(Math.log2(bitrate))));
+		} else if (to === ".gxf") {
+			change("sampleRate", 48000);
+			change("channels", 1);
+		}
+
+		return { settings: normalized, changes };
+	}
+
 	public async convert(
 		input: VertFile,
 		to: string,
@@ -210,7 +264,10 @@ export class FFmpegConverter extends Converter {
 		const conversionSettings =
 			Object.keys(settings).length > 4 // TODO: find better way to do this lmfao, rn we are just assuming all settings are present if there's at least 5 keys but ts bad
 				? settings
-				: Object.assign(settings, await this.getDefaultSettings()); // use defaults if not provided
+				: {
+						...(await this.getDefaultSettings()),
+						...settings,
+					}; // use defaults if not provided
 
 		const isAlac = to === ".alac";
 		if (isAlac) to = ".m4a";
@@ -428,119 +485,17 @@ export class FFmpegConverter extends Converter {
 		let tracksArgs: string[] = [];
 		let metadataArgs: string[] = [];
 		const extraArgs: string[] = [];
-
-		const checkSettings = () => {
-			/*
-			 * sanity check settings for certain formats, to prevent conversion failure
-			 */
-			const settingsChanged: SettingChange[] = [];
-
-			console.log(
-				`checking settings for compatibility with output format ${to}...`,
+		if (to === ".amv") {
+			// amv requires mono audio, 32kbps, and 22050 sample rate
+			// block size is 22050 (sample rate) / fps. max is 8192, so we have to force a higher fps
+			const amvFps = 3;
+			extraArgs.push(
+				"-r",
+				String(amvFps),
+				"-block_size",
+				String(Math.floor(22050 / amvFps)),
 			);
-
-			if (to === ".opus") {
-				// work around browser stereo+libopus wasm crash
-				// no idea why its broken like this in the browser only lol
-				if (settings.channels >= 2) {
-					channelsArgs = ["-ac", "1"];
-					settingsChanged.push({
-						setting: "channels",
-						oldValue: settings.channels,
-						newValue: 1,
-						file: input.name,
-					});
-				}
-
-				// TODO: surely better way to do this as well :sob:
-				if (
-					audioBitrateArgs[1] &&
-					parseInt(audioBitrateArgs[1], 10) > 256
-				) {
-					audioBitrateArgs = ["-b:a", "256k"];
-					settingsChanged.push({
-						setting: "bitrate",
-						oldValue: settings.bitrate,
-						newValue: 256,
-						file: input.name,
-					});
-				}
-			} else if (to === ".amv") {
-				// amv requires mono audio, 32kbps, and 22050 sample rate
-				// block size is 22050 (sample rate) / fps. max is 8192, so we have to force a higher fps
-				const amvFps = 3;
-				const amvBlockSize = Math.floor(22050 / amvFps);
-
-				audioBitrateArgs = ["-b:a", "32k"];
-				sampleRateArgs = ["-ar", "22050"];
-				channelsArgs = ["-ac", "1"];
-				extraArgs.push(
-					"-r",
-					String(amvFps),
-					"-block_size",
-					String(amvBlockSize),
-				);
-				settingsChanged.push({
-					setting: "sampleRate",
-					oldValue: settings.sampleRate,
-					newValue: 22050,
-					file: input.name,
-				});
-				settingsChanged.push({
-					setting: "channels",
-					oldValue: settings.channels,
-					newValue: 1,
-					file: input.name,
-				});
-				settingsChanged.push({
-					setting: "bitrate",
-					oldValue: settings.bitrate,
-					newValue: 32,
-					file: input.name,
-				});
-			} else if (to === ".mpg" || to === ".mpeg" || to === ".vob") {
-				// these formats need to have its bitrate to the power of 2 to convert correctly
-				const bitrate = parseInt(audioBitrateArgs[1], 10);
-				const newBitrate = Math.pow(2, Math.round(Math.log2(bitrate)));
-				audioBitrateArgs = ["-b:a", `${newBitrate}k`];
-				settingsChanged.push({
-					setting: "bitrate",
-					oldValue: settings.bitrate,
-					newValue: newBitrate,
-					file: input.name,
-				});
-			} else if (to === ".gxf") {
-				sampleRateArgs = ["-ar", "48000"];
-				channelsArgs = ["-ac", "1"];
-				settingsChanged.push({
-					setting: "sampleRate",
-					oldValue: settings.sampleRate,
-					newValue: 48000,
-					file: input.name,
-				});
-				settingsChanged.push({
-					setting: "channels",
-					oldValue: settings.channels,
-					newValue: 1,
-					file: input.name,
-				});
-			}
-
-			for (const change of settingsChanged) {
-				this.log(
-					`changed setting "${change.setting}" from "${change.oldValue}" to "${change.newValue}" for file ${change.file} to prevent conversion failure`,
-				);
-				ToastManager.add({
-					type: "warning",
-					message: m["workers.warnings.settings_change"]({
-						setting: change.setting,
-						oldValue: change.oldValue,
-						newValue: change.newValue,
-						file: change.file,
-					}),
-				});
-			}
-		};
+		}
 
 		this.log(`keep metadata: ${keepMetadata}`);
 		if (!keepMetadata) {
@@ -549,8 +504,6 @@ export class FFmpegConverter extends Converter {
 				"-1",
 				"-map_chapters", // remove chapters
 				"-1",
-				"-map", // remove cover art
-				"a",
 			];
 		}
 
@@ -576,6 +529,20 @@ export class FFmpegConverter extends Converter {
 				audioBitrateArgs = inputBitrate
 					? ["-b:a", `${inputBitrate}k`]
 					: [];
+				if (
+					(to === ".mpg" || to === ".mpeg" || to === ".vob") &&
+					audioBitrateArgs[1]
+				) {
+					// these formats need to have its bitrate to the power of 2 to convert correctly
+					const bitrate = Number.parseInt(audioBitrateArgs[1], 10);
+					if (Number.isFinite(bitrate) && bitrate > 0) {
+						const normalizedBitrate = Math.pow(
+							2,
+							Math.round(Math.log2(bitrate)),
+						);
+						audioBitrateArgs = ["-b:a", `${normalizedBitrate}k`];
+					}
+				}
 				this.log(`using detected audio bitrate: ${inputBitrate}k`);
 			}
 		}
@@ -584,7 +551,11 @@ export class FFmpegConverter extends Converter {
 		if (userSampleRate !== "auto") {
 			sampleRateArgs = [
 				"-ar",
-				userSampleRate === "custom" ? customSampleRate : userSampleRate,
+				String(
+					userSampleRate === "custom"
+						? customSampleRate
+						: userSampleRate,
+				),
 			];
 			this.log(`using user setting for sample rate: ${userSampleRate}Hz`);
 		} else {
@@ -618,7 +589,7 @@ export class FFmpegConverter extends Converter {
 
 		// channels setting
 		if (settings.channels !== 2) {
-			channelsArgs = ["-ac", settings.channels];
+			channelsArgs = ["-ac", String(settings.channels)];
 			this.log(
 				`using user setting for audio channels: ${settings.channels}`,
 			);
@@ -642,7 +613,6 @@ export class FFmpegConverter extends Converter {
 		// video to audio
 		if (videoFormats.includes(inputFormat)) {
 			this.log(`Converting video ${input.from} to audio ${to}`);
-			checkSettings();
 			return [
 				"-i",
 				"input",
@@ -666,8 +636,6 @@ export class FFmpegConverter extends Converter {
 				? await extractAlbumArt(ffmpeg)
 				: false;
 			const codecArgs = toArgs(to, isAlac);
-
-			checkSettings();
 
 			if (hasAlbumArt) {
 				this.log("Using album art as video background");
@@ -698,8 +666,6 @@ export class FFmpegConverter extends Converter {
 		this.log(`Converting audio ${input.from} to audio ${to}`);
 		const { audio: audioCodec } = getCodecs(to, isAlac);
 		if (m4a && keepMetadata) extraArgs.push("-c:v", "copy"); // for album art
-
-		checkSettings();
 
 		return [
 			"-i",
@@ -808,10 +774,3 @@ const handleSpecialOutput = async (
 
 	return null;
 };
-
-interface SettingChange {
-	setting: string;
-	oldValue: string | number;
-	newValue: string | number;
-	file: string;
-}

@@ -82,7 +82,8 @@ export type ComponentToastOptions<T> = BaseToastOptions & {
 };
 
 export type ToastOptions<T = unknown> =
-	StringToastOptions | ComponentToastOptions<T>;
+	| StringToastOptions
+	| ComponentToastOptions<T>;
 
 // const toasts = writable<Toast[]>([]);
 

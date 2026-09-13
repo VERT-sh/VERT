@@ -14,6 +14,7 @@ import { converters } from "../";
 import type {
 	SettingDefinition,
 	ConversionSettings,
+	NormalizedSettings,
 } from "$lib/types/conversion-settings";
 import { CONVERSION_BITRATES, SAMPLE_RATES } from "../ffmpeg/ffmpeg.codecs";
 import { formatBytes } from "$lib/util/file";
@@ -113,7 +114,12 @@ export const vertdFetch: {
 // ws types
 
 export type ConversionSpeed =
-	"verySlow" | "slower" | "slow" | "medium" | "fast" | "ultraFast";
+	| "verySlow"
+	| "slower"
+	| "slow"
+	| "medium"
+	| "fast"
+	| "ultraFast";
 
 const vertdSpeedValues: ConversionSpeed[] = [
 	"verySlow",
@@ -728,6 +734,34 @@ export class VertdConverter extends Converter {
 		});
 
 		return defaults;
+	}
+
+	public async normalizeSettings(
+		input: VertFile,
+		to: string,
+		settings: ConversionSettings,
+	): Promise<NormalizedSettings> {
+		const normalized = { ...settings };
+		const changes: NormalizedSettings["changes"] = [];
+
+		const change = (setting: string, newValue: string | number) => {
+			const oldValue = normalized[setting];
+			if (oldValue === newValue) return;
+
+			normalized[setting] = newValue;
+			changes.push({
+				setting,
+				oldValue,
+				newValue,
+				file: input.name,
+			});
+		};
+
+		if (to === ".mxf") {
+			change("sampleRate", "48000");
+		}
+
+		return { settings: normalized, changes };
 	}
 
 	public async convert(

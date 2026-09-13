@@ -21,3 +21,15 @@ export interface SettingDefinition {
 export interface ConversionSettings {
 	[key: string]: any;
 }
+
+export interface SettingChange {
+	setting: string;
+	oldValue: string | number;
+	newValue: string | number;
+	file: string;
+}
+
+export interface NormalizedSettings {
+	settings: ConversionSettings;
+	changes: SettingChange[];
+}

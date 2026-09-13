@@ -3,11 +3,16 @@
 import type { VertFile } from "$lib/types";
 import type {
 	ConversionSettings,
+	NormalizedSettings,
 	SettingDefinition,
 } from "$lib/types/conversion-settings";
 
 export type WorkerStatus =
-	"not-ready" | "downloading" | "ready" | "partially-ready" | "error";
+	| "not-ready"
+	| "downloading"
+	| "ready"
+	| "partially-ready"
+	| "error";
 
 export class FormatInfo {
 	public name: string;
@@ -76,6 +81,17 @@ export class Converter {
 			defaults[setting.key] = setting.default;
 		});
 		return defaults;
+	}
+
+	public async normalizeSettings(
+		input: VertFile,
+		to: string,
+		settings: ConversionSettings,
+	): Promise<NormalizedSettings> {
+		return {
+			settings: { ...settings },
+			changes: [],
+		};
 	}
 
 	private startTimeout() {
