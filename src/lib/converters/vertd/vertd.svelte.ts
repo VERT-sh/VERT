@@ -771,34 +771,11 @@ export class VertdConverter extends Converter {
 	): Promise<VertFile> {
 		if (to.startsWith(".")) to = to.slice(1);
 
-		let fileUpload = input;
+		const fileUpload = input;
 		const conversionSettings = // vertd expects object not string json
 			Object.keys(settings).length > 4
 				? settings // user-provided settings
 				: Object.assign(settings, await this.getDefaultSettings(input)); // use defaults if not provided
-		// if converting animated webp to video, first convert to gif
-		// ffmpeg (in vertd) doesn't support decoding animated webp still.. while supporting encoding animated webp for some reason
-		// https://trac.ffmpeg.org/ticket/4907
-		if (input.from === ".webp") {
-			this.log(`animated webp detected, converting to gif first`);
-			const magickConverter = converters.find(
-				(c) => c.name === "imagemagick",
-			);
-			if (magickConverter) {
-				try {
-					fileUpload = await magickConverter.convert(
-						input,
-						".gif",
-						conversionSettings,
-						100,
-					);
-					this.log(`successfully converted webp to gif`);
-				} catch (e) {
-					this.error(`failed to convert webp to gif: ${e}`);
-					throw e;
-				}
-			}
-		}
 
 		let hash: string;
 		if (PUB_DISABLE_FAILURE_BLOCKS === "false") {
