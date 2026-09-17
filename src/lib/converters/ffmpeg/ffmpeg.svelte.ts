@@ -124,54 +124,33 @@ export class FFmpegConverter extends Converter {
 		const bitrate: SettingDefinition = {
 			key: "bitrate",
 			label: m["convert.settings.audio.bitrate.label"](),
-			type: "select",
-			default: global.ffmpegQuality,
-			options: CONVERSION_BITRATES.map((b) => ({
-				value: b,
-				label:
-					b === "auto" || b === "custom"
-						? m[`convert.settings.common.${b}`]()
-						: `${b} kbps`,
-			})),
-			hasCustomInput: true,
-			customInputKey: "customBitrate",
+			type: "string",
+			default:
+				global.ffmpegQuality === "auto"
+					? ""
+					: global.ffmpegQuality === "custom"
+						? ""
+						: global.ffmpegQuality,
 			placeholder: m["convert.settings.audio.bitrate.placeholder"](),
 		};
 
 		const sampleRate: SettingDefinition = {
 			key: "sampleRate",
 			label: m["convert.settings.audio.sample_rate.label"](),
-			type: "select",
+			type: "string",
 			default:
-				global.ffmpegSampleRate === "custom"
-					? global.ffmpegCustomSampleRate
-					: global.ffmpegSampleRate,
-			options: SAMPLE_RATES.map((r) => ({
-				value: r,
-				label:
-					r === "auto" || r === "custom"
-						? m[`convert.settings.common.${r}`]()
-						: `${r} Hz`,
-			})),
-			hasCustomInput: true,
-			customInputKey: "customSampleRate",
+				global.ffmpegSampleRate === "auto"
+					? ""
+					: global.ffmpegSampleRate === "custom"
+						? global.ffmpegCustomSampleRate
+						: global.ffmpegSampleRate,
 			placeholder: m["convert.settings.audio.sample_rate.placeholder"](),
-		};
-
-		const tracks: SettingDefinition = {
-			key: "tracks",
-			label: m["convert.settings.audio.tracks.label"](),
-			type: "number",
-			default: 1,
-			min: 1,
-			placeholder: m["convert.settings.audio.tracks.placeholder"](),
 		};
 
 		const channels: SettingDefinition = {
 			key: "channels",
 			label: m["convert.settings.audio.channels.label"](),
 			type: "number",
-			default: 2,
 			min: 1,
 			max: 8,
 			placeholder: m["convert.settings.audio.channels.placeholder"](),
@@ -189,7 +168,7 @@ export class FFmpegConverter extends Converter {
 
 		// resize, crop, rotate - prob want a ui
 
-		return [bitrate, sampleRate, tracks, channels, metadata];
+		return [bitrate, sampleRate, channels, metadata];
 	}
 
 	public async getDefaultSettings(): Promise<ConversionSettings> {
@@ -227,11 +206,7 @@ export class FFmpegConverter extends Converter {
 			// no idea why its broken like this in the browser only lol
 			if (normalized.channels >= 2) change("channels", 1);
 
-			const bitrate = Number(
-				normalized.bitrate === "custom"
-					? normalized.customBitrate
-					: normalized.bitrate,
-			);
+			const bitrate = Number(normalized.bitrate);
 			if (Number.isFinite(bitrate) && bitrate > 256)
 				change("bitrate", 256);
 		} else if (to === ".amv") {
@@ -239,11 +214,7 @@ export class FFmpegConverter extends Converter {
 			change("channels", 1);
 			change("bitrate", 32);
 		} else if (to === ".mpg" || to === ".mpeg" || to === ".vob") {
-			const bitrate = Number(
-				normalized.bitrate === "custom"
-					? normalized.customBitrate
-					: normalized.bitrate,
-			);
+			const bitrate = Number(normalized.bitrate);
 			if (Number.isFinite(bitrate) && bitrate > 0)
 				change("bitrate", Math.pow(2, Math.round(Math.log2(bitrate))));
 		} else if (to === ".gxf") {
@@ -284,10 +255,7 @@ export class FFmpegConverter extends Converter {
 				msg.includes("Specified sample rate") &&
 				msg.includes("is not supported")
 			) {
-				const rate =
-					conversionSettings.sampleRate === "custom"
-						? conversionSettings.customSampleRate
-						: conversionSettings.sampleRate;
+				const rate = conversionSettings.sampleRate;
 				conversionError = m["workers.errors.invalid_rate"]({
 					rate,
 				});
@@ -426,9 +394,7 @@ export class FFmpegConverter extends Converter {
 		const isImageSequence = input.isZip() && settings.imageSequence;
 
 		const userBitrate = settings.bitrate;
-		const customBitrate = settings.customBitrate;
 		const userSampleRate = settings.sampleRate;
-		const customSampleRate = settings.customSampleRate;
 		const keepMetadata = settings.metadata;
 
 		// image sequences -> animated image // video
@@ -482,7 +448,6 @@ export class FFmpegConverter extends Converter {
 		let audioBitrateArgs: string[] = [];
 		let sampleRateArgs: string[] = [];
 		let channelsArgs: string[] = [];
-		let tracksArgs: string[] = [];
 		let metadataArgs: string[] = [];
 		const extraArgs: string[] = [];
 		if (to === ".amv") {
@@ -509,12 +474,9 @@ export class FFmpegConverter extends Converter {
 
 		const isLosslessToLossy =
 			lossless.includes(inputFormat) && !lossless.includes(outputFormat);
-		if (userBitrate !== "auto") {
+		if (userBitrate) {
 			// user's setting
-			audioBitrateArgs = [
-				"-b:a",
-				`${userBitrate === "custom" ? customBitrate : userBitrate}k`,
-			];
+			audioBitrateArgs = ["-b:a", `${userBitrate}k`];
 			this.log(`using user setting for audio bitrate: ${userBitrate}`);
 		} else {
 			// detect bitrate of original file and use
@@ -548,15 +510,8 @@ export class FFmpegConverter extends Converter {
 		}
 
 		// sample rate setting
-		if (userSampleRate !== "auto") {
-			sampleRateArgs = [
-				"-ar",
-				String(
-					userSampleRate === "custom"
-						? customSampleRate
-						: userSampleRate,
-				),
-			];
+		if (userSampleRate) {
+			sampleRateArgs = ["-ar", String(userSampleRate)];
 			this.log(`using user setting for sample rate: ${userSampleRate}Hz`);
 		} else {
 			// detect sample rate of original file and use
@@ -595,21 +550,6 @@ export class FFmpegConverter extends Converter {
 			);
 		}
 
-		// tracks setting
-		// TODO: select specific tracks? (prob should be for the other settings that need extra ui stuff)
-		if (settings.tracks !== "auto") {
-			// -map for each audio track
-			if (settings.tracks > 1) {
-				for (let i = 0; i < settings.tracks; i++) {
-					tracksArgs.push("-map", `0:a:${i}`);
-				}
-			} else {
-				tracksArgs = ["-map", "0:a:0"]; // default to first audio track if not specified
-			}
-
-			this.log(`using user setting for audio tracks: ${settings.tracks}`);
-		}
-
 		// video to audio
 		if (videoFormats.includes(inputFormat)) {
 			this.log(`Converting video ${input.from} to audio ${to}`);
@@ -622,7 +562,6 @@ export class FFmpegConverter extends Converter {
 				...audioBitrateArgs,
 				...sampleRateArgs,
 				...channelsArgs,
-				...tracksArgs,
 				...extraArgs,
 				"output" + to,
 			];
@@ -676,7 +615,6 @@ export class FFmpegConverter extends Converter {
 			...audioBitrateArgs,
 			...sampleRateArgs,
 			...channelsArgs,
-			...tracksArgs,
 			...extraArgs,
 			"-strict",
 			"experimental",
@@ -705,10 +643,7 @@ const handleSpecialOutput = async (
 			conversionSettings.sampleRate &&
 			conversionSettings.sampleRate !== "auto"
 		) {
-			sampleRate =
-				conversionSettings.sampleRate === "custom"
-					? (conversionSettings.customSampleRate as number)
-					: (conversionSettings.sampleRate as number);
+			sampleRate = conversionSettings.sampleRate as number;
 		} else {
 			const args = [
 				"-v",

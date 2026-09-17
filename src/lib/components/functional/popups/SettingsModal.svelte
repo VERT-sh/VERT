@@ -197,35 +197,6 @@
 													)}
 												disabled={setting.disabled}
 											/>
-											{#if setting.hasCustomInput}
-												{@const disabled =
-													(settings[setting.key] ??
-														targetFile
-															.conversionSettings[
-															setting.key
-														]) !== "custom"}
-												<FancyInput
-													type="text"
-													value={settings[
-														setting.customInputKey!
-													] ??
-														targetFile
-															.conversionSettings[
-															setting
-																.customInputKey!
-														] ??
-														""}
-													placeholder={setting.placeholder}
-													disabled={disabled ||
-														setting.disabled}
-													oninput={(e: any) =>
-														handleSettingChange(
-															setting.customInputKey!,
-															e.currentTarget
-																.value,
-														)}
-												/>
-											{/if}
 										{:else if setting.type === "boolean"}
 											<FancyInput
 												type="checkbox"

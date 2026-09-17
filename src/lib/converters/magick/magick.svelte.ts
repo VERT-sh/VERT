@@ -155,68 +155,22 @@ export class MagickConverter extends Converter {
 				break;
 		}
 
-		const toRes = (
-			w: number,
-			h?: number,
-		): { value: string; label: string } => {
-			if (w && h) {
-				if (w < h)
-					return { value: `${w}x${h}`, label: `${w}x${h} (V)` };
-				if (w > h) return { value: `${w}x${h}`, label: `${w}x${h}` };
-				return { value: `${w}x${h}`, label: `${w}x${h}` };
-			}
-			if (w) return { value: `${w}x${w}`, label: `${w}x${w}` };
-			return { value: "", label: "" };
-		};
-
 		const quality: SettingDefinition = {
 			key: "quality",
-			label: m["convert.settings.image.quality"](),
+			label: m["convert.settings.image.quality.label"](),
 			type: "number",
-			default: global.magickQuality ?? 100,
 			min: 0,
 			max: 100,
+			placeholder: m["convert.settings.image.quality.placeholder"](),
 		};
 		settings.push(quality);
 
-		// TODO: surely there's a better way to do this as well
-		const iconResolutions = [
-			toRes(16),
-			toRes(32),
-			toRes(48),
-			toRes(64),
-			toRes(128),
-			toRes(256),
-			toRes(512),
-		];
-		const commonResolutions = [
-			{
-				value: "custom",
-				label: m["convert.settings.common.custom"](),
-			},
-			toRes(320, 240),
-			toRes(426, 240),
-			toRes(640, 360),
-			toRes(854, 480),
-			toRes(720, 1280),
-			toRes(1280, 720),
-			toRes(1080, 1920),
-			toRes(1920, 1080),
-			toRes(2160, 3840),
-			toRes(3840, 2160),
-		];
 		const resolution: SettingDefinition = {
 			key: "resolution",
-			label: m["convert.settings.video.resolution.label"](),
-			type: "select",
-			default: "auto",
-			options: [
-				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...(toIcon ? iconResolutions : commonResolutions),
-			],
-			hasCustomInput: true,
-			customInputKey: "customResolution",
-			placeholder: m["convert.settings.video.resolution.placeholder"](),
+			label: m["convert.settings.image.resolution.label"](),
+			type: "string",
+			default: "",
+			placeholder: m["convert.settings.image.resolution.placeholder"](),
 		};
 		settings.push(resolution);
 
@@ -230,16 +184,10 @@ export class MagickConverter extends Converter {
 
 		const depth: SettingDefinition = {
 			key: "depth",
-			label: m["convert.settings.image.depth"](),
-			type: "select",
-			default: "auto",
-			options: [
-				{ value: "auto", label: "Auto" },
-				// { value: "custom", label: "Custom" },
-				{ value: "8", label: "8-bit" },
-				{ value: "16", label: "16-bit" },
-				{ value: "32", label: "32-bit" },
-			],
+			label: m["convert.settings.image.depth.label"](),
+			type: "string",
+			default: "",
+			placeholder: m["convert.settings.image.depth.placeholder"](),
 		};
 		settings.push(depth);
 
@@ -468,18 +416,10 @@ export class MagickConverter extends Converter {
 		const defaultSize = 512;
 		let [width, height] = [defaultSize, defaultSize];
 
-		// TODO: figure out a better way to process "custom" settings in general lol (see vertd.svelte.ts#processSettings)
 		if (settings.resolution) {
-			const resolution =
-				settings.resolution === "custom"
-					? settings.customResolution
-					: settings.resolution;
-			[width, height] = resolution
+			[width, height] = settings.resolution
 				.split("x")
 				.map((dim: string) => parseInt(dim));
-			this.log(
-				`using custom dimensions from settings for SVG: ${width}x${height}`,
-			);
 		} else {
 			const widthMatch = svgText.match(/width=["'](\d+)["']/);
 			const heightMatch = svgText.match(/height=["'](\d+)["']/);

@@ -377,13 +377,7 @@ class Files {
 	public add(file: FileList | null | undefined): void;
 	public add(
 		file:
-			| VertFile
-			| File
-			| VertFile[]
-			| File[]
-			| FileList
-			| null
-			| undefined,
+			VertFile | File | VertFile[] | File[] | FileList | null | undefined,
 	) {
 		if (!file) return;
 		if (Array.isArray(file) || file instanceof FileList) {

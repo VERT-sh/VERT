@@ -334,12 +334,7 @@ const magickConvert = async (
 
 	const resolution = conversionSettings.resolution as string;
 	if (!singleSize && resolution && resolution !== "auto") {
-		const actualResolution =
-			resolution === "custom"
-				? (conversionSettings.customResolution as string)
-				: resolution;
-
-		const [width, height] = actualResolution
+		const [width, height] = resolution
 			.split("x")
 			.map((dim: string) => parseInt(dim));
 
@@ -359,11 +354,7 @@ const magickConvert = async (
 
 			let desired = 0;
 			if (resolution && resolution !== "auto") {
-				const actualResolution =
-					resolution === "custom"
-						? (conversionSettings.customResolution as string)
-						: resolution;
-				const [wsel, hsel] = (actualResolution || "")
+				const [wsel, hsel] = (resolution || "")
 					.split("x")
 					.map((d: string) => parseInt(d) || 0);
 				desired = Math.max(wsel || 0, hsel || 0);

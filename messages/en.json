@@ -98,8 +98,18 @@
 			"none": "No settings available for this format.",
 			"converter": "Converter",
 			"image": {
-				"quality": "Quality",
-				"depth": "Color depth",
+				"resolution": {
+					"label": "Resolution",
+					"placeholder": "e.g. 1920x1080, 1280x720"
+				},
+				"quality": {
+					"label": "Quality (%)",
+					"placeholder": "e.g. 75, 90, 100"
+				},
+				"depth": {
+					"label": "Colour depth (bits)",
+					"placeholder": "e.g. 8, 16, 32"
+				},
 				"color_space": "Color space",
 				"transparency": "Transparency",
 				"single_size": "Single size image"
@@ -107,19 +117,15 @@
 			"audio": {
 				"bitrate": {
 					"label": "Bitrate (kbps)",
-					"placeholder": "Custom bitrate"
+					"placeholder": "e.g. 128, 192, 320"
 				},
 				"sample_rate": {
 					"label": "Sample rate (Hz)",
-					"placeholder": "Custom sample rate"
+					"placeholder": "e.g. 44100, 48000"
 				},
 				"channels": {
 					"label": "Audio channels",
-					"placeholder": "Custom audio channels"
-				},
-				"tracks": {
-					"label": "Audio tracks",
-					"placeholder": "Custom audio tracks"
+					"placeholder": "e.g. 1 (mono), 2 (stereo)"
 				}
 			},
 			"video": {
@@ -137,24 +143,29 @@
 				},
 				"fps": {
 					"label": "Frame rate (FPS)",
-					"placeholder": "Custom frame rate"
+					"placeholder": "e.g. 24, 30, 60"
 				},
 				"resolution": {
 					"label": "Resolution",
-					"placeholder": "Custom resolution"
+					"placeholder": "e.g. 1920x1080, 1280x720"
 				},
 				"bitrate": {
 					"video": "Video bitrate (kbps)",
 					"audio": "Audio bitrate (kbps)",
-					"placeholder": "Custom bitrate"
+					"video_placeholder": "e.g. 1000, 2000, 4000",
+					"audio_placeholder": "e.g. 128, 192, 320"
 				},
 				"sample_rate": {
 					"label": "Audio sample rate (Hz)",
-					"placeholder": "Custom sample rate"
+					"placeholder": "e.g. 44100, 48000"
 				},
 				"codec": {
 					"video": "Video codec",
 					"audio": "Audio codec"
+				},
+				"audioChannels": {
+					"label": "Audio channels",
+					"placeholder": "e.g. 1 (mono), 2 (stereo)"
 				}
 			},
 			"document": {
@@ -416,7 +427,7 @@
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
 		},
 		"warnings": {
-			"settings_change": "Changed the setting '{setting}' from '{oldValue}' to '{newValue}' for {file} to prevent conversion failure."
+			"settings_change": "Changed setting '{setting}' from '{oldValue}' to '{newValue}' for {file} ({to}) to prevent conversion failure."
 		}
 	},
 	"privacy": {

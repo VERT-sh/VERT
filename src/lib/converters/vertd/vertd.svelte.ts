@@ -114,12 +114,7 @@ export const vertdFetch: {
 // ws types
 
 export type ConversionSpeed =
-	| "verySlow"
-	| "slower"
-	| "slow"
-	| "medium"
-	| "fast"
-	| "ultraFast";
+	"verySlow" | "slower" | "slow" | "medium" | "fast" | "ultraFast";
 
 const vertdSpeedValues: ConversionSpeed[] = [
 	"verySlow",
@@ -143,7 +138,7 @@ interface StartJobMessage {
 interface ErrorMessage {
 	type: "error";
 	data: {
-		message: string;
+		message: unknown;
 	};
 }
 
@@ -218,31 +213,16 @@ const progressEstimate = (
 	return progress * progressEstimates[type] + previousValues;
 };
 
-const processSettings = (settings: ConversionSettings): ConversionSettings => {
-	const newSettings = { ...settings };
+const formatError = (message: unknown): string => {
+	if (typeof message === "string") return message;
+	if (message instanceof Error) return message.message;
+	if (message === undefined) return "Unknown Vertd error";
 
-	if (newSettings.fps === "custom") {
-		newSettings.fps = newSettings.customFps;
-		delete newSettings.customFps;
+	try {
+		return JSON.stringify(message);
+	} catch {
+		return String(message);
 	}
-	if (newSettings.resolution === "custom") {
-		newSettings.resolution = newSettings.customResolution;
-		delete newSettings.customResolution;
-	}
-	if (newSettings.videoBitrate === "custom") {
-		newSettings.videoBitrate = newSettings.customVideoBitrate;
-		delete newSettings.customVideoBitrate;
-	}
-	if (newSettings.audioBitrate === "custom") {
-		newSettings.audioBitrate = newSettings.customAudioBitrate;
-		delete newSettings.customAudioBitrate;
-	}
-	if (newSettings.sampleRate === "custom") {
-		newSettings.sampleRate = newSettings.customSampleRate;
-		delete newSettings.customSampleRate;
-	}
-
-	return newSettings;
 };
 
 interface UploadTask {
@@ -555,49 +535,16 @@ export class VertdConverter extends Converter {
 		const fps: SettingDefinition = {
 			key: "fps",
 			label: m["convert.settings.video.fps.label"](),
-			type: "select",
-			default: "auto",
-			options: [
-				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				{
-					value: "custom",
-					label: m["convert.settings.common.custom"](),
-				},
-				{ value: "24", label: "24" },
-				{ value: "30", label: "30" },
-				{ value: "60", label: "60" },
-				{ value: "120", label: "120" },
-				{ value: "144", label: "144" },
-				{ value: "240", label: "240" },
-			],
-			hasCustomInput: true,
-			customInputKey: "customFps",
+			type: "string",
+			default: "",
 			placeholder: m["convert.settings.video.fps.placeholder"](),
 		};
 
 		const resolution: SettingDefinition = {
 			key: "resolution",
 			label: m["convert.settings.video.resolution.label"](),
-			type: "select",
-			default: "auto",
-			options: [
-				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				{
-					value: "custom",
-					label: m["convert.settings.common.custom"](),
-				},
-				{ value: "426x240", label: "426x240" },
-				{ value: "640x360", label: "640x360" },
-				{ value: "854x480", label: "854x480" },
-				{ value: "720x1280", label: "720x1280 (V)" },
-				{ value: "1280x720", label: "1280x720" },
-				{ value: "1080x1920", label: "1080x1920 (V)" },
-				{ value: "1920x1080", label: "1920x1080" },
-				{ value: "2160x3840", label: "2160x3840 (V)" },
-				{ value: "3840x2160", label: "3840x2160" },
-			],
-			hasCustomInput: true,
-			customInputKey: "customResolution",
+			type: "string",
+			default: "",
 			placeholder: m["convert.settings.video.resolution.placeholder"](),
 		};
 
@@ -619,24 +566,10 @@ export class VertdConverter extends Converter {
 		const videoBitrate: SettingDefinition = {
 			key: "videoBitrate",
 			label: m["convert.settings.video.bitrate.video"](),
-			type: "select",
-			default: "auto",
-			options: [
-				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				{
-					value: "custom",
-					label: m["convert.settings.common.custom"](),
-				},
-				{ value: "1000", label: "1000 kbps" },
-				{ value: "2500", label: "2500 kbps" },
-				{ value: "5000", label: "5000 kbps" },
-				{ value: "8000", label: "8000 kbps" },
-				{ value: "12000", label: "12000 kbps" },
-				{ value: "18000", label: "18000 kbps" },
-			],
-			hasCustomInput: true,
-			customInputKey: "customVideoBitrate",
-			placeholder: m["convert.settings.video.bitrate.placeholder"](),
+			type: "string",
+			default: "",
+			placeholder:
+				m["convert.settings.video.bitrate.video_placeholder"](),
 		};
 
 		/*
@@ -659,39 +592,28 @@ export class VertdConverter extends Converter {
 		const audioBitrate: SettingDefinition = {
 			key: "audioBitrate",
 			label: m["convert.settings.video.bitrate.audio"](),
-			type: "select",
-			default: "auto",
-			options: CONVERSION_BITRATES.map((b) => ({
-				value: b.toString(),
-				label:
-					b === "auto"
-						? m["convert.settings.common.auto"]()
-						: b === "custom"
-							? m["convert.settings.common.custom"]()
-							: `${b} kbps`,
-			})),
-			hasCustomInput: true,
-			customInputKey: "customAudioBitrate",
-			placeholder: m["convert.settings.audio.bitrate.placeholder"](),
+			type: "string",
+			default: "",
+			placeholder:
+				m["convert.settings.video.bitrate.audio_placeholder"](),
 		};
 
 		const sampleRate: SettingDefinition = {
 			key: "sampleRate",
 			label: m["convert.settings.audio.sample_rate.label"](),
-			type: "select",
-			default: "auto",
-			options: SAMPLE_RATES.map((r) => ({
-				value: r.toString(),
-				label:
-					r === "auto"
-						? m["convert.settings.common.auto"]()
-						: r === "custom"
-							? m["convert.settings.common.custom"]()
-							: `${r} Hz`,
-			})),
-			hasCustomInput: true,
-			customInputKey: "customSampleRate",
+			type: "string",
+			default: "",
 			placeholder: m["convert.settings.audio.sample_rate.placeholder"](),
+		};
+
+		const audioChannels: SettingDefinition = {
+			key: "audioChannels",
+			label: m["convert.settings.video.audioChannels.label"](),
+			type: "number",
+			min: 1,
+			max: 8,
+			placeholder:
+				m["convert.settings.video.audioChannels.placeholder"](),
 		};
 
 		/*
@@ -717,6 +639,7 @@ export class VertdConverter extends Converter {
 				videoBitrate,
 				audioBitrate,
 				fps,
+				audioChannels,
 				sampleRate,
 				resolution,
 				metadata,
@@ -757,9 +680,18 @@ export class VertdConverter extends Converter {
 			});
 		};
 
-		if (to === ".mxf") {
-			change("sampleRate", "48000");
-		}
+		// handled in backend now
+		// if (to === ".mxf") {
+		// 	change("sampleRate", "48000");
+		// }
+
+		// // gxf was used for tv program systems/archives, so only PAL/NTSC resolutions
+		// if (to === ".gxf") {
+		// 	// for now, just PAL cause highest res at 720x576
+		// 	change("resolution", "720x576");
+		// 	change("sampleRate", "48000");
+		// 	change("audioChannels", "1");
+		// }
 
 		return { settings: normalized, changes };
 	}
@@ -882,7 +814,7 @@ export class VertdConverter extends Converter {
 						jobId: uploadRes.id,
 						token: uploadRes.auth,
 						to,
-						settings: processSettings(conversionSettings),
+						settings: conversionSettings,
 					},
 				};
 				ws.send(JSON.stringify(msg));
@@ -991,7 +923,8 @@ export class VertdConverter extends Converter {
 					}
 
 					case "error": {
-						this.error(`error: ${msg.data.message}`);
+						const errorMessage = formatError(msg.data.message);
+						this.error(`error: ${errorMessage}`);
 						if (hash) this.failure(hash);
 
 						rejectConversion({
@@ -1001,7 +934,7 @@ export class VertdConverter extends Converter {
 								auth: uploadRes.auth,
 								from: input.from,
 								to: to,
-								errorMessage: msg.data.message,
+								errorMessage,
 							},
 						});
 						break;

@@ -8,11 +8,7 @@ import type {
 } from "$lib/types/conversion-settings";
 
 export type WorkerStatus =
-	| "not-ready"
-	| "downloading"
-	| "ready"
-	| "partially-ready"
-	| "error";
+	"not-ready" | "downloading" | "ready" | "partially-ready" | "error";
 
 export class FormatInfo {
 	public name: string;

@@ -121,26 +121,16 @@ const buildVideoConfig = (
 
 	if (settings.videoCodec !== "auto") config.codec = settings.videoCodec;
 
-	if (settings.videoBitrate !== "auto") {
-		const bitrate =
-			settings.videoBitrate === "custom"
-				? settings.customVideoBitrate
-				: settings.videoBitrate;
-		config.bitrate = Number(bitrate);
+	if (settings.videoBitrate && settings.videoBitrate !== "auto") {
+		config.bitrate = Number(settings.videoBitrate);
 	}
 
-	if (settings.fps !== "auto") {
-		const fps =
-			settings.fps === "custom" ? settings.customFps : settings.fps;
-		config.frameRate = Number(fps);
+	if (settings.fps && settings.fps !== "auto") {
+		config.frameRate = Number(settings.fps);
 	}
 
-	if (settings.resolution !== "auto") {
-		const resolution =
-			settings.resolution === "custom"
-				? settings.customResolution
-				: settings.resolution;
-		const [width, height] = resolution.split("x").map(Number);
+	if (settings.resolution && settings.resolution !== "auto") {
+		const [width, height] = settings.resolution.split("x").map(Number);
 		config.width = width;
 		config.height = height;
 		config.fit = "contain"; // TODO: maybe allow changing this?
@@ -156,20 +146,12 @@ const buildAudioConfig = (
 
 	if (settings.audioCodec !== "auto") config.codec = settings.audioCodec;
 
-	if (settings.audioBitrate !== "auto") {
-		const bitrate =
-			settings.audioBitrate === "custom"
-				? settings.customAudioBitrate
-				: settings.audioBitrate;
-		config.bitrate = Number(bitrate);
+	if (settings.audioBitrate && settings.audioBitrate !== "auto") {
+		config.bitrate = Number(settings.audioBitrate);
 	}
 
-	if (settings.sampleRate !== "auto") {
-		const sampleRate =
-			settings.sampleRate === "custom"
-				? settings.customSampleRate
-				: settings.sampleRate;
-		config.sampleRate = Number(sampleRate);
+	if (settings.sampleRate && settings.sampleRate !== "auto") {
+		config.sampleRate = Number(settings.sampleRate);
 	}
 
 	return config;
@@ -282,49 +264,16 @@ export class MediabunnyConverter extends Converter {
 		const fps: SettingDefinition = {
 			key: "fps",
 			label: m["convert.settings.video.fps.label"](),
-			type: "select",
-			default: "auto",
-			options: [
-				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				{
-					value: "custom",
-					label: m["convert.settings.common.custom"](),
-				},
-				{ value: "24", label: "24" },
-				{ value: "30", label: "30" },
-				{ value: "60", label: "60" },
-				{ value: "120", label: "120" },
-				{ value: "144", label: "144" },
-				{ value: "240", label: "240" },
-			],
-			hasCustomInput: true,
-			customInputKey: "customFps",
+			type: "string",
+			default: "",
 			placeholder: m["convert.settings.video.fps.placeholder"](),
 		};
 
 		const resolution: SettingDefinition = {
 			key: "resolution",
 			label: m["convert.settings.video.resolution.label"](),
-			type: "select",
-			default: "auto",
-			options: [
-				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				{
-					value: "custom",
-					label: m["convert.settings.common.custom"](),
-				},
-				{ value: "426x240", label: "426x240" },
-				{ value: "640x360", label: "640x360" },
-				{ value: "854x480", label: "854x480" },
-				{ value: "720x1280", label: "720x1280 (V)" },
-				{ value: "1280x720", label: "1280x720" },
-				{ value: "1080x1920", label: "1080x1920 (V)" },
-				{ value: "1920x1080", label: "1920x1080" },
-				{ value: "2160x3840", label: "2160x3840 (V)" },
-				{ value: "3840x2160", label: "3840x2160" },
-			],
-			hasCustomInput: true,
-			customInputKey: "customResolution",
+			type: "string",
+			default: "",
 			placeholder: m["convert.settings.video.resolution.placeholder"](),
 		};
 
@@ -332,24 +281,10 @@ export class MediabunnyConverter extends Converter {
 		const videoBitrate: SettingDefinition = {
 			key: "videoBitrate",
 			label: m["convert.settings.video.bitrate.video"](),
-			type: "select",
-			default: "auto",
-			options: [
-				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				{
-					value: "custom",
-					label: m["convert.settings.common.custom"](),
-				},
-				{ value: "1000", label: "1000 kbps" },
-				{ value: "2500", label: "2500 kbps" },
-				{ value: "5000", label: "5000 kbps" },
-				{ value: "8000", label: "8000 kbps" },
-				{ value: "12000", label: "12000 kbps" },
-				{ value: "18000", label: "18000 kbps" },
-			],
-			hasCustomInput: true,
-			customInputKey: "customVideoBitrate",
-			placeholder: m["convert.settings.video.bitrate.placeholder"](),
+			type: "string",
+			default: "",
+			placeholder:
+				m["convert.settings.video.bitrate.video_placeholder"](),
 		};
 
 		const toFormat = input.to;
@@ -389,38 +324,17 @@ export class MediabunnyConverter extends Converter {
 		const audioBitrate: SettingDefinition = {
 			key: "audioBitrate",
 			label: m["convert.settings.video.bitrate.audio"](),
-			type: "select",
-			default: "auto",
-			options: CONVERSION_BITRATES.map((b) => ({
-				value: b.toString(),
-				label:
-					b === "auto"
-						? m["convert.settings.common.auto"]()
-						: b === "custom"
-							? m["convert.settings.common.custom"]()
-							: `${b} kbps`,
-			})),
-			hasCustomInput: true,
-			customInputKey: "customAudioBitrate",
-			placeholder: m["convert.settings.audio.bitrate.placeholder"](),
+			type: "string",
+			default: "",
+			placeholder:
+				m["convert.settings.video.bitrate.audio_placeholder"](),
 		};
 
 		const sampleRate: SettingDefinition = {
 			key: "sampleRate",
 			label: m["convert.settings.audio.sample_rate.label"](),
-			type: "select",
-			default: "auto",
-			options: SAMPLE_RATES.map((r) => ({
-				value: r.toString(),
-				label:
-					r === "auto"
-						? m["convert.settings.common.auto"]()
-						: r === "custom"
-							? m["convert.settings.common.custom"]()
-							: `${r} Hz`,
-			})),
-			hasCustomInput: true,
-			customInputKey: "customSampleRate",
+			type: "string",
+			default: "",
 			placeholder: m["convert.settings.audio.sample_rate.placeholder"](),
 		};
 
