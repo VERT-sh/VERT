@@ -18,9 +18,12 @@ import {
 	WEBM,
 	WebMOutputFormat,
 } from "mediabunny";
+import { registerAacEncoder } from "@mediabunny/aac-encoder";
 import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
+import { registerDtsDecoder, registerDtsEncoder } from "@mediabunny/dts";
 import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import { registerFlacEncoder } from "@mediabunny/flac-encoder";
+import { registerProresDecoder } from "@mediabunny/prores";
 import { Converter, FormatInfo, type WorkerStatus } from "../converter.svelte";
 import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
@@ -28,16 +31,15 @@ import type {
 	SettingDefinition,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
-import { CONVERSION_BITRATES, SAMPLE_RATES } from "../ffmpeg/ffmpeg.codecs";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { browser } from "$app/environment";
 
 // codec compatibility stuff, based on mediabunny's docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
 // prettier-ignore
-const mp4VideoCodecs = ["avc", "hevc", "vp8", "vp9", "av1"] as const;
+const mp4VideoCodecs = ["avc","hevc","vp8","vp9","av1","prores"] as const;
 // prettier-ignore
-const mp4AudioCodecs = [ "aac", "opus", "mp3", "vorbis", "flac", "ac3", "eac3", "pcm-s16", "pcm-s16be", "pcm-s24", "pcm-s24be", "pcm-s32", "pcm-s32be", "pcm-f32", "pcm-f64"] as const;
+const mp4AudioCodecs = [ "aac", "opus", "mp3", "vorbis", "flac", "ac3", "eac3", "dts", "pcm-s16", "pcm-s16be", "pcm-s24", "pcm-s24be", "pcm-s32", "pcm-s32be", "pcm-f32", "pcm-f64"] as const;
 const codecCompatibility = {
 	video: {
 		mp4: mp4VideoCodecs,
@@ -67,6 +69,7 @@ const codecCompatibility = {
 			"flac",
 			"ac3",
 			"eac3",
+			"dts",
 			"pcm-u8",
 			"pcm-s16",
 			"pcm-s24",
@@ -83,6 +86,7 @@ const codecCompatibility = {
 			"flac",
 			"ac3",
 			"eac3",
+			"dts",
 			"pcm-u8",
 			"pcm-s8",
 			"pcm-s16",
@@ -97,7 +101,7 @@ const codecCompatibility = {
 			"ulaw",
 			"alaw",
 		],
-		ts: ["aac", "mp3", "ac3", "eac3"],
+		ts: ["aac", "mp3", "ac3", "eac3", "dts"],
 	},
 } as const;
 
@@ -174,6 +178,8 @@ export class MediabunnyConverter extends Converter {
 		"f4v",
 		"3gp",
 		"3g2",
+		"mts",
+		"m2ts",
 		"ts",
 	];
 
@@ -196,14 +202,16 @@ export class MediabunnyConverter extends Converter {
 
 		// additional mediabunny coders
 		// currently the official ones -- maybe add our own in the future
-		this.initializeCodecs();
-
-		// checks if mediabunny and webcodecs are initialized and supported
-		this.checkStatus();
+		void this.initializeCodecs()
+			.then(() => this.checkStatus())
+			.catch((err) => {
+				this.error(`Failed to initialize Mediabunny codecs: ${err}`);
+				this.status = "error";
+			});
 	}
 
-	private checkStatus() {
-		const mediabunnyInitialized = canEncodeAudio("pcm-s16");
+	private async checkStatus() {
+		const mediabunnyInitialized = await canEncodeAudio("pcm-s16");
 
 		const webCodecsVideoDecode = "VideoDecoder" in globalThis;
 		const webCodecsVideoEncode = "VideoEncoder" in globalThis;
@@ -248,11 +256,17 @@ export class MediabunnyConverter extends Converter {
 		if (!(await canEncodeAudio("mp3"))) {
 			registerMp3Encoder();
 		}
+		if (!(await canEncodeAudio("aac"))) {
+			registerAacEncoder();
+		}
 		if (!(await canEncodeAudio("flac"))) {
 			registerFlacEncoder();
 		}
 		registerAc3Decoder();
 		registerAc3Encoder();
+		registerDtsDecoder();
+		registerDtsEncoder();
+		registerProresDecoder();
 	}
 
 	public async getAvailableSettings(
@@ -509,6 +523,8 @@ export class MediabunnyConverter extends Converter {
 				return new WebMOutputFormat();
 			case ".mov":
 				return new MovOutputFormat();
+			case ".mts":
+			case ".m2ts":
 			case ".ts":
 				return new MpegTsOutputFormat();
 			default:

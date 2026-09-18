@@ -10,13 +10,11 @@ import { VertFile } from "$lib/types";
 import { Converter, FormatInfo } from "../converter.svelte";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
 import { ToastManager } from "$lib/util/toast.svelte";
-import { converters } from "../";
 import type {
 	SettingDefinition,
 	ConversionSettings,
 	NormalizedSettings,
 } from "$lib/types/conversion-settings";
-import { CONVERSION_BITRATES, SAMPLE_RATES } from "../ffmpeg/ffmpeg.codecs";
 import { formatBytes } from "$lib/util/file";
 
 interface UploadResponse {
