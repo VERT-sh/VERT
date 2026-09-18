@@ -6,10 +6,7 @@ import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
-import {
-	getCodecs,
-	toArgs,
-} from "./ffmpeg.codecs";
+import { getCodecs, toArgs } from "./ffmpeg.codecs";
 import { buildImageSequenceCommand } from "./ffmpeg.animated";
 import { extractAlbumArt, avWithArt, avWithBg } from "./utils/ffmpeg";
 import type {

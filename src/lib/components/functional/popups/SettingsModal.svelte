@@ -97,6 +97,11 @@
 	icon={SearchIcon}
 	title={m["convert.settings.title"]()}
 	color="purple"
+	badge={{
+		text: m["convert.settings.badge.text"](),
+		tooltip: m["convert.settings.badge.tooltip"](),
+		color: "accent-pink",
+	}}
 	buttons={[
 		{
 			text: "Cancel",

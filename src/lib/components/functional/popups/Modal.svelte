@@ -1,18 +1,26 @@
 <script lang="ts">
+	import Tooltip from "$lib/components/visual/Tooltip.svelte";
 	import { duration, fade } from "$lib/util/animation";
 	import type { SearchIcon } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 
-	interface ModalButton {
+	export interface ModalButton {
 		text: string;
 		action: () => void;
 		primary?: boolean;
 	}
 
-	interface Props {
+	export interface ModalBadge {
+		text: string;
+		tooltip?: string;
+		color: string;
+	}
+
+	export interface Props {
 		icon: typeof SearchIcon;
 		title: string;
 		color: string;
+		badge: ModalBadge | null;
 		buttons: ModalButton[];
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		children: () => any;
@@ -23,6 +31,7 @@
 		icon: Icon,
 		title,
 		color,
+		badge,
 		buttons,
 		children,
 		onclose,
@@ -90,6 +99,23 @@
 					<Icon size="16" color="black" />
 				</div>
 				<p class="text-lg font-semibold">{title}</p>
+				{#if badge && badge.text}
+					{#if badge.tooltip}
+						<Tooltip text={badge.tooltip} position="bottom">
+							<div
+								class="rounded-md bg-{badge.color} px-1.5 py-0.5 text-sm font-display text-white"
+							>
+								{badge.text}
+							</div>
+						</Tooltip>
+					{:else}
+						<div
+							class="rounded-md bg-{badge.color} px-1.5 py-0.5 text-sm font-display text-white"
+						>
+							{badge.text}
+						</div>
+					{/if}
+				{/if}
 			</div>
 		</div>
 

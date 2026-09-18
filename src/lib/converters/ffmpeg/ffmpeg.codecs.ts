@@ -1,7 +1,6 @@
 // prettier-ignore
 export const animatedImageFormats = ["gif", "webp", "apng"];
 
-
 export const getCodecs = (
 	ext: string,
 	isAlac: boolean = false,
