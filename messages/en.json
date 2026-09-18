@@ -429,7 +429,8 @@
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
 		},
 		"warnings": {
-			"settings_change": "Changed setting '{setting}' from '{oldValue}' to '{newValue}' for {file} ({to}) to prevent conversion failure."
+			"settings_change": "Changed setting '{setting}' from '{oldValue}' to '{newValue}' for {file} ({to}) to prevent conversion failure.",
+			"file_type_mismatch": "File {filename} is named {expected}, but was detected as {actual}. This may cause conversion issues."
 		}
 	},
 	"privacy": {

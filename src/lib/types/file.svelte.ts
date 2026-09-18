@@ -189,7 +189,15 @@ export class VertFile {
 				console.warn(
 					`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`,
 				);
-				// TODO: show a warning modal or message if detected type doesn't match name
+				ToastManager.add({
+					type: "warning",
+					disappearing: false,
+					message: m["workers.warnings.file_type_mismatch"]({
+						filename: this.file.name,
+						expected: expectedExtension,
+						actual: detectedExtension,
+					}),
+				});
 			}
 
 			this.from = `.${detectedExtension}`;
@@ -290,6 +298,7 @@ export class VertFile {
 					oldValue: change.oldValue,
 					newValue: change.newValue,
 					file: change.file,
+					to: this.to,
 				}),
 			});
 		}
