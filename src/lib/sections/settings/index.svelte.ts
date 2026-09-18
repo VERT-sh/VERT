@@ -1,5 +1,4 @@
 import { PUB_VERTD_URL } from "$env/static/public";
-import type { ConversionBitrate } from "$lib/converters/ffmpeg/ffmpeg.codecs";
 import type { ConversionSpeed } from "$lib/converters/vertd/vertd.svelte";
 import { readSettings } from "$lib/util/settings";
 import { VertdInstance } from "./vertdSettings.svelte";
@@ -28,9 +27,6 @@ export interface ISettings {
 	vertdBlockedHashes: Map<string, Date[]>; // hashes of files blocked from vertd conversion
 	vertdCustomHeaders: string; // custom headers to send to the vertd server
 	magickQuality: number; // images
-	ffmpegQuality: ConversionBitrate; // audio (or audio <-> video)
-	ffmpegSampleRate: string; // audio (or audio <-> video)
-	ffmpegCustomSampleRate: number; // audio (or audio <-> video) - only used when ffmpegSampleRate is "custom"
 }
 
 export class Settings {
@@ -51,10 +47,7 @@ export class Settings {
 		vertdSpeed: "slow",
 		vertdBlockedHashes: new Map<string, Date[]>(),
 		vertdCustomHeaders: "",
-		magickQuality: 100,
-		ffmpegQuality: "auto",
-		ffmpegSampleRate: "auto",
-		ffmpegCustomSampleRate: 44100, //TODO: make string to match for vertd
+		magickQuality: 90,
 	});
 
 	public save() {

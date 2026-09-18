@@ -117,12 +117,6 @@ export class FFmpegConverter extends Converter {
 			key: "bitrate",
 			label: m["convert.settings.audio.bitrate.label"](),
 			type: "string",
-			default:
-				global.ffmpegQuality === "auto"
-					? ""
-					: global.ffmpegQuality === "custom"
-						? ""
-						: global.ffmpegQuality,
 			placeholder: m["convert.settings.audio.bitrate.placeholder"](),
 		};
 
@@ -130,12 +124,6 @@ export class FFmpegConverter extends Converter {
 			key: "sampleRate",
 			label: m["convert.settings.audio.sample_rate.label"](),
 			type: "string",
-			default:
-				global.ffmpegSampleRate === "auto"
-					? ""
-					: global.ffmpegSampleRate === "custom"
-						? global.ffmpegCustomSampleRate
-						: global.ffmpegSampleRate,
 			placeholder: m["convert.settings.audio.sample_rate.placeholder"](),
 		};
 

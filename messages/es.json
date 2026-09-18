@@ -166,10 +166,8 @@
 				"label": "Calidad de la conversión",
 				"description": "Esto cambia la calidad por defecto de los archivos convertidos (en su categoría). Valores más altos pueden resultar en tiempos de conversión y tamaños de archivo más largos.",
 				"video": "Esto cambia la calidad por defecto de los vídeos convertidos. Valores más altos pueden resultar en tiempos de conversión y tamaños de archivo más largos.",
-				"audio": "Audio (kbps)",
 				"images": "Imagen (%)"
 			},
-			"rate": "Tasa de muestreo (Hz)",
 			"filename": {
 				"description": "Esto va a determinar el nombre del archivo al ser descargado <b>sin incluir la extensión</b>. Puedes poner las siguientes plantillas en el formato, las cuales serán reemplazadas con la información que les corresponde: <b>%name%</b> para el nombre original, <b>%extension%</b> para la extensión original del archivo y <b>%date%</b> para la fecha de cuando el archivo fue convertido.",
 				"format": "Formato del nombre de archivo",

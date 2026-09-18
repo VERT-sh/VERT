@@ -172,10 +172,8 @@
 				"label": "Jakość konwersji",
 				"description": "To ustawienie pozwala ci ustalić domyślną jakość wyjściową przekonwertowanego pliku (w danej kategorii). Wyższe wartości mogą skutkować dłuższym czasem konwersji oraz większym rozmiarem pliku.",
 				"video": "To ustawienie pozwala ustalić domyślną jakość wyjściową przekonwertowanego pliku wideo. Wyższe wartości mogą skutkować dłuższym czasem konwersji oraz większym rozmiarem pliku.",
-				"audio": "Audio (kbps)",
 				"images": "Zdjęcia (%)"
 			},
-			"rate": "Częstotliwość próbkowania (Hz)",
 			"filename": {
 				"format": "Format nazwy pliku",
 				"description": "To ustawienie pozwoli ci określić nazwę pliku przy jego pobieraniu <b>z wyłączeniem jego rozszerzenia.</b> Możesz w formacie umieścić następujące wzorce, które następnie zostaną zamienione na odpowiednią informację: <b>%name%</b> zostanie zamieniony na oryginalną nazwę pliku, <b>%extension%</b> zostanie zamieniony na oryginalne rozszerzenie pliku oraz <b>%date%</b> zamieniony zostanie na datę kiedy plik został przekonwertowany.",

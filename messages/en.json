@@ -283,10 +283,8 @@
 				"label": "Conversion quality",
 				"description": "This changes the default output quality of the converted files (in its category). Higher values may result in longer conversion times and file size.",
 				"video": "This changes the default output quality of the converted video files. Higher values may result in longer conversion times and file size.",
-				"audio": "Audio (kbps)",
 				"images": "Image (%)"
-			},
-			"rate": "Sample rate (Hz)"
+			}
 		},
 		"vertd": {
 			"title": "Server video conversion",

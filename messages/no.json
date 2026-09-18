@@ -172,10 +172,8 @@
 				"label": "Konverteringskvalitet",
 				"description": "Dette endrer standard utgangskvalitet for konverterte filer (i sin kategori). Høyere verdier kan føre til lengre konverteringstid og filstørrelse.",
 				"video": "Dette endrer standard utgangskvalitet for konverterte videofiler. Høyere verdier kan føre til lengre konverteringstid og filstørrelse.",
-				"audio": "Lyd (kbps)",
 				"images": "Bilde (%)"
 			},
-			"rate": "Samplingsfrekvens (Hz)",
 			"filename": {
 				"format": "Filnavnformat",
 				"description": "Dette bestemmer navnet på filen ved nedlasting, <b>uten filendelsen.</b> Du kan bruke følgende maler i formatet, som vil bli erstattet med relevant informasjon: <b>%name%</b> for det opprinnelige filnavnet, <b>%extension%</b> for den opprinnelige filendelsen, og <b>%date%</b> for en dato når filen ble konvertert.",

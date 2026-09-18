@@ -1,14 +1,6 @@
 // prettier-ignore
-export const CONVERSION_BITRATES = ["auto", "custom", 16, 32, 64, 96, 128, 160, 192, 256, 320] as const;
-
-// prettier-ignore
-export const SAMPLE_RATES = ["auto", "custom", 8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000, 96000,] as const;
-
-// prettier-ignore
 export const animatedImageFormats = ["gif", "webp", "apng"];
 
-// prettier-ignore
-export const lossless = ["flac", "m4a", "caf", "alac", "wav", "dsd", "dsf", "dff"];
 
 export const getCodecs = (
 	ext: string,
@@ -144,6 +136,3 @@ export const toArgs = (ext: string, isAlac: boolean = false): string[] => {
 
 	return args;
 };
-
-export type ConversionBitrate = (typeof CONVERSION_BITRATES)[number];
-export type SampleRate = (typeof SAMPLE_RATES)[number];

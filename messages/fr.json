@@ -131,10 +131,8 @@
 				"label": "Qualité de conversion",
 				"description": "Cela modifie la qualité de sortie par défaut des fichiers convertis (de son format). Des valeurs plus élevées peuvent entraîner des temps de conversion et une taille de fichier plus longs.",
 				"video": "Cela modifie la qualité de sortie par défaut des fichiers vidéo convertis. Des valeurs plus élevées peuvent allonger le temps de conversion et la taille du fichier.",
-				"audio": "Audio (kbps)",
 				"images": "Image (%)"
 			},
-			"rate": "Taux d'échantillonnage (Hz)",
 			"filename": {
 				"format": "Format du nom de fichier",
 				"description": "Cela déterminera le nom du fichier lors du téléchargement, <b>sans inclure l'extension du fichier.</b> Vous pouvez mettre les modèles suivants dans le format, qui seront remplacés par les informations pertinentes: <b>%name%</b> pour le nom du fichier d'origine, <b>%extension%</b> pour l'extension du fichier d'origine et <b>%date%</b> pour une chaîne de date indiquant quand le fichier a été converti.",

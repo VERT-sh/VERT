@@ -172,10 +172,8 @@
 				"label": "Kvalita konverze",
 				"description": "Toto mění výchozí výstupní kvalitu konvertovaných souborů (v jejich kategorii). Vyšší hodnoty mohou vést k delšímu času konverze a větší velikosti souboru.",
 				"video": "Toto mění výchozí výstupní kvalitu konvertovaných video souborů. Vyšší hodnoty mohou vést k delšímu času konverze a větší velikosti souboru.",
-				"audio": "Audio (kbps)",
 				"images": "Obrázek (%)"
 			},
-			"rate": "Vzorkovací frekvence (Hz)",
 			"filename": {
 				"format": "Formát názvu souboru",
 				"description": "Toto určí název souboru při stažení, <b>bez přípony souboru.</b> Do formátu můžete vložit následující šablony, které budou nahrazeny příslušnými informacemi: <b>%name%</b> pro původní název souboru, <b>%extension%</b> pro původní příponu souboru a <b>%date%</b> pro datum, kdy byl soubor konvertován.",

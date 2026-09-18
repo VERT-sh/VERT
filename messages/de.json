@@ -172,10 +172,8 @@
 				"label": "Qualität",
 				"description": "Dies ändert die Standard-Qualität der konvertierten Dateien. Höhere Werte können zu längeren Konvertierungszeiten und größeren Dateien führen.",
 				"video": "Dies ändert die Standard-Qualität der konvertierten Videodateien. Höhere Werte können zu längeren Konvertierungszeiten und größeren Dateien führen.",
-				"audio": "Audio (kbps)",
 				"images": "Bild (%)"
 			},
-			"rate": "Abtastrate (Hz)",
 			"filename": {
 				"format": "Dateinamensformat",
 				"description": "Dies bestimmt den Namen der Datei beim Herunterladen, <b>ohne die Dateiendung.</b> Du kannst folgende Platzhalter verwenden: <b>%name%</b> für den ursprünglichen Dateinamen, <b>%extension%</b> für die ursprüngliche Dateiendung und <b>%date%</b> für das Datum der Konvertierung.",

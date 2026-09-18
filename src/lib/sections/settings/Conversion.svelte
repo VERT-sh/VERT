@@ -8,14 +8,7 @@
 		ChevronDownIcon,
 	} from "@lucide/svelte";
 	import type { ISettings } from "./index.svelte";
-	import {
-		CONVERSION_BITRATES,
-		type ConversionBitrate,
-		SAMPLE_RATES,
-		type SampleRate,
-	} from "$lib/converters/ffmpeg/ffmpeg.codecs";
 	import { m } from "$lib/paraglide/messages";
-	import Dropdown from "$lib/components/functional/Dropdown.svelte";
 	import FancyInput from "$lib/components/functional/FancyInput.svelte";
 	import { effects, sanitize } from "$lib/store/index.svelte";
 	import FormatDropdown from "$lib/components/functional/FormatDropdown.svelte";
@@ -280,72 +273,6 @@
 										max={100}
 										placeholder={"100"}
 										extension={"%"}
-									/>
-								</div>
-								<div class="flex flex-col gap-2">
-									<p class="text-sm font-bold">
-										{m[
-											"settings.conversion.quality.audio"
-										]()}
-									</p>
-									<Dropdown
-										options={CONVERSION_BITRATES.map(
-											(b) => ({
-												value: b.toString(),
-												label:
-													b === "auto" ||
-													b === "custom"
-														? m[
-																`convert.settings.common.${b}`
-															]()
-														: `${b} kbps`,
-											}),
-										)}
-										selected={settings.ffmpegQuality.toString()}
-										onselect={(option: string) =>
-											(settings.ffmpegQuality =
-												option as ConversionBitrate)}
-										settingsStyle
-									/>
-								</div>
-							</div>
-							<div class="grid grid-cols-2 gap-3">
-								<div class="flex flex-col gap-2">
-									<p class="text-sm font-bold">
-										{m["settings.conversion.rate"]()}
-									</p>
-									<Dropdown
-										options={SAMPLE_RATES.map((r) => ({
-											value: r.toString(),
-											label:
-												r === "auto" || r === "custom"
-													? m[
-															`convert.settings.common.${r}`
-														]()
-													: `${r} Hz`,
-										}))}
-										selected={settings.ffmpegSampleRate.toString()}
-										onselect={(option: string) => {
-											settings.ffmpegSampleRate =
-												option as SampleRate as string;
-										}}
-										settingsStyle
-									/>
-								</div>
-								<div class="flex flex-col gap-2">
-									<p class="text-sm font-bold select-none">
-										&nbsp;&nbsp;
-									</p>
-									<FancyInput
-										bind:value={
-											settings.ffmpegCustomSampleRate as unknown as string
-										}
-										type="number"
-										min={1}
-										placeholder={"44100"}
-										extension={"Hz"}
-										disabled={settings.ffmpegSampleRate !==
-											"custom"}
 									/>
 								</div>
 							</div>

@@ -143,10 +143,8 @@
 				"label": "Kualitas konversi",
 				"description": "Mengubah kualitas keluaran baku berkas hasil konversi. Nilai yang lebih tinggi dapat menghasilkan waktu konversi dan ukuran berkas yang lebih besar.",
 				"video": "Mengubah kualitas keluaran baku berkas video hasil konversi. Nilai yang lebih tinggi dapat memperpanjang waktu dan ukuran berkas.",
-				"audio": "Audio (kbps)",
 				"images": "Gambar (%)"
 			},
-			"rate": "Laju sampel (Hz)",
 			"filename": {
 				"format": "Format nama berkas",
 				"description": "Ini akan menentukan nama berkas saat diunduh, <b>tidak termasuk ekstensi berkas.</b> Kamu dapat menggunakan template berikut dalam format, yang akan diganti dengan informasi terkait: <b>%name%</b> untuk nama berkas asli, <b>%extension%</b> untuk ekstensi berkas asli, dan <b>%date%</b> untuk tanggal saat berkas dikonversi.",

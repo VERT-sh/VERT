@@ -128,10 +128,8 @@
 				"label": "Kvaliteta pretvaranja",
 				"description": "Ovo mijenja zadanu izlaznu kvalitetu pretvorene datoteke (u svojoj kategoriji). Veći iznosi mogu uzrokovati duže vrijeme za pretvaranje i veličinu.",
 				"video": "Ovo mijenja zadanu izlaznu kvalitetu pretvoranog videozapisa. Veći iznosi mogu uzrokovati duže vrijeme za pretvaranje i veličinu.",
-				"audio": "Audio (kbps)",
 				"images": "Slika (%)"
 			},
-			"rate": "Sample rate (Hz)",
 			"filename": {
 				"format": "Način imenovanja datoteke",
 				"description": "Ovo će odrediti ime datoteke pri preuzimanju, <b>ali ne i nastavak.</b> Možete staviti navedene prijedloge u način imenovanja, koji će biti zamijenjeni sa relevatnim informacijama: <b>%name%</b> za originalni naziv datoteke, <b>%extension%</b> za originalni nastavak, i <b>%date%</b> za datum kada je datoteka bila pretvorena.",

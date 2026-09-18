@@ -172,10 +172,8 @@
 				"label": "Dönüştürme kalitesi",
 				"description": "Bu, dönüştürülen dosyaların (kendi kategorisinde) varsayılan çıktı kalitesini değiştirir. Yüksek değerler, uzun dönüştürme sürelerine ve büyük dosya boyutuna neden olabilir.",
 				"video": "Bu, dönüştürülen videoların varsayılan çıktı kalitesini değiştirir. Yüksek değerler, uzun dönüştürme sürelerine ve büyük dosya boyutuna neden olabilir.",
-				"audio": "Ses (kbps)",
 				"images": "Görsel (%)"
 			},
-			"rate": "Örnekleme oranı (Hz)",
 			"filename": {
 				"format": "Dosya adı formatı",
 				"description": "Bu ayar, <b>dosya uzantısını etkilemeden</b> indirilen dosyanın adını belirleyecektir. Aşağıdaki şablonları formata ekleyebilirsiniz, bunlar ilgili bilgilerle değiştirilecektir: orijinal dosya adı için <b>%name%</b>, orijinal dosya uzantısı için <b>%extension%</b> ve dosyanın dönüştürüldüğü tarihin tarih için <b>%date%</b>.",

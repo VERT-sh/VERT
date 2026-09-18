@@ -172,10 +172,8 @@
 				"label": "Kvalitet konverzije",
 				"description": "Mijenja podrazumijevani kvalitet izlazne datoteke. Veće vrijednosti znače duže vrijeme konverzije i veću veličinu.",
 				"video": "Mijenja izlazni kvalitet videa.",
-				"audio": "Audio (kbps)",
 				"images": "Slika (%)"
 			},
-			"rate": "Sample rate (Hz)",
 			"filename": {
 				"format": "Format imena datoteke",
 				"description": "Ovo određuje ime datoteke pri preuzimanju, <b>bez ekstenzije</b>. Možete koristiti sljedeće šablone: <b>%name%</b> originalno ime, <b>%extension%</b> originalna ekstenzija, <b>%date%</b> datum konverzije.",
