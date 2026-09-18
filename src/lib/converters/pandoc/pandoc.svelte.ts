@@ -130,7 +130,7 @@ export class PandocConverter extends Converter {
 
 	public supportedFormats = [
 		new FormatInfo("docx", true, true),
-		new FormatInfo("doc", true, true),
+		//new FormatInfo("doc", true, true), pandoc doesn't actually support old doc (https://github.com/jgm/pandoc/issues/5809)
 		new FormatInfo("md", true, true),
 		new FormatInfo("html", true, true),
 		new FormatInfo("rtf", true, true),
