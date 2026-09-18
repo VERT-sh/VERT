@@ -5,12 +5,12 @@
 		from?: string;
 		to?: string;
 		errorMessage?: string;
-		fileName?: string;
+		filename?: string;
 	}
 </script>
 
 <script lang="ts">
-	import { vertdFetch } from "$lib/converters/vertd.svelte";
+	import { vertdFetch } from "$lib/converters/vertd/vertd.svelte";
 
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager, type ToastProps } from "$lib/util/toast.svelte";
@@ -21,7 +21,7 @@
 
 	let submitting = $state(false);
 
-	export const title = "An error occurred";
+	export const title = m["convert.errors.vertd.generic.title"]();
 
 	const remove = () => {
 		ToastManager.remove(toast.id);
@@ -31,8 +31,9 @@
 		submitting = true;
 		try {
 			await submitInner();
-		} catch (e) {}
-		submitting = false;
+		} finally {
+			submitting = false;
+		}
 	};
 
 	const submitInner = async () => {
@@ -50,7 +51,7 @@
 		} catch (e) {
 			ToastManager.add({
 				type: "error",
-				message: m["convert.errors.vertd_failed_to_keep"]({
+				message: m["convert.errors.vertd.failed_to_keep"]({
 					error: (e as Error).message || e || "Unknown error",
 				}),
 			});
@@ -61,7 +62,8 @@
 
 	const showDetails = () => {
 		addDialog(
-			m["convert.errors.vertd_details"](),
+			m["convert.errors.vertd.details.view"](),
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			VertdErrorDetails as any,
 			[
 				{
@@ -81,26 +83,26 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<p class="text-black">{m["convert.errors.vertd_generic_body"]()}</p>
+	<p class="text-black">{m["convert.errors.vertd.generic.body"]()}</p>
 	<div class="flex flex-col gap-2">
 		<button
 			onclick={showDetails}
 			class="btn rounded-lg h-fit py-2 w-full bg-accent-blue text-black"
 			disabled={submitting}
-			>{m["convert.errors.vertd_generic_view"]()}</button
+			>{m["convert.errors.vertd.generic.view"]()}</button
 		>
 		<div class="flex gap-4">
 			<button
 				onclick={submit}
 				class="btn rounded-lg h-fit py-2 w-full bg-accent-red-alt text-white"
 				disabled={submitting}
-				>{m["convert.errors.vertd_generic_yes"]()}</button
+				>{m["convert.errors.vertd.generic.yes"]()}</button
 			>
 			<button
 				onclick={remove}
 				class="btn rounded-lg h-fit py-2 w-full"
 				disabled={submitting}
-				>{m["convert.errors.vertd_generic_no"]()}</button
+				>{m["convert.errors.vertd.generic.no"]()}</button
 			>
 		</div>
 	</div>

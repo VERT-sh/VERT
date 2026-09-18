@@ -11,17 +11,20 @@ This file covers how to get started with VERT.
 ### Prerequisites
 
 Make sure you have the following installed:
+
 - [Bun](https://bun.sh/)
 
 ### Installation
 
 First, clone the repository:
+
 ```sh
 git clone https://github.com/VERT-sh/VERT
 cd VERT/
 ```
 
 Install dependencies:
+
 ```sh
 bun i
 ```
