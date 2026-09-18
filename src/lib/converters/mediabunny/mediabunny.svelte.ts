@@ -174,7 +174,6 @@ export class MediabunnyConverter extends Converter {
 		"f4v",
 		"3gp",
 		"3g2",
-		"mts",
 		"ts",
 	];
 

@@ -9,16 +9,8 @@ import { ToastManager } from "$lib/util/toast.svelte";
 import {
 	getCodecs,
 	toArgs,
-	lossless,
-	CONVERSION_BITRATES,
-	SAMPLE_RATES,
 } from "./ffmpeg.codecs";
 import { buildImageSequenceCommand } from "./ffmpeg.animated";
-import {
-	ffprobeValue,
-	detectAudioBitrate,
-	detectAudioSampleRate,
-} from "./utils/ffprobe";
 import { extractAlbumArt, avWithArt, avWithBg } from "./utils/ffmpeg";
 import type {
 	NormalizedSettings,
@@ -151,6 +143,7 @@ export class FFmpegConverter extends Converter {
 			key: "channels",
 			label: m["convert.settings.audio.channels.label"](),
 			type: "number",
+			default: 2,
 			min: 1,
 			max: 8,
 			placeholder: m["convert.settings.audio.channels.placeholder"](),
@@ -472,74 +465,15 @@ export class FFmpegConverter extends Converter {
 			];
 		}
 
-		const isLosslessToLossy =
-			lossless.includes(inputFormat) && !lossless.includes(outputFormat);
 		if (userBitrate) {
-			// user's setting
 			audioBitrateArgs = ["-b:a", `${userBitrate}k`];
 			this.log(`using user setting for audio bitrate: ${userBitrate}`);
-		} else {
-			// detect bitrate of original file and use
-			if (isLosslessToLossy) {
-				// use safe default
-				audioBitrateArgs = ["-b:a", "128k"];
-				this.log(
-					`converting from lossless to lossy, using default audio bitrate: 128k`,
-				);
-			} else {
-				const inputBitrate = await detectAudioBitrate(ffmpeg);
-				audioBitrateArgs = inputBitrate
-					? ["-b:a", `${inputBitrate}k`]
-					: [];
-				if (
-					(to === ".mpg" || to === ".mpeg" || to === ".vob") &&
-					audioBitrateArgs[1]
-				) {
-					// these formats need to have its bitrate to the power of 2 to convert correctly
-					const bitrate = Number.parseInt(audioBitrateArgs[1], 10);
-					if (Number.isFinite(bitrate) && bitrate > 0) {
-						const normalizedBitrate = Math.pow(
-							2,
-							Math.round(Math.log2(bitrate)),
-						);
-						audioBitrateArgs = ["-b:a", `${normalizedBitrate}k`];
-					}
-				}
-				this.log(`using detected audio bitrate: ${inputBitrate}k`);
-			}
 		}
 
 		// sample rate setting
 		if (userSampleRate) {
 			sampleRateArgs = ["-ar", String(userSampleRate)];
 			this.log(`using user setting for sample rate: ${userSampleRate}Hz`);
-		} else {
-			// detect sample rate of original file and use
-			if (isLosslessToLossy) {
-				// use safe default
-				const defaultRate = to === ".opus" ? "48000" : "44100";
-				this.log(
-					`converting from lossless to lossy, using default sample rate: ${defaultRate}Hz`,
-				);
-				sampleRateArgs = ["-ar", defaultRate];
-			} else {
-				let inputSampleRate = await detectAudioSampleRate(ffmpeg);
-				if (to === ".opus" && inputSampleRate === 44100) {
-					// special case: opus does not support 44100Hz which is more common - adjust to 48000Hz
-					this.log(
-						`conversion to opus with 44100Hz sample rate detected, adjusting to 48000Hz`,
-					);
-					inputSampleRate = 48000;
-				}
-
-				sampleRateArgs = inputSampleRate
-					? ["-ar", `${inputSampleRate}`]
-					: [];
-				this.log(
-					`using detected audio sample rate: ${inputSampleRate}Hz`,
-				);
-				// TODO: maybe have a hard cap for certain conversions - 3072kbps is very unrealistic for a mp3 for example lol (qoa -> mp3 detected as 3072kbps)
-			}
 		}
 
 		// channels setting
@@ -638,32 +572,11 @@ const handleSpecialOutput = async (
 	conversionError: string | null,
 ): Promise<VertFile | null> => {
 	if (to === ".qoa") {
-		let sampleRate: number | null = null;
-		if (
+		const sampleRate =
 			conversionSettings.sampleRate &&
 			conversionSettings.sampleRate !== "auto"
-		) {
-			sampleRate = conversionSettings.sampleRate as number;
-		} else {
-			const args = [
-				"-v",
-				"quiet",
-				"-select_streams",
-				"a:0",
-				"-show_entries",
-				"stream=sample_rate",
-				"-of",
-				"default=noprint_wrappers=1:nokey=1",
-				"input",
-			];
-
-			const probed = await ffprobeValue(ffmpeg, args, (s) => {
-				const n = parseInt(s, 10);
-				return Number.isFinite(n) ? n : null;
-			});
-
-			sampleRate = probed ?? 48000;
-		}
+				? (conversionSettings.sampleRate as number)
+				: 48000;
 
 		let channels = 2;
 		if (
@@ -695,7 +608,7 @@ const handleSpecialOutput = async (
 		const { encodeQoa } = await import("$lib/util/parse/qoa");
 		const qoaBytes = encodeQoa(
 			new Uint8Array(pcmRaw),
-			sampleRate!,
+			sampleRate,
 			channels,
 		);
 		const outputFileName =
