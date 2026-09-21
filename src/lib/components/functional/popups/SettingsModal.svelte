@@ -99,7 +99,6 @@
 	color="purple"
 	badge={{
 		text: m["convert.settings.badge.text"](),
-		tooltip: m["convert.settings.badge.tooltip"](),
 		color: "accent-pink",
 	}}
 	buttons={[
@@ -126,6 +125,7 @@
 				settings.converter,
 			)}
 			<p class="text-base">
+			<!-- TODO: allow changing file by clicking name -->
 				{@html sanitize(
 					m["convert.settings.description"]({
 						filename:

@@ -94,10 +94,9 @@
 			"settings": "Settings",
 			"title": "File conversion settings",
 			"badge": {
-				"text": "BETA",
-				"tooltip": "Early feature preview - may have some issues."
+				"text": "BETA"
 			},
-			"description": "Change the conversion settings for <b>{filename}</b> with the selected converter. These settings may not be available for all formats.",
+			"description": "Currently editing conversion settings for <b>{filename}</b>.",
 			"all_files": "all files",
 			"none": "No settings available for this format.",
 			"converter": "Converter",
