@@ -148,7 +148,7 @@
 									]();
 							}
 						})()}
-						settingsStyle
+						style={"settings"}
 					/>
 					{#if VertdInstance.instance.innerData().type === "custom"}
 						<FancyInput
@@ -181,7 +181,7 @@
 							"settings.vertd.conversion_speed.speeds.ultra_fast"
 						](),
 					]}
-					settingsStyle
+					style={"settings"}
 					selected={(() => {
 						switch (settings.vertdSpeed) {
 							case "verySlow":

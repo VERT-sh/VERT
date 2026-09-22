@@ -2,13 +2,16 @@
 	import { duration, fade, transition } from "$lib/util/animation";
 	import { ChevronDown } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
+	import { clsx } from "clsx";
+
+	type DropdownStyle = "default" | "settings" | "inline";
 
 	type Props = {
 		options: string[] | { value: string; label: string }[];
 		selected?: string;
 		onselect?: (option: string) => void;
 		disabled?: boolean;
-		settingsStyle?: boolean;
+		style?: DropdownStyle;
 	};
 
 	let {
@@ -18,7 +21,7 @@
 		),
 		onselect,
 		disabled,
-		settingsStyle,
+		style = "default",
 	}: Props = $props();
 
 	let open = $state(false);
@@ -105,26 +108,35 @@
 </script>
 
 <div
-	class="relative w-full min-w-fit {settingsStyle
-		? 'font-normal'
-		: 'text-xl font-medium'} text-center"
+	class={clsx(
+		"min-w-fit text-center",
+		style !== "inline" && "w-full",
+		style === "inline" &&
+			"inline-flex w-[6.5rem] sm:w-[10.5rem] md:w-52 text-left",
+		style === "default" && "text-xl font-medium",
+		style === "settings" && "font-normal",
+	)}
 	bind:this={dropdown}
 >
 	<button
 		bind:this={button}
-		class="font-display w-full {settingsStyle
-			? 'justify-between'
-			: 'justify-center'} overflow-hidden relative cursor-pointer {settingsStyle
-			? 'px-4'
-			: 'px-3'} py-3.5 bg-button {disabled
-			? 'opacity-50 cursor-auto'
-			: 'cursor-pointer'} flex items-center {settingsStyle
-			? 'rounded-xl'
-			: 'rounded-full'} focus:!outline-none"
+		class={clsx(
+			"font-display overflow-hidden relative w-full flex focus:!outline-none",
+			style !== "inline" && "bg-button py-3.5 px-3",
+			style === "inline" && "justify-start",
+			style === "settings" && "justify-between px-4 rounded-xl",
+			style === "default" && "justify-center rounded-full",
+			disabled ? "opacity-50 cursor-auto" : "cursor-pointer",
+		)}
 		onclick={toggle}
 		{disabled}
 	>
-		<div class="grid grid-cols-1 grid-rows-1 w-fit flex-grow-0">
+		<div
+			class={clsx(
+				"grid grid-cols-1 grid-rows-1 min-w-0 flex-grow-1 truncate",
+				style === "inline" && "max-w-full",
+			)}
+		>
 			{#key selected}
 				<p
 					in:fade={{
@@ -135,11 +147,13 @@
 						duration,
 						easing: quintOut,
 					}}
-					class="col-start-1 row-start-1 {settingsStyle
-						? 'text-left'
-						: 'text-center'} font-body {settingsStyle
-						? 'font-normal'
-						: 'font-medium'}"
+					class={clsx(
+						"col-start-1 row-start-1 min-w-0 font-body",
+						style === "inline" && "truncate max-w-52 text-left",
+						style === "settings" && "text-left font-normal",
+						style === "default" && "text-center",
+						style !== "settings" && "font-medium",
+					)}
 				>
 					{getLabel(
 						options.find((opt) => getValue(opt) === selected) ||
@@ -149,7 +163,10 @@
 			{/key}
 			{#each options as option}
 				<p
-					class="col-start-1 row-start-1 invisible pointer-events-none"
+					class={clsx(
+						"col-start-1 row-start-1 pointer-events-none",
+						style === "inline" ? "hidden" : "invisible",
+					)}
 				>
 					{getLabel(option)}
 				</p>

@@ -6,7 +6,7 @@
 	import Modal from "./Modal.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import type { VertFile } from "$lib/types";
-	import { files, sanitize } from "$lib/store/index.svelte";
+	import { files } from "$lib/store/index.svelte";
 	import { log, error } from "$lib/util/logger";
 	import { type ConversionSettings } from "$lib/types/conversion-settings";
 
@@ -16,7 +16,33 @@
 	};
 
 	let { file, onclose }: Props = $props();
-	let targetFile = $derived(file ?? files.files[0]);
+	let targetFile = $derived(
+		files.files.find((f) => f.name === selectedFileName) ?? files.files[0],
+	);
+	// TODO: implement all files
+	let selectedFileName = $derived<string>(
+		file?.name ?? files.files[0]?.name ?? m["convert.settings.all_files"](),
+	);
+
+	$effect(() => {
+		if (file) {
+			selectedFileName = file.name;
+		} else if (files.files.length > 0) {
+			selectedFileName = files.files[0].name;
+		}
+	});
+
+	const allFilesValue = "all";
+	const fileOptions = $derived([
+		{
+			value: allFilesValue,
+			label: m["convert.settings.all_files"](),
+		},
+		...files.files.map((f: VertFile) => ({
+			value: f.name,
+			label: f.name,
+		})),
+	]);
 
 	const getAvailableConverters = (vertFile: VertFile) => {
 		return vertFile.isZip()
@@ -37,7 +63,10 @@
 	};
 
 	const applySettings = async (converterName: string) => {
-		const targetFiles = file ? [file] : files.files;
+		const targetFiles =
+			selectedFileName === allFilesValue
+				? files.files
+				: files.files.filter((f) => f.name === selectedFileName);
 		if (targetFiles.length === 0) {
 			error(
 				["settings", "modal"],
@@ -124,15 +153,18 @@
 				targetFile,
 				settings.converter,
 			)}
-			<p class="text-base">
-			<!-- TODO: allow changing file by clicking name -->
-				{@html sanitize(
-					m["convert.settings.description"]({
-						filename:
-							file?.name ?? m["convert.settings.all_files"](),
-					}),
-				)}
-			</p>
+			<div class="w-full text-base">
+				{m["convert.settings.description"]()}
+				<Dropdown
+					options={fileOptions}
+					selected={selectedFileName}
+					style={"inline"}
+					onselect={(value) => {
+						selectedFileName = value;
+						settings = {};
+					}}
+				/>
+			</div>
 
 			<div class="flex flex-col gap-2">
 				<p class="text-sm font-bold mb-1">
@@ -144,7 +176,7 @@
 						label: converter.name,
 					}))}
 					selected={validConverter?.name}
-					settingsStyle
+					style={"settings"}
 					onselect={(value) => {
 						settings.converter = value;
 					}}
@@ -194,7 +226,7 @@
 														setting.key
 													] ??
 													setting.default}
-												settingsStyle
+												style={"settings"}
 												onselect={(value) =>
 													handleSettingChange(
 														setting.key,

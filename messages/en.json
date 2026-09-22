@@ -96,7 +96,7 @@
 			"badge": {
 				"text": "BETA"
 			},
-			"description": "Currently editing conversion settings for <b>{filename}</b>.",
+			"description": "Editing conversion settings for:",
 			"all_files": "all files",
 			"none": "No settings available for this format.",
 			"converter": "Converter",
