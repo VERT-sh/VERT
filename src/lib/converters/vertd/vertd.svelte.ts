@@ -13,9 +13,7 @@ import { ToastManager } from "$lib/util/toast.svelte";
 import type {
 	SettingDefinition,
 	ConversionSettings,
-	NormalizedSettings,
 } from "$lib/types/conversion-settings";
-import { formatBytes } from "$lib/util/file";
 
 interface UploadResponse {
 	id: string;
@@ -62,6 +60,9 @@ export const vertdFetch: {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 } = async (url: any, options: RequestInit, body?: any) => {
 	const domain = await VertdInstance.instance.url();
+
+	if (!domain) return undefined;
+
 	const headers = new Headers(options.headers);
 	for (const [key, value] of Object.entries(getVertdCustomHeaders()))
 		headers.set(key, value);
@@ -366,54 +367,6 @@ export class VertdConverter extends Converter {
 		this.status = "ready";
 	}
 
-	private async getServerSizeLimit(apiUrl: string): Promise<number | null> {
-		const cacheKey = `vertd:size-limit:${apiUrl}`;
-
-		if (typeof sessionStorage !== "undefined") {
-			try {
-				const cached = sessionStorage.getItem(cacheKey);
-				if (cached !== null) {
-					const parsedCached = Number(cached);
-					if (Number.isFinite(parsedCached) && parsedCached > 0) {
-						this.log(
-							`using cached vertd size limit: ${parsedCached} bytes`,
-						);
-						return parsedCached;
-					}
-					sessionStorage.removeItem(cacheKey);
-				}
-			} catch (e) {
-				this.error(
-					`failed to read vertd size limit from sessionStorage: ${e}`,
-				);
-			}
-		}
-
-		try {
-			const limit = await vertdFetch("/api/size_limit", {
-				method: "GET",
-			});
-			const parsed = Number(limit);
-			if (!Number.isFinite(parsed) || parsed <= 0) return null;
-
-			if (typeof sessionStorage !== "undefined") {
-				try {
-					sessionStorage.setItem(cacheKey, parsed.toString());
-				} catch (e) {
-					this.error(
-						`failed to cache vertd size limit in sessionStorage: ${e}`,
-					);
-				}
-			}
-
-			this.log(`fetched vertd size limit: ${parsed} bytes`);
-			return parsed;
-		} catch (e) {
-			this.error(`failed to fetch vertd size limit: ${e}`);
-			return null;
-		}
-	}
-
 	private blocked(hash: string): boolean {
 		let blockedHashes = Settings.instance.settings.vertdBlockedHashes;
 
@@ -657,43 +610,6 @@ export class VertdConverter extends Converter {
 		return defaults;
 	}
 
-	public async normalizeSettings(
-		input: VertFile,
-		to: string,
-		settings: ConversionSettings,
-	): Promise<NormalizedSettings> {
-		const normalized = { ...settings };
-		const changes: NormalizedSettings["changes"] = [];
-
-		const change = (setting: string, newValue: string | number) => {
-			const oldValue = normalized[setting];
-			if (oldValue === newValue) return;
-
-			normalized[setting] = newValue;
-			changes.push({
-				setting,
-				oldValue,
-				newValue,
-				file: input.name,
-			});
-		};
-
-		// handled in backend now
-		// if (to === ".mxf") {
-		// 	change("sampleRate", "48000");
-		// }
-
-		// // gxf was used for tv program systems/archives, so only PAL/NTSC resolutions
-		// if (to === ".gxf") {
-		// 	// for now, just PAL cause highest res at 720x576
-		// 	change("resolution", "720x576");
-		// 	change("sampleRate", "48000");
-		// 	change("audioChannels", "1");
-		// }
-
-		return { settings: normalized, changes };
-	}
-
 	public async convert(
 		input: VertFile,
 		to: string,
@@ -722,19 +638,6 @@ export class VertdConverter extends Converter {
 		}
 
 		const apiUrl = await VertdInstance.instance.url();
-		const sizeLimit =
-			(await this.getServerSizeLimit(apiUrl)) || Number.POSITIVE_INFINITY; // fall back to no limit just in case - server will block if too large anyways
-		if (sizeLimit !== null && fileUpload.file.size > sizeLimit) {
-			this.log(
-				`blocked upload for ${input.name}: ${fileUpload.file.size} bytes exceeds server limit of ${sizeLimit} bytes`,
-			);
-			throw new Error(
-				m["convert.errors.vertd.file_too_large"]({
-					fileSize: formatBytes(fileUpload.file.size),
-					limit: formatBytes(sizeLimit),
-				}),
-			);
-		}
 
 		const uploadTask = await createUploadTask(fileUpload);
 		this.activeUploads.set(input.id, uploadTask);

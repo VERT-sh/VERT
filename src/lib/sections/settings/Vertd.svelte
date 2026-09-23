@@ -11,9 +11,11 @@
 	import {
 		VertdInstance,
 		getVertdCustomHeaders,
+		vertdSizeLimit,
 		type VertdInner,
 	} from "./vertdSettings.svelte";
 	import FancyInput from "$lib/components/functional/FancyInput.svelte";
+	import { formatBytes } from "$lib/util/file";
 
 	let vertdCommit = $state<string | null>(null);
 	let abortController: AbortController | null = null;
@@ -81,6 +83,7 @@
 						? m["settings.vertd.loading"]()
 						: m["settings.vertd.available"]({
 								commitId: vertdCommit,
+								sizeLimit: formatBytes($vertdSizeLimit),
 							})
 					: m["settings.vertd.unavailable"]()}
 			</p>

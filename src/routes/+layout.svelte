@@ -6,7 +6,7 @@
 	import {
 		DISABLE_ALL_EXTERNAL_REQUESTS,
 		VERT_NAME,
-	} from "$lib/util/consts.js";
+	} from "$lib/util/consts";
 	import * as Layout from "$lib/components/layout";
 	import * as Navbar from "$lib/components/layout/Navbar";
 	import { Settings } from "$lib/sections/settings/index.svelte";
@@ -22,11 +22,14 @@
 	} from "$lib/store/index.svelte";
 	import "$lib/css/app.scss";
 	import { browser } from "$app/environment";
-	import { initStores as initAnimStores } from "$lib/util/animation.js";
-	import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte.js";
-	import { ToastManager } from "$lib/util/toast.svelte.js";
-	import { m } from "$lib/paraglide/messages.js";
-	import { log } from "$lib/util/logger.js";
+	import { initStores as initAnimStores } from "$lib/util/animation";
+	import {
+		useVertdSizeLimit,
+		VertdInstance,
+	} from "$lib/sections/settings/vertdSettings.svelte";
+	import { ToastManager } from "$lib/util/toast.svelte";
+	import { m } from "$lib/paraglide/messages";
+	import { log } from "$lib/util/logger";
 
 	let { children } = $props();
 	let enablePlausible = $state(false);
@@ -129,6 +132,11 @@
 			// reset pushState on opt-out so that plausible stops firing events on page navigation
 			history.pushState = History.prototype.pushState;
 		}
+	});
+
+	onMount(() => {
+		// query vertd server for size limit on mount and on settings change
+		useVertdSizeLimit();
 	});
 </script>
 

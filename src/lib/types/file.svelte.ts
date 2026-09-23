@@ -25,6 +25,7 @@ export class VertFile {
 	public from = $state("");
 	public name = $state("");
 	public to = $state("");
+	public size = $state(0);
 	public fileType = $state<Awaited<ReturnType<typeof fileTypeFromBuffer>>>();
 	public isZip = $state(() => this.from === ".zip");
 
@@ -59,6 +60,7 @@ export class VertFile {
 		this.convert = this.convert.bind(this);
 		this.download = this.download.bind(this);
 		this.blobUrl = blobUrl;
+		this.size = newFile.size;
 
 		log(
 			["file", "init"],

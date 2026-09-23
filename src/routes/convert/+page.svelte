@@ -35,6 +35,8 @@
 	import { Settings } from "$lib/sections/settings/index.svelte";
 	import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
 	import { GB } from "$lib/util/consts";
+	import { formatBytes } from "$lib/util/file";
+	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
 
 	let processedFileIds = $state(new Set<string>());
 
@@ -263,6 +265,8 @@
 				(f) => f.name === file.from,
 			)}
 			{@const isLarge = file.isLarge()}
+			{@const size = file.size}
+			{@const limit = $vertdSizeLimit}
 			{#if formatInfo && !formatInfo.fromSupported}
 				<div
 					class="h-full flex flex-col text-center justify-center text-failure"
@@ -274,6 +278,21 @@
 						{m["convert.errors.format_output_only"]()}
 					</p>
 				</div>
+			{:else if size > limit}
+				<div
+					class="h-full flex flex-col text-center justify-center text-failure"
+				>
+					<p class="font-body font-bold">
+						{m["convert.errors.cant_convert"]()}
+					</p>
+					<p class="font-normal">
+						{m["convert.errors.vertd.file_too_large"]({
+							fileSize: formatBytes(size),
+							limit: formatBytes(limit),
+						})}
+					</p>
+				</div>
+				<!-- TODO: add settings button to change to mediabunny, only show if vertd is actually being used -->
 			{:else if isLarge && !file.supportsStreaming()}
 				<div
 					class="h-full flex flex-col text-center justify-center text-failure"
@@ -299,7 +318,7 @@
 							type: isAudio
 								? m["convert.errors.audio"]()
 								: isVideo
-									? "Video"
+									? m["convert.errors.video"]()
 									: isDocument
 										? m["convert.errors.doc"]()
 										: m["convert.errors.image"](),
@@ -318,7 +337,7 @@
 							type: isAudio
 								? m["convert.errors.audio"]()
 								: isVideo
-									? "Video"
+									? m["convert.errors.video"]()
 									: isDocument
 										? m["convert.errors.doc"]()
 										: m["convert.errors.image"](),

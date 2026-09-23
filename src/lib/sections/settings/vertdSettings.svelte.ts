@@ -1,6 +1,8 @@
 import { Settings } from "./index.svelte";
 import { PUB_VERTD_URL } from "$env/static/public";
 import { log } from "$lib/util/logger";
+import { writable } from "svelte/store";
+import { getVertdLimit } from "$lib/store/index.svelte";
 
 const LOCATIONS = [
 	{ url: "https://eu.vertd.vert.sh" },
@@ -32,6 +34,8 @@ export const getVertdCustomHeaders = (): Record<string, string> => {
 
 	return headers;
 };
+
+export const vertdSizeLimit = writable(Number.POSITIVE_INFINITY);
 
 export class VertdInstance {
 	public static instance = new VertdInstance();
@@ -133,4 +137,74 @@ export class VertdInstance {
 			}
 		}
 	}
+}
+
+export function useVertdSizeLimit() {
+	$effect(() => {
+		let cancelled = false;
+
+		const loadLimit = async () => {
+			const apiUrl = await VertdInstance.instance.url();
+			if (cancelled) return;
+
+			const cacheKey = `vertd:size-limit:${apiUrl}`;
+			const sessionStorageAvailable =
+				typeof sessionStorage !== "undefined";
+
+			let cachedLimit: number | null = null;
+
+			if (sessionStorageAvailable) {
+				try {
+					const cached = sessionStorage.getItem(cacheKey);
+					if (cached !== null) {
+						const parsed = Number(cached);
+						if (Number.isFinite(parsed) && parsed > 0) {
+							cachedLimit = parsed;
+						} else {
+							sessionStorage.removeItem(cacheKey);
+						}
+					}
+				} catch (e) {
+					log(
+						["vertd"],
+						`failed to read vertd size limit from sessionStorage: ${e}`,
+					);
+				}
+			}
+
+			if (cachedLimit !== null) {
+				log(
+					["vertd"],
+					`using cached vertd size limit: ${cachedLimit} bytes`,
+				);
+				vertdSizeLimit.set(cachedLimit);
+				return;
+			}
+
+			const serverLimit = await getVertdLimit();
+			const finalLimit = serverLimit ?? Number.POSITIVE_INFINITY;
+			vertdSizeLimit.set(finalLimit);
+			log(
+				["vertd"],
+				`fetched vertd size limit: ${finalLimit} bytes`,
+			);
+
+			if (sessionStorageAvailable) {
+				try {
+					sessionStorage.setItem(cacheKey, finalLimit.toString());
+				} catch (e) {
+					log(
+						["vertd"],
+						`failed to cache vertd size limit in sessionStorage: ${e}`,
+					);
+				}
+			}
+		};
+
+		void loadLimit();
+
+		return () => {
+			cancelled = true;
+		};
+	});
 }

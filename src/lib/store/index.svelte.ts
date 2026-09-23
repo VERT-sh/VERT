@@ -13,6 +13,7 @@ import { ToastManager } from "$lib/util/toast.svelte";
 import { GB } from "$lib/util/consts";
 import { readSettings } from "$lib/util/settings";
 import { formatFilename } from "$lib/util/file";
+import { vertdFetch } from "$lib/converters/vertd/vertd.svelte";
 
 class Files {
 	public files = $state<VertFile[]>([]);
@@ -663,3 +664,19 @@ export const getMaxArrayBufferSize = (): number => {
 };
 
 export const MAX_ARRAY_BUFFER_SIZE = getMaxArrayBufferSize();
+
+export const getVertdLimit = async (): Promise<number | null> => {
+	try {
+		const limit = await vertdFetch("/api/size_limit", {
+			method: "GET",
+		});
+		const parsed = Number(limit);
+		if (!Number.isFinite(parsed) || parsed <= 0) return null;
+
+		log(["vertd"], `fetched vertd size limit: ${parsed} bytes`);
+		return parsed;
+	} catch (e) {
+		error(["vertd"], `failed to fetch vertd size limit: ${e}`);
+		return null;
+	}
+};

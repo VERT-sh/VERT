@@ -211,7 +211,7 @@
 				"server": "what are you doing..? you're supposed to run the vertd server!",
 				"not_found": "Could not find the vertd instance to start video conversion. Are you sure the instance URL is set correctly?",
 				"ratelimit": "Your video, '{filename}', has failed to convert a few times. To prevent server overload, further conversion attempts for this file have been temporarily blocked. Please try again later.",
-				"file_too_large": "This file is too big for the specified vertd server ({fileSize}/{limit}). Please choose a smaller file or use another converter/server.",
+				"file_too_large": "This file is too big for the specified vertd server ({fileSize}/{limit}). Try another server or converter.",
 				"failed_to_keep": "Failed to keep the video on the server: {error}",
 				"retry": "Retrying video conversion for {filename} with different settings due to failure. This may take longer than usual.",
 				"generic": {
@@ -293,7 +293,7 @@
 			"title": "Server video conversion",
 			"status": "status:",
 			"loading": "loading...",
-			"available": "available, commit id {commitId}",
+			"available": "available, size limit {sizeLimit}, commit id {commitId}",
 			"unavailable": "unavailable (is the url right?)",
 			"description": {
 				"main": "When possible, VERT converts videos locally in your browser, however some conversions may require the use of the <code>vertd</code> project, a server wrapper for FFmpeg. This allows you to convert videos through the convenience of VERT's web interface, while still being able to harness the power of your GPU to do it as quickly as possible.",
