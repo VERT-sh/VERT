@@ -149,7 +149,8 @@
 					}}
 					class={clsx(
 						"col-start-1 row-start-1 min-w-0 font-body",
-						style === "inline" && "truncate max-w-52 text-left",
+						style === "inline" &&
+							"truncate max-w-52 text-left underline underline-offset-3 decoration-dotted",
 						style === "settings" && "text-left font-normal",
 						style === "default" && "text-center",
 						style !== "settings" && "font-medium",
@@ -173,7 +174,7 @@
 			{/each}
 		</div>
 		<ChevronDown
-			class="w-4 h-4 ml-3 mt-0.5 flex-shrink-0"
+			class="w-4 h-4 ml-1.5 mt-0.5 flex-shrink-0"
 			style="transform: rotate({open
 				? 180
 				: 0}deg); transition: transform {duration}ms {transition};"
