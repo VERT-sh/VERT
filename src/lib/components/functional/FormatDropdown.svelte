@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { duration, fade, transition } from "$lib/util/animation";
 	import { m } from "$lib/paraglide/messages";
-	import { isMobile, files, dropdownStates } from "$lib/store/index.svelte";
+	import { isMobile, files, dropdownStates, fileSettings } from "$lib/store/index.svelte";
 	import type { Categories } from "$lib/types";
 	import clsx from "clsx";
 	import { ChevronDown, SearchIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
-	import SettingsModal from "./popups/SettingsModal.svelte";
 	import { log } from "$lib/util/logger";
 	import FancyInput from "./FancyInput.svelte";
 
@@ -36,7 +35,6 @@
 	let dropdown = $state<HTMLDivElement>();
 	let dropdownMenu: HTMLElement | undefined = $state();
 	let dropdownPosition = $state<"left" | "center" | "right">("center");
-	let showSettingsModal = $state(false);
 	let currentCategory = $state<string | null>(null);
 	let searchQuery = $state("");
 	let rootCategory: string | null = null;
@@ -395,14 +393,6 @@
 		newFiles.forEach((f) => files.add(f));
 	};
 
-	const settings = () => {
-		log(
-			["dropdown", "settings"],
-			`opening settings modal for ${file?.name ?? "all files"}`,
-		);
-		showSettingsModal = true;
-	};
-
 	onMount(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (dropdown && !dropdown.contains(e.target as Node)) open = false;
@@ -424,10 +414,6 @@
 		};
 	});
 </script>
-
-{#if showSettingsModal}
-	<SettingsModal {file} onclose={() => (showSettingsModal = false)} />
-{/if}
 
 <div
 	class="relative w-full min-w-fit text-xl font-medium text-center"
@@ -646,7 +632,7 @@
 				<div class="border-t border-separator text-base p-2">
 					<button
 						class="w-full p-2 text-center rounded-lg bg-accent text-black"
-						onclick={() => settings()}
+						onclick={() => $fileSettings = file}
 					>
 						{m["convert.settings.settings"]()}
 					</button>

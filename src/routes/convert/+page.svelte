@@ -16,6 +16,8 @@
 		gradientColor,
 		showGradient,
 		dropdownStates,
+		fileSettings,
+		sanitize,
 	} from "$lib/store/index.svelte";
 	import { VertFile } from "$lib/types";
 	import {
@@ -37,6 +39,7 @@
 	import { GB } from "$lib/util/consts";
 	import { formatBytes } from "$lib/util/file";
 	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
+	import SettingsModal from "$lib/components/functional/popups/SettingsModal.svelte";
 
 	let processedFileIds = $state(new Set<string>());
 
@@ -44,12 +47,14 @@
 		const converterName = file.conversionSettings.converter;
 		const availableConverters = file.isZip()
 			? file.converters
-			: file.findConverters();
+			: file.to
+				? file.findConverters([file.from, file.to])
+				: file.findConverters();
 
 		if (converterName) {
-			const selectedConverter =
-				availableConverters.find((c) => c.name === converterName) ||
-				file.converters.find((c) => c.name === converterName);
+			const selectedConverter = availableConverters.find(
+				(c) => c.name === converterName,
+			);
 			if (selectedConverter) return selectedConverter;
 		}
 
@@ -278,21 +283,37 @@
 						{m["convert.errors.format_output_only"]()}
 					</p>
 				</div>
-			{:else if size > limit}
-				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
-				>
-					<p class="font-body font-bold">
-						{m["convert.errors.cant_convert"]()}
-					</p>
-					<p class="font-normal">
-						{m["convert.errors.vertd.file_too_large"]({
-							fileSize: formatBytes(size),
-							limit: formatBytes(limit),
-						})}
-					</p>
+			{:else if size > limit && currentConverter.name === "vertd"}
+				<div class="h-full flex flex-col justify-between">
+					<div
+						class="flex flex-col text-center justify-center text-failure"
+					>
+						<p class="font-body font-bold">
+							{m["convert.errors.cant_convert"]()}
+						</p>
+						<p class="font-normal whitespace-pre-line">
+							{@html sanitize(m["convert.errors.vertd.file_too_large.text"]({
+								fileSize: formatBytes(size),
+								limit: formatBytes(limit),
+							}))}
+						</p>
+					</div>
+					<div class="flex p-2 justify-center gap-4">
+						<FormatDropdown
+						{categories}
+						from={file.from}
+						bind:selected={file.to}
+						onselect={(option) => handleSelect(option, file)}
+						{file}
+					/>
+					<button
+						class="w-full p-2 text-center rounded-lg bg-accent text-black"
+						onclick={() => ($fileSettings = file)}
+					>
+						{m["convert.errors.vertd.file_too_large.button"]()}
+					</button>
+					</div>
 				</div>
-				<!-- TODO: add settings button to change to mediabunny, only show if vertd is actually being used -->
 			{:else if isLarge && !file.supportsStreaming()}
 				<div
 					class="h-full flex flex-col text-center justify-center text-failure"
@@ -483,3 +504,10 @@
 		{/if}
 	</div>
 </div>
+
+{#if $fileSettings instanceof VertFile}
+	<SettingsModal
+		file={$fileSettings}
+		onclose={() => ($fileSettings = null)}
+	/>
+{/if}
