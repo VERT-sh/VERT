@@ -35,6 +35,7 @@ export class VertFile {
 	public blobUrl = $state<string>();
 	public processing = $state(false);
 	public cancelled = $state(false);
+	public unavailableConverters = $state<string[]>([]);
 
 	public converters: Converter[] = [];
 	private fallbackToastId: number | null = null;
@@ -97,9 +98,14 @@ export class VertFile {
 		return converterInstance.getAvailableSettings(input);
 	}
 
-	public findConverters(supportedFormats: string[] = [this.from]) {
+	public findConverters(
+		supportedFormats: string[] = [this.from],
+		unavailableConverters: string[] = [],
+	) {
 		return this.converters
 			.filter((converter) => {
+				if (unavailableConverters.includes(converter.name))
+					return false;
 				if (
 					!converter
 						.formatStrings()
@@ -141,6 +147,28 @@ export class VertFile {
 				const bPriority = bFrom ? bFrom.priority : 1;
 				return bPriority - aPriority;
 			});
+	}
+
+	// returns true if there is at least one converter that can convert from `from` to `to`
+	public hasAvailableConverter(from: string, to: string): boolean {
+		return this.converters.some((converter) => {
+			if (this.unavailableConverters.includes(converter.name))
+				return false;
+
+			const fromInfo = converter.supportedFormats.find(
+				(info) => info.name === from,
+			);
+			const toInfo = converter.supportedFormats.find(
+				(info) => info.name === to,
+			);
+			return (
+				!!fromInfo &&
+				!!toInfo &&
+				fromInfo.fromSupported &&
+				toInfo.toSupported &&
+				(fromInfo.isNative || toInfo.isNative)
+			);
+		});
 	}
 
 	public isLarge(): boolean {

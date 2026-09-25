@@ -3,10 +3,7 @@
 	import { goto, beforeNavigate, afterNavigate } from "$app/navigation";
 
 	import { PUB_PLAUSIBLE_URL, PUB_HOSTNAME } from "$env/static/public";
-	import {
-		DISABLE_ALL_EXTERNAL_REQUESTS,
-		VERT_NAME,
-	} from "$lib/util/consts";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/util/consts";
 	import * as Layout from "$lib/components/layout";
 	import * as Navbar from "$lib/components/layout/Navbar";
 	import { Settings } from "$lib/sections/settings/index.svelte";

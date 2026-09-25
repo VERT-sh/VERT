@@ -184,10 +184,7 @@ export function useVertdSizeLimit() {
 			const serverLimit = await getVertdLimit();
 			const finalLimit = serverLimit ?? Number.POSITIVE_INFINITY;
 			vertdSizeLimit.set(finalLimit);
-			log(
-				["vertd"],
-				`fetched vertd size limit: ${finalLimit} bytes`,
-			);
+			log(["vertd"], `fetched vertd size limit: ${finalLimit} bytes`);
 
 			if (sessionStorageAvailable) {
 				try {

@@ -45,9 +45,16 @@
 	]);
 
 	const getAvailableConverters = (vertFile: VertFile) => {
-		return vertFile.isZip()
-			? vertFile.converters
-			: vertFile.findConverters([vertFile.from, vertFile.to]);
+		const availableConverters = vertFile.converters.filter(
+			(converter) =>
+				!vertFile.unavailableConverters.includes(converter.name),
+		);
+		const supportedConverters = vertFile.findConverters(
+			[vertFile.from, vertFile.to],
+			vertFile.unavailableConverters,
+		);
+
+		return vertFile.isZip() ? availableConverters : supportedConverters;
 	};
 
 	const getValidConverter = (vertFile: VertFile, converterName?: string) => {

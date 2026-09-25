@@ -13,6 +13,7 @@
 	import type { SvelteComponent } from "svelte";
 	import clsx from "clsx";
 	import type { Toast as ToastType } from "$lib/util/toast.svelte";
+	import { sanitize } from "$lib/store/index.svelte";
 
 	const props: {
 		toast: ToastType<unknown>;
@@ -58,7 +59,7 @@
 </script>
 
 <div
-	class="flex flex-col max-w-[100%] md:max-w-md p-4 gap-2 bg-accent-{color} border-accent-{color}-alt border-l-4 rounded-lg shadow-md"
+	class="flex flex-col max-w-[100%] md:max-w-lg p-4 gap-2 bg-accent-{color} border-accent-{color}-alt border-l-4 rounded-lg shadow-md"
 	in:fly={{
 		duration: durations.enter,
 		easing: quintOut,
@@ -71,11 +72,10 @@
 	}}
 >
 	<div class="flex flex-row items-center justify-between w-full gap-4">
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-4">
 			<Icon
 				class="w-6 h-6 text-black flex-shrink-0"
 				size="24"
-				stroke="2"
 				fill="none"
 			/>
 			<p
@@ -83,7 +83,7 @@
 					"font-normal": !title,
 				})}
 			>
-				{title || message}
+				{@html sanitize((title || message) as string)}
 			</p>
 		</div>
 		<button

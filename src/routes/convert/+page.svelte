@@ -17,7 +17,6 @@
 		showGradient,
 		dropdownStates,
 		fileSettings,
-		sanitize,
 	} from "$lib/store/index.svelte";
 	import { VertFile } from "$lib/types";
 	import {
@@ -38,10 +37,41 @@
 	import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
 	import { GB } from "$lib/util/consts";
 	import { formatBytes } from "$lib/util/file";
-	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
 	import SettingsModal from "$lib/components/functional/popups/SettingsModal.svelte";
+	import { ToastManager } from "$lib/util/toast.svelte";
+	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
 
 	let processedFileIds = $state(new Set<string>());
+	const vertdSizeWarningFileIds = new Set<string>();
+
+	$effect(() => {
+		const limit = $vertdSizeLimit;
+		for (const file of files.files) {
+			const exceedsLimit = file.size > limit;
+			const unavailable = file.unavailableConverters;
+			const shouldMarkUnavailable = exceedsLimit
+				? !unavailable.includes("vertd")
+				: unavailable.includes("vertd");
+
+			if (shouldMarkUnavailable) {
+				file.unavailableConverters = exceedsLimit
+					? [...unavailable, "vertd"]
+					: unavailable.filter((name) => name !== "vertd");
+			}
+			if (!exceedsLimit || vertdSizeWarningFileIds.has(file.id)) continue;
+
+			vertdSizeWarningFileIds.add(file.id);
+			ToastManager.add({
+				type: "warning",
+				message: m["convert.errors.vertd.file_too_large"]({
+					filename: file.name,
+					fileSize: formatBytes(file.size),
+					limit: formatBytes(limit),
+				}),
+				disappearing: false,
+			});
+		}
+	});
 
 	const getCurrentConverter = (file: VertFile) => {
 		const converterName = file.conversionSettings.converter;
@@ -270,8 +300,6 @@
 				(f) => f.name === file.from,
 			)}
 			{@const isLarge = file.isLarge()}
-			{@const size = file.size}
-			{@const limit = $vertdSizeLimit}
 			{#if formatInfo && !formatInfo.fromSupported}
 				<div
 					class="h-full flex flex-col text-center justify-center text-failure"
@@ -282,37 +310,6 @@
 					<p class="font-normal">
 						{m["convert.errors.format_output_only"]()}
 					</p>
-				</div>
-			{:else if size > limit && currentConverter.name === "vertd"}
-				<div class="h-full flex flex-col justify-between">
-					<div
-						class="flex flex-col text-center justify-center text-failure"
-					>
-						<p class="font-body font-bold">
-							{m["convert.errors.cant_convert"]()}
-						</p>
-						<p class="font-normal whitespace-pre-line">
-							{@html sanitize(m["convert.errors.vertd.file_too_large.text"]({
-								fileSize: formatBytes(size),
-								limit: formatBytes(limit),
-							}))}
-						</p>
-					</div>
-					<div class="flex p-2 justify-center gap-4">
-						<FormatDropdown
-						{categories}
-						from={file.from}
-						bind:selected={file.to}
-						onselect={(option) => handleSelect(option, file)}
-						{file}
-					/>
-					<button
-						class="w-full p-2 text-center rounded-lg bg-accent text-black"
-						onclick={() => ($fileSettings = file)}
-					>
-						{m["convert.errors.vertd.file_too_large.button"]()}
-					</button>
-					</div>
 				</div>
 			{:else if isLarge && !file.supportsStreaming()}
 				<div

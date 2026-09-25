@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { duration, fade, transition } from "$lib/util/animation";
 	import { m } from "$lib/paraglide/messages";
-	import { isMobile, files, dropdownStates, fileSettings } from "$lib/store/index.svelte";
+	import {
+		isMobile,
+		files,
+		dropdownStates,
+		fileSettings,
+	} from "$lib/store/index.svelte";
 	import type { Categories } from "$lib/types";
 	import clsx from "clsx";
 	import { ChevronDown, SearchIcon } from "@lucide/svelte";
@@ -64,11 +69,17 @@
 
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
 
-	const shouldExclude = (format: string): boolean =>
-		!!(
+	const shouldExclude = (format: string): boolean => {
+		if (
 			categories["audio"]?.formats.includes(from ?? "") &&
 			format === ".gif"
-		);
+		)
+			return true;
+
+		if (!file || file.unavailableConverters.length === 0) return false;
+
+		return !file.hasAvailableConverter(file.from, format);
+	};
 
 	const getFormats = (cat: string) => {
 		let formats = (categories[cat]?.formats ?? []).filter(
@@ -276,16 +287,10 @@
 		);
 
 		if (!allUnfilteredFormats.includes(selected)) {
-			// check if formats available in filteredData, else fall back to all available formats, else keep previous selection
-			if (filteredData.formats.length > 0) {
-				selected = filteredData.formats[0];
-				onselect?.(selected);
-			} else if (allUnfilteredFormats.length > 0) {
+			if (allUnfilteredFormats.length > 0) {
 				selected = allUnfilteredFormats[0];
-				onselect?.(allUnfilteredFormats[0]);
-			} else {
-				// no formats available, keeping previous selection
-				// i feel like this is all very scuffed and we need a better search and filtering system
+				onselect?.(selected);
+				return;
 			}
 		}
 	});
@@ -632,7 +637,7 @@
 				<div class="border-t border-separator text-base p-2">
 					<button
 						class="w-full p-2 text-center rounded-lg bg-accent text-black"
-						onclick={() => $fileSettings = file}
+						onclick={() => ($fileSettings = file)}
 					>
 						{m["convert.settings.settings"]()}
 					</button>

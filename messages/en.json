@@ -211,12 +211,9 @@
 				"server": "what are you doing..? you're supposed to run the vertd server!",
 				"not_found": "Could not find the vertd instance to start video conversion. Are you sure the instance URL is set correctly?",
 				"ratelimit": "Your video, '{filename}', has failed to convert a few times. To prevent server overload, further conversion attempts for this file have been temporarily blocked. Please try again later.",
-				"file_too_large": {
-					"text": "This file is <b>{fileSize}</b>, but the selected vertd server only supports files up to <b>{limit}</b>.\nTry using a smaller file, different format, or change your vertd server in Settings.",
-					"button": "Change converter"
-				},
+				"file_too_large": "The file '{filename}' is <b>{fileSize}</b>, but the selected vertd server only supports files up to <b>{limit}</b>.\nTry using a smaller file, different format, or change your vertd server in Settings.",
 				"failed_to_keep": "Failed to keep the video on the server: {error}",
-				"retry": "Retrying video conversion for {filename} with different settings due to failure. This may take longer than usual.",
+				"retry": "Retrying video conversion for '{filename}' with different settings due to failure. This may take longer than usual.",
 				"generic": {
 					"title": "Video conversion error",
 					"view": "View error details",
