@@ -13,6 +13,23 @@
 	const progress = $derived(files.files.filter((f) => f.result).length);
 	const manyFiles = $derived(files.files.length > 50);
 	const compactActions = $derived(manyFiles && !$isMobile);
+	const canSetAll = $derived.by(() => {
+		const [firstFile, ...otherFiles] = files.files;
+		if (!firstFile?.converters.length) return false;
+
+		const converterNames = new Set(
+			firstFile.converters.map((converter) => converter.name),
+		);
+		if (otherFiles.some((file) => !file.converters.length)) return false;
+
+		return otherFiles.every((file) => {
+			const names = new Set(
+				file.converters.map((converter) => converter.name),
+			);
+			return names.size === converterNames.size &&
+				[...converterNames].every((name) => names.has(name));
+		});
+	});
 </script>
 
 <Panel class="flex flex-col gap-4">
@@ -99,10 +116,9 @@
 				{m["convert.panel.set_all_to"]()}
 			</p>
 			<div class="w-[122px]">
-				<!-- check if all files have the same converters -->
-				<!-- video and audio together still have this dropdown disabled because audio has just ffmpeg (video has vertd & ffmpeg), even tho it can convert between video and audio  -->
-				{#if files.files.length > 0 && files.files.every((f) => f.converters.length) && files.files.every((f) => JSON.stringify(f.converters) === JSON.stringify(files.files[0].converters))}
+				{#if canSetAll}
 					<FormatDropdown
+						allowEmpty
 						onselect={(r) =>
 							files.files.forEach((f) => {
 								f.to = r;

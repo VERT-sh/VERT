@@ -24,6 +24,7 @@
 		disabled?: boolean;
 		dropdownSize?: "default" | "large" | "small";
 		file?: VertFile;
+		allowEmpty?: boolean;
 	};
 
 	let {
@@ -34,6 +35,7 @@
 		disabled,
 		dropdownSize = "default",
 		file,
+		allowEmpty = false,
 	}: Props = $props();
 
 	let open = $state(false);
@@ -286,6 +288,8 @@
 		const allUnfilteredFormats = availableCategories.flatMap((cat) =>
 			getFormats(cat),
 		);
+
+		if (allowEmpty && !selected) return;
 
 		if (!allUnfilteredFormats.includes(selected)) {
 			if (allUnfilteredFormats.length > 0) {

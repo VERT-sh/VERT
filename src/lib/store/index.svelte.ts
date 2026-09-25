@@ -1,5 +1,10 @@
 import { browser } from "$app/environment";
-import { byNative, converterCategories, converters } from "$lib/converters";
+import {
+	byNative,
+	categories,
+	converterCategories,
+	converters,
+} from "$lib/converters";
 import type { Converter } from "$lib/converters/converter.svelte";
 import { error, log } from "$lib/util/logger";
 import { VertFile } from "$lib/types";
@@ -344,7 +349,12 @@ class Files {
 				this.files.push(new VertFile(file, format));
 				return;
 			}
-			const to = converter.formatStrings().find((f) => f !== format);
+			const category = Object.keys(categories).find((name) =>
+				categories[name].formats.includes(format),
+			);
+			const to = category
+				? categories[category].formats.find((f) => f !== format)
+				: converter.formatStrings().find((f) => f !== format);
 			if (!to) {
 				log(["files"], `no output format found for ${file.name}`);
 				return;
@@ -361,6 +371,7 @@ class Files {
 				ToastManager.add({
 					type: "warning",
 					message: m["convert.large_file_warning"]({
+						filename: file.name,
 						limit: (MAX_ARRAY_BUFFER_SIZE / GB).toFixed(2),
 					}),
 					durations: {
