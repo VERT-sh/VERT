@@ -10,7 +10,7 @@
 	import type { Categories } from "$lib/types";
 	import clsx from "clsx";
 	import { ChevronDown, SearchIcon } from "@lucide/svelte";
-	import { onMount } from "svelte";
+	import { onMount, tick } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
 	import { log } from "$lib/util/logger";
@@ -38,7 +38,8 @@
 
 	let open = $state(false);
 	let dropdown = $state<HTMLDivElement>();
-	let dropdownMenu: HTMLElement | undefined = $state();
+	let dropdownMenu: HTMLDivElement | undefined = $state();
+	let formatList: HTMLDivElement | undefined = $state();
 	let dropdownPosition = $state<"left" | "center" | "right">("center");
 	let currentCategory = $state<string | null>(null);
 	let searchQuery = $state("");
@@ -326,15 +327,18 @@
 	};
 
 	const scrollView = () => {
-		if (!dropdownMenu) return;
-		const selectedOption = dropdownMenu.querySelector(
+		if (!formatList) return;
+		const selectedOption = formatList.querySelector(
 			"[data-selected='true']",
 		) as HTMLButtonElement | null;
 		if (!selectedOption) return;
-		selectedOption.scrollIntoView({ block: "start" });
+
+		const listRect = formatList.getBoundingClientRect();
+		const optionRect = selectedOption.getBoundingClientRect();
+		formatList.scrollTop += optionRect.top - listRect.top;
 	};
 
-	const clickDropdown = () => {
+	const clickDropdown = async () => {
 		open = !open;
 		if (!open) return;
 
@@ -358,17 +362,15 @@
 			else dropdownPosition = "center";
 		}
 
-		setTimeout(() => {
-			if (!dropdownMenu) return;
-			const searchInput = dropdownMenu.querySelector(
-				"#format-search",
-			) as HTMLInputElement;
-			if (searchInput) {
-				searchInput.focus();
-				searchInput.select();
-			}
-			scrollView();
-		}, 0); // let dropdown open first
+		await tick();
+
+		const searchInput = dropdownMenu?.querySelector(
+			"#format-search",
+		) as HTMLInputElement | null;
+
+		searchInput?.focus();
+		searchInput?.select();
+		scrollView();
 	};
 
 	const extract = async () => {
@@ -548,7 +550,10 @@
 				{/each}
 			</div>
 			<!-- available formats -->
-			<div class="max-h-80 overflow-y-auto grid grid-cols-3 gap-2 p-2">
+			<div
+				class="max-h-80 overflow-y-auto grid grid-cols-3 gap-2 p-2"
+				bind:this={formatList}
+			>
 				{#if filteredData.formats.length > 0}
 					{#each filteredData.formats as format}
 						<button
