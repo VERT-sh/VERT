@@ -18,6 +18,8 @@ import { fileTypeFromBuffer } from "file-type";
 
 const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
 
+export type UnavailableReasons = "vertd-size-limit" | "other-reason"; // find more stuff to add
+
 export class VertFile {
 	public id: string = Math.random().toString(36).slice(2, 8);
 	public readonly file: File;
@@ -35,7 +37,7 @@ export class VertFile {
 	public blobUrl = $state<string>();
 	public processing = $state(false);
 	public cancelled = $state(false);
-	public unavailableConverters = $state<string[]>([]);
+	public unavailableConverters = $state<Record<string, UnavailableReasons>>({});
 
 	public converters: Converter[] = [];
 	private fallbackToastId: number | null = null;
@@ -100,11 +102,14 @@ export class VertFile {
 
 	public findConverters(
 		supportedFormats: string[] = [this.from],
-		unavailableConverters: string[] = [],
+		unavailableConverters: Record<string, UnavailableReasons> = {},
 	) {
 		return this.converters
 			.filter((converter) => {
-				if (unavailableConverters.includes(converter.name))
+				if (
+					unavailableConverters[converter.name] ||
+					!converter.isReady()
+				)
 					return false;
 				if (
 					!converter
@@ -152,7 +157,10 @@ export class VertFile {
 	// returns true if there is at least one converter that can convert from `from` to `to`
 	public hasAvailableConverter(from: string, to: string): boolean {
 		return this.converters.some((converter) => {
-			if (this.unavailableConverters.includes(converter.name))
+			if (
+				this.unavailableConverters[converter.name] ||
+				!converter.isReady()
+			)
 				return false;
 
 			const fromInfo = converter.supportedFormats.find(

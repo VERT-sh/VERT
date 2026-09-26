@@ -38,22 +38,13 @@ class Files {
 		return selectedConverter ? [selectedConverter] : compatibleConverters;
 	}
 
-	private isConverterReady(converter: Converter): boolean {
-		return (
-			converter.status === "ready" ||
-			converter.status === "partially-ready" // no idea where this could be used actually in a real converter
-		);
-	}
-
 	public isReady(file: VertFile): boolean {
 		const requiredConverters = this.getRequiredConverters(file);
 		if (requiredConverters.length === 0) return false;
 
 		return (
 			!file.processing &&
-			requiredConverters.some((converter) =>
-				this.isConverterReady(converter),
-			)
+			requiredConverters.some((converter) => converter.isReady())
 		);
 	}
 

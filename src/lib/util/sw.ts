@@ -53,11 +53,11 @@ class ServiceWorkerManager {
 				reject(new Error("Timeout waiting for cache info"));
 			}, 5000);
 
-			messageChannel.port1.onmessage = (event) => {
+			messageChannel.port1.onmessage = (e) => {
 				if (settled) return;
 				settled = true;
 				clearTimeout(timeoutId);
-				resolve(event.data);
+				resolve(e.data);
 			};
 
 			navigator.serviceWorker?.controller?.postMessage(
@@ -81,15 +81,15 @@ class ServiceWorkerManager {
 				reject(new Error("Timeout waiting for cache clear"));
 			}, 10000);
 
-			messageChannel.port1.onmessage = (event) => {
+			messageChannel.port1.onmessage = (e) => {
 				if (settled) return;
 				settled = true;
 				clearTimeout(timeoutId);
-				if (event.data.success) {
+				if (e.data.success) {
 					resolve();
 				} else {
 					reject(
-						new Error(event.data.error || "Failed to clear cache"),
+						new Error(e.data.error || "Failed to clear cache"),
 					);
 				}
 			};

@@ -728,7 +728,7 @@ export class VertdConverter extends Converter {
 				rejectConversion(new Error("vertd websocket error"));
 			};
 
-			ws.onclose = (event) => {
+			ws.onclose = (e) => {
 				if (settled) return;
 				if (this.cancelledConversions.has(input.id)) {
 					rejectConversion(new Error("Conversion cancelled"));
@@ -736,7 +736,7 @@ export class VertdConverter extends Converter {
 				}
 
 				this.error(
-					`ws closed unexpectedly for file ${input.name} (code: ${event.code})`,
+					`ws closed unexpectedly for file ${input.name} (code: ${e.code})`,
 				);
 				rejectConversion(
 					new Error("vertd websocket closed unexpectedly"),

@@ -129,6 +129,10 @@ export class Converter {
 		return true;
 	}
 
+	public isReady(): boolean {
+		return this.status === "ready" || this.status === "partially-ready";
+	}
+
 	public formatStrings(predicate?: (f: FormatInfo) => boolean) {
 		if (predicate) {
 			return this.supportedFormats.filter(predicate).map((f) => f.name);

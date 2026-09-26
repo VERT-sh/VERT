@@ -15,6 +15,9 @@
 	import { VertFile } from "$lib/types";
 	import { log } from "$lib/util/logger";
 	import FancyInput from "./FancyInput.svelte";
+	import Tooltip from "../visual/Tooltip.svelte";
+	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
+	import { formatBytes } from "$lib/util/file";
 
 	type Props = {
 		categories: Categories;
@@ -72,21 +75,54 @@
 
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
 
-	const shouldExclude = (format: string): boolean => {
-		if (
-			categories["audio"]?.formats.includes(from ?? "") &&
-			format === ".gif"
-		)
-			return true;
+	const isUnavailable = (format: string): boolean =>
+		!!file && !file.hasAvailableConverter(file.from, format);
 
-		if (!file || file.unavailableConverters.length === 0) return false;
+	const getUnavailableReason = (format: string): string => {
+		if (!file) return "";
+		// check if any compatible converters are available for this file and format
+		const compatible = file.converters.filter((converter) => {
+			const fromInfo = converter.supportedFormats.find(
+				(info) => info.name === file.from,
+			);
+			const toInfo = converter.supportedFormats.find(
+				(info) => info.name === format,
+			);
+			return (
+				!!fromInfo &&
+				!!toInfo &&
+				fromInfo.fromSupported &&
+				toInfo.toSupported &&
+				(fromInfo.isNative || toInfo.isNative)
+			);
+		});
 
-		return !file.hasAvailableConverter(file.from, format);
+		const largeFile = compatible.some(
+			(converter) =>
+				converter.name === "vertd" &&
+				converter.isReady() &&
+				file.unavailableConverters[converter.name] ===
+					"vertd-size-limit",
+		);
+		if (largeFile)
+			return m["convert.dropdown.disabled.vertd_size_limit"]({
+				limit: formatBytes($vertdSizeLimit),
+				fileSize: formatBytes(file.size),
+			});
+
+		return m["convert.dropdown.disabled.no_converter"]({
+			from: file.from,
+			to: format,
+		});
 	};
+
+	const shouldHide = (format: string): boolean =>
+		categories["audio"]?.formats.includes(from ?? "") === true &&
+		format === ".gif";
 
 	const getFormats = (cat: string) => {
 		let formats = (categories[cat]?.formats ?? []).filter(
-			(f) => !shouldExclude(f),
+			(f) => !shouldHide(f),
 		);
 
 		// if imageSequence is checked, filter image category to sequence formats only
@@ -220,7 +256,7 @@
 		const matches = (f: string, cat?: string) => {
 			if (
 				!normalize(f).includes(query) ||
-				shouldExclude(f) ||
+				shouldHide(f) ||
 				hiddenFormats.includes(f)
 			)
 				return false;
@@ -285,9 +321,9 @@
 
 	$effect(() => {
 		// this thing checks if selected format is still valid with the current filters (imageSequence or search query) and falls back if not
-		const allUnfilteredFormats = availableCategories.flatMap((cat) =>
-			getFormats(cat),
-		);
+		const allUnfilteredFormats = availableCategories
+			.flatMap((cat) => getFormats(cat))
+			.filter((format) => !isUnavailable(format));
 
 		if (allowEmpty && !selected) return;
 
@@ -301,6 +337,7 @@
 	});
 
 	const selectOption = (option: string) => {
+		if (isUnavailable(option)) return;
 		selected = option;
 
 		// save user's selection to dropdownStates for this session
@@ -559,19 +596,35 @@
 				bind:this={formatList}
 			>
 				{#if filteredData.formats.length > 0}
-					{#each filteredData.formats as format}
-						<button
-							data-selected={format === selected}
-							class="w-full p-2 text-center rounded-xl
-							{format === selected
-								? 'bg-accent text-black'
-								: format === from
-									? 'bg-separator'
-									: 'hover:bg-panel'}"
-							onclick={() => selectOption(format)}
-						>
-							{format}
-						</button>
+					{#each filteredData.formats as format (format)}
+						{@const unavailable = isUnavailable(format)}
+						{#if unavailable}
+							<Tooltip text={getUnavailableReason(format)}>
+								<button
+									data-selected={format === selected}
+									aria-disabled="true"
+									class="w-full p-2 text-center rounded-xl opacity-45 cursor-not-allowed"
+									tabindex="0"
+									onclick={(e) => e.preventDefault()}
+									onkeydown={(e) => e.preventDefault()}
+								>
+									{format}
+								</button>
+							</Tooltip>
+						{:else}
+							<button
+								data-selected={format === selected}
+								class="w-full p-2 text-center rounded-xl
+								{format === selected
+									? 'bg-accent text-black'
+									: format === from
+										? 'bg-separator'
+										: 'hover:bg-panel'}"
+								onclick={() => selectOption(format)}
+							>
+								{format}
+							</button>
+						{/if}
 					{/each}
 				{:else}
 					<div class="col-span-3 text-center p-4 text-muted">

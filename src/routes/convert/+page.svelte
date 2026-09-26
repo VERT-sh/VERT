@@ -50,14 +50,22 @@
 			const exceedsLimit = file.size > limit;
 			const unavailable = file.unavailableConverters;
 			const shouldMarkUnavailable = exceedsLimit
-				? !unavailable.includes("vertd")
-				: unavailable.includes("vertd");
+				? !unavailable["vertd"]
+				: unavailable["vertd"];
 
 			if (shouldMarkUnavailable) {
 				file.unavailableConverters = exceedsLimit
-					? [...unavailable, "vertd"]
-					: unavailable.filter((name) => name !== "vertd");
+					? { ...unavailable, vertd: "vertd-size-limit" }
+					: Object.fromEntries(
+							Object.entries(unavailable).filter(
+								([key]) => key !== "vertd",
+							),
+						);
 			}
+			if (exceedsLimit)
+				file.unavailableConverters["vertd"] = "vertd-size-limit";
+			else delete file.unavailableConverters["vertd"];
+
 			if (!exceedsLimit || vertdSizeWarningFileIds.has(file.id)) continue;
 
 			vertdSizeWarningFileIds.add(file.id);
@@ -68,7 +76,6 @@
 					fileSize: formatBytes(file.size),
 					limit: formatBytes(limit),
 				}),
-				disappearing: false,
 			});
 		}
 	});

@@ -88,7 +88,11 @@
 			"placeholder": "Search format",
 			"no_formats": "No formats available",
 			"no_results": "No formats match your search",
-			"fallback": "An error occurred loading available categories & formats, showing everything."
+			"fallback": "An error occurred loading available categories & formats, showing everything.",
+			"disabled": {
+				"no_converter": "No compatible converter is available for {from} to {to}.",
+				"vertd_size_limit": "This file cannot be converted to this format as the file's size is too large for the selected vertd server."
+			}
 		},
 		"settings": {
 			"settings": "Settings",

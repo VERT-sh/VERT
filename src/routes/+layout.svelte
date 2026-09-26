@@ -20,10 +20,8 @@
 	import "$lib/css/app.scss";
 	import { browser } from "$app/environment";
 	import { initStores as initAnimStores } from "$lib/util/animation";
-	import {
-		useVertdSizeLimit,
-		VertdInstance,
-	} from "$lib/sections/settings/vertdSettings.svelte";
+	import { useVertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
+	import { converters } from "$lib/converters";
 	import { ToastManager } from "$lib/util/toast.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { log } from "$lib/util/logger";
@@ -92,15 +90,6 @@
 
 		Settings.instance.load();
 
-		if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
-			VertdInstance.instance
-				.url()
-				.then((u) => fetch(`${u}/api/version`))
-				.then((res) => {
-					if (res.ok) $vertdLoaded = true;
-				});
-		}
-
 		// detect if insecure context
 		if (!window.isSecureContext) {
 			log(
@@ -117,6 +106,29 @@
 		return () => {
 			window.removeEventListener("paste", handlePaste);
 			window.removeEventListener("resize", handleResize);
+		};
+	});
+
+	$effect(() => {
+		if (DISABLE_ALL_EXTERNAL_REQUESTS) return;
+		let cancelled = false;
+		const vertd = converters.find((converter) => converter.name === "vertd");
+		if (!vertd) return;
+
+		void vertd.valid().then((valid) => {
+			if (cancelled) return;
+			vertdLoaded.set(valid);
+			vertd.status = valid ? "ready" : "error";
+			if (!valid) log(["layout", "vertd"], "health check failed");
+		}).catch((error) => {
+			if (cancelled) return;
+			vertdLoaded.set(false);
+			vertd.status = "error";
+			log(["layout", "vertd"], `health check failed: ${error}`);
+		});
+
+		return () => {
+			cancelled = true;
 		};
 	});
 
