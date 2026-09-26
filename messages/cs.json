@@ -1,0 +1,325 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"navbar": {
+		"upload": "Nahrát",
+		"convert": "Konvertovat",
+		"settings": "Nastavení",
+		"about": "O aplikaci",
+		"toggle_theme": "Přepnout vzhled"
+	},
+	"footer": {
+		"copyright": "© {year} VERT.",
+		"source_code": "Zdrojový kód",
+		"discord_server": "Discord server",
+		"privacy_policy": "Zásady ochrany osobních údajů"
+	},
+	"upload": {
+		"title": "Konvertor souborů, který si zamilujete.",
+		"subtitle": "Veškeré zpracování obrázků, audia a dokumentů probíhá na vašem zařízení. Videa jsou konvertována na našich bleskově rychlých serverech. Žádné omezení velikosti souborů, bez reklam a kompletně open-source.",
+		"uploader": {
+			"text": "Přetáhněte soubor nebo klikněte pro {action}",
+			"convert": "konvertování"
+		},
+		"cards": {
+			"title": "VERT podporuje...",
+			"images": "Obrázky",
+			"audio": "Audio",
+			"documents": "Dokumenty",
+			"video": "Video",
+			"video_server_processing": "Podporováno na serveru",
+			"local_supported": "Lokálně podporováno",
+			"status": {
+				"text": "<b>Stav:</b> {status}",
+				"ready": "připraveno",
+				"not_ready": "není připraveno",
+				"not_initialized": "nespuštěno",
+				"downloading": "stahování...",
+				"initializing": "spouštění...",
+				"unknown": "neznámý stav"
+			},
+			"supported_formats": "Podporované formáty:"
+		},
+		"tooltip": {
+			"partial_support": "Tento formát lze konvertovat pouze jako {direction}.",
+			"direction_input": "vstup (z)",
+			"direction_output": "výstup (do)",
+			"video_server_processing": "Video se standardně nahrává na server ke zpracování. Zjistěte, jak to nastavit lokálně zde."
+		}
+	},
+	"convert": {
+		"archive_file": {
+			"extract": "Rozbalit archiv",
+			"extracting": "Detekován archiv: {filename}",
+			"extracted": "Rozbaleno {extract_count} souborů z {filename}. {ignore_count} položek bylo ignorováno.",
+			"detected": "Detekovány {type} soubory v {filename}.",
+			"audio": "audio",
+			"video": "video",
+			"doc": "dokument",
+			"image": "obrázek",
+			"extract_error": "Chyba při rozbalování {filename}: {error}"
+		},
+		"large_file_warning": "Kvůli omezením prohlížeče/zařízení je konverze videa na audio pro tento soubor zakázána, protože je větší než {limit} GB. Doporučujeme použít Firefox nebo Safari pro soubory této velikosti, které mají méně omezení.",
+		"external_warning": {
+			"title": "Upozornění na externí server",
+			"text": "Pokud se rozhodnete konvertovat do video formátu, tyto soubory budou nahrány na externí server ke konverzi. Chcete pokračovat?",
+			"yes": "Ano",
+			"no": "Ne"
+		},
+		"panel": {
+			"convert_all": "Konvertovat vše",
+			"download_all": "Stáhnout vše jako .zip",
+			"remove_all": "Odebrat všechny soubory",
+			"set_all_to": "Nastavit vše na",
+			"na": "Nedostupné"
+		},
+		"dropdown": {
+			"audio": "Audio",
+			"video": "Video",
+			"doc": "Dokument",
+			"image": "Obrázek",
+			"placeholder": "Hledat formát",
+			"no_formats": "Žádné formáty k dispozici",
+			"no_results": "Žádné formáty neodpovídají vašemu hledání"
+		},
+		"tooltips": {
+			"unknown_file": "Neznámý typ souboru",
+			"audio_file": "Audio soubor",
+			"video_file": "Video soubor",
+			"document_file": "Dokument",
+			"image_file": "Obrázek",
+			"convert_file": "Konvertovat tento soubor",
+			"download_file": "Stáhnout tento soubor"
+		},
+		"errors": {
+			"cant_convert": "Tento soubor nelze konvertovat.",
+			"vertd_server": "co to děláte...? měli byste spustit vertd server!",
+			"vertd_generic_view": "Zobrazit podrobnosti chyby",
+			"vertd_generic_body": "Při pokusu o konverzi vašeho videa došlo k chybě. Chcete odeslat toto video vývojářům, abyste pomohli opravit tuto chybu? Bude odeslán pouze váš video soubor. Žádné identifikátory nebudou nahrány.",
+			"vertd_generic_title": "Chyba při konverzi videa",
+			"vertd_generic_yes": "Odeslat video",
+			"vertd_generic_no": "Neposílat",
+			"vertd_failed_to_keep": "Selhalo uchování videa na serveru: {error}",
+			"vertd_details": "Zobrazit podrobnosti chyby",
+			"vertd_details_body": "Pokud stisknete odeslat, <b>vaše video bude také připojeno</b> spolu s protokolem chyb, který je nám vždy hlášen ke kontrole. Následující informace jsou protokol, který automaticky obdržíme:",
+			"vertd_details_footer": "Tyto informace budou použity pouze pro účely řešení problémů a nebudou nikdy sdíleny. Prohlédněte si naše [privacy_link]zásady ochrany osobních údajů[/privacy_link] pro více informací.",
+			"vertd_details_job_id": "<b>ID úlohy:</b> {jobId}",
+			"vertd_details_from": "<b>Z formátu:</b> {from}",
+			"vertd_details_to": "<b>Do formátu:</b> {to}",
+			"vertd_details_error_message": "<b>Chybová zpráva:</b> [view_link]Zobrazit protokol chyb[/view_link]",
+			"vertd_details_close": "Zavřít",
+			"vertd_ratelimit": "Vaše video '{filename}' se nepodařilo konvertovat několikrát. Aby nedošlo k přetížení serveru, další pokusy o konverzi tohoto souboru byly dočasně zablokovány. Zkuste to prosím později.",
+			"unsupported_format": "Podporovány jsou pouze soubory obrázků, videa, audia a dokumentů",
+			"format_output_only": "Tento formát lze v současné době použít pouze jako výstup (konvertovat do), nikoli jako vstup.",
+			"vertd_not_found": "Nelze najít instanci vertd pro zahájení konverze videa. Jste si jisti, že je URL instance nastavena správně?",
+			"worker_downloading": "Konvertor {type} se právě inicializuje, počkejte prosím chvíli.",
+			"worker_error": "Konvertor {type} měl při inicializaci chybu, zkuste to prosím později.",
+			"worker_timeout": "Inicializace konvertoru {type} trvá déle než obvykle, počkejte prosím ještě chvíli nebo obnovte stránku.",
+			"audio": "audia",
+			"doc": "dokumentů",
+			"image": "obrázků"
+		}
+	},
+	"settings": {
+		"title": "Nastavení",
+		"errors": {
+			"save_failed": "Selhalo uložení nastavení!"
+		},
+		"appearance": {
+			"title": "Vzhled",
+			"brightness_theme": "Barevný motiv",
+			"brightness_description": "Chcete slunečný blesk, nebo tiché osamělé noci?",
+			"light": "Světlý",
+			"dark": "Tmavý",
+			"effect_settings": "Nastavení efektů",
+			"effect_description": "Chcete efektní efekty, nebo statičtější prostředí?",
+			"enable": "Zapnout",
+			"disable": "Vypnout"
+		},
+		"conversion": {
+			"title": "Konverze",
+			"advanced_settings": "Pokročilá nastavení",
+			"filename_format": "Formát názvu souboru",
+			"filename_description": "Toto určí název souboru při stažení, <b>bez přípony souboru.</b> Do formátu můžete vložit následující šablony, které budou nahrazeny příslušnými informacemi: <b>%name%</b> pro původní název souboru, <b>%extension%</b> pro původní příponu souboru a <b>%date%</b> pro datum, kdy byl soubor konvertován.",
+			"placeholder": "VERT_%name%",
+			"default_format": "Výchozí formát konverze",
+			"default_format_enable": "Zapnout",
+			"default_format_disable": "Vypnout",
+			"default_format_description": "Toto změní výchozí formát vybraný při nahrání souboru tohoto typu.",
+			"default_format_image": "Obrázky",
+			"default_format_video": "Videa",
+			"default_format_audio": "Audio",
+			"default_format_document": "Dokumenty",
+			"metadata": "Metadata souboru",
+			"metadata_description": "Toto mění, zda budou metadata (EXIF, informace o skladbě atd.) z původního souboru zachována v konvertovaných souborech.",
+			"keep": "Zachovat",
+			"remove": "Odebrat",
+			"quality": "Kvalita konverze",
+			"quality_description": "Toto mění výchozí výstupní kvalitu konvertovaných souborů (v jejich kategorii). Vyšší hodnoty mohou vést k delšímu času konverze a větší velikosti souboru.",
+			"quality_video": "Toto mění výchozí výstupní kvalitu konvertovaných video souborů. Vyšší hodnoty mohou vést k delšímu času konverze a větší velikosti souboru.",
+			"quality_audio": "Audio (kbps)",
+			"quality_images": "Obrázek (%)",
+			"rate": "Vzorkovací frekvence (Hz)"
+		},
+		"vertd": {
+			"title": "Konverze videa",
+			"status": "stav:",
+			"loading": "načítání...",
+			"available": "dostupné, commit id {commitId}",
+			"unavailable": "nedostupné (je URL správná?)",
+			"description": "Projekt <code>vertd</code> je serverový obal pro FFmpeg. To vám umožňuje konvertovat videa prostřednictvím pohodlného webového rozhraní VERT a zároveň využívat sílu vašeho GPU, abyste to udělali co nejrychleji.",
+			"hosting_info": "Pro vaše pohodlí hostujeme veřejnou instanci, ale pokud víte, co děláte, je docela snadné si ji hostovat sami na vašem PC nebo serveru. Serverové binárky si můžete stáhnout [vertd_link]zde[/vertd_link] - proces nastavení bude v budoucnu jednodušší, takže zůstaňte naladěni!",
+			"instance": "Instance",
+			"url_placeholder": "Příklad: http://localhost:24153",
+			"conversion_speed": "Rychlost konverze",
+			"speed_description": "Toto popisuje kompromis mezi rychlostí a kvalitou. Vyšší rychlosti povedou k nižší kvalitě, ale práci udělají rychleji.",
+			"speeds": {
+				"very_slow": "Velmi pomalá",
+				"slower": "Pomalejší",
+				"slow": "Pomalá",
+				"medium": "Střední",
+				"fast": "Rychlá",
+				"ultra_fast": "Ultra rychlá"
+			},
+			"auto_instance": "Automaticky (doporučeno)",
+			"eu_instance": "Falkenstein, Německo",
+			"us_instance": "Washington, USA",
+			"custom_instance": "Vlastní"
+		},
+		"privacy": {
+			"title": "Soukromí a data",
+			"plausible_title": "Plausible analytika",
+			"plausible_description": "Používáme [plausible_link]Plausible[/plausible_link], nástroj pro analytiku zaměřený na ochranu soukromí, ke shromažďování zcela anonymních statistik. Všechna data jsou anonymizována a agregována a nikdy nejsou odesílány nebo ukládány žádné identifikovatelné informace. Analytiku můžete zobrazit [analytics_link]zde[/analytics_link] a níže se můžete rozhodnout odhlásit.",
+			"opt_in": "Souhlasím",
+			"opt_out": "Odhlásit se",
+			"cache_title": "Správa mezipaměti",
+			"cache_description": "Ukládáme soubory konvertoru do mezipaměti vašeho prohlížeče, abyste je nemuseli stahovat pokaždé znovu, což zlepšuje výkon a snižuje využití dat.",
+			"refresh_cache": "Obnovit mezipaměť",
+			"clear_cache": "Vymazat mezipaměť",
+			"files_cached": "{size} ({count} souborů)",
+			"loading_cache": "Načítání...",
+			"total_size": "Celková velikost",
+			"files_cached_label": "Souborů v mezipaměti",
+			"cache_cleared": "Mezipaměť byla úspěšně vymazána!",
+			"cache_clear_error": "Selhalo vymazání mezipaměti.",
+			"site_data_title": "Správa dat webu",
+			"site_data_description": "Vymažte všechna data webu včetně nastavení a souborů v mezipaměti, resetujte VERT do výchozího stavu a znovu načtěte stránku.",
+			"clear_all_data": "Vymazat všechna data webu",
+			"clear_all_data_confirm_title": "Vymazat všechna data webu?",
+			"clear_all_data_confirm": "Toto resetuje všechna nastavení a mezipaměť a poté znovu načte stránku. Tuto akci nelze vrátit zpět.",
+			"clear_all_data_cancel": "Zrušit",
+			"all_data_cleared": "Všechna data webu byla vymazána! Načítání stránky...",
+			"all_data_clear_error": "Selhalo vymazání všech dat webu."
+		},
+		"language": {
+			"title": "Jazyk",
+			"description": "Vyberte preferovaný jazyk pro rozhraní VERT."
+		}
+	},
+	"about": {
+		"title": "O aplikaci",
+		"why": {
+			"title": "Proč VERT?",
+			"description": "<b>Konvertory souborů nás vždy zklamaly.</b> Jsou ošklivé, plné reklam a především; pomalé. Rozhodli jsme se tento problém vyřešit jednou provždy vytvořením alternativy, která řeší všechny tyto problémy a ještě víc.<br/><br/>Všechny ne-video soubory jsou konvertovány kompletně na vašem zařízení; to znamená, že není žádné zpoždění mezi odesláním a přijetím souborů ze serveru a my nikdy nemůžeme špehovat soubory, které konvertujete.<br/><br/>Video soubory jsou nahrány na náš bleskově rychlý server s RTX 4000 Ada. Vaše videa tam zůstanou hodinu, pokud je nekonvertujete. Pokud soubor konvertujete, video zůstane na serveru hodinu nebo dokud nebude staženo. Poté bude soubor z našeho serveru smazán."
+		},
+		"sponsors": {
+			"title": "Sponzoři",
+			"description": "Chcete nás podpořit? Kontaktujte vývojáře na [discord_link]Discord[/discord_link] serveru nebo pošlete e-mail na",
+			"email_copied": "E-mail zkopírován do schránky!"
+		},
+		"resources": {
+			"title": "Zdroje",
+			"discord": "Discord",
+			"source": "Zdrojový kód",
+			"email": "E-mail"
+		},
+		"donate": {
+			"title": "Přispějte projektu VERT",
+			"description": "S vaší podporou můžeme pokračovat v údržbě a vylepšování VERT.",
+			"one_time": "Jednorázově",
+			"monthly": "Měsíčně",
+			"custom": "Vlastní částka",
+			"pay_now": "Zaplatit nyní",
+			"donate_amount": "Přispět ${amount} USD",
+			"thank_you": "Děkujeme za váš příspěvek!",
+			"payment_failed": "Platba selhala: {message}{period} Nebyli jste účtováni.",
+			"donation_error": "Při zpracování vašeho příspěvku došlo k chybě. Zkuste to prosím později.",
+			"payment_error": "Chyba při načítání platebních údajů. Zkuste to prosím později.",
+			"donation_notice_official": "Vaše příspěvky zde jdou oficiální instanci VERT (vert.sh) a pomáhají podporovat vývoj projektu.",
+			"donation_notice_unofficial": "Vaše příspěvky zde jdou provozovateli této instance VERT. Pokud chcete podpořit oficiální vývojáře VERT, navštivte prosím místo toho [official_link]vert.sh[/official_link]."
+		},
+		"credits": {
+			"title": "Tvůrci",
+			"contact_team": "Pokud byste chtěli kontaktovat vývojový tým, použijte prosím e-mail uvedený na kartě \"Zdroje\".",
+			"notable_contributors": "Významní přispěvatelé",
+			"notable_description": "Chtěli bychom poděkovat těmto lidem za jejich významný přínos projektu VERT.",
+			"github_contributors": "Přispěvatelé na GitHubu",
+			"github_description": "Velké díky všem těmto lidem za pomoc! [github_link]Chcete pomoci také?[/github_link]",
+			"no_contributors": "Zdá se, že zatím nikdo nepřispěl... [contribute_link]buďte první, kdo přispěje![/contribute_link]",
+			"libraries": "Knihovny",
+			"libraries_description": "Velké díky FFmpeg (audio, video), ImageMagick (obrázky) a Pandoc (dokumenty) za udržování tak vynikajících knihoven po tolik let. VERT na nich spoléhá, aby vám mohl poskytovat vaše konverze.",
+			"roles": {
+				"lead_developer": "Vedoucí vývojář; backend konverze, implementace UI",
+				"developer": "Vývojář; implementace UI",
+				"designer": "Designer; UX, branding, marketing",
+				"docker_ci": "Údržba podpory Docker a CI",
+				"former_cofounder": "Bývalý spoluzakladatel a designer"
+			}
+		},
+		"errors": {
+			"github_contributors": "Chyba při načítání přispěvatelů z GitHubu"
+		}
+	},
+	"workers": {
+		"errors": {
+			"general": "Chyba při konverzi {file}: {message}",
+			"cancel": "Chyba při zrušení konverze {file}: {message}",
+			"magick": "Chyba v Magick workeru, konverze obrázků nemusí fungovat podle očekávání.",
+			"ffmpeg": "Chyba při načítání FFmpeg, některé funkce nemusí fungovat podle očekávání.",
+			"pandoc": "Chyba při načítání Pandoc workeru, konverze dokumentů nemusí fungovat podle očekávání.",
+			"no_audio": "Nebyl nalezen žádný audio stream.",
+			"invalid_rate": "Byla zadána neplatná vzorkovací frekvence: {rate}Hz",
+			"file_too_large": "Tento soubor překračuje limit prohlížeče/zařízení {limit} GB. Zkuste Firefox nebo Safari pro konverzi tohoto velkého souboru, které obvykle mají vyšší limity."
+		}
+	},
+	"privacy": {
+		"title": "Zásady ochrany osobních údajů",
+		"summary": {
+			"title": "Shrnutí",
+			"description": "Zásady ochrany osobních údajů VERT jsou velmi jednoduché: vůbec neshromažďujeme ani neukládáme žádná data o vás. Nepoužíváme cookies ani sledovací nástroje, analytika je zcela soukromá a všechny konverze (kromě videí) probíhají lokálně ve vašem prohlížeči. Videa jsou smazána po stažení nebo po hodině, pokud nám výslovně nedáte svolení k jejich uložení; budou použita pouze pro účely řešení problémů. VERT samostatně hostuje instanci Coolify pro hostování webové stránky a vertd (pro konverzi videa) a instanci Plausible pro zcela anonymní a agregovanou analytiku. K zpracování příspěvků používáme Stripe, který může shromažďovat některá data používaná pro prevenci podvodů.<br/><br/>Poznámka: toto se může vztahovat pouze na oficiální instanci VERT na [vert_link]vert.sh[/vert_link]; instance třetích stran mohou s vašimi daty zacházet odlišně."
+		},
+		"conversions": {
+			"title": "Konverze",
+			"description": "Většina konverzí (obrázky, dokumenty, audio) probíhá zcela lokálně na vašem zařízení pomocí WebAssembly verzí příslušných nástrojů (např. ImageMagick, Pandoc, FFmpeg). To znamená, že vaše soubory nikdy neopustí vaše zařízení a my k nim nikdy nebudeme mít přístup.<br/><br/>Konverze videí se provádějí na našich serverech, protože vyžadují větší výpočetní výkon a v prohlížeči je zatím nelze provádět velmi rychle. Videa, která konvertujete pomocí VERT, jsou smazána po stažení nebo po jedné hodině, pokud nám výslovně nedáte svolení k jejich uložení na delší dobu čistě pro účely řešení problémů."
+		},
+		"donations": {
+			"title": "Příspěvky",
+			"description": "Na stránce [about_link]o aplikaci[/about_link] používáme Stripe ke shromažďování příspěvků. Stripe může shromažďovat určité informace o platbě a zařízení pro prevenci podvodů, jak je popsáno v [stripe_link]jejich dokumentaci o pokročilé detekci podvodů[/stripe_link]. Externí síťové požadavky na Stripe jsou odloženy a jsou provedeny až poté, co kliknete na tlačítko k platbě."
+		},
+		"conversion_errors": {
+			"title": "Chyby konverze",
+			"description": "Když se konverze videa nezdaří, můžeme shromažďovat některá anonymní data, která nám pomohou diagnostikovat problém. Tato data mohou zahrnovat:",
+			"list_job_id": "ID úlohy, což je anonymizovaný název souboru",
+			"list_format_from": "Formát, ze kterého jste konvertovali",
+			"list_format_to": "Formát, do kterého jste konvertovali",
+			"list_stderr": "Výstup FFmpeg stderr z vaší úlohy (chybová zpráva)",
+			"list_video": "Skutečný video soubor (pokud je uděleno výslovné svolení)",
+			"footer": "Tyto informace jsou používány pouze pro účely diagnostiky problémů s konverzí. Skutečný video soubor bude shromážděn pouze tehdy, pokud nám k tomu udělíte svolení, kde bude použit pouze pro řešení problémů."
+		},
+		"analytics": {
+			"title": "Analytika",
+			"description": "Samostatně hostujeme instanci Plausible pro zcela anonymní a agregovanou analytiku. Plausible nepoužívá cookies a dodržuje všechny hlavní předpisy o ochraně osobních údajů (GDPR/CCPA/PECR). Z analytiky se můžete odhlásit v sekci \"Soukromí a data\" v [settings_link]nastavení[/settings_link] a přečíst si více o postupech ochrany soukromí Plausible [plausible_link]zde[/plausible_link]."
+		},
+		"local_storage": {
+			"title": "Lokální úložiště",
+			"description": "Používáme lokální úložiště vašeho prohlížeče k uložení vašich nastavení a úložiště relace vašeho prohlížeče k dočasnému uložení seznamu přispěvatelů z GitHubu pro sekci \"O aplikaci\", abychom snížili opakované požadavky na GitHub API. Žádná osobní data nejsou ukládána ani přenášena.<br/><br/>WebAssembly verze konverzních nástrojů, které používáme (FFmpeg, ImageMagick, Pandoc), jsou také uloženy lokálně ve vašem prohlížeči při první návštěvě webové stránky, takže je nemusíte stahovat při každé návštěvě. Žádná osobní data nejsou ukládána ani přenášena. Tato data můžete kdykoli zobrazit nebo smazat v sekci \"Soukromí a data\" v [settings_link]nastavení[/settings_link]."
+		},
+		"contact": {
+			"title": "Kontakt",
+			"description": "Pro dotazy nám napište e-mail na: [email_link]hello@vert.sh[/email_link]. Pokud používáte instanci VERT třetí strany, kontaktujte prosím místo toho hostitele této instance."
+		},
+		"last_updated": "Naposledy aktualizováno: 29. 10. 2025"
+	},
+	"toast": {
+		"insecure_context": "Navštěvujete VERT v nezabezpečeném kontextu (např. přístup přes HTTP místo HTTPS). Některé funkce nemusí fungovat podle očekávání."
+	}
+}
