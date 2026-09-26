@@ -46,14 +46,19 @@ class ServiceWorkerManager {
 
 		return new Promise((resolve, reject) => {
 			const messageChannel = new MessageChannel();
-
-			messageChannel.port1.onmessage = (event) => {
-				resolve(event.data);
-			};
-
-			setTimeout(() => {
+			let settled = false;
+			const timeoutId = setTimeout(() => {
+				if (settled) return;
+				settled = true;
 				reject(new Error("Timeout waiting for cache info"));
 			}, 5000);
+
+			messageChannel.port1.onmessage = (e) => {
+				if (settled) return;
+				settled = true;
+				clearTimeout(timeoutId);
+				resolve(e.data);
+			};
 
 			navigator.serviceWorker?.controller?.postMessage(
 				{ type: "GET_CACHE_INFO" },
@@ -69,20 +74,25 @@ class ServiceWorkerManager {
 
 		return new Promise((resolve, reject) => {
 			const messageChannel = new MessageChannel();
+			let settled = false;
+			const timeoutId = setTimeout(() => {
+				if (settled) return;
+				settled = true;
+				reject(new Error("Timeout waiting for cache clear"));
+			}, 10000);
 
-			messageChannel.port1.onmessage = (event) => {
-				if (event.data.success) {
+			messageChannel.port1.onmessage = (e) => {
+				if (settled) return;
+				settled = true;
+				clearTimeout(timeoutId);
+				if (e.data.success) {
 					resolve();
 				} else {
 					reject(
-						new Error(event.data.error || "Failed to clear cache"),
+						new Error(e.data.error || "Failed to clear cache"),
 					);
 				}
 			};
-
-			setTimeout(() => {
-				reject(new Error("Timeout waiting for cache clear"));
-			}, 10000);
 
 			navigator.serviceWorker?.controller?.postMessage(
 				{ type: "CLEAR_CACHE" },

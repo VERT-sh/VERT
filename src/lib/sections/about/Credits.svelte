@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Panel from "$lib/components/visual/Panel.svelte";
-	import { HeartHandshakeIcon } from "lucide-svelte";
+	import { HeartHandshakeIcon } from "@lucide/svelte";
 	import {
 		DISABLE_ALL_EXTERNAL_REQUESTS,
 		GITHUB_URL_VERT,

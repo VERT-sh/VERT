@@ -28,7 +28,10 @@ export async function extractZip(file: File): Promise<ZipEntry[]> {
 					data: new Uint8Array(data),
 				}));
 
-			log(["zip"], `extracted ${entries.length} entries from ${file.name}`);
+			log(
+				["zip"],
+				`extracted ${entries.length} entries from ${file.name}`,
+			);
 			resolve(entries);
 		});
 	});
@@ -47,3 +50,43 @@ export function ignoreEntry(filename: string): boolean {
 		filename.endsWith("/")
 	);
 }
+
+export function formatFilename(format: string, file: File | string) {
+	const now = new Date();
+	const iso = now.toISOString();
+	const date = iso.split("T")[0];
+	const time = iso.split("T")[1].split(".")[0].replace(/:/g, "-");
+	const unix = now.getTime().toString();
+	const baseName =
+		typeof file === "string"
+			? file.replace(/\.[^/.]+$/, "")
+			: file.name.replace(/\.[^/.]+$/, "");
+	const originalExtension =
+		typeof file === "string"
+			? file.split(".").pop()!
+			: file.name.split(".").pop()!;
+
+	return format
+		.replace(/%datetime%/g, iso)
+		.replace(/%date%/g, date)
+		.replace(/%time%/g, time)
+		.replace(/%unix%/g, unix)
+		.replace(/%name%/g, baseName)
+		.replace(/%extension%/g, originalExtension);
+}
+
+export const formatBytes = (bytes: number): string => {
+	if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+	if (bytes < 1024) return `${bytes} B`;
+
+	const units = ["KB", "MB", "GB", "TB"];
+	let value = bytes;
+	let unitIndex = -1;
+
+	while (value >= 1024 && unitIndex < units.length - 1) {
+		value /= 1024;
+		unitIndex++;
+	}
+
+	return `${value.toFixed(value >= 100 ? 0 : value >= 10 ? 1 : 2)} ${units[unitIndex]}`;
+};

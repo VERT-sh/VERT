@@ -1,46 +1,44 @@
-import { ip, type IpInfo } from "$lib/util/ip";
 import { Settings } from "./index.svelte";
 import { PUB_VERTD_URL } from "$env/static/public";
+import { log } from "$lib/util/logger";
+import { writable } from "svelte/store";
+import { getVertdLimit } from "$lib/store/index.svelte";
 
 const LOCATIONS = [
-	{
-		latitude: 49.0976,
-		longitude: 12.4869,
-		url: "https://eu.vertd.vert.sh",
-	},
-	{
-		latitude: 47.6587,
-		longitude: -117.426,
-		url: "https://usa.vertd.vert.sh",
-	},
+	{ url: "https://eu.vertd.vert.sh" },
+	{ url: "https://usa.vertd.vert.sh" },
 ];
 
-const toRad = (value: number) => (value * Math.PI) / 180;
-const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-	const R = 6371; // km
-	const dLat = toRad(lat2 - lat1);
-	const dLon = toRad(lon2 - lon1);
-	const a =
-		Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-		Math.cos(toRad(lat1)) *
-			Math.cos(toRad(lat2)) *
-			Math.sin(dLon / 2) *
-			Math.sin(dLon / 2);
-	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-	const d = R * c;
-	return d;
+export type VertdInner =
+	{ type: "auto" } | { type: "eu" } | { type: "us" } | { type: "custom" };
+
+export const getVertdCustomHeaders = (): Record<string, string> => {
+	const raw = Settings.instance.settings.vertdCustomHeaders.trim();
+	if (!raw) return {};
+
+	const headers: Record<string, string> = {};
+
+	for (const line of raw.split(/\r?\n/)) {
+		const trimmed = line.trim();
+		if (!trimmed) continue;
+
+		const separatorIndex = trimmed.indexOf(":");
+		if (separatorIndex <= 0) continue;
+
+		const key = trimmed.slice(0, separatorIndex).trim();
+		const value = trimmed.slice(separatorIndex + 1).trim();
+		if (!key || !value) continue;
+
+		headers[key] = value;
+	}
+
+	return headers;
 };
 
-export type VertdInner =
-	| { type: "auto" }
-	| { type: "eu" }
-	| { type: "us" }
-	| { type: "custom" };
+export const vertdSizeLimit = writable(Number.POSITIVE_INFINITY);
 
 export class VertdInstance {
 	public static instance = new VertdInstance();
-
-	private cachedIp = $state<IpInfo | null>(null);
 
 	private inner = $state<VertdInner>({
 		type: "auto",
@@ -81,32 +79,46 @@ export class VertdInstance {
 	}
 
 	public async url() {
-		const reachable = async (url: string) => {
+		const latency = async (url: string) => {
 			try {
-				const res = await fetch(url + "/api/version", {
+				const start = performance.now();
+				await fetch(url, {
 					method: "GET",
 					cache: "no-store",
+					mode: "cors",
+					headers: getVertdCustomHeaders(),
 				});
-				return res.ok;
+				return performance.now() - start;
 			} catch {
-				return false;
+				return Number.POSITIVE_INFINITY;
 			}
 		};
 
 		switch (this.inner.type) {
 			case "auto": {
-				if (!this.cachedIp) this.cachedIp = await ip();
-				const ipInfo = this.cachedIp;
-				const primary = this.geographicallyOptimalInstance(ipInfo);
+				const results = await Promise.all(
+					LOCATIONS.map(async ({ url }) => ({
+						url,
+						latency: await latency(url),
+					})),
+				);
 
-				// try primary (closest) first
-				if (await reachable(primary)) return primary;
+				const fastest = results
+					.filter((result) => Number.isFinite(result.latency))
+					.sort((a, b) => a.latency - b.latency)[0];
 
-				// fall back to other locations
-				for (const location of LOCATIONS) {
-					if (location.url === primary) continue;
-					if (await reachable(location.url)) return location.url;
-				}
+				const latencySummary = results
+					.map(
+						(result) =>
+							`${result.url} = ${Number.isFinite(result.latency) ? `${result.latency.toFixed(2)}ms` : "unreachable"}`,
+					)
+					.join("\n");
+				log(
+					["settings", "vertd"],
+					`vertd latency results: ${latencySummary}`,
+				);
+
+				if (fastest) return fastest.url;
 
 				// if none are reachable, fall back to custom
 				return Settings.instance.settings.vertdURL;
@@ -125,30 +137,71 @@ export class VertdInstance {
 			}
 		}
 	}
+}
 
-	private geographicallyOptimalInstance(ip: IpInfo) {
-		let bestLocation = LOCATIONS[0];
-		let bestDistance = haversine(
-			ip.latitude,
-			ip.longitude,
-			bestLocation.latitude,
-			bestLocation.longitude,
-		);
+export function useVertdSizeLimit() {
+	$effect(() => {
+		let cancelled = false;
 
-		for (let i = 1; i < LOCATIONS.length; i++) {
-			const location = LOCATIONS[i];
-			const distance = haversine(
-				ip.latitude,
-				ip.longitude,
-				location.latitude,
-				location.longitude,
-			);
-			if (distance < bestDistance) {
-				bestDistance = distance;
-				bestLocation = location;
+		const loadLimit = async () => {
+			const apiUrl = await VertdInstance.instance.url();
+			if (cancelled) return;
+
+			const cacheKey = `vertd:size-limit:${apiUrl}`;
+			const sessionStorageAvailable =
+				typeof sessionStorage !== "undefined";
+
+			let cachedLimit: number | null = null;
+
+			if (sessionStorageAvailable) {
+				try {
+					const cached = sessionStorage.getItem(cacheKey);
+					if (cached !== null) {
+						const parsed = Number(cached);
+						if (Number.isFinite(parsed) && parsed > 0) {
+							cachedLimit = parsed;
+						} else {
+							sessionStorage.removeItem(cacheKey);
+						}
+					}
+				} catch (e) {
+					log(
+						["vertd"],
+						`failed to read vertd size limit from sessionStorage: ${e}`,
+					);
+				}
 			}
-		}
 
-		return bestLocation.url;
-	}
+			if (cachedLimit !== null) {
+				log(
+					["vertd"],
+					`using cached vertd size limit: ${cachedLimit} bytes`,
+				);
+				vertdSizeLimit.set(cachedLimit);
+				return;
+			}
+
+			const serverLimit = await getVertdLimit();
+			const finalLimit = serverLimit ?? Number.POSITIVE_INFINITY;
+			vertdSizeLimit.set(finalLimit);
+			log(["vertd"], `fetched vertd size limit: ${finalLimit} bytes`);
+
+			if (sessionStorageAvailable) {
+				try {
+					sessionStorage.setItem(cacheKey, finalLimit.toString());
+				} catch (e) {
+					log(
+						["vertd"],
+						`failed to cache vertd size limit in sessionStorage: ${e}`,
+					);
+				}
+			}
+		};
+
+		void loadLimit();
+
+		return () => {
+			cancelled = true;
+		};
+	});
 }
