@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type SettingType = "number" | "select" | "boolean" | "string" | "range";
+export type SettingType = "number" | "select" | "boolean" | "text" | "range";
 
 export interface SettingDefinition {
 	key: string;

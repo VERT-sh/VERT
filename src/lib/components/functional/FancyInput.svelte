@@ -71,6 +71,7 @@
 	{:else}
 		<input
 			{...rest}
+			{type}
 			bind:value
 			{disabled}
 			class="w-full rounded-lg bg-panel border-2 border-button

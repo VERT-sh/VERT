@@ -395,6 +395,7 @@ body {
 
 	input[type="text"]:focus {
 		@apply outline outline-accent outline-2;
+		outline-offset: -2px;
 	}
 
 	input[type="checkbox"] {

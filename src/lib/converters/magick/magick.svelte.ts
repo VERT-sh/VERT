@@ -169,7 +169,7 @@ export class MagickConverter extends Converter {
 		const resolution: SettingDefinition = {
 			key: "resolution",
 			label: m["convert.settings.image.resolution.label"](),
-			type: "string",
+			type: "text",
 			default: "",
 			placeholder: m["convert.settings.image.resolution.placeholder"](),
 		};
@@ -186,7 +186,7 @@ export class MagickConverter extends Converter {
 		const depth: SettingDefinition = {
 			key: "depth",
 			label: m["convert.settings.image.depth.label"](),
-			type: "string",
+			type: "text",
 			default: "",
 			placeholder: m["convert.settings.image.depth.placeholder"](),
 		};

@@ -114,14 +114,14 @@ export class FFmpegConverter extends Converter {
 		const bitrate: SettingDefinition = {
 			key: "bitrate",
 			label: m["convert.settings.audio.bitrate.label"](),
-			type: "string",
+			type: "text",
 			placeholder: m["convert.settings.audio.bitrate.placeholder"](),
 		};
 
 		const sampleRate: SettingDefinition = {
 			key: "sampleRate",
 			label: m["convert.settings.audio.sample_rate.label"](),
-			type: "string",
+			type: "text",
 			placeholder: m["convert.settings.audio.sample_rate.placeholder"](),
 		};
 

@@ -271,8 +271,8 @@
 					{#each availableCategories[activeTab] as setting (setting.key)}
 						<div
 							class={setting.forceFullWidth
-								? "col-span-2"
-								: "flex flex-col gap-2"}
+								? "col-span-2 min-w-0"
+								: "flex min-w-0 flex-col gap-2"}
 						>
 							<p class="text-sm font-bold">{setting.label}</p>
 							{#if setting.description}

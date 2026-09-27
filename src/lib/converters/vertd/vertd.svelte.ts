@@ -487,7 +487,7 @@ export class VertdConverter extends Converter {
 		const fps: SettingDefinition = {
 			key: "fps",
 			label: m["convert.settings.video.fps.label"](),
-			type: "string",
+			type: "text",
 			default: "",
 			placeholder: m["convert.settings.video.fps.placeholder"](),
 		};
@@ -495,7 +495,7 @@ export class VertdConverter extends Converter {
 		const resolution: SettingDefinition = {
 			key: "resolution",
 			label: m["convert.settings.video.resolution.label"](),
-			type: "string",
+			type: "text",
 			default: "",
 			placeholder: m["convert.settings.video.resolution.placeholder"](),
 		};
@@ -518,7 +518,7 @@ export class VertdConverter extends Converter {
 		const videoBitrate: SettingDefinition = {
 			key: "videoBitrate",
 			label: m["convert.settings.video.bitrate.video"](),
-			type: "string",
+			type: "text",
 			default: "",
 			placeholder:
 				m["convert.settings.video.bitrate.video_placeholder"](),
@@ -544,7 +544,7 @@ export class VertdConverter extends Converter {
 		const audioBitrate: SettingDefinition = {
 			key: "audioBitrate",
 			label: m["convert.settings.video.bitrate.audio"](),
-			type: "string",
+			type: "text",
 			default: "",
 			placeholder:
 				m["convert.settings.video.bitrate.audio_placeholder"](),
@@ -553,7 +553,7 @@ export class VertdConverter extends Converter {
 		const sampleRate: SettingDefinition = {
 			key: "sampleRate",
 			label: m["convert.settings.audio.sample_rate.label"](),
-			type: "string",
+			type: "text",
 			default: "",
 			placeholder: m["convert.settings.audio.sample_rate.placeholder"](),
 		};
