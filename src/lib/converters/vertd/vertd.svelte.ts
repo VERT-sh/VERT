@@ -12,6 +12,7 @@ import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
 import { ToastManager } from "$lib/util/toast.svelte";
 import type {
 	SettingDefinition,
+	SettingCategories,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
 
@@ -415,7 +416,7 @@ export class VertdConverter extends Converter {
 
 	public async getAvailableSettings(
 		input: VertFile,
-	): Promise<SettingDefinition[]> {
+	): Promise<SettingCategories> {
 		// video - bitrate, fps, resolution, trim, crop, rotate, flip/flop, audio settings?
 
 		const qualityOptions = [
@@ -581,31 +582,35 @@ export class VertdConverter extends Converter {
 
 		const animatedImages = [".gif", ".webp", ".apng"];
 		if (animatedImages.includes(input.to)) {
-			return [fps, resolution, metadata];
-		} else {
-			return [
+			return {
+				Video: [fps, resolution],
+				General: [metadata],
+			};
+		}
+
+		return {
+			Video: [
 				qualitySpeedRange,
 				videoCodec,
-				audioCodec,
 				videoBitrate,
-				audioBitrate,
 				fps,
-				audioChannels,
-				sampleRate,
 				resolution,
-				metadata,
-			];
-		}
+			],
+			Audio: [audioCodec, audioBitrate, audioChannels, sampleRate],
+			General: [metadata],
+		};
 	}
 
 	public async getDefaultSettings(
 		input: VertFile,
 	): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings(input);
-		settings.forEach((setting) => {
-			defaults[setting.key] = setting.default;
-		});
+		const categories = await this.getAvailableSettings(input);
+		Object.values(categories)
+			.flat()
+			.forEach((setting) => {
+				defaults[setting.key] = setting.default;
+			});
 
 		return defaults;
 	}

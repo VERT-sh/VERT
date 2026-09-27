@@ -29,6 +29,7 @@ import { error, log } from "$lib/util/logger";
 import { m } from "$lib/paraglide/messages";
 import type {
 	SettingDefinition,
+	SettingCategories,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
 import { ToastManager } from "$lib/util/toast.svelte";
@@ -271,7 +272,7 @@ export class MediabunnyConverter extends Converter {
 
 	public async getAvailableSettings(
 		input: VertFile,
-	): Promise<SettingDefinition[]> {
+	): Promise<SettingCategories> {
 		// TODO: maybe have a slider for conversion speed/quality like vertd
 
 		const fps: SettingDefinition = {
@@ -363,26 +364,23 @@ export class MediabunnyConverter extends Converter {
 
 		// trim/crop/rotate - also have another ui for this prob
 
-		return [
-			videoCodec,
-			audioCodec,
-			videoBitrate,
-			audioBitrate,
-			fps,
-			sampleRate,
-			resolution,
-			metadata,
-		];
+		return {
+			Video: [videoCodec, videoBitrate, fps, resolution],
+			Audio: [audioCodec, audioBitrate, sampleRate],
+			General: [metadata],
+		};
 	}
 
 	public async getDefaultSettings(
 		input: VertFile,
 	): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings(input);
-		settings.forEach((setting) => {
-			defaults[setting.key] = setting.default;
-		});
+		const categories = await this.getAvailableSettings(input);
+		Object.values(categories)
+			.flat()
+			.forEach((setting) => {
+				defaults[setting.key] = setting.default;
+			});
 		return defaults;
 	}
 

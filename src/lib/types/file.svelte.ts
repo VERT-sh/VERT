@@ -9,7 +9,7 @@ import ServerUploadWarning from "$lib/components/functional/popups/ServerUploadW
 import type {
 	ConversionSettings,
 	NormalizedSettings,
-	SettingDefinition,
+	SettingCategories,
 } from "./conversion-settings";
 import { log } from "$lib/util/logger";
 import { readSettings } from "$lib/util/settings";
@@ -37,7 +37,10 @@ export class VertFile {
 	public blobUrl = $state<string>();
 	public processing = $state(false);
 	public cancelled = $state(false);
-	public unavailableConverters = $state<Record<string, UnavailableReasons>>({});
+	public unavailableConverters = $state<Record<string, UnavailableReasons>>(
+		{},
+	);
+	public vertdSizeWarningShown = false;
 
 	public converters: Converter[] = [];
 	private fallbackToastId: number | null = null;
@@ -92,11 +95,11 @@ export class VertFile {
 	public getAvailableSettings(
 		input: VertFile,
 		converter: string | undefined = this.conversionSettings.converter,
-	): Promise<SettingDefinition[]> {
+	): Promise<SettingCategories> {
 		const converterInstance = this.converters.find(
 			(c) => c.name === converter,
 		);
-		if (!converterInstance) return Promise.resolve([]);
+		if (!converterInstance) return Promise.resolve({});
 		return converterInstance.getAvailableSettings(input);
 	}
 

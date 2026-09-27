@@ -88,9 +88,7 @@ class ServiceWorkerManager {
 				if (e.data.success) {
 					resolve();
 				} else {
-					reject(
-						new Error(e.data.error || "Failed to clear cache"),
-					);
+					reject(new Error(e.data.error || "Failed to clear cache"));
 				}
 			};
 

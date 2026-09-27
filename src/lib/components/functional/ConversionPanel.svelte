@@ -26,8 +26,10 @@
 			const names = new Set(
 				file.converters.map((converter) => converter.name),
 			);
-			return names.size === converterNames.size &&
-				[...converterNames].every((name) => names.has(name));
+			return (
+				names.size === converterNames.size &&
+				[...converterNames].every((name) => names.has(name))
+			);
 		});
 	});
 </script>

@@ -10,6 +10,7 @@ import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";
 import { ToastManager } from "$lib/util/toast.svelte";
 import type {
 	SettingDefinition,
+	SettingCategories,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
 
@@ -124,7 +125,7 @@ export class MagickConverter extends Converter {
 
 	public async getAvailableSettings(
 		input: VertFile,
-	): Promise<SettingDefinition[]> {
+	): Promise<SettingCategories> {
 		// images - quality/compression/quantize/interlace/depth-DPI, resize, crop, rotate, flip/flop, autoOrient?, color space/bit depth, transparency settings
 		const global = Settings.instance.settings;
 		const settings: SettingDefinition[] = [];
@@ -229,17 +230,22 @@ export class MagickConverter extends Converter {
 
 		// resize, crop, rotate - prob want a ui
 
-		return settings;
+		return {
+			Image: settings.filter((setting) => setting.key !== "metadata"),
+			General: [metadata],
+		};
 	}
 
 	public async getDefaultSettings(
 		input: VertFile,
 	): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings(input);
-		settings.forEach((setting) => {
-			defaults[setting.key] = setting.default;
-		});
+		const categories = await this.getAvailableSettings(input);
+		Object.values(categories)
+			.flat()
+			.forEach((setting) => {
+				defaults[setting.key] = setting.default;
+			});
 		return defaults;
 	}
 

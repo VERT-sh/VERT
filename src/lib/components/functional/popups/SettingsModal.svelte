@@ -8,7 +8,11 @@
 	import type { VertFile } from "$lib/types";
 	import { files } from "$lib/store/index.svelte";
 	import { log, error } from "$lib/util/logger";
-	import { type ConversionSettings } from "$lib/types/conversion-settings";
+	import type {
+		ConversionSettings,
+		SettingCategories,
+	} from "$lib/types/conversion-settings";
+	import clsx from "clsx";
 
 	type Props = {
 		file: VertFile | undefined;
@@ -46,8 +50,7 @@
 
 	const getAvailableConverters = (vertFile: VertFile) => {
 		const availableConverters = vertFile.converters.filter(
-			(converter) =>
-				!vertFile.unavailableConverters.includes(converter.name),
+			(converter) => !vertFile.unavailableConverters[converter.name],
 		);
 		const supportedConverters = vertFile.findConverters(
 			[vertFile.from, vertFile.to],
@@ -64,6 +67,62 @@
 	};
 
 	let settings = $state<ConversionSettings>({});
+	let activeTab = $state("Converter");
+	let availableCategories = $state<SettingCategories>({});
+
+	const settingTabs = $derived.by((): SettingCategories => ({
+		...(targetFile && getAvailableConverters(targetFile).length > 1
+			? { Converter: [] }
+			: {}),
+		...availableCategories,
+	}));
+
+	const getTabLabel = (tab: string) => {
+		const key = tab.toLowerCase();
+		if (key === "converter") return m["convert.settings.tabs.converter"]();
+		if (key === "general") return m["convert.settings.tabs.general"]();
+		if (key === "video") return m["convert.settings.tabs.video"]();
+		if (key === "audio") return m["convert.settings.tabs.audio"]();
+		if (key === "image") return m["convert.settings.tabs.image"]();
+		return tab;
+	};
+
+	$effect(() => {
+		const currentFile = targetFile;
+		const currentConverter = settings.converter;
+		let cancelled = false;
+
+		if (!currentFile) {
+			availableCategories = {};
+			return;
+		}
+
+		void currentFile
+			.getAvailableSettings(currentFile, currentConverter)
+			.then((categories) => {
+				if (cancelled) return;
+
+				availableCategories = categories;
+				const hasConverterTab =
+					getAvailableConverters(currentFile).length > 1;
+				if (
+					(!hasConverterTab && activeTab === "Converter") ||
+					(activeTab !== "Converter" && !categories[activeTab])
+				)
+					activeTab = Object.keys(categories)[0] ?? "Converter";
+			})
+			.catch((cause: unknown) => {
+				if (cancelled) return;
+				error(
+					["settings", "modal"],
+					`failed to load settings for ${currentFile.name}: ${cause}`,
+				);
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	});
 
 	const handleSettingChange = (key: string, value: any) => {
 		settings[key] = value;
@@ -169,162 +228,144 @@
 					onselect={(value) => {
 						selectedFileName = value;
 						settings = {};
+						activeTab = "Converter";
 					}}
 				/>
 			</div>
 
-			<div class="flex flex-col gap-2">
-				<p class="text-sm font-bold mb-1">
-					{m["convert.settings.converter"]()}
-				</p>
-				<Dropdown
-					options={availableConverters.map((converter) => ({
-						value: converter.name,
-						label: converter.name,
-					}))}
-					selected={validConverter?.name}
-					style={"settings"}
-					onselect={(value) => {
-						settings.converter = value;
-					}}
-				/>
+			<div class="flex items-center justify-between">
+				{#each Object.keys(settingTabs) as tab}
+					<button
+						class={clsx(
+							"flex-grow text-lg hover:text-muted/20 border-b-[1px] pb-2 capitalize",
+							activeTab === tab
+								? "text-accent border-b-accent"
+								: "border-b-separator text-muted",
+						)}
+						onclick={() => (activeTab = tab)}
+					>
+						{getTabLabel(tab)}
+					</button>
+				{/each}
 			</div>
-			{#key settings}
-				{#await targetFile.getAvailableSettings(targetFile, settings.converter) then availableSettings}
-					<div class="flex flex-col gap-4">
-						{#if availableSettings.length === 0}
-							<p class="text-sm text-muted">
-								{m["convert.settings.none"]()}
-							</p>
-						{:else}
-							<div class="grid grid-cols-2 gap-4">
-								{#each availableSettings as setting (setting.key)}
-									<div
-										class={setting.forceFullWidth
-											? "col-span-2"
-											: "flex flex-col gap-2"}
+			{#if activeTab === "Converter"}
+				<div class="flex flex-col gap-2">
+					{#each availableConverters as converter}
+						<button
+							class={clsx(
+								"w-full p-3 text-left rounded-xl border border-separator",
+								converter.name === validConverter?.name
+									? "bg-accent-purple text-black"
+									: "hover:bg-panel",
+							)}
+							onclick={() => {
+								settings.converter = converter.name;
+							}}
+						>
+							{converter.name}
+						</button>
+					{/each}
+				</div>
+			{:else if availableCategories[activeTab]?.length}
+				<div class="grid grid-cols-2 gap-4">
+					{#each availableCategories[activeTab] as setting (setting.key)}
+						<div
+							class={setting.forceFullWidth
+								? "col-span-2"
+								: "flex flex-col gap-2"}
+						>
+							<p class="text-sm font-bold">{setting.label}</p>
+							{#if setting.description}
+								<p class="text-xs text-muted mt-1">
+									{setting.description}
+								</p>
+							{/if}
+							{#if setting.type === "select"}
+								<Dropdown
+									options={setting.options?.map((opt) =>
+										typeof opt === "string"
+											? { value: opt, label: opt }
+											: opt,
+									) || []}
+									selected={settings[setting.key] ??
+										targetFile.conversionSettings[
+											setting.key
+										] ??
+										setting.default}
+									style="settings"
+									onselect={(value) =>
+										handleSettingChange(setting.key, value)}
+									disabled={setting.disabled}
+								/>
+							{:else if setting.type === "boolean"}
+								<FancyInput
+									type="checkbox"
+									checked={settings[setting.key] ??
+										targetFile.conversionSettings[
+											setting.key
+										] ??
+										setting.default}
+									onchange={(e: any) =>
+										handleSettingChange(
+											setting.key,
+											e.currentTarget.checked,
+										)}
+									disabled={setting.disabled}
+								/>
+							{:else if setting.type === "range"}
+								{@const rangeValue = (settings[setting.key] ??
+									targetFile.conversionSettings[
+										setting.key
+									] ??
+									setting.default ??
+									setting.min ??
+									0) as number}
+								{@const rangeLabel =
+									setting.options?.[rangeValue]?.label ??
+									rangeValue}
+								<div class="flex items-center mt-2 gap-2">
+									<input
+										type="range"
+										min={setting.min}
+										max={setting.max}
+										step={setting.step}
+										value={rangeValue}
+										class="range-slider w-full"
+										oninput={(e) =>
+											handleSettingChange(
+												setting.key,
+												e.currentTarget.valueAsNumber,
+											)}
+										disabled={setting.disabled}
+									/>
+									<span
+										class="text-sm max-w-28 w-full text-right"
+										>{rangeLabel}</span
 									>
-										<p class="text-sm font-bold">
-											{setting.label}
-										</p>
-										<!-- prob unneeded -->
-										{#if setting.description}
-											<p class="text-xs text-muted mt-1">
-												{setting.description}
-											</p>
-										{/if}
-
-										{#if setting.type === "select"}
-											<Dropdown
-												options={setting.options?.map(
-													(opt) =>
-														typeof opt === "string"
-															? {
-																	value: opt,
-																	label: opt,
-																}
-															: opt,
-												) || []}
-												selected={settings[
-													setting.key
-												] ??
-													targetFile
-														.conversionSettings[
-														setting.key
-													] ??
-													setting.default}
-												style={"settings"}
-												onselect={(value) =>
-													handleSettingChange(
-														setting.key,
-														value,
-													)}
-												disabled={setting.disabled}
-											/>
-										{:else if setting.type === "boolean"}
-											<FancyInput
-												type="checkbox"
-												checked={settings[
-													setting.key
-												] ??
-													targetFile
-														.conversionSettings[
-														setting.key
-													] ??
-													setting.default}
-												placeholder={setting.placeholder}
-												onchange={(e: any) =>
-													handleSettingChange(
-														setting.key,
-														e.currentTarget.checked,
-													)}
-												disabled={setting.disabled}
-											/>
-										{:else if setting.type === "range"}
-											{@const rangeValue = (settings[
-												setting.key
-											] ??
-												targetFile.conversionSettings[
-													setting.key
-												] ??
-												setting.default ??
-												setting.min ??
-												0) as number}
-											{@const rangeLabel =
-												setting.options?.[rangeValue]
-													?.label ?? rangeValue}
-											<div
-												class="flex items-center mt-2 gap-2"
-											>
-												<input
-													type="range"
-													min={setting.min}
-													max={setting.max}
-													step={setting.step}
-													value={rangeValue}
-													class="range-slider w-full"
-													oninput={(e) => {
-														const nextValue =
-															e.currentTarget
-																.valueAsNumber;
-														handleSettingChange(
-															setting.key,
-															nextValue,
-														);
-													}}
-													disabled={setting.disabled}
-												/>
-												<span
-													class="text-sm max-w-28 w-full text-right"
-												>
-													{rangeLabel}
-												</span>
-											</div>
-										{:else}
-											<FancyInput
-												type={setting.type}
-												value={settings[setting.key] ??
-													targetFile
-														.conversionSettings[
-														setting.key
-													] ??
-													setting.default}
-												placeholder={setting.placeholder}
-												oninput={(e: any) =>
-													handleSettingChange(
-														setting.key,
-														e.currentTarget.value,
-													)}
-												disabled={setting.disabled}
-											/>
-										{/if}
-									</div>
-								{/each}
-							</div>
-						{/if}
-					</div>
-				{/await}
-			{/key}
+								</div>
+							{:else}
+								<FancyInput
+									type={setting.type}
+									value={settings[setting.key] ??
+										targetFile.conversionSettings[
+											setting.key
+										] ??
+										setting.default}
+									placeholder={setting.placeholder}
+									oninput={(e: any) =>
+										handleSettingChange(
+											setting.key,
+											e.currentTarget.value,
+										)}
+									disabled={setting.disabled}
+								/>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{:else}
+				<p class="text-sm text-muted">{m["convert.settings.none"]()}</p>
+			{/if}
 		{/if}
 	</div>
 </Modal>

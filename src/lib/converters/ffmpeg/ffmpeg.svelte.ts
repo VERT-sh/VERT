@@ -10,9 +10,10 @@ import { getCodecs, toArgs } from "./ffmpeg.codecs";
 import { buildImageSequenceCommand } from "./ffmpeg.animated";
 import { extractAlbumArt, avWithArt, avWithBg } from "./utils/ffmpeg";
 import type {
-	NormalizedSettings,
+	SettingCategories,
 	SettingDefinition,
 	ConversionSettings,
+	NormalizedSettings,
 } from "$lib/types/conversion-settings";
 import { videoFormats } from "../vertd/vertd.svelte";
 
@@ -105,7 +106,7 @@ export class FFmpegConverter extends Converter {
 		})();
 	}
 
-	public async getAvailableSettings(): Promise<SettingDefinition[]> {
+	public async getAvailableSettings(): Promise<SettingCategories> {
 		// audio - bitrate, sample rate, channels, normalize, trim silence
 
 		const global = Settings.instance.settings;
@@ -146,15 +147,20 @@ export class FFmpegConverter extends Converter {
 
 		// resize, crop, rotate - prob want a ui
 
-		return [bitrate, sampleRate, channels, metadata];
+		return {
+			Audio: [bitrate, sampleRate, channels],
+			General: [metadata],
+		};
 	}
 
 	public async getDefaultSettings(): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings();
-		settings.forEach((setting) => {
-			defaults[setting.key] = setting.default;
-		});
+		const categories = await this.getAvailableSettings();
+		Object.values(categories)
+			.flat()
+			.forEach((setting) => {
+				defaults[setting.key] = setting.default;
+			});
 		return defaults;
 	}
 

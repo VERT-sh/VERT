@@ -42,7 +42,6 @@
 	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
 
 	let processedFileIds = $state(new Set<string>());
-	const vertdSizeWarningFileIds = new Set<string>();
 
 	$effect(() => {
 		const limit = $vertdSizeLimit;
@@ -66,9 +65,9 @@
 				file.unavailableConverters["vertd"] = "vertd-size-limit";
 			else delete file.unavailableConverters["vertd"];
 
-			if (!exceedsLimit || vertdSizeWarningFileIds.has(file.id)) continue;
+			if (!exceedsLimit || file.vertdSizeWarningShown) continue;
 
-			vertdSizeWarningFileIds.add(file.id);
+			file.vertdSizeWarningShown = true;
 			ToastManager.add({
 				type: "warning",
 				message: m["convert.errors.vertd.file_too_large"]({

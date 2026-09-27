@@ -16,6 +16,8 @@ export interface SettingDefinition {
 	forceFullWidth?: boolean; // force setting to take up full width (usually grid 2)
 }
 
+export type SettingCategories = Record<string, SettingDefinition[]>;
+
 export interface ConversionSettings {
 	[key: string]: any;
 }

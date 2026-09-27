@@ -4,7 +4,7 @@ import type { VertFile } from "$lib/types";
 import type {
 	ConversionSettings,
 	NormalizedSettings,
-	SettingDefinition,
+	SettingCategories,
 } from "$lib/types/conversion-settings";
 
 export type WorkerStatus =
@@ -60,8 +60,8 @@ export class Converter {
 	 */
 	public async getAvailableSettings(
 		input?: VertFile,
-	): Promise<SettingDefinition[]> {
-		return [];
+	): Promise<SettingCategories> {
+		return {};
 	}
 
 	/**
@@ -72,10 +72,12 @@ export class Converter {
 		input?: VertFile,
 	): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const settings = await this.getAvailableSettings(input);
-		settings.forEach((setting) => {
-			defaults[setting.key] = setting.default;
-		});
+		const categories = await this.getAvailableSettings(input);
+		Object.values(categories)
+			.flat()
+			.forEach((setting) => {
+				defaults[setting.key] = setting.default;
+			});
 		return defaults;
 	}
 

@@ -103,7 +103,13 @@
 			"description": "Editing conversion settings for:",
 			"all_files": "all files",
 			"none": "No settings available for this format.",
-			"converter": "Converter",
+			"tabs": {
+				"converter": "Converter",
+				"general": "General",
+				"video": "Video",
+				"audio": "Audio",
+				"image": "Image"
+			},
 			"image": {
 				"resolution": {
 					"label": "Resolution",
