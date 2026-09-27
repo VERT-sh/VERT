@@ -2,9 +2,11 @@ import { byNative, converters } from "$lib/converters";
 import type { Converter } from "$lib/converters/converter.svelte";
 import { m } from "$lib/paraglide/messages";
 import { ToastManager } from "$lib/util/toast.svelte";
+import { addDialog } from "$lib/store/DialogProvider";
 import type { Component } from "svelte";
 import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
 import FallbackToast from "$lib/components/functional/popups/FallbackToast.svelte";
+import SlowConversionToast from "$lib/components/functional/popups/SlowConversionToast.svelte";
 import ServerUploadWarning from "$lib/components/functional/popups/ServerUploadWarning.svelte";
 import type {
 	ConversionSettings,
@@ -17,6 +19,78 @@ import { formatFilename } from "$lib/util/file";
 import { fileTypeFromBuffer } from "file-type";
 
 const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
+
+type ServerWarningRequest = {
+	filename: string;
+	resolve: (shouldProceed: boolean) => void;
+};
+
+const serverWarningQueue: ServerWarningRequest[] = [];
+let serverWarningActive = false;
+
+const processServerWarningQueue = () => {
+	if (serverWarningActive) return;
+
+	if (localStorage.getItem("acceptedExternalWarning") === "true") {
+		while (serverWarningQueue.length)
+			serverWarningQueue.shift()?.resolve(true);
+		return;
+	}
+
+	const request = serverWarningQueue.shift();
+	if (!request) return;
+
+	serverWarningActive = true;
+	let resolved = false;
+
+	const finish = (shouldProceed: boolean, dontShowAgain = false) => {
+		if (resolved) return;
+		resolved = true;
+		serverWarningActive = false;
+
+		if (dontShowAgain) {
+			localStorage.setItem("acceptedExternalWarning", "true");
+			log(
+				["file", "warning"],
+				`external upload warning preference saved: ${localStorage.getItem("acceptedExternalWarning")}`,
+			);
+		}
+		request.resolve(shouldProceed);
+
+		if (dontShowAgain) {
+			while (serverWarningQueue.length)
+				serverWarningQueue.shift()?.resolve(true);
+		}
+
+		queueMicrotask(processServerWarningQueue);
+	};
+
+	let dontShowAgain = false;
+	const additional = {
+		filename: request.filename,
+		onDontShowAgainChange: (value: boolean) => {
+			dontShowAgain = value;
+		},
+	};
+
+	addDialog(
+		m["convert.external_warning.title"](),
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		ServerUploadWarning as any,
+		[
+			{
+				text: m["convert.external_warning.no"](),
+				action: () => finish(false),
+			},
+			{
+				text: m["convert.external_warning.yes"](),
+				action: () => finish(true, dontShowAgain),
+			},
+		],
+		"warning",
+		additional,
+	);
+};
 
 export type UnavailableReasons = "vertd-size-limit" | "other-reason"; // find more stuff to add
 
@@ -44,9 +118,9 @@ export class VertFile {
 
 	public converters: Converter[] = [];
 	private fallbackToastId: number | null = null;
+	private slowConversionToastId: number | null = null;
 	private attemptedConverters = new Set<string>();
 	private retryingFallback = false;
-	private vertdWarningToastId: number | null = null;
 	private postDownload: (() => Promise<void>) | null = null;
 	private activeConverterName: string | null = null;
 
@@ -373,6 +447,10 @@ export class VertFile {
 				ToastManager.remove(this.fallbackToastId);
 				this.fallbackToastId = null;
 			}
+			if (this.slowConversionToastId !== null) {
+				ToastManager.remove(this.slowConversionToastId);
+				this.slowConversionToastId = null;
+			}
 		} catch (err) {
 			if (!this.cancelled) this.toastErr(err);
 
@@ -445,41 +523,11 @@ export class VertFile {
 	private async confirmServerWarning(converter: Converter): Promise<boolean> {
 		if (converter.name !== "vertd") return true;
 		if (localStorage.getItem("acceptedExternalWarning") === "true")
-			return true;
+			return Promise.resolve(true);
 
 		return new Promise((resolve) => {
-			let resolved = false;
-
-			const finish = (shouldProceed: boolean) => {
-				if (resolved) return;
-				resolved = true;
-				if (this.vertdWarningToastId !== null)
-					ToastManager.remove(this.vertdWarningToastId);
-				this.vertdWarningToastId = null;
-				resolve(shouldProceed);
-			};
-
-			if (this.vertdWarningToastId !== null)
-				ToastManager.remove(this.vertdWarningToastId);
-
-			this.vertdWarningToastId = ToastManager.add({
-				type: "warning",
-				disappearing: false,
-				message: ServerUploadWarning,
-				additional: {
-					filename: this.file.name,
-					onProceed: () => {
-						finish(true);
-					},
-					onCancel: () => {
-						finish(false);
-					},
-					onDontShowAgain: () => {
-						localStorage.setItem("acceptedExternalWarning", "true");
-						finish(true);
-					},
-				},
-			});
+			serverWarningQueue.push({ filename: this.file.name, resolve });
+			processServerWarningQueue();
 		});
 	}
 
@@ -575,6 +623,52 @@ export class VertFile {
 			outputFilename,
 		);
 		return new VertFile(resultFile, ".zip");
+	}
+
+	public slowConversionOffer(reason: "device" | "timeout") {
+		if (
+			!this.processing ||
+			this.activeConverterName !== "mediabunny" ||
+			this.slowConversionToastId !== null
+		)
+			return;
+
+		const serverConverter = this.findConverters([this.from, this.to]).find(
+			(converter) => converter.name === "vertd",
+		);
+		if (!serverConverter) return;
+
+		const removeToast = () => {
+			if (this.slowConversionToastId !== null)
+				ToastManager.remove(this.slowConversionToastId);
+			this.slowConversionToastId = null;
+		};
+
+		this.slowConversionToastId = ToastManager.add({
+			type: "warning",
+			disappearing: false,
+			message: SlowConversionToast,
+			additional: {
+				filename: this.file.name,
+				converter: serverConverter.name,
+				reason,
+				onContinue: removeToast,
+				onSwitch: async () => {
+					removeToast();
+					await this.cancel();
+					this.conversionSettings = {
+						...this.conversionSettings,
+						converter: serverConverter.name,
+					};
+					this.retryingFallback = true;
+					try {
+						await this.convert();
+					} finally {
+						this.retryingFallback = false;
+					}
+				},
+			},
+		});
 	}
 
 	public async cancel() {

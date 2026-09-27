@@ -67,10 +67,17 @@
 		"large_file_warning": "Due to browser / device limitations, video to audio conversion is disabled for '{filename}' as it is larger than {limit}GB. We recommend using Firefox or Safari for files of this size since they have less limitations.",
 		"external_warning": {
 			"title": "External server warning",
-			"text": "Converting {filename} with its current settings is not supported locally and requires server-side processing. Do you want to continue?",
+			"text": "Converting '{filename}' with its current settings is not supported locally and requires server-side processing. Do you want to continue?",
 			"yes": "Convert on server",
 			"no": "Cancel conversion",
-			"dont_show_again": "Convert & don't show again"
+			"dont_show_again": "Don't show again"
+		},
+		"slow_conversion": {
+			"title": "Conversion may take a while",
+			"device_body": "Your device may be slow at converting '{filename}' locally. You can continue to try local conversion, but you might have better luck switching to on-server conversion.",
+			"timeout_body": "Converting '{filename}' is taking longer than expected. You can continue waiting, or try on-server conversion instead.",
+			"continue": "Continue locally",
+			"switch": "Continue on server"
 		},
 		"panel": {
 			"convert_all": "Convert all",
@@ -302,14 +309,15 @@
 			}
 		},
 		"vertd": {
-			"title": "Server video conversion",
+			"title": "Video conversion server",
 			"status": "status:",
 			"loading": "loading...",
 			"available": "available, size limit {sizeLimit}, commit id {commitId}",
 			"unavailable": "unavailable (is the url right?)",
 			"description": {
-				"main": "When possible, VERT converts videos locally in your browser, however some conversions may require the use of the <code>vertd</code> project, a server wrapper for FFmpeg. This allows you to convert videos through the convenience of VERT's web interface, while still being able to harness the power of your GPU to do it as quickly as possible.",
-				"info": "We host a public instance for your convenience, but it is quite easy to host your own on your PC or server if you know what you are doing. You can download the server binaries [vertd_link]here[/vertd_link] - the process of setting this up will become easier in the future, so stay tuned!"
+				"main": "VERT converts videos securely by doing it locally in your browser; however some specific conversions may require connecting to, and using a <code>vertd</code> server. <code>vertd</code> allows you to convert videos using the server's GPU, and without the conversion limits of your browser, whilst still allowing you the convenience of VERT's web interface.",
+				"info": "We host a public server for vertd for your convenience, but it is quite easy to host your own on your PC or server if you know what you are doing.",
+				"more": "[vertd_link]Learn more[/vertd_link]"
 			},
 			"instance": {
 				"label": "Instance",

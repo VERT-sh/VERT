@@ -86,12 +86,20 @@
 	let activeTab = $state("Converter");
 	let availableCategories = $state<SettingCategories>({});
 
-	const settingTabs = $derived.by((): SettingCategories => ({
-		...(targetFile && getAvailableConverters(targetFile).length > 1
-			? { Converter: [] }
-			: {}),
-		...availableCategories,
-	}));
+	const settingTabs = $derived.by((): SettingCategories => {
+		const categories = Object.fromEntries(
+			Object.entries(availableCategories).filter(
+				([, settings]) => settings.length > 0,
+			),
+		);
+
+		return {
+			...(targetFile && getAvailableConverters(targetFile).length > 1
+				? { Converter: [] }
+				: {}),
+			...categories,
+		};
+	});
 
 	const getTabLabel = (tab: string) => {
 		const key = tab.toLowerCase();
@@ -305,10 +313,15 @@
 			{:else if availableCategories[activeTab]?.length}
 				<div class="grid grid-cols-2 gap-4">
 					{#each availableCategories[activeTab] as setting (setting.key)}
+					{@const fullWidth = setting.forceFullWidth || setting.type === "boolean"}
 						<div
-							class={setting.forceFullWidth
-								? "col-span-2 min-w-0"
-								: "flex min-w-0 flex-col gap-2"}
+							class={clsx(
+								"flex min-w-0 gap-2",
+								fullWidth && "col-span-2",
+								setting.type === "boolean"
+									? "flex-row justify-between"
+									: "flex-col",
+							)}
 						>
 							<p class="text-sm font-bold">{setting.label}</p>
 							{#if setting.description}

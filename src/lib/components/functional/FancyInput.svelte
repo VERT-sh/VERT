@@ -29,7 +29,7 @@
 	}: Props = $props();
 </script>
 
-<div class="relative flex w-full {className}">
+<div class="relative flex {className}">
 	{#if type === "checkbox"}
 		<input
 			{...rest}

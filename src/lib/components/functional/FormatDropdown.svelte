@@ -660,7 +660,6 @@
 							>
 								<FancyInput
 									type="checkbox"
-									class="!w-fit"
 									bind:checked={imageSequence}
 								/>
 								<label for="extract-sequence" class="text-sm">
@@ -689,7 +688,6 @@
 							>
 								<FancyInput
 									type="checkbox"
-									class="!w-fit"
 									bind:checked={imageSequenceTransparency}
 									disabled={!imageSequence}
 								/>

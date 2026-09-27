@@ -26,7 +26,7 @@
 			easing: quintOut,
 		}}
 	>
-		{#each dialogList as dialog, i}
+		{#each dialogList as dialog, i (dialog.id)}
 			{#if i === 0}
 				<Dialog {...dialog} />
 			{/if}

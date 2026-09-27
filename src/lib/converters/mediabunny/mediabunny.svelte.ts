@@ -32,8 +32,10 @@ import type {
 	SettingCategories,
 	ConversionSettings,
 } from "$lib/types/conversion-settings";
+import { isMobile } from "$lib/store/index.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { browser } from "$app/environment";
+import { get } from "svelte/store";
 
 // codec compatibility stuff, based on mediabunny's docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
@@ -434,6 +436,26 @@ export class MediabunnyConverter extends Converter {
 
 		this.activeConversions.set(file.id, conversion);
 
+		const mobile = get(isMobile);
+		const deviceMemory = (navigator as Navigator & { deviceMemory?: number })
+			.deviceMemory;
+		const hardwareConcurrency = navigator.hardwareConcurrency || 3; // if we can't detect it, just fall back to something that will definitely warn
+		const likelySlowDevice =
+			(mobile && hardwareConcurrency <= 4) ||
+			hardwareConcurrency <= 4 ||
+			(deviceMemory !== undefined && deviceMemory <= 4);
+		if (likelySlowDevice) void file.slowConversionOffer("device");
+		this.log(`hardwareConcurrency: ${hardwareConcurrency}`)
+		this.log(`deviceMemory: ${deviceMemory}`)
+		this.log(`mobile: ${mobile}`)
+
+		const slowConversionTimer: ReturnType<typeof setTimeout> = setTimeout(
+			() => {
+				void file.slowConversionOffer("timeout");
+			},
+			60 * 1000,
+		);
+
 		this.log(`videoConfig: ${JSON.stringify(videoConfig)}`);
 		this.log(`audioConfig: ${JSON.stringify(audioConfig)}`);
 
@@ -484,6 +506,7 @@ export class MediabunnyConverter extends Converter {
 			}
 			throw err;
 		} finally {
+			if (slowConversionTimer) clearTimeout(slowConversionTimer);
 			this.activeConversions.delete(file.id);
 		}
 

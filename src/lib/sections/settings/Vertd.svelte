@@ -92,10 +92,13 @@
 				{@html sanitize(m["settings.vertd.description.main"]())}
 			</p>
 			<p class="text-sm text-muted font-normal">
+				{@html sanitize(m["settings.vertd.description.info"]())}
+			</p>
+			<p class="text-sm text-muted font-normal">
 				{@html sanitize(
 					link(
 						"vertd_link",
-						m["settings.vertd.description.info"](),
+						m["settings.vertd.description.more"](),
 						GITHUB_URL_VERTD,
 					),
 				)}

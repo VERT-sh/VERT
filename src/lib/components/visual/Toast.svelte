@@ -83,7 +83,11 @@
 					"font-normal": !title,
 				})}
 			>
-				{@html sanitize((title || message) as string)}
+				{#if title && typeof title === "string"}
+					{@html sanitize(title)}
+				{:else if message && typeof message === "string"}
+					{@html sanitize(message)}
+				{/if}
 			</p>
 		</div>
 		<button

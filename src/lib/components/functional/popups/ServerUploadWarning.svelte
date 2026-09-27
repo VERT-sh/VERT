@@ -1,47 +1,39 @@
 <script lang="ts" module>
+	import type { DialogProps } from "$lib/store/DialogProvider";
+
 	export interface ServerUploadWarningProps {
 		filename: string;
-		onProceed: () => void;
-		onCancel: () => void;
-		onDontShowAgain: () => void;
+		onDontShowAgainChange: (value: boolean) => void;
 	}
+
+	export type Props = DialogProps<ServerUploadWarningProps>;
 </script>
 
 <script lang="ts">
 	import { m } from "$lib/paraglide/messages";
-	import type { ToastProps } from "$lib/util/toast.svelte";
+	import FancyInput from "../FancyInput.svelte";
 
-	const toast: ToastProps<ServerUploadWarningProps> = $props();
-
-	export const title = m["convert.external_warning.title"]();
+	let { additional }: Props = $props();
+	let dontShowAgain = $state(true);
 </script>
 
 <div class="flex flex-col gap-4">
 	<p class="text-black">
 		{m["convert.external_warning.text"]({
-			filename: toast.additional.filename,
+			filename: additional.filename,
 		})}
 	</p>
-	<div class="flex flex-col gap-2">
-		<button
-			onclick={toast.additional.onDontShowAgain}
-			class="btn rounded-lg h-fit py-2 w-full bg-accent-blue text-black"
-		>
-			{m["convert.external_warning.dont_show_again"]()}
-		</button>
-		<div class="flex gap-4">
-			<button
-				onclick={toast.additional.onCancel}
-				class="btn rounded-lg h-fit py-2 w-full"
-			>
-				{m["convert.external_warning.no"]()}
-			</button>
-			<button
-				onclick={toast.additional.onProceed}
-				class="btn rounded-lg h-fit py-2 w-full bg-accent-red-alt text-white"
-			>
-				{m["convert.external_warning.yes"]()}
-			</button>
-		</div>
+	<div class="flex items-center gap-2 text-black">
+		<FancyInput
+			type="checkbox"
+			checked={dontShowAgain}
+			onchange={(event: Event) => {
+				const checked = (event.currentTarget as HTMLInputElement)
+					.checked;
+				dontShowAgain = checked;
+				additional.onDontShowAgainChange(checked);
+			}}
+		/>
+		<span>{m["convert.external_warning.dont_show_again"]()}</span>
 	</div>
 </div>

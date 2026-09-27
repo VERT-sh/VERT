@@ -5,6 +5,10 @@ import { VertFile, type WorkerMessage } from "$lib/types";
 import MagickWorker from "$lib/workers/magick?worker&url";
 import { Converter, FormatInfo } from "../converter.svelte";
 import { imageFormats } from "./magick-automated";
+import {
+	formatsWithoutMetadataRemoval,
+	formatsWithoutTransparency,
+} from "./magick-settings";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";
 import { ToastManager } from "$lib/util/toast.svelte";
@@ -130,31 +134,13 @@ export class MagickConverter extends Converter {
 		const global = Settings.instance.settings;
 		const settings: SettingDefinition[] = [];
 
-		let supportsMetadata = true;
-		let supportsTransparency = true;
+		const outputFormat = input.to.replace(/^\./, "").toLowerCase();
+		const supportsMetadata =
+			!formatsWithoutMetadataRemoval.has(outputFormat);
+		const supportsTransparency =
+			!formatsWithoutTransparency.has(outputFormat);
 
 		const toIcon = input.to === ".ico";
-
-		// TODO: surely there's a better way to do this lol
-		switch (input.from) {
-			case ".jpg":
-			case ".jpeg":
-			case ".jfif":
-				supportsTransparency = false;
-				break;
-		}
-
-		switch (input.to) {
-			case ".ico":
-				supportsMetadata = false;
-				break;
-
-			case ".jpg":
-			case ".jpeg":
-			case ".jfif":
-				supportsTransparency = false;
-				break;
-		}
 
 		const quality: SettingDefinition = {
 			key: "quality",
@@ -231,8 +217,15 @@ export class MagickConverter extends Converter {
 		// resize, crop, rotate - prob want a ui
 
 		return {
-			Image: settings.filter((setting) => setting.key !== "metadata"),
-			General: [metadata],
+			// put all boolean types (checkboxes) at end
+			Image: settings
+				.filter((setting) => setting.key !== "metadata")
+				.sort(
+					(a, b) =>
+						Number(a.type === "boolean") -
+						Number(b.type === "boolean"),
+				),
+			General: supportsMetadata ? [metadata] : [],
 		};
 	}
 
