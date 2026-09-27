@@ -7,6 +7,7 @@
 	import { m } from "$lib/paraglide/messages";
 	import type { VertFile } from "$lib/types";
 	import { files } from "$lib/store/index.svelte";
+	import { converterCategories } from "$lib/converters";
 	import { log, error } from "$lib/util/logger";
 	import type {
 		ConversionSettings,
@@ -20,23 +21,17 @@
 	};
 
 	let { file, onclose }: Props = $props();
+	const allFilesValue = "all";
+	let selectedFileName = $derived<string>(file?.name ?? allFilesValue);
 	let targetFile = $derived(
 		files.files.find((f) => f.name === selectedFileName) ?? files.files[0],
 	);
-	// TODO: implement all files
-	let selectedFileName = $derived<string>(
-		file?.name ?? files.files[0]?.name ?? m["convert.settings.all_files"](),
-	);
 
 	$effect(() => {
-		if (file) {
-			selectedFileName = file.name;
-		} else if (files.files.length > 0) {
-			selectedFileName = files.files[0].name;
-		}
+		if (file) selectedFileName = file.name;
+		else selectedFileName = allFilesValue;
 	});
 
-	const allFilesValue = "all";
 	const fileOptions = $derived([
 		{
 			value: allFilesValue,
@@ -64,6 +59,26 @@
 		const available = getAvailableConverters(vertFile);
 		const name = converterName || vertFile.conversionSettings.converter;
 		return available.find((c) => c.name === name) || available[0];
+	};
+
+	const converterCategoryByName = new Map(
+		Object.entries(converterCategories).flatMap(([category, names]) =>
+			names.map((name) => [name, category] as const),
+		),
+	);
+
+	const getFileType = (vertFile: VertFile) => {
+		const converter = vertFile.converters.find(
+			({ name, supportedFormats }) =>
+				converterCategoryByName.has(name) &&
+				supportedFormats.some(
+					(format) => format.name === vertFile.from && format.isNative,
+				),
+		);
+
+		return converter
+			? converterCategoryByName.get(converter.name)!
+			: vertFile.from;
 	};
 
 	let settings = $state<ConversionSettings>({});
@@ -129,9 +144,14 @@
 	};
 
 	const applySettings = async (converterName: string) => {
+		const referenceFile =
+			files.files.find((f) => f.name === selectedFileName) ??
+			files.files[0];
 		const targetFiles =
-			selectedFileName === allFilesValue
-				? files.files
+			selectedFileName === allFilesValue && referenceFile
+				? files.files.filter(
+						(f) => getFileType(f) === getFileType(referenceFile),
+					)
 				: files.files.filter((f) => f.name === selectedFileName);
 		if (targetFiles.length === 0) {
 			error(
@@ -141,14 +161,11 @@
 			return;
 		}
 
-		const firstConverter = targetFiles[0].conversionSettings.converter;
-		const selectedConverter = converterName || firstConverter;
-
 		for (const targetFile of targetFiles) {
 			try {
 				const converter = getValidConverter(
 					targetFile,
-					selectedConverter,
+					converterName || targetFile.conversionSettings.converter,
 				);
 				if (!converter) {
 					error(
@@ -158,11 +175,30 @@
 					continue;
 				}
 
+				const categories = await converter.getAvailableSettings(
+					targetFile,
+				);
+				const supportedKeys = new Set(
+					Object.values(categories)
+						.flat()
+						.map((setting) => setting.key),
+				);
+				const applicableSettings = Object.fromEntries(
+					Object.entries(settings).filter(([key]) =>
+						supportedKeys.has(key),
+					),
+				);
+				const defaultSettings = Object.fromEntries(
+					Object.values(categories)
+						.flat()
+						.map((setting) => [setting.key, setting.default]),
+				);
+
 				// apply defaults, then existing settings, then new settings on top
 				targetFile.conversionSettings = {
-					...(await converter.getDefaultSettings(targetFile)),
+					...defaultSettings,
 					...targetFile.conversionSettings,
-					...settings,
+					...applicableSettings,
 					converter: converter.name,
 				};
 				log(
@@ -198,11 +234,11 @@
 	}}
 	buttons={[
 		{
-			text: "Cancel",
+			text: m["convert.settings.cancel"](),
 			action: () => onclose?.(),
 		},
 		{
-			text: "Apply",
+			text: m["convert.settings.apply"](),
 			action: () => {
 				applySettings(settings.converter!);
 				onclose?.();
