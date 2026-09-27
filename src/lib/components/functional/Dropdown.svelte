@@ -73,10 +73,11 @@
 			if (dropdown && !dropdown.contains(e.target as Node)) open = false;
 		};
 
-		window.addEventListener("click", clickHandler);
+		window.addEventListener("click", clickHandler, true);
 
 		return () => {
-			if (clickHandler) window.removeEventListener("click", clickHandler);
+			if (clickHandler)
+				window.removeEventListener("click", clickHandler, true);
 		};
 	});
 
@@ -150,7 +151,7 @@
 					class={clsx(
 						"col-start-1 row-start-1 min-w-0 font-body",
 						style === "inline" &&
-							"truncate max-w-52 text-left underline underline-offset-3 decoration-dotted",
+							"truncate w-full md:max-w-52 text-left underline underline-offset-3 decoration-dotted",
 						style === "settings" && "text-left font-normal",
 						style === "default" && "text-center",
 						style !== "settings" && "font-medium",

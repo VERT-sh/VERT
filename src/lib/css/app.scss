@@ -375,7 +375,7 @@ body {
 
 	input[type="text"],
 	select.dropdown {
-		@apply w-full p-3 rounded-lg bg-panel border-2 border-button pl-3 pr-[4rem];
+		@apply w-full p-3 rounded-lg bg-panel border-2 border-button pl-3;
 	}
 
 	input[type="number"]::-webkit-inner-spin-button,

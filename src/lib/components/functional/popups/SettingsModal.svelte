@@ -72,7 +72,8 @@
 			({ name, supportedFormats }) =>
 				converterCategoryByName.has(name) &&
 				supportedFormats.some(
-					(format) => format.name === vertFile.from && format.isNative,
+					(format) =>
+						format.name === vertFile.from && format.isNative,
 				),
 		);
 
@@ -175,9 +176,8 @@
 					continue;
 				}
 
-				const categories = await converter.getAvailableSettings(
-					targetFile,
-				);
+				const categories =
+					await converter.getAvailableSettings(targetFile);
 				const supportedKeys = new Set(
 					Object.values(categories)
 						.flat()
