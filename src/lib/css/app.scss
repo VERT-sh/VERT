@@ -339,17 +339,21 @@ body {
 	@apply bg-accent-purple !text-black;
 }
 
+.transition {
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease,
+		background-color 0.2s ease;
+	transition-duration: 200ms;
+}
+
 @layer components {
 	select {
 		@apply appearance-none;
 	}
 
 	.btn {
-		@apply bg-button flex items-center justify-center overflow-hidden relative cursor-pointer px-6 h-14 rounded-full font-medium focus:!outline-none hover:scale-105 duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none hoverable;
-		transition:
-			opacity 0.2s ease,
-			transform 0.2s ease,
-			background-color 0.2s ease;
+		@apply transition bg-button flex items-center justify-center overflow-hidden relative cursor-pointer px-6 h-14 rounded-full font-medium focus:!outline-none hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none hoverable;
 	}
 
 	.btn.highlight {
@@ -400,6 +404,7 @@ body {
 
 	input[type="checkbox"] {
 		@apply appearance-none w-5 h-5 rounded-md border-2 border-button cursor-pointer transition-colors duration-200;
+		outline-offset: -2px;;
 	}
 
 	input[type="checkbox"]:hover {

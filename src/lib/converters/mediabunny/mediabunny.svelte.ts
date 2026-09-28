@@ -437,17 +437,18 @@ export class MediabunnyConverter extends Converter {
 		this.activeConversions.set(file.id, conversion);
 
 		const mobile = get(isMobile);
-		const deviceMemory = (navigator as Navigator & { deviceMemory?: number })
-			.deviceMemory;
+		const deviceMemory = (
+			navigator as Navigator & { deviceMemory?: number }
+		).deviceMemory;
 		const hardwareConcurrency = navigator.hardwareConcurrency || 3; // if we can't detect it, just fall back to something that will definitely warn
 		const likelySlowDevice =
 			(mobile && hardwareConcurrency <= 4) ||
 			hardwareConcurrency <= 4 ||
 			(deviceMemory !== undefined && deviceMemory <= 4);
 		if (likelySlowDevice) void file.slowConversionOffer("device");
-		this.log(`hardwareConcurrency: ${hardwareConcurrency}`)
-		this.log(`deviceMemory: ${deviceMemory}`)
-		this.log(`mobile: ${mobile}`)
+		this.log(`hardwareConcurrency: ${hardwareConcurrency}`);
+		this.log(`deviceMemory: ${deviceMemory}`);
+		this.log(`mobile: ${mobile}`);
 
 		const slowConversionTimer: ReturnType<typeof setTimeout> = setTimeout(
 			() => {

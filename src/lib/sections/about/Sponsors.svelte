@@ -37,7 +37,7 @@
 		</div>
 		{m["about.sponsors.title"]()}
 	</h2>
-	<div class="mt-2 [&>*]:font-normal h-full flex justify-between flex-col">
+	<div class="[&>*]:font-normal h-full flex justify-between flex-col gap-4">
 		<div class="flex gap-3 justify-center text-lg">
 			<a
 				href="https://eva.pink"

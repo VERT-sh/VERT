@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { duration, fade, transition } from "$lib/util/animation";
+	import {
+		animateHeight,
+		duration,
+		fade,
+		transition,
+	} from "$lib/util/animation";
 	import { m } from "$lib/paraglide/messages";
 	import {
 		isMobile,
@@ -597,48 +602,63 @@
 				{/each}
 			</div>
 			<!-- available formats -->
-			<div
-				class="max-h-80 overflow-y-auto grid grid-cols-3 gap-2 p-2"
-				bind:this={formatList}
-			>
-				{#if filteredData.formats.length > 0}
-					{#each filteredData.formats as format (format)}
-						{@const unavailable = isUnavailable(format)}
-						{#if unavailable}
-							<Tooltip text={getUnavailableReason(format)}>
-								<button
-									data-selected={format === selected}
-									aria-disabled="true"
-									class="w-full p-2 text-center rounded-xl opacity-45 cursor-not-allowed"
-									tabindex="0"
-									onclick={(e) => e.preventDefault()}
-									onkeydown={(e) => e.preventDefault()}
-								>
-									{format}
-								</button>
-							</Tooltip>
-						{:else}
-							<button
-								data-selected={format === selected}
-								class="w-full p-2 text-center rounded-xl
+			<div use:animateHeight>
+				{#key currentCategory}
+					<div
+						class="max-h-80 overflow-y-auto grid grid-cols-3 gap-2 p-2"
+						in:fade={{
+							duration: duration,
+							easing: quintOut,
+						}}
+						out:fade={{
+							duration: duration,
+							easing: quintOut,
+						}}
+						bind:this={formatList}
+					>
+						{#if filteredData.formats.length > 0}
+							{#each filteredData.formats as format (format)}
+								{@const unavailable = isUnavailable(format)}
+								{#if unavailable}
+									<Tooltip
+										text={getUnavailableReason(format)}
+									>
+										<button
+											data-selected={format === selected}
+											aria-disabled="true"
+											class="w-full p-2 text-center rounded-xl opacity-45 cursor-not-allowed"
+											tabindex="0"
+											onclick={(e) => e.preventDefault()}
+											onkeydown={(e) =>
+												e.preventDefault()}
+										>
+											{format}
+										</button>
+									</Tooltip>
+								{:else}
+									<button
+										data-selected={format === selected}
+										class="w-full p-2 text-center rounded-xl
 								{format === selected
-									? 'bg-accent text-black'
-									: format === from
-										? 'bg-separator'
-										: 'hover:bg-panel'}"
-								onclick={() => selectOption(format)}
-							>
-								{format}
-							</button>
+											? 'bg-accent text-black'
+											: format === from
+												? 'bg-separator'
+												: 'hover:bg-panel'}"
+										onclick={() => selectOption(format)}
+									>
+										{format}
+									</button>
+								{/if}
+							{/each}
+						{:else}
+							<div class="col-span-3 text-center p-4 text-muted">
+								{searchQuery
+									? m["convert.dropdown.no_results"]()
+									: m["convert.dropdown.no_formats"]()}
+							</div>
 						{/if}
-					{/each}
-				{:else}
-					<div class="col-span-3 text-center p-4 text-muted">
-						{searchQuery
-							? m["convert.dropdown.no_results"]()
-							: m["convert.dropdown.no_formats"]()}
 					</div>
-				{/if}
+				{/key}
 			</div>
 			<!-- format options -->
 			{#if file?.name.toLowerCase().endsWith(".zip")}
