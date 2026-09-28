@@ -290,9 +290,14 @@ export class VertFile {
 				// original: alias
 				jpg: "jpeg",
 				jfif: "jpeg",
+				jpe: "jpeg",
 				tif: "tiff",
 				ogx: "ogv",
-				// TODO: is there more stuff
+				wmv: "asf",
+				wma: "asf",
+				mpg: "mpeg",
+				mpe: "mpeg",
+				mpv: "mpeg",
 			};
 			const fileExtension = this.from.slice(1);
 			const detectedExtension = forceKeep.includes(fileExtension)

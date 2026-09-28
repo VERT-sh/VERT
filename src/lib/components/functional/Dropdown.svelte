@@ -196,8 +196,10 @@
 		{#each options as option}
 			<button
 				data-selected={getValue(option) === selected}
-				class={`w-full p-2 px-4 text-left hover:bg-panel font-normal text-sm text-muted
-				${getValue(option) === selected ? "bg-separator" : ""}`}
+				class={clsx(
+					"w-full p-2 px-4 text-left hover:bg-panel font-normal text-sm text-muted",
+					getValue(option) === selected && "bg-separator",
+				)}
 				onclick={() => select(option)}
 			>
 				{getLabel(option)}

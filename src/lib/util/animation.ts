@@ -34,6 +34,7 @@ export function animateHeight(
 	node: HTMLElement,
 	options: HeightTransitionOptions = {},
 ) {
+	if (!effectsEnabled) return {};
 	let transitionDuration = options.duration ?? duration;
 	let easing = options.easing ?? transition;
 	let observedChild: Element | null = null;

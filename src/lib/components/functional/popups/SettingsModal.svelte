@@ -6,7 +6,7 @@
 	import Modal from "./Modal.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import type { VertFile } from "$lib/types";
-	import { files } from "$lib/store/index.svelte";
+	import { effects, files } from "$lib/store/index.svelte";
 	import { converterCategories } from "$lib/converters";
 	import { log, error } from "$lib/util/logger";
 	import type {
@@ -274,7 +274,6 @@
 					onselect={(value) => {
 						selectedFileName = value;
 						settings = {};
-						activeTab = "Converter";
 					}}
 				/>
 			</div>
@@ -306,11 +305,11 @@
 								{#each availableConverters as converter}
 									<button
 										class={clsx(
-											"transition w-full p-3 text-left rounded-xl border border-separator",
+											"w-full p-3 text-left rounded-xl border-2 border-button",
 											converter.name ===
-												validConverter?.name
-												? "bg-accent-purple text-black"
-												: "hover:bg-panel",
+												validConverter?.name &&
+												"bg-accent-purple text-black",
+											$effects && "transition",
 										)}
 										onclick={() => {
 											settings.converter = converter.name;

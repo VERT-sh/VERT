@@ -88,10 +88,7 @@
 				{vertdCommit
 					? vertdCommit === "loading"
 						? m["settings.vertd.loading"]()
-						: m["settings.vertd.available"]({
-								commitId: vertdCommit,
-								sizeLimit: formatBytes($vertdSizeLimit),
-							})
+						: m["settings.vertd.available"]()
 					: m["settings.vertd.unavailable"]()}
 			</p>
 
@@ -99,7 +96,13 @@
 				{@html sanitize(m["settings.vertd.description.main"]())}
 			</p>
 			<p class="text-sm text-muted font-normal">
-				{@html sanitize(m["settings.vertd.description.info"]())}
+				{@html sanitize(
+					link(
+						"vertd_link",
+						m["settings.vertd.description.info"](),
+						GITHUB_URL_VERTD,
+					),
+				)}
 			</p>
 			<p class="text-sm text-muted font-normal">
 				{@html sanitize(
@@ -172,6 +175,17 @@
 							bind:value={settings.vertdURL}
 						/>
 					{/if}
+					<p class="text-sm text-muted font-normal">
+						{m["settings.vertd.info"]({
+							sizeLimit:
+								vertdCommit === null
+									? "N/A"
+									: formatBytes($vertdSizeLimit) === "0 B"
+										? "unlimited"
+										: formatBytes($vertdSizeLimit),
+							commitId: vertdCommit ?? "N/A",
+						})}
+					</p>
 				</div>
 			</div>
 			<div class="flex flex-col gap-4">
