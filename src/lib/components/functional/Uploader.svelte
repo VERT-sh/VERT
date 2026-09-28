@@ -60,7 +60,9 @@
 	onclick={uploadFiles}
 	bind:this={uploaderButton}
 	class={clsx(
-		`hover:scale-105 active:scale-100 ${$effects ? "" : "!scale-100"} duration-200 ${classList}`,
+		"hover:scale-105 active:scale-100 duration-200",
+		!$effects && "!scale-100",
+		classList,
 	)}
 >
 	<Panel

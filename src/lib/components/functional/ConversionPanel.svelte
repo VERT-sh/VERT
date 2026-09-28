@@ -8,6 +8,7 @@
 	import FormatDropdown from "./FormatDropdown.svelte";
 	import { categories } from "$lib/converters";
 	import { m } from "$lib/paraglide/messages";
+	import { clsx } from "clsx";
 
 	const length = $derived(files.files.length);
 	const progress = $derived(files.files.filter((f) => f.result).length);
@@ -43,11 +44,11 @@
 		>
 			<button
 				onclick={() => files.convertAll()}
-				class="btn {$effects
-					? ''
-					: '!scale-100'} highlight flex gap-3 max-md:w-full {compactActions
-					? 'p-4'
-					: 'md:max-w-[15.5rem]'}"
+				class={clsx(
+					"btn highlight flex gap-3 max-md:w-full",
+					!$effects && "!scale-100",
+					compactActions ? "p-4" : "md:max-w-[15.5rem]",
+				)}
 				disabled={!files.allReady}
 			>
 				<RefreshCw size="24" />
@@ -56,11 +57,11 @@
 				{/if}
 			</button>
 			<button
-				class="btn {$effects
-					? ''
-					: '!scale-100'} flex gap-3 max-md:w-full {compactActions
-					? 'p-4'
-					: 'md:max-w-[15.5rem]'}"
+				class={clsx(
+					"btn flex gap-3 max-md:w-full",
+					!$effects && "!scale-100",
+					compactActions ? "p-4" : "md:max-w-[15.5rem]",
+				)}
 				disabled={!files.allReady || !files.results}
 				onclick={() => files.downloadAll()}
 			>
