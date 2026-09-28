@@ -420,7 +420,7 @@
 			"libraries": "Libraries",
 			"libraries_description": "A big thanks to Mediabunny (video), FFmpeg (audio, video), ImageMagick (images) and Pandoc (documents) for maintaining such excellent libraries for so many years. VERT relies on them to provide you with your conversions.",
 			"roles": {
-				"lead_developer": "Lead developer; conversion backend, UI implementation",
+				"lead_developer": "Developer; infrastructure, conversion backend, UI implementation",
 				"developer": "Developer; conversion backend, UI implementation",
 				"designer": "Designer; UX, branding, marketing",
 				"docker_ci": "Maintaining Docker & CI support",
