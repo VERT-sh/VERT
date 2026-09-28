@@ -214,6 +214,7 @@ export class FFmpegConverter extends Converter {
 		to: string,
 		settings: ConversionSettings,
 	): Promise<VertFile> {
+		this.trackConversion(input);
 		if (!to.startsWith(".")) to = `.${to}`;
 
 		const conversionSettings =
@@ -323,6 +324,7 @@ export class FFmpegConverter extends Converter {
 				return new VertFile(new File([outBuf], outputFileName), to);
 			}
 		} finally {
+			this.clearTrackedConversion(input);
 			ffmpeg.off("log", errorListener);
 			ffmpeg.off("log", logListener);
 			this.activeConversions.delete(input.id);

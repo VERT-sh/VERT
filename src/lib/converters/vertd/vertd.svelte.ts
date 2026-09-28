@@ -620,6 +620,7 @@ export class VertdConverter extends Converter {
 		to: string,
 		settings: ConversionSettings,
 	): Promise<VertFile> {
+		this.trackConversion(input);
 		if (to.startsWith(".")) to = to.slice(1);
 
 		const fileUpload = input;
@@ -852,6 +853,7 @@ export class VertdConverter extends Converter {
 				}
 			};
 		});
+		this.clearTrackedConversion(input);
 	}
 
 	public async cancel(input: VertFile): Promise<void> {

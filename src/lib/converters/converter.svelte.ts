@@ -48,6 +48,7 @@ export class Converter {
 	public readonly reportsProgress: boolean = false;
 
 	private timeoutId?: ReturnType<typeof setTimeout>;
+	private activeInput?: VertFile;
 
 	constructor(public readonly timeout: number = 10) {
 		this.startTimeout();
@@ -94,8 +95,18 @@ export class Converter {
 
 	private startTimeout() {
 		this.timeoutId = setTimeout(() => {
-			if (this.status !== "ready") this.status = "not-ready";
+			if (this.status === "ready") return;
+			this.status = "not-ready";
+			if (this.activeInput) void this.cancel(this.activeInput);
 		}, this.timeout * 1000);
+	}
+
+	protected trackConversion(input: VertFile) {
+		this.activeInput = input;
+	}
+
+	protected clearTrackedConversion(input: VertFile) {
+		if (this.activeInput?.id === input.id) this.activeInput = undefined;
 	}
 
 	protected clearTimeout() {

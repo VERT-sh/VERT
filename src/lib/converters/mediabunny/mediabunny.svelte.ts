@@ -391,6 +391,7 @@ export class MediabunnyConverter extends Converter {
 		to: string,
 		settings: ConversionSettings,
 	): Promise<VertFile> {
+		this.trackConversion(file);
 		const toFormat = to.startsWith(".") ? to.slice(1) : to;
 		const originalName = file.file.name.split(".").slice(0, -1).join(".");
 		const outputFilename = `${originalName}.${toFormat}`;
@@ -507,6 +508,7 @@ export class MediabunnyConverter extends Converter {
 			}
 			throw err;
 		} finally {
+			this.clearTrackedConversion(file);
 			if (slowConversionTimer) clearTimeout(slowConversionTimer);
 			this.activeConversions.delete(file.id);
 		}

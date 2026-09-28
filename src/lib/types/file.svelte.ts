@@ -547,6 +547,12 @@ export class VertFile {
 		const totalFiles = entries.length;
 		const fileProgress: number[] = new Array(totalFiles).fill(0);
 		const convertedFiles: File[] = [];
+		const progressFiles = new Map<number, VertFile>();
+		const progressInterval = setInterval(() => {
+			for (const [index, file] of progressFiles)
+				fileProgress[index] = file.progress;
+			updateProgress();
+		}, 100);
 
 		const queue = new PQueue({
 			concurrency: navigator.hardwareConcurrency || 4,
@@ -557,68 +563,53 @@ export class VertFile {
 			this.progress = Math.round(totalProgress / totalFiles);
 		};
 
-		// convert all files in the zip
-		await queue.addAll(
-			entries.map(({ filename, data }, index) => async () => {
-				if (this.cancelled) {
-					throw new Error("Conversion cancelled");
-				}
+		try {
+			// convert all files in the zip
+			await queue.addAll(
+				entries.map(({ filename, data }, index) => async () => {
+					if (this.cancelled) {
+						throw new Error("Conversion cancelled");
+					}
 
-				const file = new File([new Uint8Array(data)], filename, {
-					type: "application/octet-stream",
-				});
-				const tempVFile = new VertFile(file, this.to);
-				tempVFile.converters = [converter];
+					const file = new File([new Uint8Array(data)], filename, {
+						type: "application/octet-stream",
+					});
+					const tempVFile = new VertFile(file, this.to);
+					tempVFile.converters = [converter];
 
-				if (converter.reportsProgress) {
-					// track progress of individual files
-					const progressInterval = setInterval(() => {
-						fileProgress[index] = tempVFile.progress;
-						updateProgress();
-					}, 100);
+					if (converter.reportsProgress) {
+						progressFiles.set(index, tempVFile);
+						try {
+							const converted = await converter.convert(
+								tempVFile,
+								this.to,
+								settings,
+							);
 
-					try {
+							convertedFiles[index] = converted.file;
+							fileProgress[index] = 100;
+							updateProgress();
+						} finally {
+							progressFiles.delete(index);
+						}
+					} else {
+						// else track progress via completions only
 						const converted = await converter.convert(
 							tempVFile,
 							this.to,
 							settings,
 						);
 
-						let outputExt = this.to;
-						if (!outputExt.startsWith("."))
-							outputExt = `.${outputExt}`;
-
-						convertedFiles[index] = new File(
-							[await converted.file.arrayBuffer()],
-							converted.name,
-						);
+						convertedFiles[index] = converted.file;
 
 						fileProgress[index] = 100;
 						updateProgress();
-					} finally {
-						clearInterval(progressInterval);
 					}
-				} else {
-					// else track progress via completions only
-					const converted = await converter.convert(
-						tempVFile,
-						this.to,
-						settings,
-					);
-
-					let outputExt = this.to;
-					if (!outputExt.startsWith(".")) outputExt = `.${outputExt}`;
-
-					convertedFiles[index] = new File(
-						[await converted.file.arrayBuffer()],
-						converted.name,
-					);
-
-					fileProgress[index] = 100;
-					updateProgress();
-				}
-			}),
-		);
+				}),
+			);
+		} finally {
+			clearInterval(progressInterval);
+		}
 
 		// return zip of converted files
 		const resultArray = await createZip(convertedFiles);
