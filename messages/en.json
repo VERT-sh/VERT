@@ -312,8 +312,9 @@
 			"title": "Video conversion server",
 			"status": "status:",
 			"loading": "loading...",
-			"available": "available, size limit {sizeLimit}, commit id {commitId}",
+			"available": "available",
 			"unavailable": "unavailable (is the url right?)",
+			"info": "size limit: {sizeLimit}, commit id: {commitId}",
 			"description": {
 				"main": "VERT converts videos securely by doing it locally in your browser; however some specific conversions may require connecting to, and using a <code>vertd</code> server. <code>vertd</code> allows you to convert videos using the server's GPU, and without the conversion limits of your browser, whilst still allowing you the convenience of VERT's web interface.",
 				"info": "We host a public server for vertd for your convenience, but it is quite easy to host your own on your PC or server if you know what you are doing.",
