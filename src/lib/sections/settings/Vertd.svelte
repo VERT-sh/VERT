@@ -16,6 +16,8 @@
 	} from "./vertdSettings.svelte";
 	import FancyInput from "$lib/components/functional/FancyInput.svelte";
 	import { formatBytes } from "$lib/util/file";
+	import { goto } from "$app/navigation";
+	import { resolve } from "$app/paths";
 
 	let vertdCommit = $state<string | null>(null);
 	let abortController: AbortController | null = null;
@@ -61,11 +63,16 @@
 <Panel class="flex flex-col gap-8 p-6">
 	<div class="flex flex-col gap-3">
 		<h2 class="text-2xl font-bold">
-			<ServerIcon
-				size="40"
-				class="inline-block -mt-1 mr-2 bg-accent-red p-2 rounded-full overflow-visible"
-				color="black"
-			/>
+			<button
+				class="cursor-default"
+				onclick={() => goto(resolve("/debug"))}
+			>
+				<ServerIcon
+					size="40"
+					class="inline-block -mt-1 mr-2 bg-accent-red p-2 rounded-full overflow-visible"
+					color="black"
+				/>
+			</button>
 			{m["settings.vertd.title"]()}
 		</h2>
 		<div class="flex flex-col gap-4">

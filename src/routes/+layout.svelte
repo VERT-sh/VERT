@@ -25,6 +25,7 @@
 	import { ToastManager } from "$lib/util/toast.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { log } from "$lib/util/logger";
+	import { page } from "$app/state";
 
 	let { children } = $props();
 	let enablePlausible = $state(false);
@@ -232,7 +233,11 @@
 		-->
 		<Layout.PageContent {children} />
 
-		<Layout.Toasts />
+		<!-- new debug page shouldnt have toasts, since it already shows errors -->
+		{#if page.url.pathname !== "/debug/"}
+			<Layout.Toasts />
+		{/if}
+
 		<Layout.Dialogs />
 
 		<div>

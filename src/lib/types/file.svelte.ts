@@ -327,8 +327,7 @@ export class VertFile {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public async convert(...args: any[]) {
+	public async convert(onError?: (err: string) => void) {
 		await this.runPostDownload();
 		await this.checkFileType();
 
@@ -440,7 +439,6 @@ export class VertFile {
 							this,
 							this.to,
 							normalizedSettings.settings,
-							...args,
 						);
 			this.result = res;
 			if (this.fallbackToastId !== null) {
@@ -452,6 +450,18 @@ export class VertFile {
 				this.slowConversionToastId = null;
 			}
 		} catch (err) {
+			if (onError) {
+				const castedErr = err as Error | string;
+				let stringErr: string = "";
+				if (typeof castedErr === "string") {
+					stringErr = castedErr;
+				} else if (castedErr instanceof Error) {
+					stringErr = castedErr.message;
+				} else {
+					stringErr = castedErr;
+				}
+				onError(stringErr);
+			}
 			if (!this.cancelled) this.toastErr(err);
 
 			const compatibleConverters = this.findConverters([
@@ -490,7 +500,7 @@ export class VertFile {
 							};
 							this.retryingFallback = true;
 							try {
-								await this.convert(...args);
+								await this.convert();
 							} finally {
 								this.retryingFallback = false;
 							}

@@ -380,7 +380,13 @@ class Files {
 	public add(file: FileList | null | undefined): void;
 	public add(
 		file:
-			VertFile | File | VertFile[] | File[] | FileList | null | undefined,
+			| VertFile
+			| File
+			| VertFile[]
+			| File[]
+			| FileList
+			| null
+			| undefined,
 	) {
 		if (!file) return;
 		if (Array.isArray(file) || file instanceof FileList) {
@@ -392,8 +398,13 @@ class Files {
 		}
 	}
 
-	public async convertAll() {
-		const promiseFns = this.files.map((f) => () => f.convert());
+	public async convertAll(err?: (file: VertFile, error: string) => void) {
+		// christ
+		const onErrorFactory = (file: VertFile) =>
+			err ? (error: string) => err(file, error) : undefined;
+		const promiseFns = this.files.map(
+			(f) => () => f.convert(onErrorFactory(f)),
+		);
 		const coreCount = navigator.hardwareConcurrency || 4;
 		const queue = new PQueue({ concurrency: coreCount });
 		await Promise.all(promiseFns.map((fn) => queue.add(fn)));

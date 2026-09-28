@@ -33,6 +33,7 @@
 		dropdownSize?: "default" | "large" | "small";
 		file?: VertFile;
 		allowEmpty?: boolean;
+		leftAligned?: boolean;
 	};
 
 	let {
@@ -44,6 +45,7 @@
 		dropdownSize = "default",
 		file,
 		allowEmpty = false,
+		leftAligned,
 	}: Props = $props();
 
 	let open = $state(false);
@@ -479,7 +481,9 @@
 	bind:this={dropdown}
 >
 	<button
-		class="relative flex items-center justify-center w-full font-display px-3 py-3.5 bg-button rounded-full overflow-hidden cursor-pointer focus:!outline-none
+		class="relative flex items-center {leftAligned === true
+			? 'px-6 justify-between'
+			: 'justify-center'} w-full font-display px-3 py-3.5 bg-button rounded-full overflow-hidden cursor-pointer focus:!outline-none
 		{disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}"
 		onclick={() => clickDropdown()}
 		{disabled}

@@ -4,7 +4,7 @@
 	import { quintOut } from "svelte/easing";
 	import { clsx } from "clsx";
 
-	type DropdownStyle = "default" | "settings" | "inline";
+	type DropdownStyle = "default" | "settings" | "inline" | "defaultLeft";
 
 	type Props = {
 		options: string[] | { value: string; label: string }[];
@@ -122,9 +122,10 @@
 	<button
 		bind:this={button}
 		class={clsx(
-			"font-display overflow-hidden relative w-full flex focus:!outline-none",
+			"font-display overflow-hidden items-center relative w-full flex focus:!outline-none",
 			style !== "inline" && "bg-button py-3.5 px-3",
 			style === "inline" && "justify-start",
+			style === "defaultLeft" && "justify-between px-5 rounded-full",
 			style === "settings" && "justify-between px-4 rounded-xl",
 			style === "default" && "justify-center rounded-full",
 			disabled ? "opacity-50 cursor-auto" : "cursor-pointer",

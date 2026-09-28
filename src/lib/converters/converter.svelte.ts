@@ -8,7 +8,11 @@ import type {
 } from "$lib/types/conversion-settings";
 
 export type WorkerStatus =
-	"not-ready" | "downloading" | "ready" | "partially-ready" | "error";
+	| "not-ready"
+	| "downloading"
+	| "ready"
+	| "partially-ready"
+	| "error";
 
 export class FormatInfo {
 	public name: string;
@@ -114,7 +118,6 @@ export class Converter {
 		input: VertFile,
 		to: string,
 		settings: ConversionSettings,
-		...args: any[]
 	): Promise<VertFile> {
 		throw new Error("Not implemented");
 	}
