@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { effects } from "$lib/store/index.svelte";
+	import clsx from "clsx";
+
 	interface Props {
 		class?: string;
 		value?: string | number;
@@ -16,7 +19,6 @@
 	let {
 		class: className,
 		inputClass,
-		bgColor = "bg-panel",
 		value = $bindable(),
 		checked = $bindable(),
 		type = "text",
@@ -36,12 +38,14 @@
 			type="checkbox"
 			bind:checked
 			{disabled}
-			class="w-full p-3 rounded-lg border-2 border-button
-				{bgColor}
-				{prefix ? 'pl-[2rem]' : 'pl-3'} 
-				{extension ? 'pr-[4rem]' : 'pr-3'}
-				{disabled && 'opacity-50 cursor-not-allowed'} appearance-none
-				{inputClass}"
+			class={clsx(
+				"bg-panel w-full p-3 rounded-lg border-2 border-button appearance-none",
+				prefix ? "pl-[2rem]" : "pl-3",
+				extension ? "pr-[4rem]" : "pr-3",
+				disabled && "opacity-50 cursor-not-allowed",
+				inputClass,
+				$effects && "transition-colors duration-200",
+			)}
 		/>
 		{#if checked}
 			<div
