@@ -94,6 +94,12 @@ export class VertdInstance {
 			}
 		};
 
+		const normalize = (url: string) => {
+			let finalUrl = url;
+			if (url.endsWith("/")) finalUrl = finalUrl.slice(0, -1);
+			return finalUrl;
+		};
+
 		switch (this.inner.type) {
 			case "auto": {
 				const results = await Promise.all(
@@ -121,7 +127,7 @@ export class VertdInstance {
 				if (fastest) return fastest.url;
 
 				// if none are reachable, fall back to custom
-				return Settings.instance.settings.vertdURL;
+				return normalize(Settings.instance.settings.vertdURL);
 			}
 
 			case "eu": {
@@ -133,7 +139,7 @@ export class VertdInstance {
 			}
 
 			case "custom": {
-				return Settings.instance.settings.vertdURL;
+				return normalize(Settings.instance.settings.vertdURL);
 			}
 		}
 	}
