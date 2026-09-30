@@ -160,7 +160,7 @@
 				<About.Donate />
 			{/if}
 			<About.Why />
-			<About.Sponsors />
+			<!-- <About.Sponsors /> -->
 		</div>
 
 		<!-- Resources & Donate to VERT -->
