@@ -8,6 +8,7 @@ import {
 	MagickReadSettings,
 	AlphaAction,
 	type IMagickImage,
+	type IMagickImageCollection,
 } from "@imagemagick/magick-wasm";
 import { makeZip } from "client-zip";
 import type { WorkerMessage } from "$lib/types";
@@ -117,34 +118,22 @@ const readToEnd = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
 };
 
 const convertCollectionToZip = async (
-	buffer: ArrayBuffer,
-	format: MagickFormat,
+	collection: IMagickImageCollection,
 	to: string,
 	conversionSettings: ConversionSettings,
 ): Promise<Uint8Array> => {
-	const collection = MagickImageCollection.create();
-	try {
-		collection.read(
-			new Uint8Array(buffer),
-			new MagickReadSettings({ format }),
-		);
-		console.log(`read ${collection.length} images from ${format}`);
+	const convertedImages = await Promise.all(
+		collection.map((img) => magickConvert(img, to, conversionSettings)),
+	);
+	const zip = makeZip(
+		convertedImages.map(
+			(img, i) =>
+				new File([new Uint8Array(img)], `image${i}.${to.slice(1)}`),
+		),
+		"images.zip",
+	);
 
-		const convertedImages = await Promise.all(
-			collection.map((img) => magickConvert(img, to, conversionSettings)),
-		);
-		const zip = makeZip(
-			convertedImages.map(
-				(img, i) =>
-					new File([new Uint8Array(img)], `image${i}.${to.slice(1)}`),
-			),
-			"images.zip",
-		);
-
-		return await readToEnd(zip.getReader());
-	} finally {
-		collection.dispose();
-	}
+	return await readToEnd(zip.getReader());
 };
 
 const loadDicomHelpers = async () =>
@@ -191,39 +180,53 @@ const handleSpecialOutput = async (
 	};
 	const collectionFormat = collectionFormats[from];
 	if (collectionFormat !== undefined) {
-		const zipBytes = await convertCollectionToZip(
-			buffer,
-			collectionFormat,
-			to,
-			conversionSettings,
-		);
+		const collection = MagickImageCollection.create();
+		try {
+			collection.read(
+				new Uint8Array(buffer),
+				new MagickReadSettings({ format: collectionFormat }),
+			);
+			console.log(
+				`read ${collection.length} images from ${collectionFormat}`,
+			);
 
-		return {
-			type: "finished",
-			output: zipBytes,
-			zip: true,
-		};
-	}
+			if (from === ".gif" || from === ".webp") {
+				if (collection.length === 1)
+					return {
+						type: "finished",
+						output: await magickConvert(
+							collection[0],
+							to,
+							conversionSettings,
+						),
+					};
 
-	// converting from animated format to another animated format
-	// APNG does not work on magick-wasm since it needs ffmpeg built-in (not in magick-wasm) - should pass into ffmpeg.wasm instead
-	if (
-		(from === ".webp" || from === ".gif") &&
-		(to === ".gif" || to === ".webp")
-	) {
-		const collection = MagickImageCollection.create(new Uint8Array(buffer));
-		const format = to === ".gif" ? MagickFormat.Gif : MagickFormat.WebP;
-		const result = await new Promise<Uint8Array>((resolve) => {
-			collection.write(format, (output) => {
-				resolve(structuredClone(output));
-			});
-		});
-		collection.dispose();
+				// converting from animated format to another animated format
+				// APNG does not work on magick-wasm since it needs ffmpeg built-in (not in magick-wasm) - should pass into ffmpeg.wasm instead
+				if (to === ".gif" || to === ".webp") {
+					const format =
+						to === ".gif" ? MagickFormat.Gif : MagickFormat.WebP;
+					const result = await new Promise<Uint8Array>((resolve) => {
+						collection.write(format, (output) => {
+							resolve(structuredClone(output));
+						});
+					});
+					return { type: "finished", output: result };
+				}
+			}
 
-		return {
-			type: "finished",
-			output: result,
-		};
+			return {
+				type: "finished",
+				output: await convertCollectionToZip(
+					collection,
+					to,
+					conversionSettings,
+				),
+				zip: true,
+			};
+		} finally {
+			collection.dispose();
+		}
 	}
 
 	if (from === ".ani") {

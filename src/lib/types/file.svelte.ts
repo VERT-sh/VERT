@@ -97,6 +97,7 @@ export type UnavailableReasons = "vertd-size-limit" | "other-reason"; // find mo
 export class VertFile {
 	public id: string = Math.random().toString(36).slice(2, 8);
 	public readonly file: File;
+	public readonly originalFrom: string;
 
 	public from = $state("");
 	public name = $state("");
@@ -123,6 +124,7 @@ export class VertFile {
 	private retryingFallback = false;
 	private postDownload: (() => Promise<void>) | null = null;
 	private activeConverterName: string | null = null;
+	private fileTypeMismatchShown = false;
 
 	constructor(file: File, to: string, blobUrl?: string) {
 		const ext = file.name.split(".").pop();
@@ -133,6 +135,7 @@ export class VertFile {
 		this.file = newFile;
 		this.name = newFile.name;
 		this.from = ("." + ext || "").toLowerCase();
+		this.originalFrom = this.from;
 		this.to = to.startsWith(".") ? to : `.${to}`;
 		this.converters = converters.filter((c) =>
 			c.formatStrings().includes(this.from),
@@ -299,28 +302,33 @@ export class VertFile {
 				mpe: "mpeg",
 				mpv: "mpeg",
 			};
-			const fileExtension = this.from.slice(1);
+			const fileExtension = this.originalFrom.slice(1);
 			const detectedExtension = forceKeep.includes(fileExtension)
 				? fileExtension
 				: (aliases[this.fileType.ext] ?? this.fileType.ext);
 			const expectedExtension = aliases[fileExtension] ?? fileExtension;
 
 			if (detectedExtension !== expectedExtension) {
-				console.warn(
-					`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`,
-				);
-				ToastManager.add({
-					type: "warning",
-					disappearing: false,
-					message: m["workers.warnings.file_type_mismatch"]({
-						filename: this.file.name,
-						expected: expectedExtension,
-						actual: detectedExtension,
-					}),
-				});
+				this.from = `.${detectedExtension}`;
+				if (!this.fileTypeMismatchShown) {
+					console.warn(
+						`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`,
+					);
+					ToastManager.add({
+						type: "warning",
+						disappearing: false,
+						message: m["workers.warnings.file_type_mismatch"]({
+							filename: this.file.name,
+							expected: expectedExtension,
+							actual: detectedExtension,
+						}),
+					});
+					this.fileTypeMismatchShown = true;
+				}
+			} else {
+				this.from = this.originalFrom;
 			}
 
-			this.from = `.${detectedExtension}`;
 			this.converters = converters.filter((converter) =>
 				converter.formatStrings().includes(this.from),
 			);
