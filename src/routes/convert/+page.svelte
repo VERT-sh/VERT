@@ -508,7 +508,7 @@
 	</div>
 </div>
 
-{#if $fileSettings instanceof VertFile}
+{#if $fileSettings !== null}
 	<SettingsModal
 		file={$fileSettings}
 		onclose={() => ($fileSettings = null)}

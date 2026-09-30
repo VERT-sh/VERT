@@ -6,7 +6,6 @@
 	import { m } from "$lib/paraglide/messages";
 	import { link, sanitize } from "$lib/store/index.svelte";
 	import { ToastManager } from "$lib/util/toast.svelte";
-	import lily from "$lib/assets/lily.jpeg";
 
 	let copied = false;
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -39,17 +38,6 @@
 	</h2>
 	<div class="[&>*]:font-normal h-full flex justify-between flex-col gap-4">
 		<div class="flex gap-3 justify-center text-lg">
-			<a
-				href="https://eva.pink"
-				target="_blank"
-				class="w-48 h-24 rounded-2xl px-0 btn gap-2 flex flex-col justify-center items-center"
-			>
-				<img
-					src={lily}
-					alt="Eva"
-					class="w-full h-full select-none object-cover"
-				/>
-			</a>
 		</div>
 		<p class="text-muted">
 			{@html sanitize(

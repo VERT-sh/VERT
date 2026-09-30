@@ -37,20 +37,26 @@
 		{
 			name: "nullptr",
 			github: "https://github.com/not-nullptr",
-			role: m["about.credits.roles.lead_developer"](),
+			role: m["about.credits.roles.maddie"](),
 			avatar: avatarNullptr,
 		},
 		{
 			name: "JovannMC // Maya",
 			github: "https://github.com/JovannMC",
-			role: m["about.credits.roles.developer"](),
+			role: m["about.credits.roles.maya"](),
 			avatar: avatarJovannMC,
+		},
+		{
+			name: "Eva",
+			github: "https://eva.pink",
+			role: m["about.credits.roles.eva"](),
+			avatar: "https://avatars.githubusercontent.com/u/110857998?v=4", //// wanted to keep pfp up-to-date
 		},
 		{
 			name: "Liam",
 			github: "https://x.com/z2rMC",
-			role: m["about.credits.roles.designer"](),
-			avatar: avatarLiam,
+			role: m["about.credits.roles.liam"](),
+			avatar: avatarLiam 
 		},
 	];
 
@@ -58,13 +64,13 @@
 		{
 			name: "azurejelly",
 			github: "https://github.com/azurejelly",
-			role: m["about.credits.roles.docker_ci"](),
+			role: m["about.credits.roles.azure"](),
 			avatar: avatarAzurejelly,
 		},
 		{
 			name: "Realmy",
 			github: "https://github.com/RealmyTheMan",
-			role: m["about.credits.roles.former_cofounder"](),
+			role: m["about.credits.roles.realmy"](),
 			avatar: avatarRealmy,
 		},
 	];
