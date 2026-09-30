@@ -56,7 +56,7 @@ const handleMessage = async (
 			message.to = message.to.toLowerCase();
 			if (message.to === ".jfif") message.to = ".jpeg";
 
-			let to = message.input.to;
+			let to = message.to;
 			let from = message.input.from;
 			if (from === ".jfif") from = ".jpeg";
 			if (from === ".fit") from = ".fits";
@@ -430,8 +430,8 @@ const magickConvert = async (
 
 			// magick-wasm automatically clamps (https://github.com/dlemstra/magick-wasm/blob/76fc6f2b0c0497d2ddc251bbf6174b4dc92ac3ea/src/magick-image.ts#L2480)
 			if (quality) img.quality = quality;
-			if (bitDepth !== "auto") img.depth = bitDepth;
-			if (!metadata) img.strip();
+			if (bitDepth && bitDepth !== "auto") img.depth = bitDepth;
+			if (metadata === false) img.strip();
 			if (colorSpace) {
 				switch (colorSpace) {
 					case "srgb":
@@ -461,7 +461,7 @@ const magickConvert = async (
 					// auto is default so do nothing
 				}
 			}
-			if (!transparency) {
+			if (transparency === false) {
 				img.backgroundColor = new MagickColor(0, 0, 0, 255); // TODO: probably make it an option to set the bg colour
 				img.alpha(AlphaAction.Remove);
 			}

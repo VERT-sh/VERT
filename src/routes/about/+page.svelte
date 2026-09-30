@@ -56,7 +56,7 @@
 			name: "Liam",
 			github: "https://x.com/z2rMC",
 			role: m["about.credits.roles.liam"](),
-			avatar: avatarLiam 
+			avatar: avatarLiam,
 		},
 	];
 

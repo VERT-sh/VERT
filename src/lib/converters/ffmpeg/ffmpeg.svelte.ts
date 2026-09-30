@@ -470,11 +470,10 @@ export class FFmpegConverter extends Converter {
 		}
 
 		// channels setting
-		if (settings.channels !== 2) {
-			channelsArgs = ["-ac", String(settings.channels)];
-			this.log(
-				`using user setting for audio channels: ${settings.channels}`,
-			);
+		const channels = Number(settings.channels);
+		if (Number.isInteger(channels) && channels !== 2) {
+			channelsArgs = ["-ac", String(channels)];
+			this.log(`using user setting for audio channels: ${channels}`);
 		}
 
 		// video to audio
