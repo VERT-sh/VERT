@@ -397,7 +397,6 @@ export class MediabunnyConverter extends Converter {
 		const outputFilename = `${originalName}.${toFormat}`;
 
 		const input = new Input({
-			// TODO: add settings & special handling for certain formats & codecs
 			formats: [MP4, QTFF, MATROSKA, WEBM, MPEG_TS],
 			source: new BlobSource(file.file),
 		});

@@ -194,7 +194,8 @@ class Files {
 		}
 	}
 
-	private async _handleZipFile(file: File): Promise<void> {
+	private async _handleZipFile(input: VertFile): Promise<void> {
+		const file = input.file;
 		try {
 			log(["files"], `extracting zip file: ${file.name}`);
 			ToastManager.add({
@@ -213,9 +214,18 @@ class Files {
 			// check if all files in zip use the same converter and are compatible
 			const convertersUsed = new Set<string>();
 			let incompatibleFiles = false;
+			const archiveFiles: VertFile[] = [];
 
-			for (const { filename } of entries) {
-				const format = "." + filename.split(".").pop()?.toLowerCase();
+			for (const { filename, data } of entries) {
+				const member = new VertFile(
+					new File([new Uint8Array(data)], filename, {
+						type: "application/octet-stream",
+					}),
+					".zip",
+				);
+				await member.checkFileType();
+				archiveFiles.push(member);
+				const format = member.from;
 				if (!format || format === ".zip") {
 					incompatibleFiles = true;
 					continue;
@@ -239,7 +249,9 @@ class Files {
 
 			if (canConvertAsOne) {
 				// all files use same converter - add zip as a single VertFile file
-				const vf = new VertFile(file, ".zip");
+				const vf = input;
+				vf.to = ".zip";
+				vf.archiveFormats = archiveFiles.map((member) => member.from);
 				vf.converters = converters.filter(
 					(c) => c.name === Array.from(convertersUsed)[0],
 				);
@@ -273,12 +285,9 @@ class Files {
 				});
 			} else {
 				// mixed converters/incompatible files - extract all individually
-				for (const { filename, data } of entries) {
-					this._add(
-						new File([new Uint8Array(data)], filename, {
-							type: "application/octet-stream",
-						}),
-					);
+				for (const file of archiveFiles) {
+					file.to = file.from;
+					await this._add(file);
 				}
 
 				ToastManager.add({
@@ -297,35 +306,32 @@ class Files {
 	}
 
 	private async _add(file: VertFile | File) {
+		const input =
+			file instanceof VertFile ? file : new VertFile(file, ".zip");
+		await input.checkFileType();
+		// if zip, extract and add contents
+		const isZip = input.from === ".zip";
+		if (isZip && !input.archiveFormats) {
+			try {
+				await this._handleZipFile(input);
+			} catch (err) {
+				error(["files"], `error extracting zip file: ${err}`);
+				ToastManager.add({
+					type: "error",
+					message: m["convert.archive_file.extract_error"]({
+						filename: input.file.name,
+						error: String(err),
+					}),
+				});
+			}
+			return;
+		}
 		if (file instanceof VertFile) {
 			this.files.push(file);
 			this._addThumbnail(file);
 		} else {
-			// if zip, extract and add contents
-			const isZip =
-				file.name.toLowerCase().endsWith(".zip") ||
-				file.type === "application/zip" ||
-				file.type === "application/x-zip-compressed";
-
-			if (isZip) {
-				try {
-					await this._handleZipFile(file);
-					return;
-				} catch (err) {
-					error(["files"], `error extracting zip file: ${err}`);
-					ToastManager.add({
-						type: "error",
-						message: m["convert.archive_file.extract_error"]({
-							filename: file.name,
-							error: String(err),
-						}),
-					});
-					return;
-				}
-			}
-
 			// regular files
-			const format = "." + file.name.split(".").pop()?.toLowerCase();
+			const format = input.from;
 			if (!format) {
 				log(["files"], `no extension found for ${file.name}`);
 				return;
@@ -337,7 +343,8 @@ class Files {
 				);
 			if (!converter) {
 				log(["files"], `no converter found for ${file.name}`);
-				this.files.push(new VertFile(file, format));
+				input.to = format;
+				this.files.push(input);
 				return;
 			}
 			const category = Object.keys(categories).find((name) =>
@@ -350,7 +357,8 @@ class Files {
 				log(["files"], `no output format found for ${file.name}`);
 				return;
 			}
-			const vf = new VertFile(file, to);
+			const vf = input;
+			vf.to = to;
 			this.files.push(vf);
 			this._addThumbnail(vf);
 
@@ -383,12 +391,22 @@ class Files {
 			VertFile | File | VertFile[] | File[] | FileList | null | undefined,
 	) {
 		if (!file) return;
+		const addFile = (input: VertFile | File) => {
+			void this._add(input).catch((err) => {
+				error(["files"], `error adding file ${input.name}: ${err}`);
+				ToastManager.add({
+					type: "error",
+					message: m["workers.errors.general"]({
+						file: input.name,
+						message: String(err),
+					}),
+				});
+			});
+		};
 		if (Array.isArray(file) || file instanceof FileList) {
-			for (const f of file) {
-				this._add(f);
-			}
+			for (const f of file) addFile(f);
 		} else {
-			this._add(file);
+			addFile(file);
 		}
 	}
 

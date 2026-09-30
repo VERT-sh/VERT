@@ -13,12 +13,13 @@ import type {
 	NormalizedSettings,
 	SettingCategories,
 } from "./conversion-settings";
-import { log } from "$lib/util/logger";
+import { error, log } from "$lib/util/logger";
 import { readSettings } from "$lib/util/settings";
 import { formatFilename } from "$lib/util/file";
 import { fileTypeFromBuffer } from "file-type";
 
 const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
+const FILE_TYPE_HEADER_SIZE = 4100;
 
 type ServerWarningRequest = {
 	filename: string;
@@ -118,6 +119,7 @@ export class VertFile {
 	public vertdSizeWarningShown = false;
 
 	public converters: Converter[] = [];
+	public archiveFormats?: string[];
 	private fallbackToastId: number | null = null;
 	private slowConversionToastId: number | null = null;
 	private attemptedConverters = new Set<string>();
@@ -125,6 +127,7 @@ export class VertFile {
 	private postDownload: (() => Promise<void>) | null = null;
 	private activeConverterName: string | null = null;
 	private fileTypeMismatchShown = false;
+	private fileTypeCheck: Promise<void> | null = null;
 
 	constructor(file: File, to: string, blobUrl?: string) {
 		const ext = file.name.split(".").pop();
@@ -280,10 +283,14 @@ export class VertFile {
 		);
 	}
 
-	public async checkFileType() {
+	public checkFileType(): Promise<void> {
+		return (this.fileTypeCheck ??= this.detectFileType());
+	}
+
+	private async detectFileType() {
 		try {
 			this.fileType = await fileTypeFromBuffer(
-				await this.file.arrayBuffer(),
+				await this.file.slice(0, FILE_TYPE_HEADER_SIZE).arrayBuffer(),
 			);
 
 			if (!this.fileType) return;
@@ -303,15 +310,22 @@ export class VertFile {
 				mpv: "mpeg",
 			};
 			const fileExtension = this.originalFrom.slice(1);
+			const isPngContainer =
+				this.fileType.ext === "png" || this.fileType.ext === "apng";
+			// preserve file type for png and apng so they can convert
+			// TODO: apng can't be converted with magick-wasm - use another library for it
 			const detectedExtension = forceKeep.includes(fileExtension)
 				? fileExtension
-				: (aliases[this.fileType.ext] ?? this.fileType.ext);
+				: isPngContainer &&
+					  (fileExtension === "png" || fileExtension === "apng")
+					? fileExtension
+					: (aliases[this.fileType.ext] ?? this.fileType.ext);
 			const expectedExtension = aliases[fileExtension] ?? fileExtension;
 
 			if (detectedExtension !== expectedExtension) {
 				this.from = `.${detectedExtension}`;
 				if (!this.fileTypeMismatchShown) {
-					console.warn(
+					error(
 						`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`,
 					);
 					ToastManager.add({
@@ -343,11 +357,10 @@ export class VertFile {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
 		await this.runPostDownload();
-		await this.checkFileType();
 
 		if (!this.retryingFallback) this.attemptedConverters.clear();
 
-		console.log(
+		log(
 			`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`,
 		);
 		if (!this.converters.length) throw new Error("No converters found");
@@ -579,10 +592,14 @@ export class VertFile {
 						throw new Error("Conversion cancelled");
 					}
 
-					const file = new File([new Uint8Array(data)], filename, {
-						type: "application/octet-stream",
-					});
-					const tempVFile = new VertFile(file, this.to);
+					const tempVFile = new VertFile(
+						new File([new Uint8Array(data)], filename, {
+							type: "application/octet-stream",
+						}),
+						this.to,
+					);
+					tempVFile.from =
+						this.archiveFormats?.[index] ?? tempVFile.from;
 					tempVFile.converters = [converter];
 
 					if (converter.reportsProgress) {
