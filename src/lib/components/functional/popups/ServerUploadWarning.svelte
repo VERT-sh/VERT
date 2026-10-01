@@ -18,12 +18,12 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<p class="text-black">
+	<p class="text-black dynadark:text-white">
 		{m["convert.external_warning.text"]({
 			filename: additional.filename,
 		})}
 	</p>
-	<div class="flex items-center gap-2 text-black">
+	<div class="flex items-center gap-2 text-black dynadark:text-white">
 		<FancyInput
 			type="checkbox"
 			checked={dontShowAgain}
