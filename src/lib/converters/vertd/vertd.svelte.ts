@@ -50,19 +50,20 @@ interface RouteResponseMap {
 
 export const vertdFetch: {
 	<U extends keyof RouteRequestMap>(
-		url: U,
+		path: U,
 		options: RequestInit,
 		body: RouteRequestMap[U],
+		baseUrl?: string,
 	): Promise<RouteResponseMap[U]>;
 	<U extends Exclude<keyof RouteResponseMap, keyof RouteRequestMap>>(
-		url: U,
+		path: U,
 		options: RequestInit,
+		body?: undefined,
+		baseUrl?: string,
 	): Promise<RouteResponseMap[U]>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-} = async (url: any, options: RequestInit, body?: any) => {
-	const domain = await VertdInstance.instance.url();
-
-	if (!domain) return undefined;
+} = async (url: any, options: RequestInit, body?: any, baseUrl?: string) => {
+	const domain = baseUrl ?? (await VertdInstance.instance.url());
 
 	const headers = new Headers(options.headers);
 	for (const [key, value] of Object.entries(getVertdCustomHeaders()))
@@ -230,8 +231,10 @@ interface UploadTask {
 	abort: () => void;
 }
 
-const createUploadTask = async (file: VertFile): Promise<UploadTask> => {
-	const apiUrl = await VertdInstance.instance.url();
+const createUploadTask = async (
+	file: VertFile,
+	apiUrl: string,
+): Promise<UploadTask> => {
 	const formData = new FormData();
 	formData.append("file", file.file, file.name);
 	const xhr = new XMLHttpRequest();
@@ -416,6 +419,7 @@ export class VertdConverter extends Converter {
 
 	public async getAvailableSettings(
 		input: VertFile,
+		baseUrl?: string,
 	): Promise<SettingCategories> {
 		// video - bitrate, fps, resolution, trim, crop, rotate, flip/flop, audio settings?
 
@@ -449,9 +453,14 @@ export class VertdConverter extends Converter {
 		// get codecs for this format from vertd
 		try {
 			const targetFormat = input.to.replace(/^\./, "");
-			const codecsJson = await vertdFetch(`/api/codecs/${targetFormat}`, {
-				method: "GET",
-			});
+			const codecsJson = await vertdFetch(
+				`/api/codecs/${targetFormat}`,
+				{
+					method: "GET",
+				},
+				undefined,
+				baseUrl,
+			);
 
 			const previousCodecs = JSON.stringify(this.codecs);
 			const newCodecs = JSON.stringify(codecsJson);
@@ -603,9 +612,10 @@ export class VertdConverter extends Converter {
 
 	public async getDefaultSettings(
 		input: VertFile,
+		baseUrl?: string,
 	): Promise<ConversionSettings> {
 		const defaults: ConversionSettings = {};
-		const categories = await this.getAvailableSettings(input);
+		const categories = await this.getAvailableSettings(input, baseUrl);
 		Object.values(categories)
 			.flat()
 			.forEach((setting) => {
@@ -624,10 +634,14 @@ export class VertdConverter extends Converter {
 		if (to.startsWith(".")) to = to.slice(1);
 
 		const fileUpload = input;
+		const apiUrl = await VertdInstance.instance.url();
 		const conversionSettings = // vertd expects object not string json
 			Object.keys(settings).length > 4
 				? settings // user-provided settings
-				: Object.assign(settings, await this.getDefaultSettings(input)); // use defaults if not provided
+				: Object.assign(
+						settings,
+						await this.getDefaultSettings(input, apiUrl),
+					); // use defaults if not provided
 
 		let hash: string;
 		if (PUB_DISABLE_FAILURE_BLOCKS === "false") {
@@ -643,9 +657,7 @@ export class VertdConverter extends Converter {
 			}
 		}
 
-		const apiUrl = await VertdInstance.instance.url();
-
-		const uploadTask = await createUploadTask(fileUpload);
+		const uploadTask = await createUploadTask(fileUpload, apiUrl);
 		this.activeUploads.set(input.id, uploadTask);
 
 		let uploadRes: UploadResponse;
@@ -802,6 +814,8 @@ export class VertdConverter extends Converter {
 									{
 										method: "GET",
 									},
+									undefined,
+									apiUrl,
 								);
 								this.log(
 									`confirmed download for file ${input.name}`,
@@ -897,14 +911,16 @@ export class VertdConverter extends Converter {
 	}
 
 	public async valid(): Promise<boolean> {
-		if (!(await VertdInstance.instance.url())) {
-			return false;
-		}
-
 		try {
-			await vertdFetch("/api/version", {
-				method: "GET",
-			});
+			const apiUrl = await VertdInstance.instance.url();
+			await vertdFetch(
+				"/api/version",
+				{
+					method: "GET",
+				},
+				undefined,
+				apiUrl,
+			);
 			return true;
 		} catch (e) {
 			this.log(e as unknown as string);

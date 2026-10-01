@@ -686,11 +686,18 @@ export const getMaxArrayBufferSize = (): number => {
 
 export const MAX_ARRAY_BUFFER_SIZE = getMaxArrayBufferSize();
 
-export const getVertdLimit = async (): Promise<number | null> => {
+export const getVertdLimit = async (
+	baseUrl?: string,
+): Promise<number | null> => {
 	try {
-		const limit = await vertdFetch("/api/size_limit", {
-			method: "GET",
-		});
+		const limit = await vertdFetch(
+			"/api/size_limit",
+			{
+				method: "GET",
+			},
+			undefined,
+			baseUrl,
+		);
 		const parsed = Number(limit);
 		if (!Number.isFinite(parsed) || parsed <= 0) return null;
 
