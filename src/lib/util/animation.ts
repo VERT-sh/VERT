@@ -41,6 +41,7 @@ export function animateHeight(
 	let frame = 0;
 	let releaseTimer = 0;
 	let settledHeight: number | undefined;
+	// eslint-disable-next-line prefer-const
 	let resizeObserver: ResizeObserver | undefined;
 	let mutationObserver: MutationObserver | undefined;
 
@@ -114,6 +115,7 @@ export function animateHeight(
 	};
 
 	resizeObserver = new ResizeObserver(updateHeight);
+	// eslint-disable-next-line prefer-const
 	mutationObserver = new MutationObserver(updateHeight);
 	mutationObserver.observe(node, { childList: true });
 	updateHeight();

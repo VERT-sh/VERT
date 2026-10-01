@@ -170,7 +170,6 @@ export class MediabunnyConverter extends Converter {
 	public reportsProgress: boolean = true;
 
 	private activeConversions = new Map<string, Conversion>();
-	private pendingOutputCleanups = new Map<string, () => Promise<void>>();
 
 	private formats: string[] = [
 		"mp4",
@@ -396,139 +395,155 @@ export class MediabunnyConverter extends Converter {
 		const originalName = file.file.name.split(".").slice(0, -1).join(".");
 		const outputFilename = `${originalName}.${toFormat}`;
 
-		const input = new Input({
-			formats: [MP4, QTFF, MATROSKA, WEBM, MPEG_TS],
-			source: new BlobSource(file.file),
-		});
+		let streamTargetContext: Awaited<
+			ReturnType<typeof this.createStreamingTarget>
+		> = null;
+		let input: Input | undefined;
+		let output: Output | undefined;
+		let slowConversionTimer: ReturnType<typeof setTimeout> | undefined;
+		let retained = false;
+		try {
+			input = new Input({
+				formats: [MP4, QTFF, MATROSKA, WEBM, MPEG_TS],
+				source: new BlobSource(file.file),
+			});
+			streamTargetContext =
+				await this.createStreamingTarget(outputFilename);
+			if (streamTargetContext) {
+				this.log(`using OPFS stream target for ${file.name}`);
+			}
 
-		const streamTargetContext =
-			await this.createStreamingTarget(outputFilename);
-		if (streamTargetContext) {
-			this.log(`using OPFS stream target for ${file.name}`);
-			this.pendingOutputCleanups.set(
-				file.id,
-				streamTargetContext.cleanup,
-			);
-		}
+			const target = streamTargetContext?.target ?? new BufferTarget();
 
-		const target = streamTargetContext?.target ?? new BufferTarget();
-
-		const output = new Output({
-			format: this.format(to),
-			target,
-		});
-
-		const conversionSettings =
-			Object.keys(settings).length > 4
-				? settings
-				: Object.assign(settings, await this.getDefaultSettings(file)); // use defaults if not provided
-
-		const videoConfig = buildVideoConfig(conversionSettings);
-		const audioConfig = buildAudioConfig(conversionSettings);
-
-		const conversion = await Conversion.init({
-			input,
-			output,
-			video: videoConfig,
-			audio: audioConfig,
-			...(conversionSettings.metadata === "false" ? { tags: {} } : {}),
-		});
-
-		this.activeConversions.set(file.id, conversion);
-
-		const mobile = get(isMobile);
-		const deviceMemory = (
-			navigator as Navigator & { deviceMemory?: number }
-		).deviceMemory;
-		const hardwareConcurrency = navigator.hardwareConcurrency || 3; // if we can't detect it, just fall back to something that will definitely warn
-		const likelySlowDevice =
-			(mobile && hardwareConcurrency <= 4) ||
-			hardwareConcurrency <= 4 ||
-			(deviceMemory !== undefined && deviceMemory <= 4);
-		if (likelySlowDevice) void file.slowConversionOffer("device");
-		this.log(`hardwareConcurrency: ${hardwareConcurrency}`);
-		this.log(`deviceMemory: ${deviceMemory}`);
-		this.log(`mobile: ${mobile}`);
-
-		const slowConversionTimer: ReturnType<typeof setTimeout> = setTimeout(
-			() => {
-				void file.slowConversionOffer("timeout");
-			},
-			60 * 1000,
-		);
-
-		this.log(`videoConfig: ${JSON.stringify(videoConfig)}`);
-		this.log(`audioConfig: ${JSON.stringify(audioConfig)}`);
-
-		// log any discarded tracks & its reasons
-		const discardedTracks = conversion.discardedTracks;
-		if (discardedTracks.length > 0) {
-			const discardedTrackCount = discardedTracks.length;
-			const discardedTrackList = discardedTracks.map(
-				(discarded, index) =>
-					`${index + 1}. ${discarded.track.type} (${discarded.track.getCodec()}) - ${discarded.reason}`,
-			);
-
-			const isValid = conversion.isValid;
-			const logMethod = isValid ? this.error : this.log;
-			logMethod(
-				`${discardedTrackCount} discarded track(s) for ${file.name}:\n${discardedTrackList.join("\n")}`,
-			);
-			ToastManager.add({
-				type: isValid ? "warning" : "error", // warning if output created, error if nothing / conversion was completely invalid
-				message: m["workers.errors.mediabunny.discarded"]({
-					count: discardedTrackCount,
-					file: file.name,
-				}),
-				durations: {
-					stay: 10000,
-				},
+			output = new Output({
+				format: this.format(to),
+				target,
 			});
 
-			if (!isValid) {
-				this.activeConversions.delete(file.id);
+			const conversionSettings =
+				Object.keys(settings).length > 4
+					? settings
+					: Object.assign(
+							settings,
+							await this.getDefaultSettings(file),
+						); // use defaults if not provided
+
+			const videoConfig = buildVideoConfig(conversionSettings);
+			const audioConfig = buildAudioConfig(conversionSettings);
+
+			const conversion = await Conversion.init({
+				input,
+				output,
+				video: videoConfig,
+				audio: audioConfig,
+				...(conversionSettings.metadata === "false"
+					? { tags: {} }
+					: {}),
+			});
+
+			this.activeConversions.set(file.id, conversion);
+
+			const mobile = get(isMobile);
+			const deviceMemory = (
+				navigator as Navigator & { deviceMemory?: number }
+			).deviceMemory;
+			const hardwareConcurrency = navigator.hardwareConcurrency || 3; // if we can't detect it, just fall back to something that will definitely warn
+			const likelySlowDevice =
+				(mobile && hardwareConcurrency <= 4) ||
+				hardwareConcurrency <= 4 ||
+				(deviceMemory !== undefined && deviceMemory <= 4);
+			if (likelySlowDevice) void file.slowConversionOffer("device");
+			this.log(`hardwareConcurrency: ${hardwareConcurrency}`);
+			this.log(`deviceMemory: ${deviceMemory}`);
+			this.log(`mobile: ${mobile}`);
+
+			slowConversionTimer = setTimeout(() => {
+				void file.slowConversionOffer("timeout");
+			}, 60 * 1000);
+
+			this.log(`videoConfig: ${JSON.stringify(videoConfig)}`);
+			this.log(`audioConfig: ${JSON.stringify(audioConfig)}`);
+
+			// log any discarded tracks & its reasons
+			const discardedTracks = conversion.discardedTracks;
+			if (discardedTracks.length > 0) {
+				const discardedTrackCount = discardedTracks.length;
+				const discardedTrackList = discardedTracks.map(
+					(discarded, index) =>
+						`${index + 1}. ${discarded.track.type} (${discarded.track.getCodec()}) - ${discarded.reason}`,
+				);
+
+				const isValid = conversion.isValid;
+				const logMethod = isValid ? this.error : this.log;
+				logMethod(
+					`${discardedTrackCount} discarded track(s) for ${file.name}:\n${discardedTrackList.join("\n")}`,
+				);
+				ToastManager.add({
+					type: isValid ? "warning" : "error", // warning if output created, error if nothing / conversion was completely invalid
+					message: m["workers.errors.mediabunny.discarded"]({
+						count: discardedTrackCount,
+						file: file.name,
+					}),
+					durations: {
+						stay: 10000,
+					},
+				});
+
+				if (!isValid) {
+					throw new Error(
+						`Mediabunny cannot produce an output for ${file.name} due to unsupported tracks/codecs.`,
+					);
+				}
+			}
+
+			conversion.onProgress = (progress) => {
+				file.progress = progress * 100;
+			};
+
+			await conversion.execute();
+
+			if (streamTargetContext) {
+				const streamedFile = await streamTargetContext.getFile();
+				const result = new VertFile(streamedFile, toFormat);
+				result.setPostDownload(streamTargetContext.cleanup);
+				retained = true;
+				return result;
+			}
+
+			if (!(target instanceof BufferTarget) || !target.buffer) {
 				throw new Error(
-					`Mediabunny cannot produce an output for ${file.name} due to unsupported tracks/codecs.`,
+					"Mediabunny conversion failed: no output buffer",
 				);
 			}
-		}
 
-		conversion.onProgress = (progress) => {
-			file.progress = progress * 100;
-		};
+			const f = new File([target.buffer], `${originalName}.${toFormat}`, {
+				type: "application/octet-stream",
+			});
 
-		try {
-			await conversion.execute();
-		} catch (err) {
-			const cleanup = this.pendingOutputCleanups.get(file.id);
-			if (cleanup) {
-				await cleanup();
-				this.pendingOutputCleanups.delete(file.id);
-			}
-			throw err;
+			return new VertFile(f, toFormat);
 		} finally {
 			this.clearTrackedConversion(file);
 			if (slowConversionTimer) clearTimeout(slowConversionTimer);
 			this.activeConversions.delete(file.id);
+			try {
+				if (output && output.state !== "finalized")
+					await output.cancel();
+			} catch (err) {
+				this.error(`Failed to cancel Mediabunny output: ${err}`);
+			}
+			try {
+				input?.dispose();
+			} catch (err) {
+				this.error(`Failed to dispose Mediabunny input: ${err}`);
+			}
+			if (!retained && streamTargetContext) {
+				try {
+					await streamTargetContext.cleanup();
+				} catch (err) {
+					this.error(`Failed to clean up OPFS output: ${err}`);
+				}
+			}
 		}
-
-		if (streamTargetContext) {
-			const streamedFile = await streamTargetContext.getFile();
-			const result = new VertFile(streamedFile, toFormat);
-			result.setPostDownload(streamTargetContext.cleanup);
-			this.pendingOutputCleanups.delete(file.id);
-			return result;
-		}
-
-		if (!(target instanceof BufferTarget) || !target.buffer) {
-			throw new Error("Mediabunny conversion failed: no output buffer");
-		}
-
-		const f = new File([target.buffer], `${originalName}.${toFormat}`, {
-			type: "application/octet-stream",
-		});
-
-		return new VertFile(f, toFormat);
 	}
 
 	private format(ext: string) {
@@ -564,14 +579,7 @@ export class MediabunnyConverter extends Converter {
 
 		this.log(`cancelling conversion for file ${input.name}`);
 
-		conversion.cancel();
-		this.activeConversions.delete(input.id);
-
-		const cleanup = this.pendingOutputCleanups.get(input.id);
-		if (cleanup) {
-			await cleanup();
-			this.pendingOutputCleanups.delete(input.id);
-		}
+		await conversion.cancel();
 	}
 
 	private async createStreamingTarget(filename: string): Promise<{
@@ -579,6 +587,7 @@ export class MediabunnyConverter extends Converter {
 		getFile: () => Promise<File>;
 		cleanup: () => Promise<void>;
 	} | null> {
+		let cleanup: (() => Promise<void>) | undefined;
 		try {
 			const storage = navigator.storage as StorageManager & {
 				getDirectory?: () => Promise<FileSystemDirectoryHandle>;
@@ -594,16 +603,40 @@ export class MediabunnyConverter extends Converter {
 				create: true,
 			});
 
-			const fileStream = await fileHandle.createWritable();
-			const writable = new WritableStream({
-				write: (chunk) => fileStream.write(chunk),
-				close: () => fileStream.close(),
-				abort: (reason) => fileStream.abort(reason),
-			});
-
-			const cleanup = async () => {
-				await tempDir.removeEntry(tempName).catch(() => {});
+			// eslint-disable-next-line prefer-const
+			let fileStream: FileSystemWritableFileStream | undefined;
+			let closed = false;
+			cleanup = async () => {
+				try {
+					if (fileStream && !closed) {
+						await fileStream.abort();
+						closed = true;
+					}
+					await tempDir.removeEntry(tempName);
+				} catch (err) {
+					if (
+						err instanceof DOMException &&
+						err.name === "NotFoundError"
+					)
+						return;
+					this.error(
+						`Failed to remove OPFS entry ${tempName}: ${err}`,
+					);
+					throw err;
+				}
 			};
+			fileStream = await fileHandle.createWritable();
+			const writable = new WritableStream({
+				write: (chunk) => fileStream!.write(chunk),
+				close: async () => {
+					await fileStream!.close();
+					closed = true;
+				},
+				abort: async (reason) => {
+					await fileStream!.abort(reason);
+					closed = true;
+				},
+			});
 
 			return {
 				target: new StreamTarget(writable, {
@@ -614,6 +647,7 @@ export class MediabunnyConverter extends Converter {
 				cleanup,
 			};
 		} catch (err) {
+			if (cleanup) await cleanup();
 			this.error(
 				`failed to initialize OPFS stream target, falling back to BufferTarget: ${err}`,
 			);

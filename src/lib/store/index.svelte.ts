@@ -23,6 +23,16 @@ import { vertdFetch } from "$lib/converters/vertd/vertd.svelte";
 class Files {
 	public files = $state<VertFile[]>([]);
 
+	public async remove(file: VertFile): Promise<void> {
+		this.files = this.files.filter((entry) => entry !== file);
+		await file.dispose();
+		await file.cancel();
+	}
+
+	public async removeAll(): Promise<void> {
+		await Promise.all([...this.files].map((file) => this.remove(file)));
+	}
+
 	private getRequiredConverters(file: VertFile): Converter[] {
 		if (file.isZip()) return file.converters;
 

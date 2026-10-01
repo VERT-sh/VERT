@@ -125,6 +125,8 @@ export class VertFile {
 	private attemptedConverters = new Set<string>();
 	private retryingFallback = false;
 	private postDownload: (() => Promise<void>) | null = null;
+	private disposal: Promise<void> | null = null;
+	private disposed = false;
 	private activeConverterName: string | null = null;
 	private fileTypeMismatchShown = false;
 	private fileTypeCheck: Promise<void> | null = null;
@@ -157,19 +159,28 @@ export class VertFile {
 	}
 
 	public setPostDownload(cleanup: (() => Promise<void>) | null) {
+		// Legacy name: cleanup runs on disposal, not download; OPFS backs repeated reads.
 		this.postDownload = cleanup;
 	}
 
-	private async runPostDownload() {
-		if (!this.postDownload) return;
-
-		try {
-			await this.postDownload();
-		} catch (err) {
-			log(["file", "cleanup"], `post-download function failed: ${err}`);
-		} finally {
-			this.postDownload = null;
-		}
+	public dispose(): Promise<void> {
+		this.disposed = true;
+		return (this.disposal ??= (async () => {
+			await this.result?.dispose();
+			this.result = null;
+			try {
+				await this.postDownload?.();
+				this.postDownload = null;
+			} catch (err) {
+				log(
+					["file", "cleanup"],
+					`resource cleanup failed for ${this.name}: ${err}`,
+				);
+			} finally {
+				if (this.blobUrl) URL.revokeObjectURL(this.blobUrl);
+				this.blobUrl = undefined;
+			}
+		})());
 	}
 
 	public getAvailableSettings(
@@ -356,12 +367,11 @@ export class VertFile {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
+		if (this.disposed) return;
 		if (!this.retryingFallback) this.attemptedConverters.clear();
 		this.cancelled = false;
 		let res: VertFile | undefined;
 		try {
-			await this.runPostDownload();
-
 			log(
 				["file", "convert"],
 				`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`,
@@ -451,6 +461,7 @@ export class VertFile {
 
 			log(["file", "convert"], `using converter: ${converter.name}`);
 
+			await this.result?.dispose();
 			this.result = null;
 			this.progress = 0;
 			this.processing = true;
@@ -469,6 +480,10 @@ export class VertFile {
 							normalizedSettings.settings,
 							...args,
 						);
+			if (this.disposed || this.cancelled) {
+				await res.dispose();
+				return;
+			}
 			this.result = res;
 			if (this.fallbackToastId !== null) {
 				ToastManager.remove(this.fallbackToastId);
@@ -479,6 +494,7 @@ export class VertFile {
 				this.slowConversionToastId = null;
 			}
 		} catch (err) {
+			if (this.disposed) return;
 			if (!this.cancelled) this.toastErr(err);
 
 			const compatibleConverters = this.findConverters([
@@ -540,6 +556,7 @@ export class VertFile {
 				});
 			}
 
+			await this.result?.dispose();
 			this.result = null;
 		} finally {
 			this.processing = false;
@@ -570,6 +587,7 @@ export class VertFile {
 		const totalFiles = entries.length;
 		const fileProgress: number[] = new Array(totalFiles).fill(0);
 		const convertedFiles: File[] = [];
+		const convertedResults: VertFile[] = [];
 		const failedFiles: string[] = [];
 		const progressFiles = new Map<number, VertFile>();
 		const progressInterval = setInterval(() => {
@@ -618,6 +636,7 @@ export class VertFile {
 										settings,
 									);
 
+									convertedResults.push(converted);
 									convertedFiles[index] = converted.file;
 									fileProgress[index] = 100;
 									updateProgress();
@@ -632,6 +651,7 @@ export class VertFile {
 									settings,
 								);
 
+								convertedResults.push(converted);
 								convertedFiles[index] = converted.file;
 
 								fileProgress[index] = 100;
@@ -657,48 +677,50 @@ export class VertFile {
 					}),
 				),
 			);
+			// return zip of converted files
+			if (this.cancelled) throw new Error("Conversion cancelled");
+			const outputFiles = convertedFiles.filter(Boolean);
+			const failures = failedFiles.filter(Boolean);
+			let reportName = "failed-files.txt";
+			if (failures.length) {
+				for (
+					let suffix = 1;
+					outputFiles.some((file) => file.name === reportName);
+					suffix++
+				)
+					reportName = `failed-files-${suffix}.txt`;
+				outputFiles.push(
+					new File(
+						[
+							`Failed conversions (${failures.length}):\n\n${failures.join("\n")}\n`,
+						],
+						reportName,
+						{ type: "text/plain" },
+					),
+				);
+			}
+			const resultArray = await createZip(outputFiles);
+			const outputFilename = this.file.name.replace(/\.[^/.]+$/, ".zip");
+			const resultFile = new File(
+				[new Uint8Array(resultArray)],
+				outputFilename,
+			);
+			if (failures.length)
+				ToastManager.add({
+					type: "warning",
+					message: m["convert.archive_file.conversion_failed"]({
+						filename: outputFilename,
+						count: failures.length,
+						reportName,
+					}),
+				});
+			return new VertFile(resultFile, ".zip");
 		} finally {
 			clearInterval(progressInterval);
-		}
-
-		// return zip of converted files
-		if (this.cancelled) throw new Error("Conversion cancelled");
-		const outputFiles = convertedFiles.filter(Boolean);
-		const failures = failedFiles.filter(Boolean);
-		let reportName = "failed-files.txt";
-		if (failures.length) {
-			for (
-				let suffix = 1;
-				outputFiles.some((file) => file.name === reportName);
-				suffix++
-			)
-				reportName = `failed-files-${suffix}.txt`;
-			outputFiles.push(
-				new File(
-					[
-						`Failed conversions (${failures.length}):\n\n${failures.join("\n")}\n`,
-					],
-					reportName,
-					{ type: "text/plain" },
-				),
+			await Promise.all(
+				convertedResults.map((result) => result.dispose()),
 			);
 		}
-		const resultArray = await createZip(outputFiles);
-		const outputFilename = this.file.name.replace(/\.[^/.]+$/, ".zip");
-		const resultFile = new File(
-			[new Uint8Array(resultArray)],
-			outputFilename,
-		);
-		if (failures.length)
-			ToastManager.add({
-				type: "warning",
-				message: m["convert.archive_file.conversion_failed"]({
-					filename: outputFilename,
-					count: failures.length,
-					reportName,
-				}),
-			});
-		return new VertFile(resultFile, ".zip");
 	}
 
 	public slowConversionOffer(reason: "device" | "timeout") {

@@ -448,7 +448,7 @@
 			})
 			.filter(Boolean);
 
-		files.files = files.files.filter((f) => f !== file);
+		await files.remove(file);
 		newFiles.forEach((f) => files.add(f));
 	};
 

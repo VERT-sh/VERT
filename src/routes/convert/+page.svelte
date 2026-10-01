@@ -204,7 +204,7 @@
 	});
 </script>
 
-{#snippet fileItem(file: VertFile, index: number)}
+{#snippet fileItem(file: VertFile)}
 	{@const currentConverter = getCurrentConverter(file)}
 	{@const name = currentConverter?.name || "unknown"}
 	{@const isAudio = converterCategories.audio.includes(name)}
@@ -269,10 +269,7 @@
 			</div>
 			<button
 				class="flex-shrink-0 w-8 rounded-full hover:bg-panel-alt h-full flex items-center justify-center"
-				onclick={async () => {
-					await file.cancel();
-					files.files = files.files.filter((_, i) => i !== index);
-				}}
+				onclick={() => files.remove(file)}
 			>
 				<XIcon size="24" class="text-muted" />
 			</button>
@@ -497,7 +494,7 @@
 					class="w-full h-full col-start-1 row-start-1 md:col-start-2"
 				/>
 			{/if}
-			{@render fileItem(file, i)}
+			{@render fileItem(file)}
 			{#if files.files.length < 2}
 				<Uploader class="w-full h-full" />
 			{/if}
