@@ -411,10 +411,20 @@ class Files {
 	}
 
 	public async convertAll() {
+		const filenames = this.files.map((file) => file.name);
 		const promiseFns = this.files.map((f) => () => f.convert());
 		const coreCount = navigator.hardwareConcurrency || 4;
 		const queue = new PQueue({ concurrency: coreCount });
-		await Promise.all(promiseFns.map((fn) => queue.add(fn)));
+		const results = await Promise.allSettled(
+			promiseFns.map((fn) => queue.add(fn)),
+		);
+		for (const [i, result] of results.entries()) {
+			if (result.status === "rejected")
+				error(
+					["files", "convert"],
+					`batch conversion failed for file ${i + 1} (${filenames[i]}): ${result.reason}`,
+				);
+		}
 	}
 
 	public async downloadAll() {

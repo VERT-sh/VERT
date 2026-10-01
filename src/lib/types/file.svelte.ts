@@ -356,104 +356,105 @@ export class VertFile {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
-		await this.runPostDownload();
-
 		if (!this.retryingFallback) this.attemptedConverters.clear();
+		this.cancelled = false;
+		let res: VertFile | undefined;
+		try {
+			await this.runPostDownload();
 
-		log(
-			`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`,
-		);
-		if (!this.converters.length) throw new Error("No converters found");
-
-		let converter: Converter | undefined;
-		const isImageSequence =
-			this.conversionSettings.imageSequence && this.isZip();
-
-		// force ffmpeg for image sequences
-		// TODO: should allow vertd as well probably(?) but maybe in the future
-		if (isImageSequence) {
-			converter = converters.find((c) => c.name === "ffmpeg");
-			if (!converter) {
-				throw new Error(
-					"FFmpeg converter not found for image sequence conversion",
-				);
-			}
-		} else {
-			const customConverter = this.converters.find(
-				(c) => c.name === this.conversionSettings.converter,
+			log(
+				["file", "convert"],
+				`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`,
 			);
-			converter = customConverter;
+			if (!this.converters.length) throw new Error("No converters found");
 
-			if (!converter) {
-				const compatibleConverters = this.findConverters([
-					this.from,
-					this.to,
-				]);
-				if (compatibleConverters.length) {
-					converter = compatibleConverters[0];
-					log(
-						["file", "convert"],
-						`found compatible converter: ${converter.name}`,
-					);
-				} else {
-					log(
-						["file", "convert"],
-						`no compatible converter found for ${this.from} to ${this.to}`,
+			let converter: Converter | undefined;
+			const isImageSequence =
+				this.conversionSettings.imageSequence && this.isZip();
+
+			// force ffmpeg for image sequences
+			// TODO: should allow vertd as well probably(?) but maybe in the future
+			if (isImageSequence) {
+				converter = converters.find((c) => c.name === "ffmpeg");
+				if (!converter) {
+					throw new Error(
+						"FFmpeg converter not found for image sequence conversion",
 					);
 				}
 			} else {
-				log(
-					["file", "convert"],
-					`using custom converter from settings: ${converter.name}`,
+				const customConverter = this.converters.find(
+					(c) => c.name === this.conversionSettings.converter,
 				);
+				converter = customConverter;
+
+				if (!converter) {
+					const compatibleConverters = this.findConverters([
+						this.from,
+						this.to,
+					]);
+					if (compatibleConverters.length) {
+						converter = compatibleConverters[0];
+						log(
+							["file", "convert"],
+							`found compatible converter: ${converter.name}`,
+						);
+					} else {
+						log(
+							["file", "convert"],
+							`no compatible converter found for ${this.from} to ${this.to}`,
+						);
+					}
+				} else {
+					log(
+						["file", "convert"],
+						`using custom converter from settings: ${converter.name}`,
+					);
+				}
 			}
-		}
 
-		if (!converter) throw new Error("No converter found");
+			if (!converter) throw new Error("No converter found");
 
-		const canProceed = await this.confirmServerWarning(converter);
-		if (!canProceed) {
-			this.cancelled = true;
-			return;
-		}
+			const canProceed = await this.confirmServerWarning(converter);
+			if (!canProceed) {
+				this.cancelled = true;
+				return;
+			}
+			this.attemptedConverters.add(converter.name);
+			this.activeConverterName = converter.name;
 
-		const normalizedSettings: NormalizedSettings =
-			await converter.normalizeSettings(this, this.to, {
-				...(await converter.getDefaultSettings(this)),
-				...Object.fromEntries(
-					Object.entries(this.conversionSettings).filter(
-						([, value]) => value !== undefined,
+			const normalizedSettings: NormalizedSettings =
+				await converter.normalizeSettings(this, this.to, {
+					...(await converter.getDefaultSettings(this)),
+					...Object.fromEntries(
+						Object.entries(this.conversionSettings).filter(
+							([, value]) => value !== undefined,
+						),
 					),
-				),
-			});
+				});
 
-		for (const change of normalizedSettings.changes) {
-			log(
-				["file", "settings"],
-				`changed setting "${change.setting}" from "${change.oldValue}" to "${change.newValue}" for file ${change.file}`,
-			);
-			ToastManager.add({
-				type: "warning",
-				message: m["workers.warnings.settings_change"]({
-					setting: change.setting,
-					oldValue: change.oldValue,
-					newValue: change.newValue,
-					file: change.file,
-					to: this.to,
-				}),
-			});
-		}
+			for (const change of normalizedSettings.changes) {
+				log(
+					["file", "settings"],
+					`changed setting "${change.setting}" from "${change.oldValue}" to "${change.newValue}" for file ${change.file}`,
+				);
+				ToastManager.add({
+					type: "warning",
+					message: m["workers.warnings.settings_change"]({
+						setting: change.setting,
+						oldValue: change.oldValue,
+						newValue: change.newValue,
+						file: change.file,
+						to: this.to,
+					}),
+				});
+			}
 
-		this.attemptedConverters.add(converter.name);
-		this.activeConverterName = converter.name;
-		log(["file", "convert"], `using converter: ${converter.name}`);
+			log(["file", "convert"], `using converter: ${converter.name}`);
 
-		this.result = null;
-		this.progress = 0;
-		this.processing = true;
-		this.cancelled = false;
-		let res;
-		try {
+			this.result = null;
+			this.progress = 0;
+			this.processing = true;
+			this.cancelled = false;
 			// for zips: extract > convert each > re-zip
 			// else convert normally
 			res =
@@ -540,9 +541,10 @@ export class VertFile {
 			}
 
 			this.result = null;
+		} finally {
+			this.processing = false;
+			this.activeConverterName = null;
 		}
-		this.processing = false;
-		this.activeConverterName = null;
 		return res;
 	}
 
@@ -568,6 +570,7 @@ export class VertFile {
 		const totalFiles = entries.length;
 		const fileProgress: number[] = new Array(totalFiles).fill(0);
 		const convertedFiles: File[] = [];
+		const failedFiles: string[] = [];
 		const progressFiles = new Map<number, VertFile>();
 		const progressInterval = setInterval(() => {
 			for (const [index, file] of progressFiles)
@@ -581,68 +584,120 @@ export class VertFile {
 
 		const updateProgress = () => {
 			const totalProgress = fileProgress.reduce((sum, p) => sum + p, 0);
-			this.progress = Math.round(totalProgress / totalFiles);
+			this.progress = totalFiles
+				? Math.round(totalProgress / totalFiles)
+				: 100;
 		};
 
 		try {
 			// convert all files in the zip
-			await queue.addAll(
-				entries.map(({ filename, data }, index) => async () => {
-					if (this.cancelled) {
-						throw new Error("Conversion cancelled");
-					}
-
-					const tempVFile = new VertFile(
-						new File([new Uint8Array(data)], filename, {
-							type: "application/octet-stream",
-						}),
-						this.to,
-					);
-					tempVFile.from =
-						this.archiveFormats?.[index] ?? tempVFile.from;
-					tempVFile.converters = [converter];
-
-					if (converter.reportsProgress) {
-						progressFiles.set(index, tempVFile);
+			await Promise.allSettled(
+				entries.map(({ filename, data }, index) =>
+					queue.add(async () => {
 						try {
-							const converted = await converter.convert(
-								tempVFile,
-								this.to,
-								settings,
-							);
+							if (this.cancelled) {
+								throw new Error("Conversion cancelled");
+							}
 
-							convertedFiles[index] = converted.file;
-							fileProgress[index] = 100;
-							updateProgress();
+							const tempVFile = new VertFile(
+								new File([new Uint8Array(data)], filename, {
+									type: "application/octet-stream",
+								}),
+								this.to,
+							);
+							tempVFile.from =
+								this.archiveFormats?.[index] ?? tempVFile.from;
+							tempVFile.converters = [converter];
+
+							if (converter.reportsProgress) {
+								progressFiles.set(index, tempVFile);
+								try {
+									const converted = await converter.convert(
+										tempVFile,
+										this.to,
+										settings,
+									);
+
+									convertedFiles[index] = converted.file;
+									fileProgress[index] = 100;
+									updateProgress();
+								} finally {
+									progressFiles.delete(index);
+								}
+							} else {
+								// else track progress via completions only
+								const converted = await converter.convert(
+									tempVFile,
+									this.to,
+									settings,
+								);
+
+								convertedFiles[index] = converted.file;
+
+								fileProgress[index] = 100;
+								updateProgress();
+							}
+						} catch (err) {
+							if (!this.cancelled) {
+								const message =
+									err instanceof Error
+										? err.message
+										: String(err);
+								failedFiles[index] = `${filename}: ${message}`;
+								error(
+									["file", "zip"],
+									`failed to convert archive member ${filename}: ${message}`,
+								);
+							}
 						} finally {
 							progressFiles.delete(index);
+							fileProgress[index] = 100;
+							updateProgress();
 						}
-					} else {
-						// else track progress via completions only
-						const converted = await converter.convert(
-							tempVFile,
-							this.to,
-							settings,
-						);
-
-						convertedFiles[index] = converted.file;
-
-						fileProgress[index] = 100;
-						updateProgress();
-					}
-				}),
+					}),
+				),
 			);
 		} finally {
 			clearInterval(progressInterval);
 		}
 
 		// return zip of converted files
-		const resultArray = await createZip(convertedFiles);
+		if (this.cancelled) throw new Error("Conversion cancelled");
+		const outputFiles = convertedFiles.filter(Boolean);
+		const failures = failedFiles.filter(Boolean);
+		let reportName = "failed-files.txt";
+		if (failures.length) {
+			for (
+				let suffix = 1;
+				outputFiles.some((file) => file.name === reportName);
+				suffix++
+			)
+				reportName = `failed-files-${suffix}.txt`;
+			outputFiles.push(
+				new File(
+					[
+						`Failed conversions (${failures.length}):\n\n${failures.join("\n")}\n`,
+					],
+					reportName,
+					{ type: "text/plain" },
+				),
+			);
+		}
+		const resultArray = await createZip(outputFiles);
 		const outputFilename = this.file.name.replace(/\.[^/.]+$/, ".zip");
 		const resultFile = new File(
 			[new Uint8Array(resultArray)],
 			outputFilename,
 		);
+		if (failures.length)
+			ToastManager.add({
+				type: "warning",
+				message: m["convert.archive_file.conversion_failed"]({
+					filename: outputFilename,
+					count: failures.length,
+					reportName,
+				}),
+			});
 		return new VertFile(resultFile, ".zip");
 	}
 
