@@ -1,0 +1,35 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export type SettingType = "number" | "select" | "boolean" | "text" | "range";
+
+export interface SettingDefinition {
+	key: string;
+	label: string;
+	type: SettingType;
+	disabled?: boolean;
+	default?: any;
+	placeholder?: any;
+	min?: number;
+	max?: number;
+	step?: number;
+	options?: Array<{ value: any; label: any }>; // for select/range types
+	description?: string;
+	forceFullWidth?: boolean; // force setting to take up full width (usually grid 2)
+}
+
+export type SettingCategories = Record<string, SettingDefinition[]>;
+
+export interface ConversionSettings {
+	[key: string]: any;
+}
+
+export interface SettingChange {
+	setting: string;
+	oldValue: string | number;
+	newValue: string | number;
+	file: string;
+}
+
+export interface NormalizedSettings {
+	settings: ConversionSettings;
+	changes: SettingChange[];
+}

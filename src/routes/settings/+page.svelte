@@ -1,17 +1,22 @@
 <script lang="ts">
 	import { browser } from "$app/environment";
-	import { log } from "$lib/util/logger";
+	import { error, log } from "$lib/util/logger";
 	import * as Settings from "$lib/sections/settings/index.svelte";
-	import { PUB_PLAUSIBLE_URL } from "$env/static/public";
-	import { SettingsIcon } from "lucide-svelte";
+	import { SettingsIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager } from "$lib/util/toast.svelte";
 	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
+	import { readSettings } from "$lib/util/settings";
 
 	let settings = $state(Settings.Settings.instance.settings);
 
 	let isInitial = $state(true);
+
+	const readSavedSettings = () => {
+		const parsed = readSettings<typeof settings>();
+		return Object.keys(parsed).length ? parsed : null;
+	};
 
 	$effect(() => {
 		if (!browser) return;
@@ -20,19 +25,19 @@
 			return;
 		}
 
-		const savedSettings = localStorage.getItem("settings");
-		if (savedSettings) {
-			const parsedSettings = JSON.parse(savedSettings);
-			if (JSON.stringify(parsedSettings) === JSON.stringify(settings))
-				return;
-		}
+		const parsedSettings = readSavedSettings();
+		if (
+			parsedSettings &&
+			JSON.stringify(parsedSettings) === JSON.stringify(settings)
+		)
+			return;
 
 		try {
 			Settings.Settings.instance.settings = settings;
 			Settings.Settings.instance.save();
 			log(["settings"], "saving settings");
-		} catch (error) {
-			log(["settings", "error"], `failed to save settings: ${error}`);
+		} catch (e) {
+			error(["settings", "error"], `failed to save settings: ${e}`);
 			ToastManager.add({
 				type: "error",
 				message: m["settings.errors.save_failed"](),
@@ -41,9 +46,8 @@
 	});
 
 	onMount(() => {
-		const savedSettings = localStorage.getItem("settings");
-		if (savedSettings) {
-			const parsedSettings = JSON.parse(savedSettings);
+		const parsedSettings = readSavedSettings();
+		if (parsedSettings) {
 			Settings.Settings.instance.settings = {
 				...Settings.Settings.instance.settings,
 				...parsedSettings,
@@ -66,14 +70,14 @@
 			<Settings.Conversion bind:settings />
 			{#if !DISABLE_ALL_EXTERNAL_REQUESTS}
 				<Settings.Vertd bind:settings />
-			{:else if PUB_PLAUSIBLE_URL}
+			{:else}
 				<Settings.Privacy bind:settings />
 			{/if}
 		</div>
 
 		<div class="flex flex-col gap-4 flex-1">
 			<Settings.Appearance />
-			{#if PUB_PLAUSIBLE_URL && !DISABLE_ALL_EXTERNAL_REQUESTS}
+			{#if !DISABLE_ALL_EXTERNAL_REQUESTS}
 				<Settings.Privacy bind:settings />
 			{/if}
 		</div>
