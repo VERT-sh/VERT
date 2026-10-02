@@ -249,6 +249,7 @@ export class MagickConverter extends Converter {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		...args: any[]
 	): Promise<VertFile> {
+		this.trackConversion(input);
 		this.log(`converting ${input.name} to ${to}`);
 
 		// handle converting from SVG manually because magick-wasm doesn't support it
@@ -348,6 +349,7 @@ export class MagickConverter extends Converter {
 
 			throw new Error("Unknown message type");
 		} finally {
+			this.clearTrackedConversion(input);
 			this.activeConversions.delete(input.id);
 			worker.terminate();
 		}

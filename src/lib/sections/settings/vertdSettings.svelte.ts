@@ -1,6 +1,6 @@
 import { Settings } from "./index.svelte";
 import { PUB_VERTD_URL } from "$env/static/public";
-import { log } from "$lib/util/logger";
+import { error, log } from "$lib/util/logger";
 import { writable } from "svelte/store";
 import { getVertdLimit } from "$lib/store/index.svelte";
 
@@ -36,6 +36,23 @@ export const getVertdCustomHeaders = (): Record<string, string> => {
 };
 
 export const vertdSizeLimit = writable(Number.POSITIVE_INFINITY);
+
+export const normalizeVertdUrl = (value: string): string => {
+	const trimmed = value.trim();
+	if (!trimmed) throw new Error("No vertd server URL configured");
+	try {
+		const url = new URL(
+			/^[a-z][a-z\d+.-]*:\/\//i.test(trimmed)
+				? trimmed
+				: `https://${trimmed}`,
+		);
+		if (url.protocol !== "http:" && url.protocol !== "https:")
+			throw new Error("vertd server URL must use HTTP or HTTPS");
+		return url.href.replace(/\/+$/, "");
+	} catch (err) {
+		throw new Error(`Invalid vertd server URL: ${err}`);
+	}
+};
 
 export class VertdInstance {
 	public static instance = new VertdInstance();
@@ -94,12 +111,6 @@ export class VertdInstance {
 			}
 		};
 
-		const normalize = (url: string) => {
-			let finalUrl = url;
-			if (url.endsWith("/")) finalUrl = finalUrl.slice(0, -1);
-			return finalUrl;
-		};
-
 		switch (this.inner.type) {
 			case "auto": {
 				const results = await Promise.all(
@@ -127,7 +138,11 @@ export class VertdInstance {
 				if (fastest) return fastest.url;
 
 				// if none are reachable, fall back to custom
-				return normalize(Settings.instance.settings.vertdURL);
+				if (!Settings.instance.settings.vertdURL.trim())
+					throw new Error(
+						"No reachable vertd server and no custom URL configured",
+					);
+				return normalizeVertdUrl(Settings.instance.settings.vertdURL);
 			}
 
 			case "eu": {
@@ -139,7 +154,7 @@ export class VertdInstance {
 			}
 
 			case "custom": {
-				return normalize(Settings.instance.settings.vertdURL);
+				return normalizeVertdUrl(Settings.instance.settings.vertdURL);
 			}
 		}
 	}
@@ -171,7 +186,7 @@ export function useVertdSizeLimit() {
 						}
 					}
 				} catch (e) {
-					log(
+					error(
 						["vertd"],
 						`failed to read vertd size limit from sessionStorage: ${e}`,
 					);
@@ -187,7 +202,7 @@ export function useVertdSizeLimit() {
 				return;
 			}
 
-			const serverLimit = await getVertdLimit();
+			const serverLimit = await getVertdLimit(apiUrl);
 			const finalLimit = serverLimit ?? Number.POSITIVE_INFINITY;
 			vertdSizeLimit.set(finalLimit);
 			log(["vertd"], `fetched vertd size limit: ${finalLimit} bytes`);
@@ -196,7 +211,7 @@ export function useVertdSizeLimit() {
 				try {
 					sessionStorage.setItem(cacheKey, finalLimit.toString());
 				} catch (e) {
-					log(
+					error(
 						["vertd"],
 						`failed to cache vertd size limit in sessionStorage: ${e}`,
 					);
@@ -204,7 +219,11 @@ export function useVertdSizeLimit() {
 			}
 		};
 
-		void loadLimit();
+		void loadLimit().catch((err) => {
+			if (cancelled) return;
+			vertdSizeLimit.set(Number.POSITIVE_INFINITY);
+			error(["vertd"], `failed to resolve vertd size limit: ${err}`);
+		});
 
 		return () => {
 			cancelled = true;

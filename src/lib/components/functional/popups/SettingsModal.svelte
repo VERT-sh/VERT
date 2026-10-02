@@ -282,7 +282,7 @@
 				{#each Object.keys(settingTabs) as tab}
 					<button
 						class={clsx(
-							"flex-grow text-lg hover:text-muted/20 border-b-[1px] pb-2 capitalize",
+							"flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize",
 							activeTab === tab
 								? "text-accent border-b-accent"
 								: "border-b-separator text-muted",

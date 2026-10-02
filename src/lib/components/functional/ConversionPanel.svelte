@@ -76,7 +76,7 @@
 						? ''
 						: '!scale-100'} flex gap-3 max-md:w-full"
 					disabled={files.files.length === 0}
-					onclick={() => (files.files = [])}
+					onclick={() => files.removeAll()}
 				>
 					<Trash2Icon size="24" />
 					<p>{m["convert.panel.remove_all"]()}</p>
@@ -91,7 +91,7 @@
 							? ''
 							: '!scale-100'} flex gap-3 max-md:w-full"
 						disabled={files.files.length === 0}
-						onclick={() => (files.files = [])}
+						onclick={() => files.removeAll()}
 					>
 						<Trash2Icon size="24" />
 					</button>

@@ -214,6 +214,7 @@ export class FFmpegConverter extends Converter {
 		to: string,
 		settings: ConversionSettings,
 	): Promise<VertFile> {
+		this.trackConversion(input);
 		if (!to.startsWith(".")) to = `.${to}`;
 
 		const conversionSettings =
@@ -290,7 +291,7 @@ export class FFmpegConverter extends Converter {
 				input,
 				to,
 				conversionSettings,
-				conversionError,
+				() => conversionError,
 			);
 			if (specialHandled) {
 				return specialHandled;
@@ -323,6 +324,7 @@ export class FFmpegConverter extends Converter {
 				return new VertFile(new File([outBuf], outputFileName), to);
 			}
 		} finally {
+			this.clearTrackedConversion(input);
 			ffmpeg.off("log", errorListener);
 			ffmpeg.off("log", logListener);
 			this.activeConversions.delete(input.id);
@@ -468,11 +470,10 @@ export class FFmpegConverter extends Converter {
 		}
 
 		// channels setting
-		if (settings.channels !== 2) {
-			channelsArgs = ["-ac", String(settings.channels)];
-			this.log(
-				`using user setting for audio channels: ${settings.channels}`,
-			);
+		const channels = Number(settings.channels);
+		if (Number.isInteger(channels) && channels !== 2) {
+			channelsArgs = ["-ac", String(channels)];
+			this.log(`using user setting for audio channels: ${channels}`);
 		}
 
 		// video to audio
@@ -560,7 +561,7 @@ const handleSpecialOutput = async (
 	input: VertFile,
 	to: string,
 	conversionSettings: ConversionSettings,
-	conversionError: string | null,
+	getConversionError: () => string | null,
 ): Promise<VertFile | null> => {
 	if (to === ".qoa") {
 		const sampleRate =
@@ -589,13 +590,20 @@ const handleSpecialOutput = async (
 			"pcm_f32le",
 			"output.raw",
 		];
-		await ffmpeg.exec(pcmArgs);
+		const exitCode = await ffmpeg.exec(pcmArgs);
 
+		const conversionError = getConversionError();
 		if (conversionError) throw new Error(conversionError);
+		if (exitCode !== 0)
+			throw new Error(
+				`FFmpeg QOA PCM conversion failed with exit code ${exitCode}`,
+			);
 
 		const pcmRaw = (await ffmpeg.readFile(
 			"output.raw",
 		)) as unknown as Uint8Array;
+		if (!pcmRaw || pcmRaw.length === 0)
+			throw new Error("FFmpeg QOA conversion returned empty PCM audio");
 		const { encodeQoa } = await import("$lib/util/parse/qoa");
 		const qoaBytes = encodeQoa(
 			new Uint8Array(pcmRaw),

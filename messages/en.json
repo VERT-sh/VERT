@@ -50,14 +50,15 @@
 	"convert": {
 		"archive_file": {
 			"extract": "Extract archive",
-			"extracting": "Detected archive: {filename}",
-			"extracted": "Extracted {extract_count} files from {filename}. {ignore_count} items were ignored.",
-			"detected": "Detected {type} files in {filename}.",
+			"extracting": "Detected '{filename}' as an archive.",
+			"extracted": "Extracted {extract_count} files from '{filename}'. {ignore_count} items were ignored.",
+			"detected": "Detected {type} files in '{filename}'.",
 			"audio": "audio",
 			"video": "video",
 			"doc": "document",
 			"image": "image",
-			"extract_error": "Error extracting {filename}: {error}"
+			"extract_error": "Error extracting '{filename}': {error}",
+			"conversion_failed": "Failed to convert {count} files in '{filename}'. See '{reportName}' in the archive for more information."
 		},
 		"image_sequence": {
 			"image_sequence": "Image Sequence",
@@ -212,10 +213,10 @@
 			"cant_convert": "We can't convert this file.",
 			"converter_fallback": {
 				"title": "Change converter?",
-				"body": "Conversion failed for {filename}. Would you like to try the next compatible converter {converter}?",
+				"body": "Conversion failed for '{filename}'. Would you like to try the next compatible converter, '{converter}'?",
 				"yes": "Next converter",
 				"no": "Cancel conversion",
-				"all_failed": "All compatible converters failed for {filename}. Conversion has been cancelled."
+				"all_failed": "All compatible converters failed for '{filename}'. Conversion has been cancelled."
 			},
 			"unsupported_format": "Only image, video, audio, and document files are supported",
 			"format_output_only": "This format can currently only be used as output (converted to), not as input.",
@@ -421,11 +422,12 @@
 			"libraries": "Libraries",
 			"libraries_description": "A big thanks to Mediabunny (video), FFmpeg (audio, video), ImageMagick (images) and Pandoc (documents) for maintaining such excellent libraries for so many years. VERT relies on them to provide you with your conversions.",
 			"roles": {
-				"lead_developer": "Developer; infrastructure, conversion backend, UI implementation",
-				"developer": "Developer; conversion backend, UI implementation",
-				"designer": "Designer; UX, branding, marketing",
-				"docker_ci": "Maintaining Docker & CI support",
-				"former_cofounder": "Former co-founder & designer"
+				"maddie": "Developer; infrastructure, conversion backend, UI implementation",
+				"maya": "Developer; conversion backend, UI implementation",
+				"eva": "Developer; infrastructure",
+				"liam": "Designer; UX, branding, marketing",
+				"azure": "Maintaining Docker & CI support",
+				"realmy": "Former co-founder & designer"
 			}
 		},
 		"errors": {
@@ -450,7 +452,7 @@
 		},
 		"warnings": {
 			"settings_change": "Changed setting '{setting}' from '{oldValue}' to '{newValue}' for {file} ({to}) to prevent conversion failure.",
-			"file_type_mismatch": "File {filename} is named {expected}, but was detected as {actual}. This may cause conversion issues."
+			"file_type_mismatch": "File '{filename}' is named {expected}, but was detected as {actual}. This may cause conversion issues."
 		}
 	},
 	"privacy": {

@@ -13,12 +13,13 @@ import type {
 	NormalizedSettings,
 	SettingCategories,
 } from "./conversion-settings";
-import { log } from "$lib/util/logger";
+import { error, log } from "$lib/util/logger";
 import { readSettings } from "$lib/util/settings";
 import { formatFilename } from "$lib/util/file";
 import { fileTypeFromBuffer } from "file-type";
 
 const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
+const FILE_TYPE_HEADER_SIZE = 4100;
 
 type ServerWarningRequest = {
 	filename: string;
@@ -97,6 +98,7 @@ export type UnavailableReasons = "vertd-size-limit" | "other-reason"; // find mo
 export class VertFile {
 	public id: string = Math.random().toString(36).slice(2, 8);
 	public readonly file: File;
+	public readonly originalFrom: string;
 
 	public from = $state("");
 	public name = $state("");
@@ -117,12 +119,17 @@ export class VertFile {
 	public vertdSizeWarningShown = false;
 
 	public converters: Converter[] = [];
+	public archiveFormats?: string[];
 	private fallbackToastId: number | null = null;
 	private slowConversionToastId: number | null = null;
 	private attemptedConverters = new Set<string>();
 	private retryingFallback = false;
 	private postDownload: (() => Promise<void>) | null = null;
+	private disposal: Promise<void> | null = null;
+	private disposed = false;
 	private activeConverterName: string | null = null;
+	private fileTypeMismatchShown = false;
+	private fileTypeCheck: Promise<void> | null = null;
 
 	constructor(file: File, to: string, blobUrl?: string) {
 		const ext = file.name.split(".").pop();
@@ -133,6 +140,7 @@ export class VertFile {
 		this.file = newFile;
 		this.name = newFile.name;
 		this.from = ("." + ext || "").toLowerCase();
+		this.originalFrom = this.from;
 		this.to = to.startsWith(".") ? to : `.${to}`;
 		this.converters = converters.filter((c) =>
 			c.formatStrings().includes(this.from),
@@ -151,19 +159,28 @@ export class VertFile {
 	}
 
 	public setPostDownload(cleanup: (() => Promise<void>) | null) {
+		// Legacy name: cleanup runs on disposal, not download; OPFS backs repeated reads.
 		this.postDownload = cleanup;
 	}
 
-	private async runPostDownload() {
-		if (!this.postDownload) return;
-
-		try {
-			await this.postDownload();
-		} catch (err) {
-			log(["file", "cleanup"], `post-download function failed: ${err}`);
-		} finally {
-			this.postDownload = null;
-		}
+	public dispose(): Promise<void> {
+		this.disposed = true;
+		return (this.disposal ??= (async () => {
+			await this.result?.dispose();
+			this.result = null;
+			try {
+				await this.postDownload?.();
+				this.postDownload = null;
+			} catch (err) {
+				log(
+					["file", "cleanup"],
+					`resource cleanup failed for ${this.name}: ${err}`,
+				);
+			} finally {
+				if (this.blobUrl) URL.revokeObjectURL(this.blobUrl);
+				this.blobUrl = undefined;
+			}
+		})());
 	}
 
 	public getAvailableSettings(
@@ -277,10 +294,14 @@ export class VertFile {
 		);
 	}
 
-	public async checkFileType() {
+	public checkFileType(): Promise<void> {
+		return (this.fileTypeCheck ??= this.detectFileType());
+	}
+
+	private async detectFileType() {
 		try {
 			this.fileType = await fileTypeFromBuffer(
-				await this.file.arrayBuffer(),
+				await this.file.slice(0, FILE_TYPE_HEADER_SIZE).arrayBuffer(),
 			);
 
 			if (!this.fileType) return;
@@ -299,28 +320,40 @@ export class VertFile {
 				mpe: "mpeg",
 				mpv: "mpeg",
 			};
-			const fileExtension = this.from.slice(1);
+			const fileExtension = this.originalFrom.slice(1);
+			const isPngContainer =
+				this.fileType.ext === "png" || this.fileType.ext === "apng";
+			// preserve file type for png and apng so they can convert
+			// TODO: apng can't be converted with magick-wasm - use another library for it
 			const detectedExtension = forceKeep.includes(fileExtension)
 				? fileExtension
-				: (aliases[this.fileType.ext] ?? this.fileType.ext);
+				: isPngContainer &&
+					  (fileExtension === "png" || fileExtension === "apng")
+					? fileExtension
+					: (aliases[this.fileType.ext] ?? this.fileType.ext);
 			const expectedExtension = aliases[fileExtension] ?? fileExtension;
 
 			if (detectedExtension !== expectedExtension) {
-				console.warn(
-					`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`,
-				);
-				ToastManager.add({
-					type: "warning",
-					disappearing: false,
-					message: m["workers.warnings.file_type_mismatch"]({
-						filename: this.file.name,
-						expected: expectedExtension,
-						actual: detectedExtension,
-					}),
-				});
+				this.from = `.${detectedExtension}`;
+				if (!this.fileTypeMismatchShown) {
+					error(
+						`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`,
+					);
+					ToastManager.add({
+						type: "warning",
+						disappearing: false,
+						message: m["workers.warnings.file_type_mismatch"]({
+							filename: this.file.name,
+							expected: expectedExtension,
+							actual: detectedExtension,
+						}),
+					});
+					this.fileTypeMismatchShown = true;
+				}
+			} else {
+				this.from = this.originalFrom;
 			}
 
-			this.from = `.${detectedExtension}`;
 			this.converters = converters.filter((converter) =>
 				converter.formatStrings().includes(this.from),
 			);
@@ -333,105 +366,105 @@ export class VertFile {
 	}
 
 	public async convert(onError?: (err: string) => void) {
-		await this.runPostDownload();
-		await this.checkFileType();
-
+		if (this.disposed) return;
 		if (!this.retryingFallback) this.attemptedConverters.clear();
-
-		console.log(
-			`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`,
-		);
-		if (!this.converters.length) throw new Error("No converters found");
-
-		let converter: Converter | undefined;
-		const isImageSequence =
-			this.conversionSettings.imageSequence && this.isZip();
-
-		// force ffmpeg for image sequences
-		// TODO: should allow vertd as well probably(?) but maybe in the future
-		if (isImageSequence) {
-			converter = converters.find((c) => c.name === "ffmpeg");
-			if (!converter) {
-				throw new Error(
-					"FFmpeg converter not found for image sequence conversion",
-				);
-			}
-		} else {
-			const customConverter = this.converters.find(
-				(c) => c.name === this.conversionSettings.converter,
+		this.cancelled = false;
+		let res: VertFile | undefined;
+		try {
+			log(
+				["file", "convert"],
+				`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`,
 			);
-			converter = customConverter;
+			if (!this.converters.length) throw new Error("No converters found");
 
-			if (!converter) {
-				const compatibleConverters = this.findConverters([
-					this.from,
-					this.to,
-				]);
-				if (compatibleConverters.length) {
-					converter = compatibleConverters[0];
-					log(
-						["file", "convert"],
-						`found compatible converter: ${converter.name}`,
-					);
-				} else {
-					log(
-						["file", "convert"],
-						`no compatible converter found for ${this.from} to ${this.to}`,
+			let converter: Converter | undefined;
+			const isImageSequence =
+				this.conversionSettings.imageSequence && this.isZip();
+
+			// force ffmpeg for image sequences
+			// TODO: should allow vertd as well probably(?) but maybe in the future
+			if (isImageSequence) {
+				converter = converters.find((c) => c.name === "ffmpeg");
+				if (!converter) {
+					throw new Error(
+						"FFmpeg converter not found for image sequence conversion",
 					);
 				}
 			} else {
-				log(
-					["file", "convert"],
-					`using custom converter from settings: ${converter.name}`,
+				const customConverter = this.converters.find(
+					(c) => c.name === this.conversionSettings.converter,
 				);
+				converter = customConverter;
+
+				if (!converter) {
+					const compatibleConverters = this.findConverters([
+						this.from,
+						this.to,
+					]);
+					if (compatibleConverters.length) {
+						converter = compatibleConverters[0];
+						log(
+							["file", "convert"],
+							`found compatible converter: ${converter.name}`,
+						);
+					} else {
+						log(
+							["file", "convert"],
+							`no compatible converter found for ${this.from} to ${this.to}`,
+						);
+					}
+				} else {
+					log(
+						["file", "convert"],
+						`using custom converter from settings: ${converter.name}`,
+					);
+				}
 			}
-		}
 
-		if (!converter) throw new Error("No converter found");
+			if (!converter) throw new Error("No converter found");
 
-		const canProceed = await this.confirmServerWarning(converter);
-		if (!canProceed) {
-			this.cancelled = true;
-			return;
-		}
+			const canProceed = await this.confirmServerWarning(converter);
+			if (!canProceed) {
+				this.cancelled = true;
+				return;
+			}
+			this.attemptedConverters.add(converter.name);
+			this.activeConverterName = converter.name;
 
-		const normalizedSettings: NormalizedSettings =
-			await converter.normalizeSettings(this, this.to, {
-				...(await converter.getDefaultSettings(this)),
-				...Object.fromEntries(
-					Object.entries(this.conversionSettings).filter(
-						([, value]) => value !== undefined,
+			const normalizedSettings: NormalizedSettings =
+				await converter.normalizeSettings(this, this.to, {
+					...(await converter.getDefaultSettings(this)),
+					...Object.fromEntries(
+						Object.entries(this.conversionSettings).filter(
+							([, value]) => value !== undefined,
+						),
 					),
-				),
-			});
+				});
 
-		for (const change of normalizedSettings.changes) {
-			log(
-				["file", "settings"],
-				`changed setting "${change.setting}" from "${change.oldValue}" to "${change.newValue}" for file ${change.file}`,
-			);
-			ToastManager.add({
-				type: "warning",
-				message: m["workers.warnings.settings_change"]({
-					setting: change.setting,
-					oldValue: change.oldValue,
-					newValue: change.newValue,
-					file: change.file,
-					to: this.to,
-				}),
-			});
-		}
+			for (const change of normalizedSettings.changes) {
+				log(
+					["file", "settings"],
+					`changed setting "${change.setting}" from "${change.oldValue}" to "${change.newValue}" for file ${change.file}`,
+				);
+				ToastManager.add({
+					type: "warning",
+					message: m["workers.warnings.settings_change"]({
+						setting: change.setting,
+						oldValue: change.oldValue,
+						newValue: change.newValue,
+						file: change.file,
+						to: this.to,
+					}),
+				});
+			}
 
-		this.attemptedConverters.add(converter.name);
-		this.activeConverterName = converter.name;
-		log(["file", "convert"], `using converter: ${converter.name}`);
+			log(["file", "convert"], `using converter: ${converter.name}`);
 
-		this.result = null;
-		this.progress = 0;
-		this.processing = true;
-		this.cancelled = false;
-		let res;
-		try {
+			await this.result?.dispose();
+			this.result = null;
+			this.progress = 0;
+			this.processing = true;
+			this.cancelled = false;
 			// for zips: extract > convert each > re-zip
 			// else convert normally
 			res =
@@ -445,6 +478,10 @@ export class VertFile {
 							this.to,
 							normalizedSettings.settings,
 						);
+			if (this.disposed || this.cancelled) {
+				await res.dispose();
+				return;
+			}
 			this.result = res;
 			if (this.fallbackToastId !== null) {
 				ToastManager.remove(this.fallbackToastId);
@@ -467,6 +504,7 @@ export class VertFile {
 				}
 				onError(stringErr);
 			}
+			if (this.disposed) return;
 			if (!this.cancelled) this.toastErr(err);
 
 			const compatibleConverters = this.findConverters([
@@ -528,10 +566,12 @@ export class VertFile {
 				});
 			}
 
+			await this.result?.dispose();
 			this.result = null;
+		} finally {
+			this.processing = false;
+			this.activeConverterName = null;
 		}
-		this.processing = false;
-		this.activeConverterName = null;
 		return res;
 	}
 
@@ -557,6 +597,14 @@ export class VertFile {
 		const totalFiles = entries.length;
 		const fileProgress: number[] = new Array(totalFiles).fill(0);
 		const convertedFiles: File[] = [];
+		const convertedResults: VertFile[] = [];
+		const failedFiles: string[] = [];
+		const progressFiles = new Map<number, VertFile>();
+		const progressInterval = setInterval(() => {
+			for (const [index, file] of progressFiles)
+				fileProgress[index] = file.progress;
+			updateProgress();
+		}, 100);
 
 		const queue = new PQueue({
 			concurrency: navigator.hardwareConcurrency || 4,
@@ -564,80 +612,125 @@ export class VertFile {
 
 		const updateProgress = () => {
 			const totalProgress = fileProgress.reduce((sum, p) => sum + p, 0);
-			this.progress = Math.round(totalProgress / totalFiles);
+			this.progress = totalFiles
+				? Math.round(totalProgress / totalFiles)
+				: 100;
 		};
 
-		// convert all files in the zip
-		await queue.addAll(
-			entries.map(({ filename, data }, index) => async () => {
-				if (this.cancelled) {
-					throw new Error("Conversion cancelled");
-				}
+		try {
+			// convert all files in the zip
+			await Promise.allSettled(
+				entries.map(({ filename, data }, index) =>
+					queue.add(async () => {
+						try {
+							if (this.cancelled) {
+								throw new Error("Conversion cancelled");
+							}
 
-				const file = new File([new Uint8Array(data)], filename, {
-					type: "application/octet-stream",
+							const tempVFile = new VertFile(
+								new File([new Uint8Array(data)], filename, {
+									type: "application/octet-stream",
+								}),
+								this.to,
+							);
+							tempVFile.from =
+								this.archiveFormats?.[index] ?? tempVFile.from;
+							tempVFile.converters = [converter];
+
+							if (converter.reportsProgress) {
+								progressFiles.set(index, tempVFile);
+								try {
+									const converted = await converter.convert(
+										tempVFile,
+										this.to,
+										settings,
+									);
+
+									convertedResults.push(converted);
+									convertedFiles[index] = converted.file;
+									fileProgress[index] = 100;
+									updateProgress();
+								} finally {
+									progressFiles.delete(index);
+								}
+							} else {
+								// else track progress via completions only
+								const converted = await converter.convert(
+									tempVFile,
+									this.to,
+									settings,
+								);
+
+								convertedResults.push(converted);
+								convertedFiles[index] = converted.file;
+
+								fileProgress[index] = 100;
+								updateProgress();
+							}
+						} catch (err) {
+							if (!this.cancelled) {
+								const message =
+									err instanceof Error
+										? err.message
+										: String(err);
+								failedFiles[index] = `${filename}: ${message}`;
+								error(
+									["file", "zip"],
+									`failed to convert archive member ${filename}: ${message}`,
+								);
+							}
+						} finally {
+							progressFiles.delete(index);
+							fileProgress[index] = 100;
+							updateProgress();
+						}
+					}),
+				),
+			);
+			// return zip of converted files
+			if (this.cancelled) throw new Error("Conversion cancelled");
+			const outputFiles = convertedFiles.filter(Boolean);
+			const failures = failedFiles.filter(Boolean);
+			let reportName = "failed-files.txt";
+			if (failures.length) {
+				for (
+					let suffix = 1;
+					outputFiles.some((file) => file.name === reportName);
+					suffix++
+				)
+					reportName = `failed-files-${suffix}.txt`;
+				outputFiles.push(
+					new File(
+						[
+							`Failed conversions (${failures.length}):\n\n${failures.join("\n")}\n`,
+						],
+						reportName,
+						{ type: "text/plain" },
+					),
+				);
+			}
+			const resultArray = await createZip(outputFiles);
+			const outputFilename = this.file.name.replace(/\.[^/.]+$/, ".zip");
+			const resultFile = new File(
+				[new Uint8Array(resultArray)],
+				outputFilename,
+			);
+			if (failures.length)
+				ToastManager.add({
+					type: "warning",
+					message: m["convert.archive_file.conversion_failed"]({
+						filename: outputFilename,
+						count: failures.length,
+						reportName,
+					}),
 				});
-				const tempVFile = new VertFile(file, this.to);
-				tempVFile.converters = [converter];
-
-				if (converter.reportsProgress) {
-					// track progress of individual files
-					const progressInterval = setInterval(() => {
-						fileProgress[index] = tempVFile.progress;
-						updateProgress();
-					}, 100);
-
-					try {
-						const converted = await converter.convert(
-							tempVFile,
-							this.to,
-							settings,
-						);
-
-						let outputExt = this.to;
-						if (!outputExt.startsWith("."))
-							outputExt = `.${outputExt}`;
-
-						convertedFiles[index] = new File(
-							[await converted.file.arrayBuffer()],
-							converted.name,
-						);
-
-						fileProgress[index] = 100;
-						updateProgress();
-					} finally {
-						clearInterval(progressInterval);
-					}
-				} else {
-					// else track progress via completions only
-					const converted = await converter.convert(
-						tempVFile,
-						this.to,
-						settings,
-					);
-
-					let outputExt = this.to;
-					if (!outputExt.startsWith(".")) outputExt = `.${outputExt}`;
-
-					convertedFiles[index] = new File(
-						[await converted.file.arrayBuffer()],
-						converted.name,
-					);
-
-					fileProgress[index] = 100;
-					updateProgress();
-				}
-			}),
-		);
-
-		// return zip of converted files
-		const resultArray = await createZip(convertedFiles);
-		const outputFilename = this.file.name.replace(/\.[^/.]+$/, ".zip");
-		const resultFile = new File(
-			[new Uint8Array(resultArray)],
-			outputFilename,
-		);
-		return new VertFile(resultFile, ".zip");
+			return new VertFile(resultFile, ".zip");
+		} finally {
+			clearInterval(progressInterval);
+			await Promise.all(
+				convertedResults.map((result) => result.dispose()),
+			);
+		}
 	}
 
 	public slowConversionOffer(reason: "device" | "timeout") {

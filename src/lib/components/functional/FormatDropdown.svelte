@@ -14,7 +14,7 @@
 	} from "$lib/store/index.svelte";
 	import type { Categories } from "$lib/types";
 	import clsx from "clsx";
-	import { ChevronDown, SearchIcon } from "@lucide/svelte";
+	import { ChevronDown, SearchIcon, Settings } from "@lucide/svelte";
 	import { onMount, tick } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
@@ -450,7 +450,7 @@
 			})
 			.filter(Boolean);
 
-		files.files = files.files.filter((f) => f !== file);
+		await files.remove(file);
 		newFiles.forEach((f) => files.add(f));
 	};
 
@@ -594,7 +594,7 @@
 			<div class="flex items-center justify-between">
 				{#each filteredData.categories as category}
 					<button
-						class="flex-grow text-lg hover:text-muted/20 border-b-[1px] pb-2 capitalize
+						class="flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize
                         {currentCategory === category
 							? 'text-accent border-b-accent'
 							: 'border-b-separator text-muted'}"
@@ -726,9 +726,13 @@
 			{:else}
 				<div class="border-t border-separator text-base p-2">
 					<button
-						class="w-full p-2 text-center rounded-lg bg-accent text-black"
-						onclick={() => ($fileSettings = file)}
+						class="w-full p-2.5 flex gap-3 justify-center text-center rounded-lg bg-accent text-black"
+						onclick={() => {
+							if (file) $fileSettings = file;
+							else $fileSettings = undefined; // all files
+						}}
 					>
+						<Settings size="24" />
 						{m["convert.settings.settings"]()}
 					</button>
 				</div>

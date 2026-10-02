@@ -43,6 +43,7 @@ export class PandocConverter extends Converter {
 	}
 
 	public async convert(file: VertFile, to: string): Promise<VertFile> {
+		this.trackConversion(file);
 		const worker = new Worker(PandocWorker, {
 			type: "module",
 		});
@@ -110,6 +111,7 @@ export class PandocConverter extends Converter {
 				result.isZip ? ".zip" : to,
 			);
 		} finally {
+			this.clearTrackedConversion(file);
 			this.activeConversions.delete(file.id);
 			worker.terminate();
 		}

@@ -37,7 +37,7 @@
 </script>
 
 <div
-	class="flex flex-col items-center justify-between w-full max-w-sm p-4 gap-6 bg-panel border-accent-{color}-alt rounded-lg shadow-md"
+	class="flex flex-col items-center justify-between w-full max-w-md p-4 gap-6 bg-panel border-accent-{color}-alt rounded-lg shadow-md"
 	in:fly={{
 		duration,
 		easing: quintOut,
@@ -71,10 +71,10 @@
 			</div>
 		{/if}
 	</div>
-	<div class="flex flex-row items-center gap-4 w-full">
+	<div class="flex flex-row items-center justify-between gap-4 w-full">
 		{#each buttons as { text, action }, i}
 			<button
-				class="hover:scale-105 active:scale-100 duration-200 flex items-center gap-2 p-2 rounded-md {i ===
+				class="w-full justify-center hover:scale-105 active:scale-100 duration-200 flex items-center gap-2 p-2 rounded-md {i ===
 				1
 					? `bg-accent-${color} text-black`
 					: 'bg-button text-black dynadark:text-white'} px-6"
