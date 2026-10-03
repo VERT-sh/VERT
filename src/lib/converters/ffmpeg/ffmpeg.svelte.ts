@@ -108,9 +108,6 @@ export class FFmpegConverter extends Converter {
 
 	public async getAvailableSettings(): Promise<SettingCategories> {
 		// audio - bitrate, sample rate, channels, normalize, trim silence
-
-		const global = Settings.instance.settings;
-
 		const bitrate: SettingDefinition = {
 			key: "bitrate",
 			label: m["convert.settings.audio.bitrate.label"](),
@@ -140,7 +137,7 @@ export class FFmpegConverter extends Converter {
 			key: "metadata",
 			label: m["convert.settings.common.metadata"](),
 			type: "boolean",
-			default: global.metadata ?? true,
+			default: Settings.instance.settings.metadata,
 		};
 
 		// resize, crop, rotate - prob want a ui

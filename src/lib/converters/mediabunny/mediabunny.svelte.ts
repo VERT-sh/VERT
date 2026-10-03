@@ -36,6 +36,7 @@ import { isMobile } from "$lib/store/index.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";
 import { browser } from "$app/environment";
 import { get } from "svelte/store";
+import { Settings } from "$lib/sections/settings/index.svelte";
 
 // codec compatibility stuff, based on mediabunny's docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
@@ -360,7 +361,7 @@ export class MediabunnyConverter extends Converter {
 			key: "metadata",
 			label: m["convert.settings.common.metadata"](),
 			type: "boolean",
-			default: true,
+			default: Settings.instance.settings.metadata,
 		};
 
 		// trim/crop/rotate - also have another ui for this prob

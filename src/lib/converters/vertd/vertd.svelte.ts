@@ -583,7 +583,7 @@ export class VertdConverter extends Converter {
 			key: "metadata",
 			label: m["convert.settings.common.metadata"](),
 			type: "boolean",
-			default: true,
+			default: Settings.instance.settings.metadata,
 		};
 
 		// trim/crop/rotate - also have another ui for this prob
