@@ -23,42 +23,65 @@
 
 	let cacheInfo = $state<CacheInfo | null>(null);
 	let isLoadingCache = $state(false);
+	let isClearingData = $state(false);
 
 	async function loadCacheInfo() {
-		if (isLoadingCache) return;
+		if (isLoadingCache || isClearingData) return;
 		isLoadingCache = true;
+		let timeout: ReturnType<typeof setTimeout> | undefined;
+		let controllerListener: (() => void) | undefined;
+		let expired = false;
 		try {
-			await swManager.init();
-
-			if ("serviceWorker" in navigator) {
-				await navigator.serviceWorker.ready;
-			}
-
-			if (!navigator.serviceWorker.controller) {
-				await new Promise((resolve) => setTimeout(resolve, 500));
-			}
-
-			cacheInfo = await swManager.getCacheInfo();
+			if (!("serviceWorker" in navigator)) return;
+			cacheInfo = await Promise.race([
+				(async () => {
+					await swManager.init();
+					await navigator.serviceWorker.ready;
+					if (expired) return null;
+					if (!navigator.serviceWorker.controller) {
+						await new Promise<void>((resolve) => {
+							controllerListener = () => {
+								if (navigator.serviceWorker.controller) resolve();
+								};
+							navigator.serviceWorker.addEventListener("controllerchange", controllerListener);
+							controllerListener();
+						});
+					}
+					if (expired) return null;
+					return swManager.getCacheInfo();
+				})(),
+				new Promise<never>((_, reject) => {
+					timeout = setTimeout(
+						() => reject(new Error("Service worker cache loading timed out")),
+						10000,
+					);
+				}),
+			]);
 		} catch (err) {
 			error(["privacy", "cache"], `Failed to load cache info: ${err}`);
 		} finally {
+			expired = true;
+			clearTimeout(timeout);
+			if (controllerListener)
+				navigator.serviceWorker.removeEventListener("controllerchange", controllerListener);
 			isLoadingCache = false;
 		}
 	}
 
 	async function clearCache() {
-		if (isLoadingCache) return;
+		if (isLoadingCache || isClearingData) return;
 		isLoadingCache = true;
 		try {
 			await swManager.clearCache();
 			cacheInfo = null;
+			isLoadingCache = false;
 			await loadCacheInfo();
 			ToastManager.add({
 				type: "success",
 				message: m["settings.privacy.cache.cache_cleared"](),
 			});
 		} catch (err) {
-			error(["privacy", "cache"], "Failed to clear cache:", err);
+			error(["privacy", "cache"], `Failed to clear cache: ${err}`);
 			ToastManager.add({
 				type: "error",
 				message: m["settings.privacy.cache.cache_clear_error"](),
@@ -69,7 +92,7 @@
 	}
 
 	async function clearAllData() {
-		if (isLoadingCache) return;
+		if (isClearingData) return;
 
 		addDialog(
 			m["settings.privacy.site_data.clear_all_data_confirm_title"](),
@@ -84,15 +107,24 @@
 				{
 					text: m["settings.privacy.site_data.clear_all_data"](),
 					action: async () => {
-						isLoadingCache = true;
+						if (isClearingData) return;
+						isClearingData = true;
 						try {
-							await swManager.clearCache();
-							if (typeof localStorage.clear === "function") {
-								localStorage.clear();
+							let failed = false;
+							const operations = [
+								["cache", () => swManager.clearCache()],
+								["localStorage", () => localStorage.clear()],
+								["sessionStorage", () => sessionStorage.clear()],
+							] as const;
+							for (const [name, clear] of operations) {
+								try {
+									await clear();
+								} catch (err) {
+									failed = true;
+									error(["privacy", "data"], `Failed to clear ${name}: ${err}`);
+								}
 							}
-							if (typeof sessionStorage.clear === "function") {
-								sessionStorage.clear();
-							}
+							if (failed) throw new Error("Some site data failed to clear");
 
 							ToastManager.add({
 								type: "success",
@@ -114,7 +146,7 @@
 									](),
 							});
 						} finally {
-							isLoadingCache = false;
+							isClearingData = false;
 							setTimeout(() => {
 								window.location.href = "/";
 							}, 1500);
@@ -242,7 +274,7 @@
 						class="btn {$effects
 							? ''
 							: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
-						disabled={isLoadingCache}
+						disabled={isLoadingCache || isClearingData}
 					>
 						<RefreshCwIcon size="24" class="inline-block mr-2" />
 						{m["settings.privacy.cache.refresh_cache"]()}
@@ -252,7 +284,7 @@
 						class="btn {$effects
 							? ''
 							: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
-						disabled={isLoadingCache}
+						disabled={isLoadingCache || isClearingData}
 					>
 						<Trash2Icon size="24" class="inline-block mr-2" />
 						{m["settings.privacy.cache.clear_cache"]()}
@@ -275,7 +307,7 @@
 					class="btn {$effects
 						? ''
 						: '!scale-100'} w-full p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
-					disabled={isLoadingCache}
+					disabled={isClearingData}
 				>
 					<Trash2Icon size="24" class="inline-block mr-2" />
 					{m["settings.privacy.site_data.clear_all_data"]()}

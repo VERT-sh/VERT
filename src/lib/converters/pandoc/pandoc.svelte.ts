@@ -135,7 +135,7 @@ export class PandocConverter extends Converter {
 		//new FormatInfo("doc", true, true), pandoc doesn't actually support old doc (https://github.com/jgm/pandoc/issues/5809)
 		new FormatInfo("md", true, true),
 		new FormatInfo("html", true, true),
-		new FormatInfo("rtf", true, true),
+		new FormatInfo("rtf", true, false),
 		new FormatInfo("csv", true, true),
 		new FormatInfo("tsv", true, true),
 		new FormatInfo("json", true, true), // must be a pandoc-converted json

@@ -448,6 +448,7 @@
 			},
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
+			"invalid_channels": "Invalid audio channel count: {channels}",
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
 		},
 		"warnings": {

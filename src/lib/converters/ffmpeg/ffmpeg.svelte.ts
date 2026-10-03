@@ -465,8 +465,8 @@ export class FFmpegConverter extends Converter {
 		}
 
 		// channels setting
-		const channels = Number(settings.channels);
-		if (Number.isInteger(channels) && channels !== 2) {
+		const channels = parseChannels(settings.channels);
+		if (channels !== null) {
 			channelsArgs = ["-ac", String(channels)];
 			this.log(`using user setting for audio channels: ${channels}`);
 		}
@@ -551,6 +551,15 @@ export class FFmpegConverter extends Converter {
 //
 // }
 
+const parseChannels = (value: ConversionSettings[string]): number | null => {
+	const text = String(value ?? "").trim();
+	if (!text || text === "auto") return null;
+	const channels = Number(text);
+	if (!Number.isSafeInteger(channels) || channels <= 0)
+		throw new Error(m["workers.errors.invalid_channels"]({ channels: text }));
+	return channels;
+};
+
 const handleSpecialOutput = async (
 	ffmpeg: FFmpeg,
 	input: VertFile,
@@ -565,12 +574,9 @@ const handleSpecialOutput = async (
 				? (conversionSettings.sampleRate as number)
 				: 48000;
 
-		let channels = 2;
-		if (
-			conversionSettings.channels &&
-			conversionSettings.channels !== "auto"
-		)
-			channels = Number(conversionSettings.channels);
+		const channels = parseChannels(conversionSettings.channels) ?? 2;
+		if (channels > 255)
+			throw new Error(m["workers.errors.invalid_channels"]({ channels: String(channels) }));
 
 		const pcmArgs = [
 			"-i",

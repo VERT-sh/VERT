@@ -23,15 +23,17 @@
 	};
 
 	let { file, onclose }: Props = $props();
-	const allFilesValue = "all";
-	let selectedFileName = $derived<string>(file?.name ?? allFilesValue);
+	const allFilesValue = "all-files";
+	let selectedFileId = $derived<string>(file?.id ?? allFilesValue);
 	let targetFile = $derived(
-		files.files.find((f) => f.name === selectedFileName) ?? files.files[0],
+		selectedFileId === allFilesValue
+			? files.files[0]
+			: files.files.find((f) => f.id === selectedFileId),
 	);
 
 	$effect(() => {
-		if (file) selectedFileName = file.name;
-		else selectedFileName = allFilesValue;
+		if (file) selectedFileId = file.id;
+		else selectedFileId = allFilesValue;
 	});
 
 	const fileOptions = $derived([
@@ -40,7 +42,7 @@
 			label: m["convert.settings.all_files"](),
 		},
 		...files.files.map((f: VertFile) => ({
-			value: f.name,
+			value: f.id,
 			label: f.name,
 		})),
 	]);
@@ -155,15 +157,13 @@
 	};
 
 	const applySettings = async (converterName: string) => {
-		const referenceFile =
-			files.files.find((f) => f.name === selectedFileName) ??
-			files.files[0];
+		const referenceFile = targetFile;
 		const targetFiles =
-			selectedFileName === allFilesValue && referenceFile
+			selectedFileId === allFilesValue && referenceFile
 				? files.files.filter(
 						(f) => getFileType(f) === getFileType(referenceFile),
 					)
-				: files.files.filter((f) => f.name === selectedFileName);
+				: files.files.filter((f) => f.id === selectedFileId);
 		if (targetFiles.length === 0) {
 			error(
 				["settings", "modal"],
@@ -249,8 +249,8 @@
 		},
 		{
 			text: m["convert.settings.apply"](),
-			action: () => {
-				applySettings(settings.converter!);
+			action: async () => {
+				await applySettings(settings.converter);
 				onclose?.();
 			},
 			primary: true,
@@ -269,10 +269,10 @@
 				{m["convert.settings.description"]()}
 				<Dropdown
 					options={fileOptions}
-					selected={selectedFileName}
+					selected={selectedFileId}
 					style={"inline"}
 					onselect={(value) => {
-						selectedFileName = value;
+						selectedFileId = value;
 						settings = {};
 					}}
 				/>

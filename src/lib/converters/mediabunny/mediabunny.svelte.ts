@@ -437,7 +437,7 @@ export class MediabunnyConverter extends Converter {
 				output,
 				video: videoConfig,
 				audio: audioConfig,
-				...(conversionSettings.metadata === "false"
+				...(!conversionSettings.metadata
 					? { tags: {} }
 					: {}),
 			});
