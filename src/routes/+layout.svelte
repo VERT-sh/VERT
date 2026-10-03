@@ -45,12 +45,12 @@
 		window.scrollTo(0, scrollY);
 	});
 
-	const dropFiles = (e: DragEvent) => {
+	const dropFiles = async (e: DragEvent) => {
 		e.preventDefault();
 		dropping.set(false);
 		const oldLength = files.files.length;
-		files.add(e.dataTransfer?.files);
-		if (oldLength !== files.files.length) goto("/convert");
+		await files.addAsync(e.dataTransfer?.files);
+		if (files.files.length !== oldLength) goto("/convert");
 	};
 
 	const handleDrag = (e: DragEvent, drag: boolean) => {
@@ -58,13 +58,13 @@
 		dropping.set(drag);
 	};
 
-	const handlePaste = (e: ClipboardEvent) => {
+	const handlePaste = async (e: ClipboardEvent) => {
 		const clipboardData = e.clipboardData;
 		if (!clipboardData || !clipboardData.files.length) return;
 		e.preventDefault();
 		const oldLength = files.files.length;
-		files.add(clipboardData.files);
-		if (oldLength !== files.files.length) goto("/convert");
+		await files.addAsync(clipboardData.files);
+		if (files.files.length !== oldLength) goto("/convert");
 	};
 
 	onMount(() => {

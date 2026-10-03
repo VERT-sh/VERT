@@ -391,6 +391,19 @@ class Files {
 		}
 	}
 
+	private addFile(input: VertFile | File): Promise<void> {
+		return this._add(input).catch((err) => {
+			error(["files"], `error adding file ${input.name}: ${err}`);
+			ToastManager.add({
+				type: "error",
+				message: m["workers.errors.general"]({
+					file: input.name,
+					message: String(err),
+				}),
+			});
+		});
+	}
+
 	public add(file: VertFile | null | undefined): void;
 	public add(file: File | null | undefined): void;
 	public add(file: File[] | null | undefined): void;
@@ -401,22 +414,30 @@ class Files {
 			VertFile | File | VertFile[] | File[] | FileList | null | undefined,
 	) {
 		if (!file) return;
-		const addFile = (input: VertFile | File) => {
-			void this._add(input).catch((err) => {
-				error(["files"], `error adding file ${input.name}: ${err}`);
-				ToastManager.add({
-					type: "error",
-					message: m["workers.errors.general"]({
-						file: input.name,
-						message: String(err),
-					}),
-				});
-			});
-		};
 		if (Array.isArray(file) || file instanceof FileList) {
-			for (const f of file) addFile(f);
+			for (const f of file) void this.addFile(f);
 		} else {
-			addFile(file);
+			void this.addFile(file);
+		}
+	}
+
+	// like add(), but resolves once all files have finished being added
+	public addAsync(file: VertFile | null | undefined): Promise<void>;
+	public addAsync(file: File | null | undefined): Promise<void>;
+	public addAsync(file: File[] | null | undefined): Promise<void>;
+	public addAsync(file: VertFile[] | null | undefined): Promise<void>;
+	public addAsync(file: FileList | null | undefined): Promise<void>;
+	public async addAsync(
+		file:
+			VertFile | File | VertFile[] | File[] | FileList | null | undefined,
+	) {
+		if (!file) return;
+		if (Array.isArray(file)) {
+			await Promise.all(file.map((f) => this.addFile(f)));
+		} else if (file instanceof FileList) {
+			await Promise.all(Array.from(file).map((f) => this.addFile(f)));
+		} else {
+			await this.addFile(file);
 		}
 	}
 
