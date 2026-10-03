@@ -570,9 +570,8 @@ export class VertdConverter extends Converter {
 		const audioChannels: SettingDefinition = {
 			key: "audioChannels",
 			label: m["convert.settings.video.audioChannels.label"](),
-			type: "number",
-			min: 1,
-			max: 8,
+			type: "text",
+			default: "",
 			placeholder:
 				m["convert.settings.video.audioChannels.placeholder"](),
 		};
@@ -637,11 +636,8 @@ export class VertdConverter extends Converter {
 		const apiUrl = await VertdInstance.instance.url();
 		const conversionSettings = // vertd expects object not string json
 			Object.keys(settings).length > 4
-				? settings // user-provided settings
-				: Object.assign(
-						settings,
-						await this.getDefaultSettings(input, apiUrl),
-					); // use defaults if not provided
+				? { ...settings } // user-provided settings
+				: { ...(await this.getDefaultSettings(input)), ...settings }; // use defaults if not provided
 
 		let hash: string;
 		if (PUB_DISABLE_FAILURE_BLOCKS === "false") {

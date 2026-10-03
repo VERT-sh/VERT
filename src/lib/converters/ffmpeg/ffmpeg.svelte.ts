@@ -128,10 +128,8 @@ export class FFmpegConverter extends Converter {
 		const channels: SettingDefinition = {
 			key: "channels",
 			label: m["convert.settings.audio.channels.label"](),
-			type: "number",
-			default: 2,
-			min: 1,
-			max: 8,
+			type: "text",
+			default: "2",
 			placeholder: m["convert.settings.audio.channels.placeholder"](),
 		};
 
@@ -188,22 +186,22 @@ export class FFmpegConverter extends Converter {
 		if (to === ".opus") {
 			// work around browser stereo+libopus wasm crash
 			// no idea why its broken like this in the browser only lol
-			if (normalized.channels >= 2) change("channels", 1);
+			if (Number(normalized.channels) >= 2) change("channels", "1");
 
 			const bitrate = Number(normalized.bitrate);
 			if (Number.isFinite(bitrate) && bitrate > 256)
-				change("bitrate", 256);
+				change("bitrate", "256");
 		} else if (to === ".amv") {
-			change("sampleRate", 22050);
-			change("channels", 1);
-			change("bitrate", 32);
+			change("sampleRate", "22050");
+			change("channels", "1");
+			change("bitrate", "32");
 		} else if (to === ".mpg" || to === ".mpeg" || to === ".vob") {
 			const bitrate = Number(normalized.bitrate);
 			if (Number.isFinite(bitrate) && bitrate > 0)
 				change("bitrate", Math.pow(2, Math.round(Math.log2(bitrate))));
 		} else if (to === ".gxf") {
-			change("sampleRate", 48000);
-			change("channels", 1);
+			change("sampleRate", "48000");
+			change("channels", "1");
 		}
 
 		return { settings: normalized, changes };
@@ -219,7 +217,7 @@ export class FFmpegConverter extends Converter {
 
 		const conversionSettings =
 			Object.keys(settings).length > 4 // TODO: find better way to do this lmfao, rn we are just assuming all settings are present if there's at least 5 keys but ts bad
-				? settings
+				? { ...settings }
 				: {
 						...(await this.getDefaultSettings()),
 						...settings,
@@ -575,7 +573,7 @@ const handleSpecialOutput = async (
 			conversionSettings.channels &&
 			conversionSettings.channels !== "auto"
 		)
-			channels = conversionSettings.channels as number;
+			channels = Number(conversionSettings.channels);
 
 		const pcmArgs = [
 			"-i",

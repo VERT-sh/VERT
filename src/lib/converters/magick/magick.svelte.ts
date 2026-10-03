@@ -312,14 +312,16 @@ export class MagickConverter extends Converter {
 			]);
 
 			// every other format handled by magick worker
-			const conversionSettings = JSON.stringify(
-				Object.keys(settings).length > 4
-					? settings // user-provided settings
-					: Object.assign(
-							settings,
-							await this.getDefaultSettings(input),
-						), // use defaults if not provided
-			);
+			const conversionSettings = // vertd expects object not string json
+				JSON.stringify(
+					Object.keys(settings).length > 4
+						? { ...settings } // user-provided settings
+						: {
+								...(await this.getDefaultSettings(input)),
+								...settings,
+							}, // use defaults if not provided
+				);
+
 			const convertMsg: WorkerMessage = {
 				type: "convert",
 				id: input.id,
