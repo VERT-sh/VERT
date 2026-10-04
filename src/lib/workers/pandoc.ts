@@ -51,11 +51,6 @@ const handleMessage = async (message: WorkerMessage): Promise<any> => {
 				const { to: ext, input } = message;
 				const file = input.file as File;
 				const to = ext as Format;
-				if (to === ".rtf") {
-					throw new Error(
-						"Converting into RTF is currently not supported.",
-					);
-				}
 				const buf = new Uint8Array(await file.arrayBuffer());
 				const args = `-f ${formatToReader(`.${file.name.split(".").pop() || ""}` as Format)} -t ${formatToReader(to)} --extract-media=.`;
 				const [result, stderr, zip] = await pandoc(
@@ -279,7 +274,10 @@ const pandocToFiles = (entries: PandocEntries, parent = ""): File[] => {
 			const nestedFiles = pandocToFiles(entry.entries, fullPath);
 			flattened.push(...nestedFiles);
 		} else {
-			const file = new File([new Uint8Array(Array.from(entry.data))], fullPath);
+			const file = new File(
+				[new Uint8Array(Array.from(entry.data))],
+				fullPath,
+			);
 			flattened.push(file);
 		}
 	}

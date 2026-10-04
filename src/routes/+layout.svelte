@@ -3,10 +3,9 @@
 	import { goto, beforeNavigate, afterNavigate } from "$app/navigation";
 
 	import { PUB_PLAUSIBLE_URL, PUB_HOSTNAME } from "$env/static/public";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/util/consts.js";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/util/consts";
 	import * as Layout from "$lib/components/layout";
 	import * as Navbar from "$lib/components/layout/Navbar";
-	import featuredImage from "$lib/assets/VERT_Feature.webp";
 	import { Settings } from "$lib/sections/settings/index.svelte";
 	import {
 		files,
@@ -20,11 +19,12 @@
 	} from "$lib/store/index.svelte";
 	import "$lib/css/app.scss";
 	import { browser } from "$app/environment";
-	import { initStores as initAnimStores } from "$lib/util/animation.js";
-	import { VertdInstance } from "$lib/sections/settings/vertdSettings.svelte.js";
-	import { ToastManager } from "$lib/util/toast.svelte.js";
-	import { m } from "$lib/paraglide/messages.js";
-	import { log } from "$lib/util/logger.js";
+	import { initStores } from "$lib/util/animation";
+	import { useVertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
+	import { converters } from "$lib/converters";
+	import { ToastManager } from "$lib/util/toast.svelte";
+	import { m } from "$lib/paraglide/messages";
+	import { log } from "$lib/util/logger";
 
 	let { children } = $props();
 	let enablePlausible = $state(false);
@@ -45,12 +45,12 @@
 		window.scrollTo(0, scrollY);
 	});
 
-	const dropFiles = (e: DragEvent) => {
+	const dropFiles = async (e: DragEvent) => {
 		e.preventDefault();
 		dropping.set(false);
 		const oldLength = files.files.length;
-		files.add(e.dataTransfer?.files);
-		if (oldLength !== files.files.length) goto("/convert");
+		await files.addAsync(e.dataTransfer?.files);
+		if (files.files.length !== oldLength) goto("/convert");
 	};
 
 	const handleDrag = (e: DragEvent, drag: boolean) => {
@@ -58,20 +58,20 @@
 		dropping.set(drag);
 	};
 
-	const handlePaste = (e: ClipboardEvent) => {
+	const handlePaste = async (e: ClipboardEvent) => {
 		const clipboardData = e.clipboardData;
 		if (!clipboardData || !clipboardData.files.length) return;
 		e.preventDefault();
 		const oldLength = files.files.length;
-		files.add(clipboardData.files);
-		if (oldLength !== files.files.length) goto("/convert");
+		await files.addAsync(clipboardData.files);
+		if (files.files.length !== oldLength) goto("/convert");
 	};
 
 	onMount(() => {
 		const now = new Date();
 		isAprilFools = now.getDate() === 1 && now.getMonth() === 3;
 
-		initAnimStores();
+		initStores();
 
 		const handleResize = () => {
 			isMobile.set(window.innerWidth <= 768);
@@ -90,18 +90,12 @@
 
 		Settings.instance.load();
 
-		if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
-			VertdInstance.instance
-				.url()
-				.then((u) => fetch(`${u}/api/version`))
-				.then((res) => {
-					if (res.ok) $vertdLoaded = true;
-				});
-		}
-
 		// detect if insecure context
 		if (!window.isSecureContext) {
-			log(["layout"], "Insecure context (HTTP) detected, some features may not work as expected -- you may want to enable \"PUB_DISABLE_FAILURE_BLOCKS\" on local deployments.");
+			log(
+				["layout"],
+				'Insecure context (HTTP) detected, some features may not work as expected -- you may want to enable "PUB_DISABLE_FAILURE_BLOCKS" on local deployments.',
+			);
 			ToastManager.add({
 				type: "warning",
 				message: m["toast.insecure_context"](),
@@ -116,6 +110,34 @@
 	});
 
 	$effect(() => {
+		if (DISABLE_ALL_EXTERNAL_REQUESTS) return;
+		let cancelled = false;
+		const vertd = converters.find(
+			(converter) => converter.name === "vertd",
+		);
+		if (!vertd) return;
+
+		void vertd
+			.valid()
+			.then((valid) => {
+				if (cancelled) return;
+				vertdLoaded.set(valid);
+				vertd.status = valid ? "ready" : "error";
+				if (!valid) log(["layout", "vertd"], "health check failed");
+			})
+			.catch((error) => {
+				if (cancelled) return;
+				vertdLoaded.set(false);
+				vertd.status = "error";
+				log(["layout", "vertd"], `health check failed: ${error}`);
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	$effect(() => {
 		enablePlausible =
 			!!PUB_PLAUSIBLE_URL &&
 			Settings.instance.settings.plausible &&
@@ -124,6 +146,11 @@
 			// reset pushState on opt-out so that plausible stops firing events on page navigation
 			history.pushState = History.prototype.pushState;
 		}
+	});
+
+	onMount(() => {
+		// query vertd server for size limit on mount and on settings change
+		useVertdSizeLimit();
 	});
 </script>
 
@@ -136,7 +163,7 @@
 	/>
 	<meta
 		name="description"
-		content="With VERT, you can quickly convert any image, video, audio, and document file. No ads, no tracking, open source, and all processing (other than video) is done on your device."
+		content="With VERT, you can quickly convert any image, video, audio, and document file. No ads, no tracking, open source, and all processing is done on your device."
 	/>
 	<meta property="og:url" content="https://vert.sh" />
 	<meta property="og:type" content="website" />
@@ -146,9 +173,9 @@
 	/>
 	<meta
 		property="og:description"
-		content="With VERT, you can quickly convert any image, video, audio, and document file. No ads, no tracking, open source, and all processing (other than video) is done on your device."
+		content="With VERT, you can quickly convert any image, video, audio, and document file. No ads, no tracking, open source, and all processing is done on your device."
 	/>
-	<meta property="og:image" content={featuredImage} />
+	<meta property="og:image" content="https://vert.sh/VERT_Feature.webp" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta property="twitter:domain" content="vert.sh" />
 	<meta property="twitter:url" content="https://vert.sh" />
@@ -158,9 +185,12 @@
 	/>
 	<meta
 		property="twitter:description"
-		content="With VERT, you can quickly convert any image, video, audio, and document file. No ads, no tracking, open source, and all processing (other than video) is done on your device."
+		content="With VERT, you can quickly convert any image, video, audio, and document file. No ads, no tracking, open source, and all processing is done on your device."
 	/>
-	<meta property="twitter:image" content={featuredImage} />
+	<meta
+		property="twitter:image"
+		content="https://vert.sh/VERT_Feature.webp"
+	/>
 	<link rel="manifest" href="/manifest.json" />
 	<link rel="canonical" href="https://vert.sh/" />
 	{#if enablePlausible}

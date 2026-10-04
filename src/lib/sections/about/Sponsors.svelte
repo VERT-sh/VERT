@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Panel from "$lib/components/visual/Panel.svelte";
-	import { PiggyBankIcon, CopyIcon, CheckIcon } from "lucide-svelte";
+	import { PiggyBankIcon, CopyIcon, CheckIcon } from "@lucide/svelte";
 	import { DISCORD_URL } from "$lib/util/consts";
 	import { error } from "$lib/util/logger";
 	import { m } from "$lib/paraglide/messages";
@@ -9,7 +9,7 @@
 	import lily from "$lib/assets/lily.jpeg";
 
 	let copied = false;
-	let timeoutId: NodeJS.Timeout | null = null;
+	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
 	function copyToClipboard() {
 		try {
@@ -37,7 +37,7 @@
 		</div>
 		{m["about.sponsors.title"]()}
 	</h2>
-	<div class="mt-2 [&>*]:font-normal h-full flex justify-between flex-col">
+	<div class="[&>*]:font-normal h-full flex justify-between flex-col gap-4">
 		<div class="flex gap-3 justify-center text-lg">
 			<a
 				href="https://eva.pink"
@@ -52,6 +52,14 @@
 			</a>
 		</div>
 		<p class="text-muted">
+			{@html sanitize(
+				link(
+					"discord_link",
+					m["about.sponsors.description"](),
+					DISCORD_URL,
+					true,
+				),
+			)}
 			{@html sanitize(
 				link(
 					"discord_link",

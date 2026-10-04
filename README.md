@@ -22,7 +22,7 @@ VERT is built in Svelte and TypeScript.
 - Conversion settings
 - User-friendly interface built with Svelte
 
-<sup>\* Non-local video conversion is available with our official instance, but the [daemon](https://github.com/VERT-sh/vertd) is easily self-hostable to maintain privacy and fully local functionality.</sup>
+<sup>\* Local video conversion in-browser is supported, but some conversion may require server-side processing. Server video conversion is available with our official instance, but the [daemon](https://github.com/VERT-sh/vertd) is easily self-hostable to maintain privacy and fully local functionality.</sup>
 
 ## Documentation
 
