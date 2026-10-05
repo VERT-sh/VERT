@@ -66,7 +66,7 @@ const processServerWarningQueue = () => {
 		queueMicrotask(processServerWarningQueue);
 	};
 
-	let dontShowAgain = false;
+	let dontShowAgain = true;
 	const additional = {
 		filename: request.filename,
 		onDontShowAgainChange: (value: boolean) => {
