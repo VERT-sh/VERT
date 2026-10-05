@@ -25,7 +25,7 @@ export async function extractZip(file: File): Promise<ZipEntry[]> {
 				.filter(([filename]) => !ignoreEntry(filename))
 				.map(([filename, data]) => ({
 					filename,
-					data: new Uint8Array(data),
+					data,
 				}));
 
 			log(

@@ -15,7 +15,7 @@ import { getLocale, setLocale } from "$lib/paraglide/runtime";
 import { m } from "$lib/paraglide/messages";
 import sanitizeHtml from "sanitize-html";
 import { ToastManager } from "$lib/util/toast.svelte";
-import { GB } from "$lib/util/consts";
+import { conversionConcurrency, GB } from "$lib/util/consts";
 import { readSettings } from "$lib/util/settings";
 import { formatFilename } from "$lib/util/file";
 import { vertdFetch } from "$lib/converters/vertd/vertd.svelte";
@@ -444,8 +444,7 @@ class Files {
 	public async convertAll() {
 		const filenames = this.files.map((file) => file.name);
 		const promiseFns = this.files.map((f) => () => f.convert());
-		const coreCount = navigator.hardwareConcurrency || 4;
-		const queue = new PQueue({ concurrency: coreCount });
+		const queue = new PQueue({ concurrency: conversionConcurrency() });
 		const results = await Promise.allSettled(
 			promiseFns.map((fn) => queue.add(fn)),
 		);

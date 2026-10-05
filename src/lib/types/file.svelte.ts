@@ -16,6 +16,7 @@ import type {
 import { error, log } from "$lib/util/logger";
 import { readSettings } from "$lib/util/settings";
 import { formatFilename } from "$lib/util/file";
+import { conversionConcurrency } from "$lib/util/consts";
 import { fileTypeFromBuffer } from "file-type";
 
 const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
@@ -597,7 +598,7 @@ export class VertFile {
 		}, 100);
 
 		const queue = new PQueue({
-			concurrency: navigator.hardwareConcurrency || 4,
+			concurrency: conversionConcurrency(),
 		});
 
 		const updateProgress = () => {

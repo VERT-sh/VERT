@@ -95,9 +95,14 @@ export class FFmpegConverter extends Converter {
 				});
 
 				this.status = "ready";
+				this.ffmpeg.terminate();
+				this.log(
+					"preloaded ffmpeg assets and released the cache instance",
+				);
 			} catch (err) {
 				this.error(`Error loading ffmpeg: ${err}`);
 				this.status = "error";
+				this.ffmpeg.terminate();
 				ToastManager.add({
 					type: "error",
 					message: m["workers.errors.ffmpeg"](),
@@ -556,7 +561,9 @@ const parseChannels = (value: ConversionSettings[string]): number | null => {
 	if (!text || text === "auto") return null;
 	const channels = Number(text);
 	if (!Number.isSafeInteger(channels) || channels <= 0)
-		throw new Error(m["workers.errors.invalid_channels"]({ channels: text }));
+		throw new Error(
+			m["workers.errors.invalid_channels"]({ channels: text }),
+		);
 	return channels;
 };
 
@@ -576,7 +583,11 @@ const handleSpecialOutput = async (
 
 		const channels = parseChannels(conversionSettings.channels) ?? 2;
 		if (channels > 255)
-			throw new Error(m["workers.errors.invalid_channels"]({ channels: String(channels) }));
+			throw new Error(
+				m["workers.errors.invalid_channels"]({
+					channels: String(channels),
+				}),
+			);
 
 		const pcmArgs = [
 			"-i",

@@ -288,13 +288,18 @@ const createUploadTask = async (
 	};
 };
 
-const downloadFile = async (url: string, file: VertFile): Promise<Blob> => {
+interface DownloadTask {
+	promise: Promise<Blob>;
+	abort: () => void;
+}
+
+const downloadTask = (url: string, file: VertFile): DownloadTask => {
 	const xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
 	xhr.responseType = "blob";
 	const customHeaders = getVertdCustomHeaders();
 
-	return new Promise((resolve, reject) => {
+	const promise = new Promise<Blob>((resolve, reject) => {
 		xhr.addEventListener("progress", (e) => {
 			if (e.lengthComputable) {
 				file.progress = progressEstimate(
@@ -316,11 +321,20 @@ const downloadFile = async (url: string, file: VertFile): Promise<Blob> => {
 			reject(xhr.statusText);
 		};
 
+		xhr.onabort = () => {
+			reject(new Error("Conversion cancelled"));
+		};
+
 		for (const [key, value] of Object.entries(customHeaders))
 			xhr.setRequestHeader(key, value);
 
 		xhr.send();
 	});
+
+	return {
+		promise,
+		abort: () => xhr.abort(),
+	};
 };
 
 // prettier-ignore
@@ -343,6 +357,8 @@ export class VertdConverter extends Converter {
 	>();
 
 	private activeUploads = new Map<string, UploadTask>();
+
+	private activeDownloads = new Map<string, DownloadTask>();
 
 	private cancelledConversions = new Set<string>();
 
@@ -687,6 +703,8 @@ export class VertdConverter extends Converter {
 				clearTimeout(connectTimeout);
 				this.cancelledConversions.delete(input.id);
 				this.activeUploads.delete(input.id);
+				this.activeDownloads.get(input.id)?.abort();
+				this.activeDownloads.delete(input.id);
 				this.activeConversions.delete(input.id);
 				if (
 					ws.readyState === WebSocket.CONNECTING ||
@@ -703,6 +721,7 @@ export class VertdConverter extends Converter {
 				clearTimeout(connectTimeout);
 				this.cancelledConversions.delete(input.id);
 				this.activeUploads.delete(input.id);
+				this.activeDownloads.delete(input.id);
 				this.activeConversions.delete(input.id);
 				resolve(value);
 			};
@@ -799,9 +818,15 @@ export class VertdConverter extends Converter {
 					case "jobFinished": {
 						this.log(`job finished for file ${input.name}`);
 						try {
+							if (settled) break;
 							const url = `${apiUrl}/api/download/${msg.data.jobId}/${uploadRes.auth}`;
 							this.log(`downloading from ${url}`);
-							const res = await downloadFile(url, input);
+							const download = downloadTask(url, input);
+							this.activeDownloads.set(input.id, download);
+							const res = await download.promise;
+							this.activeDownloads.delete(input.id);
+
+							if (settled) return; // cancelled during download
 
 							// confirm download to clean up on server
 							try {
@@ -824,7 +849,12 @@ export class VertdConverter extends Converter {
 								new VertFile(new File([res], input.name), to),
 							);
 						} catch (e) {
-							if (hash) this.failure(hash);
+							// don't count cancellations as failures
+							if (
+								hash &&
+								!this.cancelledConversions.has(input.id)
+							)
+								this.failure(hash);
 							rejectConversion(e);
 						} finally {
 							ws.close();
@@ -876,9 +906,16 @@ export class VertdConverter extends Converter {
 			this.activeUploads.delete(input.id);
 		}
 
+		const activeDownload = this.activeDownloads.get(input.id);
+		if (activeDownload) {
+			this.log(`cancelling download for file ${input.name}`);
+			activeDownload.abort();
+			this.activeDownloads.delete(input.id);
+		}
+
 		const activeConversion = this.activeConversions.get(input.id);
 		if (!activeConversion) {
-			if (!activeUpload)
+			if (!activeUpload && !activeDownload)
 				this.error(`no active conversion found for file ${input.name}`);
 			return;
 		}

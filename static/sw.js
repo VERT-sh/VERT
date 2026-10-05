@@ -24,6 +24,45 @@ function shouldCacheUrl(url) {
 	);
 }
 
+const REVALIDATE_URLS = WASM_FILES.filter((file) => file.startsWith("/"));
+
+function shouldRevalidate(url) {
+	const urlObj = new URL(url);
+	return REVALIDATE_URLS.includes(urlObj.pathname);
+}
+
+// compare the headers nginx/browsers send for static files so we only rewrite the cache when the file changed
+function cacheSignature(response) {
+	return (
+		response.headers.get("etag") ||
+		response.headers.get("last-modified") ||
+		response.headers.get("content-length") ||
+		""
+	);
+}
+
+async function revalidate(request) {
+	try {
+		const cache = await caches.open(CACHE_NAME);
+		const cached = await cache.match(request);
+		if (!cached) return;
+
+		const response = await fetch(request, { cache: "no-cache" });
+		// 304 or any non-2xx means the cached copy is still current
+		if (!response.ok) return;
+
+		const signature = cacheSignature(response);
+		const cachedSignature = cacheSignature(cached);
+
+		if (!signature || signature !== cachedSignature) {
+			await cache.put(request, response);
+			console.log("[SW] revalidated and updated:", request.url);
+		}
+	} catch (err) {
+		console.warn("[SW] revalidation failed:", request.url, err);
+	}
+}
+
 self.addEventListener("install", (e) => {
 	console.log("[SW] installing service worker");
 
@@ -75,6 +114,8 @@ self.addEventListener("fetch", (e) => {
 	}
 
 	// else intercept request
+	const revalidateInBackground = shouldRevalidate(request.url);
+
 	e.respondWith(
 		caches.match(request).then((cachedResponse) => {
 			if (cachedResponse) {
@@ -121,6 +162,9 @@ self.addEventListener("fetch", (e) => {
 				});
 		}),
 	);
+
+	// refresh same-origin wasm in the background so a redeploy is picked up, even while the cached copy is served
+	if (revalidateInBackground) e.waitUntil(revalidate(request));
 });
 
 self.addEventListener("message", (e) => {
