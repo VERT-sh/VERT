@@ -4,7 +4,7 @@
 	import { converters } from "$lib/converters";
 	import { vertdLoaded } from "$lib/store/index.svelte";
 	import clsx from "clsx";
-	import { AudioLines, BookText, Check, Film, Image } from "@lucide/svelte";
+	import { AudioLinesIcon, BookTextIcon, CheckIcon, FilmIcon, ImageIcon } from "@lucide/svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { OverlayScrollbarsComponent } from "overlayscrollbars-svelte";
 	import { browser } from "$app/environment";
@@ -26,7 +26,7 @@
 	const worker: {
 		[key: string]: {
 			formats: string;
-			icon: typeof Image;
+			icon: typeof ImageIcon;
 			title: string;
 			status: WorkerStatus;
 		};
@@ -34,14 +34,14 @@
 		const output: {
 			[key: string]: {
 				formats: string;
-				icon: typeof Image;
+				icon: typeof ImageIcon;
 				title: string;
 				status: WorkerStatus;
 			};
 		} = {
 			Images: {
 				formats: getSupportedFormats("imagemagick"),
-				icon: Image,
+				icon: ImageIcon,
 				title: m["upload.cards.images"](),
 				status:
 					converters.find((c) => c.name === "imagemagick")?.status ||
@@ -49,7 +49,7 @@
 			},
 			Audio: {
 				formats: getSupportedFormats("ffmpeg"),
-				icon: AudioLines,
+				icon: AudioLinesIcon,
 				title: m["upload.cards.audio"](),
 				status:
 					converters.find((c) => c.name === "ffmpeg")?.status ||
@@ -57,7 +57,7 @@
 			},
 			Documents: {
 				formats: getSupportedFormats("pandoc"),
-				icon: BookText,
+				icon: BookTextIcon,
 				title: m["upload.cards.documents"](),
 				status:
 					converters.find((c) => c.name === "pandoc")?.status ||
@@ -89,7 +89,7 @@
 
 			output.Video = {
 				formats,
-				icon: Film,
+				icon: FilmIcon,
 				title: m["upload.cards.video"](),
 				status: videoStatus as WorkerStatus,
 			};
@@ -220,7 +220,7 @@
 										<p
 											class="flex tems-center justify-center gap-2"
 										>
-											<Check size="20" />
+											<CheckIcon size="20" />
 											<Tooltip
 												text={m[
 													"upload.tooltip.video_server_processing"
@@ -247,7 +247,7 @@
 										<p
 											class="flex tems-center justify-center gap-2"
 										>
-											<Check size="20" />
+											<CheckIcon size="20" />
 											{m[
 												"upload.cards.local_supported"
 											]()}

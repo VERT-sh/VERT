@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { effects, files, isMobile } from "$lib/store/index.svelte";
-	import { FolderArchiveIcon, RefreshCw, TrashIcon } from "@lucide/svelte";
+	import { FolderArchiveIcon, RefreshCwIcon, TrashIcon } from "@lucide/svelte";
 	import Panel from "../visual/Panel.svelte";
 	import Dropdown from "./Dropdown.svelte";
 	import Tooltip from "../visual/Tooltip.svelte";
@@ -51,7 +51,7 @@
 				)}
 				disabled={!files.allReady}
 			>
-				<RefreshCw size="24" />
+				<RefreshCwIcon size="24" />
 				{#if !compactActions}
 					<p>{m["convert.panel.convert_all"]()}</p>
 				{/if}

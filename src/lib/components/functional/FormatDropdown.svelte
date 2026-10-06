@@ -14,7 +14,7 @@
 	} from "$lib/store/index.svelte";
 	import type { Categories } from "$lib/types";
 	import clsx from "clsx";
-	import { ChevronDown, SearchIcon, Settings } from "@lucide/svelte";
+	import { ChevronDownIcon, SearchIcon, SettingsIcon } from "@lucide/svelte";
 	import { onMount, tick } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
@@ -513,7 +513,7 @@
 				{/each}
 			{/if}
 		</div>
-		<ChevronDown
+		<ChevronDownIcon
 			class="w-4 h-4 ml-3 mt-0.5 flex-shrink-0"
 			style="transform: rotate({open
 				? 180
@@ -728,7 +728,7 @@
 							else $fileSettings = undefined; // all files
 						}}
 					>
-						<Settings size="24" />
+						<SettingsIcon size="24" />
 						{m["convert.settings.settings"]()}
 					</button>
 				</div>

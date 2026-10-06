@@ -12,7 +12,7 @@
 	import {
 		InfoIcon,
 		MoonIcon,
-		RefreshCw,
+		RefreshCwIcon,
 		SettingsIcon,
 		SunIcon,
 		UploadIcon,
@@ -44,7 +44,7 @@
 			url: "/convert/",
 			activeMatch: (pathname) =>
 				pathname === "/convert/" || pathname === "/convert",
-			icon: RefreshCw,
+			icon: RefreshCwIcon,
 			badge: files.files.length,
 		},
 		{

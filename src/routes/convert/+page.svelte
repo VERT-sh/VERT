@@ -24,8 +24,8 @@
 		BookText,
 		DownloadIcon,
 		FileMusicIcon,
-		FileQuestionIcon,
-		FileVideo2,
+		FileQuestionMarkIcon,
+		FileVideoCameraIcon,
 		FilmIcon,
 		ImageIcon,
 		ImageOffIcon,
@@ -217,7 +217,7 @@
 					text={m["convert.tooltips.unknown_file"]()}
 					position="bottom"
 				>
-					<FileQuestionIcon size="24" class="flex-shrink-0" />
+					<FileQuestionMarkIcon size="24" class="flex-shrink-0" />
 				</Tooltip>
 			{:else if isAudio}
 				<Tooltip
@@ -410,7 +410,7 @@
 									{#if isAudio}
 										<FileMusicIcon size="56" />
 									{:else if isVideo}
-										<FileVideo2 size="56" />
+										<FileVideoCameraIcon size="56" />
 									{:else if isDocument}
 										<BookText size="56" />
 									{:else}

@@ -5,7 +5,7 @@
 		BanIcon,
 		CheckIcon,
 		InfoIcon,
-		TriangleAlert,
+		TriangleAlertIcon,
 	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import type { Dialog as DialogType } from "$lib/store/DialogProvider";
@@ -29,7 +29,7 @@
 		success: CheckIcon,
 		error: BanIcon,
 		info: InfoIcon,
-		warning: TriangleAlert,
+		warning: TriangleAlertIcon,
 	};
 
 	let color = $derived(colors[type]);

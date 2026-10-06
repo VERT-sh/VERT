@@ -4,7 +4,7 @@
 		BanIcon,
 		CheckIcon,
 		InfoIcon,
-		TriangleAlert,
+		TriangleAlertIcon,
 		XIcon,
 	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
@@ -37,7 +37,7 @@
 		success: CheckIcon,
 		error: BanIcon,
 		info: InfoIcon,
-		warning: TriangleAlert,
+		warning: TriangleAlertIcon,
 	};
 
 	let color = $derived(colors[type]);

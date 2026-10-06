@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { duration, fade, transition } from "$lib/util/animation";
-	import { ChevronDown } from "@lucide/svelte";
+	import { ChevronDownIcon } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import { clsx } from "clsx";
 
@@ -174,7 +174,7 @@
 				</p>
 			{/each}
 		</div>
-		<ChevronDown
+		<ChevronDownIcon
 			class="w-4 h-4 ml-1.5 mt-0.5 flex-shrink-0"
 			style="transform: rotate({open
 				? 180
