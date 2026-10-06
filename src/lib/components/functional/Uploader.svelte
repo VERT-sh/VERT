@@ -3,9 +3,9 @@
 	import Panel from "../visual/Panel.svelte";
 	import clsx from "clsx";
 	import { onMount } from "svelte";
-	import { effects, files } from "$lib/store/index.svelte";
+	import { effects, files } from "#lib/store/index.svelte";
 	import { goto } from "$app/navigation";
-	import { m } from "$lib/paraglide/messages";
+	import { m } from "#lib/paraglide/messages";
 
 	type Props = {
 		class?: string;

@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { DialogProps } from "$lib/store/DialogProvider";
+	import type { DialogProps } from "#lib/store/DialogProvider";
 
 	export interface ServerUploadWarningProps {
 		filename: string;
@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-	import { m } from "$lib/paraglide/messages";
+	import { m } from "#lib/paraglide/messages";
 	import FancyInput from "../FancyInput.svelte";
 
 	let { additional }: Props = $props();

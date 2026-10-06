@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
 	import { HeartHandshakeIcon } from "@lucide/svelte";
 	import {
 		DISABLE_ALL_EXTERNAL_REQUESTS,
 		GITHUB_URL_VERT,
-	} from "$lib/util/consts";
-	import { m } from "$lib/paraglide/messages";
-	import { link, sanitize } from "$lib/store/index.svelte";
+	} from "#lib/util/consts";
+	import { m } from "#lib/paraglide/messages";
+	import { link, sanitize } from "#lib/store/index.svelte";
 	import { clsx } from "clsx";
 
 	let { mainContribs, notableContribs, ghContribs } = $props();

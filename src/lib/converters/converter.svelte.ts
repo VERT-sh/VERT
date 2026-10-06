@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { VertFile } from "$lib/types";
+import type { VertFile } from "#lib/types";
 import type {
 	ConversionSettings,
 	NormalizedSettings,
 	SettingCategories,
-} from "$lib/types/conversion-settings";
+} from "#lib/types/conversion-settings";
 
 export type WorkerStatus =
 	"not-ready" | "downloading" | "ready" | "partially-ready" | "error";

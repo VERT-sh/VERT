@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
 	import {
 		BugIcon,
 		ChartColumnIcon,
@@ -9,16 +9,16 @@
 		TrashIcon,
 	} from "@lucide/svelte";
 	import type { ISettings } from "./index.svelte";
-	import { effects } from "$lib/store/index.svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { link, sanitize } from "$lib/store/index.svelte";
-	import { swManager, type CacheInfo } from "$lib/util/sw";
+	import { effects } from "#lib/store/index.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { link, sanitize } from "#lib/store/index.svelte";
+	import { swManager, type CacheInfo } from "#lib/util/sw";
 	import { onMount } from "svelte";
-	import { error } from "$lib/util/logger.svelte";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
-	import { addDialog } from "$lib/store/DialogProvider";
-	import { PUB_PLAUSIBLE_URL } from "$env/static/public";
+	import { error } from "#lib/util/logger.svelte";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
+	import { addDialog } from "#lib/store/DialogProvider";
+	import { PUB_PLAUSIBLE_URL } from "$app/env/public";
 
 	const { settings = $bindable() }: { settings: ISettings } = $props();
 

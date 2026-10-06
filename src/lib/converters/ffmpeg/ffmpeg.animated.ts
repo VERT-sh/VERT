@@ -1,8 +1,8 @@
 import {
 	toArgs,
 	animatedImageFormats,
-} from "$lib/converters/ffmpeg/ffmpeg.codecs";
-import type { ConversionSettings } from "$lib/types/conversion-settings";
+} from "#lib/converters/ffmpeg/ffmpeg.codecs";
+import type { ConversionSettings } from "#lib/types/conversion-settings";
 import { videoFormats } from "../vertd/vertd.svelte";
 
 export function buildImageSequenceCommand(

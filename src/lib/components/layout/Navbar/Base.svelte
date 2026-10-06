@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { browser } from "$app/environment";
+	import { browser } from "$app/env";
 	import { page } from "$app/state";
-	import { duration, fade } from "$lib/util/animation";
+	import { duration, fade } from "#lib/util/animation";
 	import {
 		effects,
 		files,
 		goingLeft,
 		setTheme,
-	} from "$lib/store/index.svelte";
+	} from "#lib/store/index.svelte";
 	import clsx from "clsx";
 	import {
 		InfoIcon,
@@ -21,8 +21,8 @@
 	import Panel from "../../visual/Panel.svelte";
 	import Logo from "../../visual/svg/Logo.svelte";
 	import { beforeNavigate } from "$app/navigation";
-	import Tooltip from "$lib/components/visual/Tooltip.svelte";
-	import { m } from "$lib/paraglide/messages";
+	import Tooltip from "#lib/components/visual/Tooltip.svelte";
+	import { m } from "#lib/paraglide/messages";
 
 	const items = $derived<
 		{

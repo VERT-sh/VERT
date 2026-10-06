@@ -1,11 +1,11 @@
-import { VertFile } from "$lib/types";
+import { VertFile } from "#lib/types";
 import { Converter, FormatInfo } from "../converter.svelte";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { browser } from "$app/environment";
-import { error, log } from "$lib/util/logger.svelte";
-import { m } from "$lib/paraglide/messages";
-import { Settings } from "$lib/sections/settings/index.svelte";
-import { ToastManager } from "$lib/util/toast.svelte";
+import { browser } from "$app/env";
+import { error, log } from "#lib/util/logger.svelte";
+import { m } from "#lib/paraglide/messages";
+import { Settings } from "#lib/sections/settings/index.svelte";
+import { ToastManager } from "#lib/util/toast.svelte";
 import { getCodecs, toArgs } from "./ffmpeg.codecs";
 import { buildImageSequenceCommand } from "./ffmpeg.animated";
 import { extractAlbumArt, avWithArt, avWithBg } from "./utils/ffmpeg";
@@ -14,7 +14,7 @@ import type {
 	SettingDefinition,
 	ConversionSettings,
 	NormalizedSettings,
-} from "$lib/types/conversion-settings";
+} from "#lib/types/conversion-settings";
 import { videoFormats } from "../vertd/vertd.svelte";
 
 // TODO: differentiate in UI? (not native formats)
@@ -271,7 +271,7 @@ export class FFmpegConverter extends Converter {
 
 			if (input.from === ".qoa") {
 				const { decodeQoa, encodeWav } =
-					await import("$lib/util/parse/qoa");
+					await import("#lib/util/parse/qoa");
 				const decoded = decodeQoa(buf);
 				buf = new Uint8Array(
 					encodeWav(
@@ -387,7 +387,7 @@ export class FFmpegConverter extends Converter {
 		if (isImageSequence) {
 			this.log(`converting image sequence ${input.name} to ${to}`);
 
-			const { extractZip } = await import("$lib/util/file");
+			const { extractZip } = await import("#lib/util/file");
 			const entries = (await extractZip(input.file)).sort((a, b) =>
 				a.filename.localeCompare(b.filename, undefined, {
 					numeric: true,
@@ -616,7 +616,7 @@ const handleSpecialOutput = async (
 		)) as unknown as Uint8Array;
 		if (!pcmRaw || pcmRaw.length === 0)
 			throw new Error("FFmpeg QOA conversion returned empty PCM audio");
-		const { encodeQoa } = await import("$lib/util/parse/qoa");
+		const { encodeQoa } = await import("#lib/util/parse/qoa");
 		const qoaBytes = encodeQoa(
 			new Uint8Array(pcmRaw),
 			sampleRate,

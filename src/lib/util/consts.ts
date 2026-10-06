@@ -1,4 +1,4 @@
-import { PUB_DISABLE_ALL_EXTERNAL_REQUESTS, PUB_ENV } from "$env/static/public";
+import { PUB_DISABLE_ALL_EXTERNAL_REQUESTS, PUB_ENV } from "$app/env/public";
 
 export const GITHUB_URL_VERT = "https://github.com/VERT-sh/VERT";
 export const GITHUB_URL_VERTD = "https://github.com/VERT-sh/vertd";

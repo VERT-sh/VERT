@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade } from "$lib/util/animation";
+	import { fade } from "#lib/util/animation";
 	interface Props {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		children: () => any;

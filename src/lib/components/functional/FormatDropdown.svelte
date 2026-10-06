@@ -4,25 +4,25 @@
 		duration,
 		fade,
 		transition,
-	} from "$lib/util/animation";
-	import { m } from "$lib/paraglide/messages";
+	} from "#lib/util/animation";
+	import { m } from "#lib/paraglide/messages";
 	import {
 		isMobile,
 		files,
 		dropdownStates,
 		fileSettings,
-	} from "$lib/store/index.svelte";
-	import type { Categories } from "$lib/types";
+	} from "#lib/store/index.svelte";
+	import type { Categories } from "#lib/types";
 	import clsx from "clsx";
 	import { ChevronDownIcon, SearchIcon, SettingsIcon } from "@lucide/svelte";
 	import { onMount, tick } from "svelte";
 	import { quintOut } from "svelte/easing";
-	import { VertFile } from "$lib/types";
-	import { log } from "$lib/util/logger.svelte";
+	import { VertFile } from "#lib/types";
+	import { log } from "#lib/util/logger.svelte";
 	import FancyInput from "./FancyInput.svelte";
 	import Tooltip from "../visual/Tooltip.svelte";
-	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
-	import { formatBytes } from "$lib/util/file";
+	import { vertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
+	import { formatBytes } from "#lib/util/file";
 
 	type Props = {
 		categories: Categories;
@@ -428,7 +428,7 @@
 	const extract = async () => {
 		// extract all files in zip, then add all extracted files to files store
 		if (!file) return;
-		const { extractZip } = await import("$lib/util/file");
+		const { extractZip } = await import("#lib/util/file");
 		const extractedFiles = await extractZip(file.file);
 
 		if (!Array.isArray(extractedFiles) || extractedFiles.length === 0)

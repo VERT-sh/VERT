@@ -1,18 +1,18 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
 	import {
 		CONTACT_EMAIL,
 		DISCORD_URL,
 		GITHUB_URL_VERT,
-	} from "$lib/util/consts";
-	import { effects } from "$lib/store/index.svelte";
+	} from "#lib/util/consts";
+	import { effects } from "#lib/store/index.svelte";
 	import {
 		CodeXmlIcon,
 		LinkIcon,
 		MailIcon,
 		MessageCircleMoreIcon,
 	} from "@lucide/svelte";
-	import { m } from "$lib/paraglide/messages";
+	import { m } from "#lib/paraglide/messages";
 </script>
 
 <Panel class="flex flex-col gap-4 p-6">

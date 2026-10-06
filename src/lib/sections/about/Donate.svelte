@@ -9,7 +9,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$env/static/public";
+	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$app/env/public";
 	// please do not change these!
 	const OFFICIAL_DONATION_URL = atob("aHR0cHM6Ly9kb25hdGlvbnMudmVydC5zaA==");
 	const OFFICIAL_STRIPE_KEY = atob(
@@ -20,10 +20,10 @@
 		PUB_STRIPE_KEY === OFFICIAL_STRIPE_KEY;
 
 	// import { PUB_STRIPE_KEY, PUB_DONATION_API } from "$env/static/public";
-	import { fade } from "$lib/util/animation";
-	import FancyInput from "$lib/components/functional/FancyInput.svelte";
-	import Panel from "$lib/components/visual/Panel.svelte";
-	import { effects, link, sanitize } from "$lib/store/index.svelte";
+	import { fade } from "#lib/util/animation";
+	import FancyInput from "#lib/components/functional/FancyInput.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
+	import { effects, link, sanitize } from "#lib/store/index.svelte";
 	import { loadStripe } from "@stripe/stripe-js/pure";
 	import { type Stripe, type StripeElements } from "@stripe/stripe-js";
 	import clsx from "clsx";
@@ -36,9 +36,9 @@
 	import { onMount } from "svelte";
 	import { Elements, PaymentElement } from "svelte-stripe";
 	import { quintOut } from "svelte/easing";
-	import { m } from "$lib/paraglide/messages";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import { log } from "$lib/util/logger.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import { log } from "#lib/util/logger.svelte";
 
 	let amount = $state(1);
 	let customAmount = $state("");

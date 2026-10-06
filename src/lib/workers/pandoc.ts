@@ -1,4 +1,4 @@
-import type { WorkerMessage } from "$lib/types";
+import type { WorkerMessage } from "#lib/types";
 import * as wasiShim from "@bjorn3/browser_wasi_shim";
 import * as zip from "client-zip";
 

@@ -1,4 +1,4 @@
-import { isMobile, effects } from "$lib/store/index.svelte";
+import { isMobile, effects } from "#lib/store/index.svelte";
 import type { AnimationConfig, FlipParams } from "svelte/animate";
 import { cubicOut } from "svelte/easing";
 import {

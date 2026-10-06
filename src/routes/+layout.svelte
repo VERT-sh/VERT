@@ -2,11 +2,11 @@
 	import { onMount } from "svelte";
 	import { goto, beforeNavigate, afterNavigate } from "$app/navigation";
 
-	import { PUB_PLAUSIBLE_URL, PUB_HOSTNAME } from "$env/static/public";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/util/consts";
-	import * as Layout from "$lib/components/layout";
-	import * as Navbar from "$lib/components/layout/Navbar";
-	import { Settings } from "$lib/sections/settings/index.svelte";
+	import { PUB_PLAUSIBLE_URL, PUB_HOSTNAME } from "$app/env/public";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "#lib/util/consts";
+	import * as Layout from "#lib/components/layout";
+	import * as Navbar from "#lib/components/layout/Navbar";
+	import { Settings } from "#lib/sections/settings/index.svelte";
 	import {
 		files,
 		isMobile,
@@ -16,19 +16,19 @@
 		vertdLoaded,
 		locale,
 		updateLocale,
-	} from "$lib/store/index.svelte";
-	import "$lib/css/app.scss";
-	import { browser } from "$app/environment";
-	import { initStores } from "$lib/util/animation";
-	import { useVertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
-	import { converters } from "$lib/converters";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import { m } from "$lib/paraglide/messages";
+	} from "#lib/store/index.svelte";
+	import "#lib/css/app.scss";
+	import { browser } from "$app/env";
+	import { initStores } from "#lib/util/animation";
+	import { useVertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
+	import { converters } from "#lib/converters";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import { m } from "#lib/paraglide/messages";
 	import {
 		addLog,
 		installConsoleCapture,
 		log,
-	} from "$lib/util/logger.svelte";
+	} from "#lib/util/logger.svelte";
 
 	let { children } = $props();
 	let enablePlausible = $state(false);

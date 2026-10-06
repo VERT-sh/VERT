@@ -1,18 +1,18 @@
 <script lang="ts">
-	import Uploader from "$lib/components/functional/Uploader.svelte";
-	import Tooltip from "$lib/components/visual/Tooltip.svelte";
-	import { converters } from "$lib/converters";
-	import { vertdLoaded } from "$lib/store/index.svelte";
+	import Uploader from "#lib/components/functional/Uploader.svelte";
+	import Tooltip from "#lib/components/visual/Tooltip.svelte";
+	import { converters } from "#lib/converters";
+	import { vertdLoaded } from "#lib/store/index.svelte";
 	import clsx from "clsx";
 	import { AudioLinesIcon, BookTextIcon, CheckIcon, FilmIcon, ImageIcon } from "@lucide/svelte";
-	import { m } from "$lib/paraglide/messages";
+	import { m } from "#lib/paraglide/messages";
 	import { OverlayScrollbarsComponent } from "overlayscrollbars-svelte";
-	import { browser } from "$app/environment";
+	import { browser } from "$app/env";
 	import "overlayscrollbars/overlayscrollbars.css";
 	import { onMount } from "svelte";
-	import type { WorkerStatus } from "$lib/converters/converter.svelte";
-	import { sanitize } from "$lib/store/index.svelte";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
+	import type { WorkerStatus } from "#lib/converters/converter.svelte";
+	import { sanitize } from "#lib/store/index.svelte";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
 
 	const getSupportedFormats = (name: string) =>
 		converters

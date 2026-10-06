@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { effects } from "$lib/store/index.svelte";
+	import { effects } from "#lib/store/index.svelte";
 	import clsx from "clsx";
 
 	interface Props {

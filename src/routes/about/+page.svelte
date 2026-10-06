@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { error } from "$lib/util/logger.svelte";
-	import * as About from "$lib/sections/about";
+	import { error } from "#lib/util/logger.svelte";
+	import * as About from "#lib/sections/about";
 	import { InfoIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
-	import avatarNullptr from "$lib/assets/avatars/nullptr.jpg";
-	import avatarLiam from "$lib/assets/avatars/liam.jpg";
-	import avatarJovannMC from "$lib/assets/avatars/jovannmc.jpg";
-	import avatarRealmy from "$lib/assets/avatars/realmy.jpg";
-	import avatarAzurejelly from "$lib/assets/avatars/azurejelly.jpg";
-	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$env/static/public";
+	import avatarNullptr from "#lib/assets/avatars/nullptr.jpg";
+	import avatarLiam from "#lib/assets/avatars/liam.jpg";
+	import avatarJovannMC from "#lib/assets/avatars/jovannmc.jpg";
+	import avatarRealmy from "#lib/assets/avatars/realmy.jpg";
+	import avatarAzurejelly from "#lib/assets/avatars/azurejelly.jpg";
+	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$app/env/public";
 	import {
 		DISABLE_ALL_EXTERNAL_REQUESTS,
 		GITHUB_API_URL,
-	} from "$lib/util/consts";
-	import { m } from "$lib/paraglide/messages";
-	import { ToastManager } from "$lib/util/toast.svelte";
+	} from "#lib/util/consts";
+	import { m } from "#lib/paraglide/messages";
+	import { ToastManager } from "#lib/util/toast.svelte";
 	// import { dev } from "$app/environment";
 	// import { page } from "$app/state";
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export type LogLevel = "log" | "error";
 

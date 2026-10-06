@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
 	import { MessageCircleQuestionMarkIcon } from "@lucide/svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { link, sanitize } from "$lib/store/index.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { link, sanitize } from "#lib/store/index.svelte";
 </script>
 
 <Panel class="flex flex-col gap-3 p-6">

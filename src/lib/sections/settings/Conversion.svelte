@@ -1,6 +1,6 @@
 <script lang="ts">
-	import FancyTextInput from "$lib/components/functional/FancyInput.svelte";
-	import Panel from "$lib/components/visual/Panel.svelte";
+	import FancyTextInput from "#lib/components/functional/FancyInput.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
 	import {
 		PauseIcon,
 		PlayIcon,
@@ -8,11 +8,11 @@
 		ChevronDownIcon,
 	} from "@lucide/svelte";
 	import type { ISettings } from "./index.svelte";
-	import { m } from "$lib/paraglide/messages";
-	import FancyInput from "$lib/components/functional/FancyInput.svelte";
-	import { effects, sanitize } from "$lib/store/index.svelte";
-	import FormatDropdown from "$lib/components/functional/FormatDropdown.svelte";
-	import { categories } from "$lib/converters";
+	import { m } from "#lib/paraglide/messages";
+	import FancyInput from "#lib/components/functional/FancyInput.svelte";
+	import { effects, sanitize } from "#lib/store/index.svelte";
+	import FormatDropdown from "#lib/components/functional/FormatDropdown.svelte";
+	import { categories } from "#lib/converters";
 	import clsx from "clsx";
 
 	const { settings = $bindable() }: { settings: ISettings } = $props();

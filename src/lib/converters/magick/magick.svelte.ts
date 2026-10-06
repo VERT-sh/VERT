@@ -1,22 +1,22 @@
-import { browser } from "$app/environment";
-import { error, log } from "$lib/util/logger.svelte";
-import { m } from "$lib/paraglide/messages";
-import { VertFile, type WorkerMessage } from "$lib/types";
-import MagickWorker from "$lib/workers/magick?worker&url";
+import { browser } from "$app/env";
+import { error, log } from "#lib/util/logger.svelte";
+import { m } from "#lib/paraglide/messages";
+import { VertFile, type WorkerMessage } from "#lib/types";
+import MagickWorker from "#lib/workers/magick?worker&url";
 import { Converter, FormatInfo } from "../converter.svelte";
 import { imageFormats } from "./magick-automated";
 import {
 	formatsWithoutMetadataRemoval,
 	formatsWithoutTransparency,
 } from "./magick-settings";
-import { Settings } from "$lib/sections/settings/index.svelte";
+import { Settings } from "#lib/sections/settings/index.svelte";
 import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";
-import { ToastManager } from "$lib/util/toast.svelte";
+import { ToastManager } from "#lib/util/toast.svelte";
 import type {
 	SettingDefinition,
 	SettingCategories,
 	ConversionSettings,
-} from "$lib/types/conversion-settings";
+} from "#lib/types/conversion-settings";
 
 export class MagickConverter extends Converter {
 	public name = "imagemagick";

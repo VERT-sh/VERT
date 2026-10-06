@@ -1,5 +1,5 @@
 <script>
-	import Logo from "$lib/components/visual/svg/Logo.svelte";
+	import Logo from "#lib/components/visual/svg/Logo.svelte";
 </script>
 
 <div class="flex md:hidden justify-center items-center pb-8 pt-4">

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
 	import { PiggyBankIcon, CopyIcon, CheckIcon } from "@lucide/svelte";
-	import { DISCORD_URL } from "$lib/util/consts";
-	import { error } from "$lib/util/logger.svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { link, sanitize } from "$lib/store/index.svelte";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import lily from "$lib/assets/lily.jpeg";
+	import { DISCORD_URL } from "#lib/util/consts";
+	import { error } from "#lib/util/logger.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { link, sanitize } from "#lib/store/index.svelte";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import lily from "#lib/assets/lily.jpeg";
 
 	let copied = false;
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;

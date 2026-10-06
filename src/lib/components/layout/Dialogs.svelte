@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { duration, fade } from "$lib/util/animation";
+	import { duration, fade } from "#lib/util/animation";
 	import { quintOut } from "svelte/easing";
 	import Dialog from "../functional/popups/Dialog.svelte";
 	import {
 		type Dialog as DialogType,
 		dialogs,
-	} from "$lib/store/DialogProvider";
+	} from "#lib/store/DialogProvider";
 
 	let dialogList = $state<DialogType[]>([]);
 

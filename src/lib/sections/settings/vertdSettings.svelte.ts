@@ -1,8 +1,8 @@
 import { Settings } from "./index.svelte";
-import { PUB_VERTD_URL } from "$env/static/public";
-import { error, log } from "$lib/util/logger.svelte";
+import { PUB_VERTD_URL } from "$app/env/public";
+import { error, log } from "#lib/util/logger.svelte";
 import { writable } from "svelte/store";
-import { getVertdLimit } from "$lib/store/index.svelte";
+import { getVertdLimit } from "#lib/store/index.svelte";
 
 const LOCATIONS = [
 	{ url: "https://eu.vertd.vert.sh" },

@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
-	import { GITHUB_URL_VERT, DISCORD_URL } from "$lib/util/consts";
-	import { m } from "$lib/paraglide/messages";
+	import { GITHUB_URL_VERT, DISCORD_URL } from "#lib/util/consts";
+	import { m } from "#lib/paraglide/messages";
 
 	declare const __COMMIT_HASH__: string | undefined;
 

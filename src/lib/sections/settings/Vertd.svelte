@@ -1,21 +1,21 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
-	import { GITHUB_URL_VERTD } from "$lib/util/consts";
+	import Panel from "#lib/components/visual/Panel.svelte";
+	import { GITHUB_URL_VERTD } from "#lib/util/consts";
 	import { ServerIcon } from "@lucide/svelte";
 	import type { ISettings } from "./index.svelte";
 	import clsx from "clsx";
-	import Dropdown from "$lib/components/functional/Dropdown.svelte";
-	import { vertdLoaded } from "$lib/store/index.svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { link, sanitize } from "$lib/store/index.svelte";
+	import Dropdown from "#lib/components/functional/Dropdown.svelte";
+	import { vertdLoaded } from "#lib/store/index.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { link, sanitize } from "#lib/store/index.svelte";
 	import {
 		VertdInstance,
 		getVertdCustomHeaders,
 		vertdSizeLimit,
 		type VertdInner,
 	} from "./vertdSettings.svelte";
-	import FancyInput from "$lib/components/functional/FancyInput.svelte";
-	import { formatBytes } from "$lib/util/file";
+	import FancyInput from "#lib/components/functional/FancyInput.svelte";
+	import { formatBytes } from "#lib/util/file";
 
 	let vertdCommit = $state<string | null>(null);
 	let abortController: AbortController | null = null;

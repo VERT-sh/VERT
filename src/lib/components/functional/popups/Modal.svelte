@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Tooltip from "$lib/components/visual/Tooltip.svelte";
-	import { duration, fade } from "$lib/util/animation";
+	import Tooltip from "#lib/components/visual/Tooltip.svelte";
+	import { duration, fade } from "#lib/util/animation";
 	import type { SearchIcon } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 

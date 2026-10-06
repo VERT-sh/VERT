@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade, fly } from "$lib/util/animation";
+	import { fade, fly } from "#lib/util/animation";
 	import {
 		BanIcon,
 		CheckIcon,
@@ -8,12 +8,12 @@
 		XIcon,
 	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import type { ToastProps } from "$lib/util/toast.svelte";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import type { ToastProps } from "#lib/util/toast.svelte";
 	import type { SvelteComponent } from "svelte";
 	import clsx from "clsx";
-	import type { Toast as ToastType } from "$lib/util/toast.svelte";
-	import { sanitize } from "$lib/store/index.svelte";
+	import type { Toast as ToastType } from "#lib/util/toast.svelte";
+	import { sanitize } from "#lib/store/index.svelte";
 
 	const props: {
 		toast: ToastType<unknown>;

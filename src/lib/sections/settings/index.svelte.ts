@@ -1,6 +1,6 @@
-import { PUB_VERTD_URL } from "$env/static/public";
-import type { ConversionSpeed } from "$lib/converters/vertd/vertd.svelte";
-import { readSettings } from "$lib/util/settings";
+import { PUB_VERTD_URL } from "$app/env/public";
+import type { ConversionSpeed } from "#lib/converters/vertd/vertd.svelte";
+import { readSettings } from "#lib/util/settings";
 import { VertdInstance } from "./vertdSettings.svelte";
 
 export { default as Appearance } from "./Appearance.svelte";

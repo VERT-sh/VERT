@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { duration, fade, fly } from "$lib/util/animation";
-	import { removeDialog } from "$lib/store/DialogProvider";
+	import { duration, fade, fly } from "#lib/util/animation";
+	import { removeDialog } from "#lib/store/DialogProvider";
 	import {
 		BanIcon,
 		CheckIcon,
@@ -8,7 +8,7 @@
 		TriangleAlertIcon,
 	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
-	import type { Dialog as DialogType } from "$lib/store/DialogProvider";
+	import type { Dialog as DialogType } from "#lib/store/DialogProvider";
 
 	type Props = DialogType;
 

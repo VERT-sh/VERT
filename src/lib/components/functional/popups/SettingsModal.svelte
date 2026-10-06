@@ -4,17 +4,17 @@
 	import Dropdown from "../Dropdown.svelte";
 	import FancyInput from "../FancyInput.svelte";
 	import Modal from "./Modal.svelte";
-	import { m } from "$lib/paraglide/messages";
-	import type { VertFile } from "$lib/types";
-	import { effects, files } from "$lib/store/index.svelte";
-	import { converterCategories } from "$lib/converters";
-	import { log, error } from "$lib/util/logger.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import type { VertFile } from "#lib/types";
+	import { effects, files } from "#lib/store/index.svelte";
+	import { converterCategories } from "#lib/converters";
+	import { log, error } from "#lib/util/logger.svelte";
 	import type {
 		ConversionSettings,
 		SettingCategories,
-	} from "$lib/types/conversion-settings";
+	} from "#lib/types/conversion-settings";
 	import clsx from "clsx";
-	import { animateHeight, duration, fade } from "$lib/util/animation";
+	import { animateHeight, duration, fade } from "#lib/util/animation";
 	import { quintOut } from "svelte/easing";
 
 	type Props = {

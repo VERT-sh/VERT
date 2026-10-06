@@ -1,5 +1,5 @@
-import { browser } from "$app/environment";
-import { PUB_ENV } from "$env/static/public";
+import { browser } from "$app/env";
+import { PUB_ENV } from "$app/env/public";
 import {
 	AudioLinesIcon,
 	BookTextIcon,
@@ -9,16 +9,16 @@ import {
 	ServerIcon,
 } from "@lucide/svelte";
 import type { Component } from "svelte";
-import { converters } from "$lib/converters";
-import { m } from "$lib/paraglide/messages";
-import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/util/consts";
+import { converters } from "#lib/converters";
+import { m } from "#lib/paraglide/messages";
+import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "#lib/util/consts";
 import {
 	error as logError,
 	formatLogLine,
 	logs,
 	type LogEntry,
-} from "$lib/util/logger.svelte";
-import { swManager, type CacheInfo } from "$lib/util/sw";
+} from "#lib/util/logger.svelte";
+import { swManager, type CacheInfo } from "#lib/util/sw";
 
 declare const __COMMIT_HASH__: string | undefined;
 export const commitHash =

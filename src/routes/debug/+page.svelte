@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
-	import Dropdown from "$lib/components/functional/Dropdown.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
+	import Dropdown from "#lib/components/functional/Dropdown.svelte";
 	import {
 		BugIcon,
 		ClipboardCopyIcon,
@@ -21,13 +21,13 @@
 	} from "@lucide/svelte";
 	import clsx from "clsx";
 	import type { Component } from "svelte";
-	import { browser } from "$app/environment";
+	import { browser } from "$app/env";
 	import { onMount } from "svelte";
-	import { PUB_ENV } from "$env/static/public";
-	import { effects } from "$lib/store/index.svelte";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import { swManager, type CacheInfo } from "$lib/util/sw";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
+	import { PUB_ENV } from "$app/env/public";
+	import { effects } from "#lib/store/index.svelte";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import { swManager, type CacheInfo } from "#lib/util/sw";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
 	import {
 		buildReport,
 		downloadText,
@@ -40,13 +40,13 @@
 		getSystemInfo,
 		STATUS_CLASSES,
 		type SystemInfo,
-	} from "$lib/util/debug.svelte";
+	} from "#lib/util/debug.svelte";
 	import {
 		clearLogs,
 		error as logError,
 		logs,
-	} from "$lib/util/logger.svelte";
-	import { m } from "$lib/paraglide/messages";
+	} from "#lib/util/logger.svelte";
+	import { m } from "#lib/paraglide/messages";
 
 	let logQuery = $state("");
 	let logLevel = $state("all");

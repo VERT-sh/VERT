@@ -1,24 +1,24 @@
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 import {
 	byNative,
 	categories,
 	converterCategories,
 	converters,
-} from "$lib/converters";
-import type { Converter } from "$lib/converters/converter.svelte";
-import { error, log } from "$lib/util/logger.svelte";
-import { VertFile } from "$lib/types";
+} from "#lib/converters";
+import type { Converter } from "#lib/converters/converter.svelte";
+import { error, log } from "#lib/util/logger.svelte";
+import { VertFile } from "#lib/types";
 import { parseBlob, selectCover } from "music-metadata";
 import { get, writable } from "svelte/store";
 import PQueue from "p-queue";
-import { getLocale, setLocale } from "$lib/paraglide/runtime";
-import { m } from "$lib/paraglide/messages";
+import { getLocale, setLocale } from "#lib/paraglide/runtime";
+import { m } from "#lib/paraglide/messages";
 import sanitizeHtml from "sanitize-html";
-import { ToastManager } from "$lib/util/toast.svelte";
-import { conversionConcurrency, GB } from "$lib/util/consts";
-import { readSettings } from "$lib/util/settings";
-import { formatFilename } from "$lib/util/file";
-import { vertdFetch } from "$lib/converters/vertd/vertd.svelte";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { conversionConcurrency, GB } from "#lib/util/consts";
+import { readSettings } from "#lib/util/settings";
+import { formatFilename } from "#lib/util/file";
+import { vertdFetch } from "#lib/converters/vertd/vertd.svelte";
 
 class Files {
 	public files = $state<VertFile[]>([]);
@@ -215,7 +215,7 @@ class Files {
 				}),
 			});
 
-			const { extractZip } = await import("$lib/util/file");
+			const { extractZip } = await import("#lib/util/file");
 			const entries = await extractZip(file);
 
 			const totalEntries = entries.length;

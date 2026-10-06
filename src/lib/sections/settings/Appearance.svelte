@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
 	import {
 		theme,
 		effects,
@@ -7,7 +7,7 @@
 		setTheme,
 		updateLocale,
 		availableLocales,
-	} from "$lib/store/index.svelte";
+	} from "#lib/store/index.svelte";
 	import {
 		MoonIcon,
 		PaletteIcon,
@@ -16,9 +16,9 @@
 		SunIcon,
 	} from "@lucide/svelte";
 	import { onMount, onDestroy } from "svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { getLocale } from "$lib/paraglide/runtime";
-	import Dropdown from "$lib/components/functional/Dropdown.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { getLocale } from "#lib/paraglide/runtime";
+	import Dropdown from "#lib/components/functional/Dropdown.svelte";
 
 	let currentLocale = $state("en");
 

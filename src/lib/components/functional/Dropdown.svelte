@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { duration, fade, transition } from "$lib/util/animation";
+	import { duration, fade, transition } from "#lib/util/animation";
 	import { ChevronDownIcon } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import { clsx } from "clsx";

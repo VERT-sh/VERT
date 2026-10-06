@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { effects, files, isMobile } from "$lib/store/index.svelte";
+	import { effects, files, isMobile } from "#lib/store/index.svelte";
 	import { FolderArchiveIcon, RefreshCwIcon, TrashIcon } from "@lucide/svelte";
 	import Panel from "../visual/Panel.svelte";
 	import Dropdown from "./Dropdown.svelte";
 	import Tooltip from "../visual/Tooltip.svelte";
 	import ProgressBar from "../visual/ProgressBar.svelte";
 	import FormatDropdown from "./FormatDropdown.svelte";
-	import { categories } from "$lib/converters";
-	import { m } from "$lib/paraglide/messages";
+	import { categories } from "#lib/converters";
+	import { m } from "#lib/paraglide/messages";
 	import { clsx } from "clsx";
 
 	const length = $derived(files.files.length);

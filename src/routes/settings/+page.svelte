@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { browser } from "$app/environment";
-	import { error, log } from "$lib/util/logger.svelte";
-	import * as Settings from "$lib/sections/settings/index.svelte";
+	import { browser } from "$app/env";
+	import { error, log } from "#lib/util/logger.svelte";
+	import * as Settings from "#lib/sections/settings/index.svelte";
 	import { SettingsIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
-	import { readSettings } from "$lib/util/settings";
+	import { m } from "#lib/paraglide/messages";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
+	import { readSettings } from "#lib/util/settings";
 
 	let settings = $state(Settings.Settings.instance.settings);
 

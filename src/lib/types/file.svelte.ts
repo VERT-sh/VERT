@@ -1,22 +1,22 @@
-import { byNative, converters } from "$lib/converters";
-import type { Converter } from "$lib/converters/converter.svelte";
-import { m } from "$lib/paraglide/messages";
-import { ToastManager } from "$lib/util/toast.svelte";
-import { addDialog } from "$lib/store/DialogProvider";
+import { byNative, converters } from "#lib/converters";
+import type { Converter } from "#lib/converters/converter.svelte";
+import { m } from "#lib/paraglide/messages";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { addDialog } from "#lib/store/DialogProvider";
 import type { Component } from "svelte";
-import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
-import FallbackToast from "$lib/components/functional/popups/FallbackToast.svelte";
-import SlowConversionToast from "$lib/components/functional/popups/SlowConversionToast.svelte";
-import ServerUploadWarning from "$lib/components/functional/popups/ServerUploadWarning.svelte";
+import { MAX_ARRAY_BUFFER_SIZE } from "#lib/store/index.svelte";
+import FallbackToast from "#lib/components/functional/popups/FallbackToast.svelte";
+import SlowConversionToast from "#lib/components/functional/popups/SlowConversionToast.svelte";
+import ServerUploadWarning from "#lib/components/functional/popups/ServerUploadWarning.svelte";
 import type {
 	ConversionSettings,
 	NormalizedSettings,
 	SettingCategories,
 } from "./conversion-settings";
-import { error, log } from "$lib/util/logger.svelte";
-import { readSettings } from "$lib/util/settings";
-import { formatFilename } from "$lib/util/file";
-import { conversionConcurrency } from "$lib/util/consts";
+import { error, log } from "#lib/util/logger.svelte";
+import { readSettings } from "#lib/util/settings";
+import { formatFilename } from "#lib/util/file";
+import { conversionConcurrency } from "#lib/util/consts";
 import { fileTypeFromBuffer } from "file-type";
 
 const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
@@ -582,7 +582,7 @@ export class VertFile {
 		converter: Converter,
 		settings: ConversionSettings,
 	): Promise<VertFile> {
-		const { extractZip, createZip } = await import("$lib/util/file");
+		const { extractZip, createZip } = await import("#lib/util/file");
 		const { default: PQueue } = await import("p-queue");
 
 		const entries = await extractZip(this.file);

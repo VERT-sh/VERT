@@ -1,15 +1,15 @@
 <script lang="ts">
-	import ConversionPanel from "$lib/components/functional/ConversionPanel.svelte";
-	import FormatDropdown from "$lib/components/functional/FormatDropdown.svelte";
-	import Uploader from "$lib/components/functional/Uploader.svelte";
-	import Panel from "$lib/components/visual/Panel.svelte";
-	import ProgressBar from "$lib/components/visual/ProgressBar.svelte";
-	import Tooltip from "$lib/components/visual/Tooltip.svelte";
+	import ConversionPanel from "#lib/components/functional/ConversionPanel.svelte";
+	import FormatDropdown from "#lib/components/functional/FormatDropdown.svelte";
+	import Uploader from "#lib/components/functional/Uploader.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
+	import ProgressBar from "#lib/components/visual/ProgressBar.svelte";
+	import Tooltip from "#lib/components/visual/Tooltip.svelte";
 	import {
 		categories,
 		converterCategories,
 		converters,
-	} from "$lib/converters";
+	} from "#lib/converters";
 	import {
 		effects,
 		files,
@@ -17,8 +17,8 @@
 		showGradient,
 		dropdownStates,
 		fileSettings,
-	} from "$lib/store/index.svelte";
-	import { VertFile } from "$lib/types";
+	} from "#lib/store/index.svelte";
+	import { VertFile } from "#lib/types";
 	import {
 		AudioLines,
 		BookText,
@@ -32,14 +32,14 @@
 		RotateCwIcon,
 		XIcon,
 	} from "@lucide/svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { Settings } from "$lib/sections/settings/index.svelte";
-	import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
-	import { GB } from "$lib/util/consts";
-	import { formatBytes } from "$lib/util/file";
-	import SettingsModal from "$lib/components/functional/popups/SettingsModal.svelte";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { Settings } from "#lib/sections/settings/index.svelte";
+	import { MAX_ARRAY_BUFFER_SIZE } from "#lib/store/index.svelte";
+	import { GB } from "#lib/util/consts";
+	import { formatBytes } from "#lib/util/file";
+	import SettingsModal from "#lib/components/functional/popups/SettingsModal.svelte";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import { vertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
 
 	let processedFileIds = $state(new Set<string>());
 

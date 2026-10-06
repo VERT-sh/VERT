@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @import url(@fontsource/radio-canada-big/600.css);
-@import url("$lib/assets/style/host-grotesk.css");
+@import url("#lib/assets/style/host-grotesk.css");
 
 :root {
 	--font-body:

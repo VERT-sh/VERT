@@ -11,16 +11,16 @@ import {
 	type IMagickImageCollection,
 } from "@imagemagick/magick-wasm";
 import { makeZip } from "client-zip";
-import type { WorkerMessage } from "$lib/types";
-import type { ConversionSettings } from "$lib/types/conversion-settings";
+import type { WorkerMessage } from "#lib/types";
+import type { ConversionSettings } from "#lib/types/conversion-settings";
 
 let magickInitialized = false;
 
 self.postMessage({ type: "ready", id: "0" });
 
 // formats requiring special parsing/handling we do
-let dicomPromise: Promise<typeof import("$lib/util/parse/dicom")> | null = null;
-let aniPromise: Promise<typeof import("$lib/util/parse/ani")> | null = null;
+let dicomPromise: Promise<typeof import("#lib/util/parse/dicom")> | null = null;
+let aniPromise: Promise<typeof import("#lib/util/parse/ani")> | null = null;
 let icnsPromise: Promise<typeof import("vert-wasm")> | null = null;
 
 const handleMessage = async (
@@ -137,10 +137,10 @@ const convertCollectionToZip = async (
 };
 
 const loadDicomHelpers = async () =>
-	(dicomPromise ??= import("$lib/util/parse/dicom"));
+	(dicomPromise ??= import("#lib/util/parse/dicom"));
 
 const loadAniHelpers = async () =>
-	(aniPromise ??= import("$lib/util/parse/ani"));
+	(aniPromise ??= import("#lib/util/parse/ani"));
 
 const loadIcnsHelpers = async () => (icnsPromise ??= import("vert-wasm"));
 

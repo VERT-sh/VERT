@@ -1,4 +1,4 @@
-import { VertFile } from "$lib/types";
+import { VertFile } from "#lib/types";
 import {
 	BlobSource,
 	BufferTarget,
@@ -25,18 +25,18 @@ import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 import { registerProresDecoder } from "@mediabunny/prores";
 import { Converter, FormatInfo, type WorkerStatus } from "../converter.svelte";
-import { error, log } from "$lib/util/logger.svelte";
-import { m } from "$lib/paraglide/messages";
+import { error, log } from "#lib/util/logger.svelte";
+import { m } from "#lib/paraglide/messages";
 import type {
 	SettingDefinition,
 	SettingCategories,
 	ConversionSettings,
-} from "$lib/types/conversion-settings";
-import { isMobile } from "$lib/store/index.svelte";
-import { ToastManager } from "$lib/util/toast.svelte";
-import { browser } from "$app/environment";
+} from "#lib/types/conversion-settings";
+import { isMobile } from "#lib/store/index.svelte";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { browser } from "$app/env";
 import { get } from "svelte/store";
-import { Settings } from "$lib/sections/settings/index.svelte";
+import { Settings } from "#lib/sections/settings/index.svelte";
 
 // codec compatibility stuff, based on mediabunny's docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table

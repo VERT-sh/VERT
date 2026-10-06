@@ -10,11 +10,11 @@
 </script>
 
 <script lang="ts">
-	import { vertdFetch } from "$lib/converters/vertd/vertd.svelte";
+	import { vertdFetch } from "#lib/converters/vertd/vertd.svelte";
 
-	import { m } from "$lib/paraglide/messages";
-	import { ToastManager, type ToastProps } from "$lib/util/toast.svelte";
-	import { addDialog } from "$lib/store/DialogProvider";
+	import { m } from "#lib/paraglide/messages";
+	import { ToastManager, type ToastProps } from "#lib/util/toast.svelte";
+	import { addDialog } from "#lib/store/DialogProvider";
 	import VertdErrorDetails from "./VertdErrorDetails.svelte";
 
 	const toast: ToastProps<VertdErrorProps> = $props();
