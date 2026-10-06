@@ -376,6 +376,66 @@
 				"clear_all_data_cancel": "Cancel",
 				"all_data_cleared": "All site data cleared! Reloading page...",
 				"all_data_clear_error": "Failed to clear all site data."
+			},
+			"debug_link": "Debug tools"
+		},
+		"debug": {
+			"title": "Debug",
+			"logs": {
+				"title": "Logs",
+				"search_placeholder": "Search logs...",
+				"count": "{count} entries",
+				"empty": "No logs to show",
+				"refresh": "Refresh",
+				"clear": "Clear",
+				"cleared": "Logs cleared!",
+				"levels": {
+					"all": "All levels",
+					"log": "Log",
+					"error": "Error"
+				}
+			},
+			"system": {
+				"title": "System information",
+				"cores": "CPU cores",
+				"memory": "Device memory",
+				"platform": "Platform",
+				"screen": "Screen",
+				"environment": "Environment",
+				"external_requests": "External requests",
+				"enabled": "Enabled",
+				"disabled": "Disabled"
+			},
+			"converters": {
+				"title": "Converters",
+				"formats": "Formats",
+				"statuses": {
+					"not_ready": "Not ready",
+					"downloading": "Downloading",
+					"ready": "Ready",
+					"partially_ready": "Partially ready",
+					"error": "Error"
+				}
+			},
+			"storage": {
+				"registration": "Service worker",
+				"registered": "Registered",
+				"controller": "SW controller",
+				"controlled": "Active",
+				"cache_size": "Cache size",
+				"cache_files": "Cached files",
+				"quota_used": "Storage used",
+				"quota_available": "Available"
+			},
+			"tools": {
+				"title": "Debugging tools",
+				"report_title": "Bug report",
+				"report_description": "Bundle system information together with your logs to share with the developers for debugging purposes. It may contain filenames, formats, and other information about your conversions.",
+				"copy_report": "Copy report",
+				"download_report": "Download report",
+				"report_copied": "Report copied to clipboard!",
+				"report_copy_error": "Failed to copy report.",
+				"report_downloaded": "Report downloaded!"
 			}
 		}
 	},

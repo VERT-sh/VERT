@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from "$app/environment";
-	import { error, log } from "$lib/util/logger";
+	import { error, log } from "$lib/util/logger.svelte";
 	import * as Settings from "$lib/sections/settings/index.svelte";
 	import { SettingsIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";

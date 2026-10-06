@@ -25,7 +25,7 @@ import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 import { registerProresDecoder } from "@mediabunny/prores";
 import { Converter, FormatInfo, type WorkerStatus } from "../converter.svelte";
-import { error, log } from "$lib/util/logger";
+import { error, log } from "$lib/util/logger.svelte";
 import { m } from "$lib/paraglide/messages";
 import type {
 	SettingDefinition,
@@ -65,46 +65,11 @@ const codecCompatibility = {
 		m4a: mp4AudioCodecs,
 		m4b: mp4AudioCodecs,
 		m4p: mp4AudioCodecs,
-		mkv: [
-			"aac",
-			"opus",
-			"mp3",
-			"vorbis",
-			"flac",
-			"ac3",
-			"eac3",
-			"dts",
-			"pcm-u8",
-			"pcm-s16",
-			"pcm-s24",
-			"pcm-s32",
-			"pcm-f32",
-			"pcm-f64",
-		],
+		// prettier-ignore
+		mkv: ["aac", "opus", "mp3", "vorbis", "flac", "ac3", "eac3", "dts", "pcm-u8", "pcm-s16", "pcm-s24", "pcm-s32", "pcm-f32", "pcm-f64"],
 		webm: ["opus", "vorbis"],
-		mov: [
-			"aac",
-			"opus",
-			"mp3",
-			"vorbis",
-			"flac",
-			"ac3",
-			"eac3",
-			"dts",
-			"pcm-u8",
-			"pcm-s8",
-			"pcm-s16",
-			"pcm-s16be",
-			"pcm-s24",
-			"pcm-s24be",
-			"pcm-s32",
-			"pcm-s32be",
-			"pcm-f32",
-			"pcm-f32be",
-			"pcm-f64",
-			"ulaw",
-			"alaw",
-		],
+		// prettier-ignore
+		mov: ["aac", "opus", "mp3", "vorbis", "flac", "ac3", "eac3", "dts", "pcm-u8", "pcm-s8", "pcm-s16", "pcm-s16be", "pcm-s24", "pcm-s24be", "pcm-s32", "pcm-s32be", "pcm-f32", "pcm-f32be", "pcm-f64", "ulaw", "alaw"],
 		ts: ["aac", "mp3", "ac3", "eac3", "dts"],
 	},
 } as const;
@@ -437,9 +402,7 @@ export class MediabunnyConverter extends Converter {
 				output,
 				video: videoConfig,
 				audio: audioConfig,
-				...(!conversionSettings.metadata
-					? { tags: {} }
-					: {}),
+				...(!conversionSettings.metadata ? { tags: {} } : {}),
 			});
 
 			this.activeConversions.set(file.id, conversion);

@@ -2,7 +2,7 @@ import { VertFile } from "$lib/types";
 import { Converter, FormatInfo } from "../converter.svelte";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { browser } from "$app/environment";
-import { error, log } from "$lib/util/logger";
+import { error, log } from "$lib/util/logger.svelte";
 import { m } from "$lib/paraglide/messages";
 import { Settings } from "$lib/sections/settings/index.svelte";
 import { ToastManager } from "$lib/util/toast.svelte";

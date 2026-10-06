@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { effects, files, isMobile } from "$lib/store/index.svelte";
-	import { FolderArchiveIcon, RefreshCw, Trash2Icon } from "@lucide/svelte";
+	import { FolderArchiveIcon, RefreshCw, TrashIcon } from "@lucide/svelte";
 	import Panel from "../visual/Panel.svelte";
 	import Dropdown from "./Dropdown.svelte";
 	import Tooltip from "../visual/Tooltip.svelte";
@@ -78,7 +78,7 @@
 					disabled={files.files.length === 0}
 					onclick={() => files.removeAll()}
 				>
-					<Trash2Icon size="24" />
+					<TrashIcon size="24" />
 					<p>{m["convert.panel.remove_all"]()}</p>
 				</button>
 			{:else}
@@ -93,7 +93,7 @@
 						disabled={files.files.length === 0}
 						onclick={() => files.removeAll()}
 					>
-						<Trash2Icon size="24" />
+						<TrashIcon size="24" />
 					</button>
 				</Tooltip>
 			{/if}

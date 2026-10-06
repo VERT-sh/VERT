@@ -8,7 +8,7 @@
 	import type { VertFile } from "$lib/types";
 	import { effects, files } from "$lib/store/index.svelte";
 	import { converterCategories } from "$lib/converters";
-	import { log, error } from "$lib/util/logger";
+	import { log, error } from "$lib/util/logger.svelte";
 	import type {
 		ConversionSettings,
 		SettingCategories,

@@ -1,11 +1,12 @@
 <script lang="ts">
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import {
+		BugIcon,
 		ChartColumnIcon,
 		PauseIcon,
 		PlayIcon,
 		RefreshCwIcon,
-		Trash2Icon,
+		TrashIcon,
 	} from "@lucide/svelte";
 	import type { ISettings } from "./index.svelte";
 	import { effects } from "$lib/store/index.svelte";
@@ -13,7 +14,7 @@
 	import { link, sanitize } from "$lib/store/index.svelte";
 	import { swManager, type CacheInfo } from "$lib/util/sw";
 	import { onMount } from "svelte";
-	import { error } from "$lib/util/logger";
+	import { error } from "$lib/util/logger.svelte";
 	import { ToastManager } from "$lib/util/toast.svelte";
 	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
 	import { addDialog } from "$lib/store/DialogProvider";
@@ -41,9 +42,13 @@
 					if (!navigator.serviceWorker.controller) {
 						await new Promise<void>((resolve) => {
 							controllerListener = () => {
-								if (navigator.serviceWorker.controller) resolve();
-								};
-							navigator.serviceWorker.addEventListener("controllerchange", controllerListener);
+								if (navigator.serviceWorker.controller)
+									resolve();
+							};
+							navigator.serviceWorker.addEventListener(
+								"controllerchange",
+								controllerListener,
+							);
 							controllerListener();
 						});
 					}
@@ -52,7 +57,12 @@
 				})(),
 				new Promise<never>((_, reject) => {
 					timeout = setTimeout(
-						() => reject(new Error("Service worker cache loading timed out")),
+						() =>
+							reject(
+								new Error(
+									"Service worker cache loading timed out",
+								),
+							),
 						10000,
 					);
 				}),
@@ -63,7 +73,10 @@
 			expired = true;
 			clearTimeout(timeout);
 			if (controllerListener)
-				navigator.serviceWorker.removeEventListener("controllerchange", controllerListener);
+				navigator.serviceWorker.removeEventListener(
+					"controllerchange",
+					controllerListener,
+				);
 			isLoadingCache = false;
 		}
 	}
@@ -114,17 +127,26 @@
 							const operations = [
 								["cache", () => swManager.clearCache()],
 								["localStorage", () => localStorage.clear()],
-								["sessionStorage", () => sessionStorage.clear()],
+								[
+									"sessionStorage",
+									() => sessionStorage.clear(),
+								],
 							] as const;
 							for (const [name, clear] of operations) {
 								try {
 									await clear();
 								} catch (err) {
 									failed = true;
-									error(["privacy", "data"], `Failed to clear ${name}: ${err}`);
+									error(
+										["privacy", "data"],
+										`Failed to clear ${name}: ${err}`,
+									);
 								}
 							}
-							if (failed) throw new Error("Some site data failed to clear");
+							if (failed)
+								throw new Error(
+									"Some site data failed to clear",
+								);
 
 							ToastManager.add({
 								type: "success",
@@ -164,7 +186,7 @@
 </script>
 
 <Panel class="flex flex-col gap-8 p-6">
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-4">
 		<h2 class="text-2xl font-bold">
 			<ChartColumnIcon
 				size="40"
@@ -286,7 +308,7 @@
 							: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
 						disabled={isLoadingCache || isClearingData}
 					>
-						<Trash2Icon size="24" class="inline-block mr-2" />
+						<TrashIcon size="24" class="inline-block mr-2" />
 						{m["settings.privacy.cache.clear_cache"]()}
 					</button>
 				</div>
@@ -309,9 +331,19 @@
 						: '!scale-100'} w-full p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
 					disabled={isClearingData}
 				>
-					<Trash2Icon size="24" class="inline-block mr-2" />
+					<TrashIcon size="24" class="inline-block mr-2" />
 					{m["settings.privacy.site_data.clear_all_data"]()}
 				</button>
+			</div>
+
+			<div class="flex justify-center">
+				<a
+					href="/debug"
+					class="text-xs text-muted hover:text-foreground transition-colors flex items-center gap-1"
+				>
+					<BugIcon size="14" />
+					{m["settings.privacy.debug_link"]()}
+				</a>
 			</div>
 		</div>
 	</div></Panel

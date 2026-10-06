@@ -6,7 +6,7 @@ import {
 	converters,
 } from "$lib/converters";
 import type { Converter } from "$lib/converters/converter.svelte";
-import { error, log } from "$lib/util/logger";
+import { error, log } from "$lib/util/logger.svelte";
 import { VertFile } from "$lib/types";
 import { parseBlob, selectCover } from "music-metadata";
 import { get, writable } from "svelte/store";

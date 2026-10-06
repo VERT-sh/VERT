@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { error, log } from "$lib/util/logger";
+import { error, log } from "$lib/util/logger.svelte";
 import { m } from "$lib/paraglide/messages";
 import { VertFile, type WorkerMessage } from "$lib/types";
 import MagickWorker from "$lib/workers/magick?worker&url";

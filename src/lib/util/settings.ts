@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { error } from "$lib/util/logger";
+import { error } from "$lib/util/logger.svelte";
 
 export function readSettings<
 	T extends object = Record<string, unknown>,

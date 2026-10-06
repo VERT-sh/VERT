@@ -13,7 +13,7 @@ import type {
 	NormalizedSettings,
 	SettingCategories,
 } from "./conversion-settings";
-import { error, log } from "$lib/util/logger";
+import { error, log } from "$lib/util/logger.svelte";
 import { readSettings } from "$lib/util/settings";
 import { formatFilename } from "$lib/util/file";
 import { conversionConcurrency } from "$lib/util/consts";
@@ -338,6 +338,7 @@ export class VertFile {
 				this.from = `.${detectedExtension}`;
 				if (!this.fileTypeMismatchShown) {
 					error(
+						["file", "type"],
 						`file type mismatched: expected ${expectedExtension}, detected ${detectedExtension}`,
 					);
 					ToastManager.add({

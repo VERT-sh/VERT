@@ -2,7 +2,7 @@
 	import Panel from "$lib/components/visual/Panel.svelte";
 	import { PiggyBankIcon, CopyIcon, CheckIcon } from "@lucide/svelte";
 	import { DISCORD_URL } from "$lib/util/consts";
-	import { error } from "$lib/util/logger";
+	import { error } from "$lib/util/logger.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { link, sanitize } from "$lib/store/index.svelte";
 	import { ToastManager } from "$lib/util/toast.svelte";

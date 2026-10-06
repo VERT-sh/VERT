@@ -37,6 +37,11 @@
 			color: "var(--bg-gradient-red-from)",
 			at: 100,
 		},
+		{
+			matcher: (path) => path === "/debug/",
+			color: "var(--bg-gradient-red-from)",
+			at: 100,
+		},
 	]);
 
 	const color = $derived(

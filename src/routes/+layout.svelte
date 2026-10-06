@@ -24,7 +24,11 @@
 	import { converters } from "$lib/converters";
 	import { ToastManager } from "$lib/util/toast.svelte";
 	import { m } from "$lib/paraglide/messages";
-	import { log } from "$lib/util/logger";
+	import {
+		addLog,
+		installConsoleCapture,
+		log,
+	} from "$lib/util/logger.svelte";
 
 	let { children } = $props();
 	let enablePlausible = $state(false);
@@ -68,6 +72,17 @@
 	};
 
 	onMount(() => {
+		// captures console output for debugging page
+		installConsoleCapture();
+
+		// catch global errors and unhandled promise rejections for debugging page
+		const handleGlobalError = (event: ErrorEvent) =>
+			addLog("error", ["window"], event.message);
+		const handleUnhandledRejection = (event: PromiseRejectionEvent) =>
+			addLog("error", ["window", "unhandledrejection"], event.reason);
+		window.addEventListener("error", handleGlobalError);
+		window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
 		const now = new Date();
 		isAprilFools = now.getDate() === 1 && now.getMonth() === 3;
 
@@ -106,6 +121,11 @@
 		return () => {
 			window.removeEventListener("paste", handlePaste);
 			window.removeEventListener("resize", handleResize);
+			window.removeEventListener("error", handleGlobalError);
+			window.removeEventListener(
+				"unhandledrejection",
+				handleUnhandledRejection,
+			);
 		};
 	});
 

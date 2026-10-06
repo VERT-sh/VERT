@@ -18,7 +18,7 @@
 	import { onMount, tick } from "svelte";
 	import { quintOut } from "svelte/easing";
 	import { VertFile } from "$lib/types";
-	import { log } from "$lib/util/logger";
+	import { log } from "$lib/util/logger.svelte";
 	import FancyInput from "./FancyInput.svelte";
 	import Tooltip from "../visual/Tooltip.svelte";
 	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";

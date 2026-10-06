@@ -1,6 +1,6 @@
 import { Settings } from "./index.svelte";
 import { PUB_VERTD_URL } from "$env/static/public";
-import { error, log } from "$lib/util/logger";
+import { error, log } from "$lib/util/logger.svelte";
 import { writable } from "svelte/store";
 import { getVertdLimit } from "$lib/store/index.svelte";
 

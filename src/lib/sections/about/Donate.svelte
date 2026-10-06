@@ -38,7 +38,7 @@
 	import { quintOut } from "svelte/easing";
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager } from "$lib/util/toast.svelte";
-	import { log } from "$lib/util/logger";
+	import { log } from "$lib/util/logger.svelte";
 
 	let amount = $state(1);
 	let customAmount = $state("");

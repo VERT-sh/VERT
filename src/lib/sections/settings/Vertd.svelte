@@ -59,7 +59,7 @@
 </script>
 
 <Panel class="flex flex-col gap-8 p-6">
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-4">
 		<h2 class="text-2xl font-bold">
 			<ServerIcon
 				size="40"
