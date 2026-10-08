@@ -189,7 +189,7 @@
 				<div class="flex flex-col gap-3 w-full">
 					<Dropdown
 						options={languageOptions}
-						style={"settings"}
+						style="settings"
 						selected={getLanguageDisplayName(currentLocale)}
 						onselect={handleLanguageChange}
 					/>

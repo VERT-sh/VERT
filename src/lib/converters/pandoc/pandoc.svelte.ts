@@ -4,6 +4,7 @@ import { browser } from "$app/env";
 import PandocWorker from "#lib/workers/pandoc?worker&url";
 import { error, log } from "#lib/util/logger.svelte";
 import { ToastManager } from "#lib/util/toast.svelte";
+import { SvelteMap } from "svelte/reactivity";
 import { m } from "#lib/paraglide/messages";
 
 export class PandocConverter extends Converter {
@@ -11,7 +12,7 @@ export class PandocConverter extends Converter {
 	public ready = $state(false);
 	public wasm: ArrayBuffer = null!;
 
-	private activeConversions = new Map<string, Worker>();
+	private activeConversions = new SvelteMap<string, Worker>();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private log: (...msg: any[]) => void = () => {};

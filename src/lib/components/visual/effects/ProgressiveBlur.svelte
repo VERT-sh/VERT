@@ -42,7 +42,7 @@
 </script>
 
 <div class="w-full h-full relative">
-	{#each blurSteps as { blurIntensity, mask }, index}
+	{#each blurSteps as { blurIntensity, mask }, index (index)}
 		<div
 			class="absolute w-full h-full"
 			style="

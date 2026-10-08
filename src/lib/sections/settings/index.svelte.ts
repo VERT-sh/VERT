@@ -1,4 +1,5 @@
 import { PUB_VERTD_URL } from "$app/env/public";
+import { SvelteMap } from "svelte/reactivity";
 import type { ConversionSpeed } from "#lib/converters/vertd/vertd.svelte";
 import { readSettings } from "#lib/util/settings";
 import { VertdInstance } from "./vertdSettings.svelte";
@@ -45,7 +46,7 @@ export class Settings {
 		plausible: true,
 		vertdURL: PUB_VERTD_URL,
 		vertdSpeed: "slow",
-		vertdBlockedHashes: new Map<string, Date[]>(),
+		vertdBlockedHashes: new SvelteMap<string, Date[]>(),
 		vertdCustomHeaders: "",
 		magickQuality: 90,
 	});
@@ -61,7 +62,7 @@ export class Settings {
 			const persisted = readSettings<ISettings>();
 			if (!Object.keys(persisted).length) return;
 			const settings = persisted as ISettings;
-			const vertdBlockedHashes = new Map<string, Date[]>(
+			const vertdBlockedHashes = new SvelteMap<string, Date[]>(
 				Object.entries(
 					settings.vertdBlockedHashes ||
 						this.settings.vertdBlockedHashes,

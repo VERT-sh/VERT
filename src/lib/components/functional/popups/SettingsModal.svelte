@@ -270,7 +270,7 @@
 				<Dropdown
 					options={fileOptions}
 					selected={selectedFileId}
-					style={"inline"}
+					style="inline"
 					onselect={(value) => {
 						selectedFileId = value;
 						settings = {};
@@ -279,7 +279,7 @@
 			</div>
 
 			<div class="flex items-center justify-between">
-				{#each Object.keys(settingTabs) as tab}
+				{#each Object.keys(settingTabs) as tab (tab)}
 					<button
 						class={clsx(
 							"flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize",
@@ -302,7 +302,7 @@
 					>
 						{#if activeTab === "Converter"}
 							<div class="flex flex-col gap-2">
-								{#each availableConverters as converter}
+								{#each availableConverters as converter (converter.name)}
 									<button
 										class={clsx(
 											"w-full p-3 text-left rounded-xl border-2 border-button",

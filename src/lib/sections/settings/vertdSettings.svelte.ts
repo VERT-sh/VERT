@@ -41,6 +41,7 @@ export const normalizeVertdUrl = (value: string): string => {
 	const trimmed = value.trim();
 	if (!trimmed) throw new Error("No vertd server URL configured");
 	try {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const url = new URL(
 			/^[a-z][a-z\d+.-]*:\/\//i.test(trimmed)
 				? trimmed

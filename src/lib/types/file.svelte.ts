@@ -17,6 +17,7 @@ import { error, log } from "#lib/util/logger.svelte";
 import { readSettings } from "#lib/util/settings";
 import { formatFilename } from "#lib/util/file";
 import { conversionConcurrency } from "#lib/util/consts";
+import { SvelteSet } from "svelte/reactivity";
 import { fileTypeFromBuffer } from "file-type";
 
 const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
@@ -123,7 +124,7 @@ export class VertFile {
 	public archiveFormats?: string[];
 	private fallbackToastId: number | null = null;
 	private slowConversionToastId: number | null = null;
-	private attemptedConverters = new Set<string>();
+	private attemptedConverters = new SvelteSet<string>();
 	private retryingFallback = false;
 	private postDownload: (() => Promise<void>) | null = null;
 	private disposal: Promise<void> | null = null;
@@ -591,6 +592,7 @@ export class VertFile {
 		const convertedFiles: File[] = [];
 		const convertedResults: VertFile[] = [];
 		const failedFiles: string[] = [];
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const progressFiles = new Map<number, VertFile>();
 		const progressInterval = setInterval(() => {
 			for (const [index, file] of progressFiles)
@@ -913,6 +915,7 @@ export class VertFile {
 
 	public hash(): Promise<string> {
 		const stream = this.file.stream();
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const hashes = new Set<string>();
 		const reader = stream.getReader();
 		return new Promise<string>((resolve, reject) => {

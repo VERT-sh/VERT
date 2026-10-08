@@ -2,6 +2,7 @@ import VertdErrorComponent from "#lib/components/functional/popups/VertdError.sv
 import { error, log } from "#lib/util/logger.svelte";
 import { m } from "#lib/paraglide/messages";
 import { Settings } from "#lib/sections/settings/index.svelte";
+import { SvelteMap, SvelteSet } from "svelte/reactivity";
 import {
 	VertdInstance,
 	getVertdCustomHeaders,
@@ -347,7 +348,7 @@ export class VertdConverter extends Converter {
 	public ready = $state(false);
 	public reportsProgress = true;
 
-	private activeConversions = new Map<
+	private activeConversions = new SvelteMap<
 		string,
 		{
 			ws: WebSocket;
@@ -356,11 +357,11 @@ export class VertdConverter extends Converter {
 		}
 	>();
 
-	private activeUploads = new Map<string, UploadTask>();
+	private activeUploads = new SvelteMap<string, UploadTask>();
 
-	private activeDownloads = new Map<string, DownloadTask>();
+	private activeDownloads = new SvelteMap<string, DownloadTask>();
 
-	private cancelledConversions = new Set<string>();
+	private cancelledConversions = new SvelteSet<string>();
 
 	public supportedFormats = [
 		...videoFormats
@@ -393,11 +394,13 @@ export class VertdConverter extends Converter {
 		// ensure it's a map
 		// this might fix the "e.get" isn't a function error, but i can't reproduce it
 		if (!(blockedHashes instanceof Map) || blockedHashes === null) {
+			// eslint-disable-next-line svelte/prefer-svelte-reactivity
 			blockedHashes = new Map(Object.entries(blockedHashes || {}));
 			Settings.instance.settings.vertdBlockedHashes = blockedHashes;
 			Settings.instance.save();
 		}
 
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const now = new Date();
 		const dates = blockedHashes.get(hash) || [];
 		const filteredDates = dates.filter(
@@ -421,11 +424,13 @@ export class VertdConverter extends Converter {
 
 		// same as above (blocked())
 		if (!(blockedHashes instanceof Map) || blockedHashes === null) {
+			// eslint-disable-next-line svelte/prefer-svelte-reactivity
 			blockedHashes = new Map(Object.entries(blockedHashes || {}));
 			Settings.instance.settings.vertdBlockedHashes = blockedHashes;
 			Settings.instance.save();
 		}
 
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const now = new Date();
 		const dates = blockedHashes.get(hash) || [];
 		dates.push(now);

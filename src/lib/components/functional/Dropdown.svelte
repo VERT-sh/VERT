@@ -163,7 +163,7 @@
 					)}
 				</p>
 			{/key}
-			{#each options as option}
+			{#each options as option (getValue(option))}
 				<p
 					class={clsx(
 						"col-start-1 row-start-1 pointer-events-none",
@@ -192,7 +192,7 @@
 		}}
 		class="shadow-xl bg-panel-alt shadow-black/25 overflow-hidden z-[9999] bg-background rounded-xl max-h-[23.5vh] overflow-y-auto"
 	>
-		{#each options as option}
+		{#each options as option (getValue(option))}
 			<button
 				data-selected={getValue(option) === selected}
 				class={clsx(

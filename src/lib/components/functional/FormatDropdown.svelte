@@ -504,7 +504,7 @@
 				</p>
 			{/key}
 			{#if currentCategory}
-				{#each categories[currentCategory].formats as option}
+				{#each categories[currentCategory].formats as option (option)}
 					<p
 						class="col-start-1 row-start-1 invisible pointer-events-none truncate max-w-[2.5rem]"
 					>
@@ -588,7 +588,7 @@
 			{/if}
 			<!-- available categories -->
 			<div class="flex items-center justify-between">
-				{#each filteredData.categories as category}
+				{#each filteredData.categories as category (category)}
 					<button
 						class="flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize
                         {currentCategory === category

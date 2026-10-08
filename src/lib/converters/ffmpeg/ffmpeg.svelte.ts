@@ -3,6 +3,7 @@ import { Converter, FormatInfo } from "../converter.svelte";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { browser } from "$app/env";
 import { error, log } from "#lib/util/logger.svelte";
+import { SvelteMap } from "svelte/reactivity";
 import { m } from "#lib/paraglide/messages";
 import { Settings } from "#lib/sections/settings/index.svelte";
 import { ToastManager } from "#lib/util/toast.svelte";
@@ -23,7 +24,7 @@ export class FFmpegConverter extends Converter {
 	public name = "ffmpeg";
 	public ready = $state(false);
 
-	private activeConversions = new Map<string, FFmpeg>();
+	private activeConversions = new SvelteMap<string, FFmpeg>();
 
 	// non supported audio to video formats
 	private cantConvert: string[] = ["ogx"];

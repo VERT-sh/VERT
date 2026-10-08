@@ -24,6 +24,7 @@ import { registerDtsDecoder, registerDtsEncoder } from "@mediabunny/dts";
 import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 import { registerProresDecoder } from "@mediabunny/prores";
+import { SvelteMap } from "svelte/reactivity";
 import { Converter, FormatInfo, type WorkerStatus } from "../converter.svelte";
 import { error, log } from "#lib/util/logger.svelte";
 import { m } from "#lib/paraglide/messages";
@@ -135,7 +136,7 @@ export class MediabunnyConverter extends Converter {
 	public status: WorkerStatus = $state("ready");
 	public reportsProgress: boolean = true;
 
-	private activeConversions = new Map<string, Conversion>();
+	private activeConversions = new SvelteMap<string, Conversion>();
 
 	private formats: string[] = [
 		"mp4",

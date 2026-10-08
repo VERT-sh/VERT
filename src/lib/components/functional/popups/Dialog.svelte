@@ -72,7 +72,7 @@
 		{/if}
 	</div>
 	<div class="flex flex-row items-center justify-between gap-4 w-full">
-		{#each buttons as { text, action }, i}
+		{#each buttons as { text, action }, i (`${i}-${text}`)}
 			<button
 				class="w-full justify-center hover:scale-105 active:scale-100 duration-200 flex items-center gap-2 p-2 rounded-md {i ===
 				1

@@ -199,6 +199,7 @@ export async function getStorageInfo(): Promise<StorageInfo> {
 }
 
 export function formatFileStamp(): string {
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	return new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 }
 
@@ -216,6 +217,7 @@ export function downloadText(filename: string, content: string): void {
 export function buildReport(systemInfo: SystemInfo): string {
 	return [
 		`${VERT_NAME} debug report`,
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		`Generated: ${new Date().toISOString()}`,
 		`Environment: ${PUB_ENV}`,
 		`Commit: ${commitHash}`,

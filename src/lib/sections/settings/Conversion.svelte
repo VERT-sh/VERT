@@ -44,7 +44,7 @@
 				<FancyTextInput
 					placeholder="VERT_%name%"
 					bind:value={settings.filenameFormat}
-					extension={".ext"}
+					extension=".ext"
 					type="text"
 				/>
 			</div>
@@ -141,7 +141,7 @@
 									</p>
 									<FormatDropdown
 										categories={{ image: categories.image }}
-										from={".png"}
+										from=".png"
 										bind:selected={
 											settings.defaultFormat.image
 										}
@@ -156,7 +156,7 @@
 									</p>
 									<FormatDropdown
 										categories={{ audio: categories.audio }}
-										from={".mp3"}
+										from=".mp3"
 										bind:selected={
 											settings.defaultFormat.audio
 										}
@@ -171,7 +171,7 @@
 									</p>
 									<FormatDropdown
 										categories={{ video: categories.video }}
-										from={".mp4"}
+										from=".mp4"
 										bind:selected={
 											settings.defaultFormat.video
 										}
@@ -186,7 +186,7 @@
 									</p>
 									<FormatDropdown
 										categories={{ doc: categories.doc }}
-										from={".docx"}
+										from=".docx"
 										bind:selected={
 											settings.defaultFormat.document
 										}
@@ -271,8 +271,8 @@
 										type="number"
 										min={1}
 										max={100}
-										placeholder={"100"}
-										extension={"%"}
+										placeholder="100"
+										extension="%"
 									/>
 								</div>
 							</div>

@@ -70,7 +70,7 @@
 	<!-- Main contributors -->
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-col flex-wrap gap-2">
-			{#each mainContribs as contrib}
+			{#each mainContribs as contrib (contrib.github)}
 				{@const { name, github, avatar, role } = contrib}
 				{@render contributor(name, github, avatar, role)}
 			{/each}
@@ -88,7 +88,7 @@
 					{m["about.credits.notable_description"]()}
 				</p>
 				<div class="flex flex-col gap-2">
-					{#each notableContribs as contrib}
+				{#each notableContribs as contrib (contrib.github)}
 						{@const { name, github, avatar, role } = contrib}
 						{@render contributor(name, github, avatar, role, true)}
 					{/each}
@@ -130,7 +130,7 @@
 
 				{#if ghContribs && ghContribs.length > 0}
 					<div class="flex flex-row flex-wrap gap-2">
-						{#each ghContribs as contrib}
+					{#each ghContribs as contrib (contrib.github)}
 							{@const { name, github, avatar } = contrib}
 							{@render contributor(name, github, avatar)}
 						{/each}

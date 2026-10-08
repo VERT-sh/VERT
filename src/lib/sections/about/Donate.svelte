@@ -239,7 +239,7 @@
 			</button>
 		</div>
 		<div class="grid grid-cols-4 gap-3 w-full">
-			{#each presetAmounts as preset, i}
+			{#each presetAmounts as preset, i (preset)}
 				<button
 					onclick={() => amountClick(preset)}
 					class={clsx(

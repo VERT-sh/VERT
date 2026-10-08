@@ -10,6 +10,7 @@ import {
 	formatsWithoutTransparency,
 } from "./magick-settings";
 import { Settings } from "#lib/sections/settings/index.svelte";
+import { SvelteMap } from "svelte/reactivity";
 import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";
 import { ToastManager } from "#lib/util/toast.svelte";
 import type {
@@ -23,7 +24,7 @@ export class MagickConverter extends Converter {
 	public ready = $state(false);
 	public wasm: ArrayBuffer = null!;
 
-	private activeConversions = new Map<string, Worker>();
+	private activeConversions = new SvelteMap<string, Worker>();
 
 	public supportedFormats = [
 		// manually tested formats

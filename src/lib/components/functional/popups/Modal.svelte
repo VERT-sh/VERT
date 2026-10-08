@@ -124,7 +124,7 @@
 		</div>
 
 		<div class="flex flex-row items-center gap-2 w-full">
-			{#each buttons as { text, action, primary }, i}
+			{#each buttons as { text, action, primary }, i (`${i}-${text}`)}
 				<button
 					class="hover:scale-105 active:scale-100 duration-200 flex items-center gap-2 p-2 rounded-md {primary ||
 					i === 1

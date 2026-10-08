@@ -222,6 +222,7 @@ class Files {
 			log(["files"], `extracted ${totalEntries} files from zip`);
 
 			// check if all files in zip use the same converter and are compatible
+			// eslint-disable-next-line svelte/prefer-svelte-reactivity
 			const convertersUsed = new Set<string>();
 			let incompatibleFiles = false;
 			const archiveFiles: VertFile[] = [];

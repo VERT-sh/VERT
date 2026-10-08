@@ -183,7 +183,7 @@
 
 		<div class="flex gap-4 mt-8 md:flex-row flex-col">
 			{#if browser}
-				{#each Object.entries(worker) as [key, s], i}
+				{#each Object.entries(worker) as [key, s], i (key)}
 					{@const Icon = s.icon}
 					<div class="file-category-card w-full flex flex-col gap-4">
 						<div class="file-category-card-inner">
@@ -271,7 +271,7 @@
 										<p
 											class="flex flex-wrap justify-center leading-tight px-2"
 										>
-											{#each s.formats.split(", ") as format, index}
+											{#each s.formats.split(", ") as format, index (format)}
 												{@const isPartial =
 													format.endsWith("*")}
 												{@const formatName = isPartial
@@ -307,7 +307,7 @@
 							{#if showBlur[i]}
 								<div
 									class="absolute left-0 bottom-0 w-full h-10 pointer-events-none"
-									style={`background: linear-gradient(to top, var(--bg-panel), transparent 65%);`}
+									style="background: linear-gradient(to top, var(--bg-panel), transparent 65%);"
 								></div>
 							{/if}
 						</div>

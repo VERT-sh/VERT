@@ -34,6 +34,7 @@
 	let enablePlausible = $state(false);
 	let isAprilFools = $state(false);
 
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	let scrollPositions = new Map<string, number>();
 
 	beforeNavigate((nav) => {
