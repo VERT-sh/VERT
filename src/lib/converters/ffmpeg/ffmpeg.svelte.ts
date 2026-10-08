@@ -10,6 +10,8 @@ import { ToastManager } from "#lib/util/toast.svelte";
 import { getCodecs, toArgs } from "./ffmpeg.codecs";
 import { buildImageSequenceCommand } from "./ffmpeg.animated";
 import { extractAlbumArt, avWithArt, avWithBg } from "./utils/ffmpeg";
+import ffmpegCoreURL from "@ffmpeg/core?url";
+import ffmpegWasmURL from "@ffmpeg/core/wasm?url";
 import type {
 	SettingCategories,
 	SettingDefinition,
@@ -17,6 +19,9 @@ import type {
 	NormalizedSettings,
 } from "#lib/types/conversion-settings";
 import { videoFormats } from "../vertd/vertd.svelte";
+
+const coreURL = new URL(ffmpegCoreURL, import.meta.url).href;
+const wasmURL = new URL(ffmpegWasmURL, import.meta.url).href;
 
 // TODO: differentiate in UI? (not native formats)
 export class FFmpegConverter extends Converter {
@@ -76,40 +81,33 @@ export class FFmpegConverter extends Converter {
 
 	constructor() {
 		super();
+		if (!browser) return;
 		this.log = (msg) => log(["converters", this.name], msg);
 		this.error = (msg) => error(["converters", this.name], msg);
 		this.log(`created converter`);
-		if (!browser) return;
+	}
 
+	public async init(): Promise<void> {
 		// this is just to cache the wasm and js for when we actually use it. we're not using this ffmpeg instance
+		if (!browser) return;
 		this.ffmpeg = new FFmpeg();
-		void (async () => {
-			try {
-				const baseURL =
-					"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
+		try {
+			this.status = "downloading";
 
-				this.status = "downloading";
+			await this.ffmpeg.load({ coreURL, wasmURL });
 
-				await this.ffmpeg.load({
-					coreURL: `${baseURL}/ffmpeg-core.js`,
-					wasmURL: `${baseURL}/ffmpeg-core.wasm`,
-				});
-
-				this.status = "ready";
-				this.ffmpeg.terminate();
-				this.log(
-					"preloaded ffmpeg assets and released the cache instance",
-				);
-			} catch (err) {
-				this.error(`Error loading ffmpeg: ${err}`);
-				this.status = "error";
-				this.ffmpeg.terminate();
-				ToastManager.add({
-					type: "error",
-					message: m["workers.errors.ffmpeg"](),
-				});
-			}
-		})();
+			this.status = "ready";
+			this.ffmpeg.terminate();
+			this.log("preloaded ffmpeg assets and released the cache instance");
+		} catch (err) {
+			this.error(`Error loading ffmpeg: ${err}`);
+			this.status = "error";
+			this.ffmpeg.terminate();
+			ToastManager.add({
+				type: "error",
+				message: m["workers.errors.ffmpeg"](),
+			});
+		}
 	}
 
 	public async getAvailableSettings(): Promise<SettingCategories> {
@@ -358,12 +356,7 @@ export class FFmpegConverter extends Converter {
 			});
 		}
 
-		const baseURL =
-			"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
-		await ffmpeg.load({
-			coreURL: `${baseURL}/ffmpeg-core.js`,
-			wasmURL: `${baseURL}/ffmpeg-core.wasm`,
-		});
+		await ffmpeg.load({ coreURL, wasmURL });
 
 		return ffmpeg;
 	}

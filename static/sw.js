@@ -1,15 +1,14 @@
-const CACHE_NAME = "vert-wasm-cache-v3"; // updated when workers update
+const CACHE_NAME = "vert-wasm-cache-v4"; // updated when workers update
 
 const WASM_FILES = [
 	"/pandoc.wasm", // from https://github.com/haskell-wasm/pandoc-wasm
-	"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js",
-	"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm",
 ];
 
 const WASM_URL_PATTERNS = [
 	/\/src\/lib\/workers\/.*\.js$/, // dev mode worker files
 	/\/assets\/.*worker.*\.js$/, // prod worker files
 	/magick.*\.wasm$/, // magick-wasm (unneeded?)
+	/\/ffmpeg-core[^/]*\.(js|wasm)$/, // ffmpeg wasm core
 ];
 
 function shouldCacheUrl(url) {

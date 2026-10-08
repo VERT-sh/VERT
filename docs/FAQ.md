@@ -31,8 +31,6 @@ We use [Plausible](https://plausible.io/privacy-focused-web-analytics), a privac
 
 Yes! If you would prefer VERT to not make any requests to external services (video conversion, analytics, among others), you can set the `PUB_DISABLE_ALL_EXTERNAL_REQUESTS` environment variable to `true` **during build time**.
 
-The only external request VERT will make with this option is to `cdn.jsdelivr.net`, which is used to download FFmpeg's WebAssembly build.
-
 ### What libraries does VERT use?
 
 VERT uses FFmpeg for audio and video conversion, imagemagick for images and Pandoc for documents. A big thanks to them for maintaining such excellent libraries for so many years.

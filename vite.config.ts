@@ -60,7 +60,12 @@ export default defineConfig(({ command }) => {
 			format: "es",
 		},
 		optimizeDeps: {
-			exclude: ["@ffmpeg/core-mt", "@ffmpeg/ffmpeg", "@ffmpeg/util"],
+			exclude: [
+				"@ffmpeg/core",
+				"@ffmpeg/core-mt",
+				"@ffmpeg/ffmpeg",
+				"@ffmpeg/util",
+			],
 		},
 		build: {
 			target: "esnext",

@@ -55,6 +55,13 @@ export class Converter {
 	}
 
 	/**
+	 * Downloads (if necessary) and initializes the converter.
+	 */
+	public async init(): Promise<void> {
+		this.status = "ready";
+	}
+
+	/**
 	 * Get available settings for this converter.
 	 * Can be overridden per converter for format-specific settings.
 	 * @param input The input file.

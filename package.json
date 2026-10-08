@@ -44,6 +44,7 @@
 	},
 	"dependencies": {
 		"@bjorn3/browser_wasi_shim": "^0.4.2",
+		"@ffmpeg/core": "0.12.10",
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/util": "^0.12.2",
 		"@fontsource/azeret-mono": "^5.3.0",
