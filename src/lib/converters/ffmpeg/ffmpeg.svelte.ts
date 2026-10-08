@@ -2,7 +2,6 @@ import { VertFile } from "#lib/types";
 import { Converter, FormatInfo } from "../converter.svelte";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { browser } from "$app/env";
-import { error, log } from "#lib/util/logger.svelte";
 import { SvelteMap } from "svelte/reactivity";
 import { m } from "#lib/paraglide/messages";
 import { Settings } from "#lib/sections/settings/index.svelte";
@@ -74,39 +73,28 @@ export class FFmpegConverter extends Converter {
 
 	public readonly reportsProgress = true;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
-
 	constructor() {
 		super();
 		if (!browser) return;
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
 		this.log(`created converter`);
 	}
 
-	public async init(): Promise<void> {
+	protected async download(): Promise<void> {
 		// this is just to cache the wasm and js for when we actually use it. we're not using this ffmpeg instance
 		if (!browser) return;
 		this.ffmpeg = new FFmpeg();
 		try {
-			this.status = "downloading";
-
 			await this.ffmpeg.load({ coreURL, wasmURL });
 
-			this.status = "ready";
 			this.ffmpeg.terminate();
-			this.log("preloaded ffmpeg assets and released the cache instance");
+			this.status = "ready";
 		} catch (err) {
-			this.error(`Error loading ffmpeg: ${err}`);
-			this.status = "error";
 			this.ffmpeg.terminate();
 			ToastManager.add({
 				type: "error",
 				message: m["workers.errors.ffmpeg"](),
 			});
+			throw err;
 		}
 	}
 
@@ -226,6 +214,8 @@ export class FFmpegConverter extends Converter {
 
 		const isAlac = to === ".alac";
 		if (isAlac) to = ".m4a";
+
+		await this.init();
 
 		let conversionError: string | null = null;
 		const ffmpeg = await this.setupFFmpeg(input);

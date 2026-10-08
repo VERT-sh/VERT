@@ -45,7 +45,7 @@
 				title: m["upload.cards.images"](),
 				status:
 					converters.find((c) => c.name === "imagemagick")?.status ||
-					"not-ready",
+					"idle",
 			},
 			Audio: {
 				formats: getSupportedFormats("ffmpeg"),
@@ -53,7 +53,7 @@
 				title: m["upload.cards.audio"](),
 				status:
 					converters.find((c) => c.name === "ffmpeg")?.status ||
-					"not-ready",
+					"idle",
 			},
 			Documents: {
 				formats: getSupportedFormats("pandoc"),
@@ -61,7 +61,7 @@
 				title: m["upload.cards.documents"](),
 				status:
 					converters.find((c) => c.name === "pandoc")?.status ||
-					"not-ready",
+					"idle",
 			},
 		};
 
@@ -75,17 +75,16 @@
 				.filter((f) => f !== "none")
 				.join(", ");
 
-			const mediabunnyStatus = converters.find(
+			const mediabunnyAvailable = converters.find(
 				(c) => c.name === "mediabunny",
-			)?.status;
+			)?.isAvailable();
 			const vertdReady = $vertdLoaded === true;
-			const mediabunnyReady = mediabunnyStatus === "ready";
 			const videoStatus =
-				vertdReady && mediabunnyReady
+				vertdReady && mediabunnyAvailable
 					? "ready"
-					: vertdReady || mediabunnyReady
+					: vertdReady || mediabunnyAvailable
 						? "partially-ready"
-						: "not-ready";
+						: "error";
 
 			output.Video = {
 				formats,
@@ -120,12 +119,16 @@
 		switch (status) {
 			case "downloading":
 				return m["upload.cards.status.downloading"]();
+			case "initializing":
+				return m["upload.cards.status.initializing"]();
 			case "partially-ready":
 				return m["upload.cards.status.partially_ready"]();
 			case "ready":
 				return m["upload.cards.status.ready"]();
+			case "idle":
+				return m["upload.cards.status.not_initialized"]();
 			default:
-				// "not-ready", "error" and other statuses (somehow)
+				// "error" and other statuses (somehow)
 				return m["upload.cards.status.not_ready"]();
 		}
 	};

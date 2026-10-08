@@ -2,7 +2,6 @@ import { VertFile, type WorkerMessage } from "#lib/types";
 import { Converter, FormatInfo } from "../converter.svelte";
 import { browser } from "$app/env";
 import PandocWorker from "#lib/workers/pandoc?worker&url";
-import { error, log } from "#lib/util/logger.svelte";
 import { ToastManager } from "#lib/util/toast.svelte";
 import { SvelteMap } from "svelte/reactivity";
 import { m } from "#lib/paraglide/messages";
@@ -14,36 +13,30 @@ export class PandocConverter extends Converter {
 
 	private activeConversions = new SvelteMap<string, Worker>();
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
-
 	constructor() {
 		super();
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
 		if (!browser) return;
-		(async () => {
-			try {
-				this.status = "downloading";
-				this.wasm = await fetch("/pandoc.wasm").then((r) =>
-					r.arrayBuffer(),
-				);
+	}
 
-				this.status = "ready";
-			} catch (err) {
-				this.status = "error";
-				this.error(`Failed to load Pandoc worker: ${err}`);
-				ToastManager.add({
-					type: "error",
-					message: m["workers.errors.pandoc"](),
-				});
-			}
-		})();
+	protected async download(): Promise<void> {
+		if (!browser) return;
+		try {
+			this.wasm = await fetch("/pandoc.wasm").then((r) =>
+				r.arrayBuffer(),
+			);
+		} catch (err) {
+			this.error(`Failed to load Pandoc WASM: ${err}`);
+			ToastManager.add({
+				type: "error",
+				message: m["workers.errors.pandoc"](),
+			});
+			throw err;
+		}
 	}
 
 	public async convert(file: VertFile, to: string): Promise<VertFile> {
+		await this.init();
+
 		this.trackConversion(file);
 		const worker = new Worker(PandocWorker, {
 			type: "module",

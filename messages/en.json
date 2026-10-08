@@ -33,7 +33,7 @@
 				"ready": "ready",
 				"partially_ready": "partially ready",
 				"not_ready": "not ready",
-				"not_initialized": "not initialized",
+				"not_initialized": "not initialized yet",
 				"downloading": "downloading...",
 				"initializing": "initializing...",
 				"unknown": "unknown status"
@@ -207,7 +207,8 @@
 			"document_file": "Document file",
 			"image_file": "Image file",
 			"convert_file": "Convert this file",
-			"download_file": "Download this file"
+			"download_file": "Download this file",
+			"converter_initializing": "The converter is being downloaded and initialized. The converters will be cached in your browser for future conversions."
 		},
 		"errors": {
 			"cant_convert": "We can't convert this file.",
@@ -220,7 +221,7 @@
 			},
 			"unsupported_format": "Only image, video, audio, and document files are supported",
 			"format_output_only": "This format can currently only be used as output (converted to), not as input.",
-			"worker_downloading": "The {type} converter is currently being initialized, please wait a few moments.",
+			"worker_downloading": "The {type} converter is currently being downloaded and/or initialized, please wait a few moments.",
 			"worker_error": "The {type} converter had an error during initialization, please try again later.",
 			"worker_timeout": "The {type} converter is taking longer than expected to initialize, please wait a few more moments or refresh the page.",
 			"audio": "audio",
@@ -410,8 +411,9 @@
 				"title": "Converters",
 				"formats": "Formats",
 				"statuses": {
-					"not_ready": "Not ready",
+					"idle": "Not initialized",
 					"downloading": "Downloading",
+					"initializing": "Initializing",
 					"ready": "Ready",
 					"partially_ready": "Partially ready",
 					"error": "Error"

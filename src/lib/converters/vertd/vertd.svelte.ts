@@ -1,5 +1,4 @@
 import VertdErrorComponent from "#lib/components/functional/popups/VertdError.svelte";
-import { error, log } from "#lib/util/logger.svelte";
 import { m } from "#lib/paraglide/messages";
 import { Settings } from "#lib/sections/settings/index.svelte";
 import { SvelteMap, SvelteSet } from "svelte/reactivity";
@@ -372,17 +371,10 @@ export class VertdConverter extends Converter {
 		...cantDecode.map((f) => new FormatInfo(f, false, true, true, 0)),
 	];
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
-
 	private codecs: CodecsResponse = { videoCodecs: [], audioCodecs: [] };
 
 	constructor() {
 		super();
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
 		this.log("created converter");
 		this.log("not rly sure how to implement this :P");
 		this.status = "ready";
@@ -925,8 +917,7 @@ export class VertdConverter extends Converter {
 			return;
 		}
 
-		log(
-			["converters", this.name],
+		this.log(
 			`cancelling conversion for file ${input.name}`,
 		);
 

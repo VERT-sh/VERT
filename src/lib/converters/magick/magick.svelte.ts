@@ -1,5 +1,4 @@
 import { browser } from "$app/env";
-import { error, log } from "#lib/util/logger.svelte";
 import { m } from "#lib/paraglide/messages";
 import { VertFile, type WorkerMessage } from "#lib/types";
 import MagickWorker from "#lib/workers/magick?worker&url";
@@ -91,23 +90,14 @@ export class MagickConverter extends Converter {
 
 	public readonly reportsProgress = false;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
-
 	constructor() {
 		super();
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
 		this.log(`created converter`);
 		if (!browser) return;
-		this.initializeWasm();
 	}
 
-	private async initializeWasm() {
+	protected async download(): Promise<void> {
 		try {
-			this.status = "downloading";
 			const response = await fetch(magickWasm);
 			if (!response.ok) {
 				throw new Error(
@@ -116,15 +106,12 @@ export class MagickConverter extends Converter {
 			}
 
 			this.wasm = await response.arrayBuffer();
-			this.status = "ready";
 		} catch (err) {
-			this.status = "error";
-			this.error(`Failed to load ImageMagick WASM: ${err}`);
-
 			ToastManager.add({
 				type: "error",
 				message: m["workers.errors.magick"](),
 			});
+			throw err;
 		}
 	}
 
@@ -250,6 +237,8 @@ export class MagickConverter extends Converter {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		...args: any[]
 	): Promise<VertFile> {
+		await this.init();
+
 		this.trackConversion(input);
 		this.log(`converting ${input.name} to ${to}`);
 

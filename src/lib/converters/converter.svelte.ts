@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { error, log } from "#lib/util/logger.svelte";
 import type { VertFile } from "#lib/types";
 import type {
 	ConversionSettings,
@@ -8,7 +9,12 @@ import type {
 } from "#lib/types/conversion-settings";
 
 export type WorkerStatus =
-	"not-ready" | "downloading" | "ready" | "partially-ready" | "error";
+	| "idle" // not initialized yet (nothing downloaded)
+	| "downloading" // fetching the converter's assets (wasm/js)
+	| "initializing" // initialize converter after downloading
+	| "ready"
+	| "partially-ready"
+	| "error"; // actual failure during initialization
 
 export class FormatInfo {
 	public name: string;
@@ -44,21 +50,69 @@ export class Converter {
 	 */
 	public supportedFormats: FormatInfo[] = [];
 
-	public status: WorkerStatus = $state("not-ready");
+	public status: WorkerStatus = $state("idle");
 	public readonly reportsProgress: boolean = false;
 
 	private timeoutId?: ReturnType<typeof setTimeout>;
 	private activeInput?: VertFile;
+	private initPromise: Promise<void> | null = null;
 
-	constructor(public readonly timeout: number = 10) {
-		this.startTimeout();
-	}
+	protected log: (...msg: unknown[]) => void = (...msg) =>
+		log(["converters", this.name], ...msg);
+	protected error: (...msg: unknown[]) => void = (...msg) =>
+		error(["converters", this.name], ...msg);
+
+	constructor(public readonly timeout: number = 10) {}
 
 	/**
-	 * Downloads (if necessary) and initializes the converter.
+	 * Downloads any assets (WASM/JS) the converter needs.
 	 */
-	public async init(): Promise<void> {
-		this.status = "ready";
+	protected async download(): Promise<void> {}
+
+	/**
+	 * Initializes the converter after downloading its assets.
+	 */
+	protected async setup(): Promise<void> {}
+
+	public init(): Promise<void> {
+		// allow a another attempt if the previous one failed
+		if (this.status === "error") this.initPromise = null;
+		return (this.initPromise ??= this.runInit());
+	}
+
+	private async runInit(): Promise<void> {
+		if (this.status === "ready" || this.status === "partially-ready")
+			return;
+
+		const hasDownload = this.download !== Converter.prototype.download;
+		const hasSetup = this.setup !== Converter.prototype.setup;
+
+		// nothing to do unless a subclass implements one of the hooks
+		if (!hasDownload && !hasSetup) {
+			this.status = "ready";
+			return;
+		}
+
+		this.log(`initializing (was ${this.status})`);
+		this.startTimeout();
+		try {
+			if (hasDownload) {
+				this.status = "downloading";
+				await this.download();
+			}
+			if (hasSetup) {
+				this.status = "initializing";
+				await this.setup();
+			}
+			// if the hooks didn't set a terminal status, assume it succeeded
+			if (this.status === "downloading" || this.status === "initializing")
+				this.status = "ready";
+		} catch (err) {
+			this.error(`initialization failed: ${err}`);
+			this.status = "error";
+		} finally {
+			this.clearTimeout();
+		}
 	}
 
 	/**
@@ -101,10 +155,11 @@ export class Converter {
 	}
 
 	private startTimeout() {
+		this.clearTimeout();
 		this.timeoutId = setTimeout(() => {
-			if (this.status === "ready") return;
-			this.status = "not-ready";
-			if (this.activeInput) void this.cancel(this.activeInput);
+			if (this.status !== "downloading" && this.status !== "initializing")
+				return;
+			this.log(`initialization is taking longer than ${this.timeout}s`);
 		}, this.timeout * 1000);
 	}
 
@@ -149,6 +204,18 @@ export class Converter {
 		return true;
 	}
 
+	/**
+	 * This is to indicate whether the converter is usable at all.
+	 * It will be true if its still downloading / initializing - it shouldn't block the user from starting a conversion
+	 * unless it does actually fail to initialize
+	 */
+	public isAvailable(): boolean {
+		return this.status !== "error";
+	}
+
+	/**
+	 * Whether this converter is initialized and usable right now
+	 */
 	public isReady(): boolean {
 		return this.status === "ready" || this.status === "partially-ready";
 	}

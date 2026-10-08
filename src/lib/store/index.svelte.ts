@@ -58,6 +58,12 @@ class Files {
 		);
 	}
 
+	// preload first required converter when added to list
+	private preloadConverters(file: VertFile): void {
+		const [preferred] = this.getRequiredConverters(file);
+		void preferred?.init();
+	}
+
 	public requiredConverters = $derived(
 		Array.from(
 			new Set(
@@ -279,6 +285,7 @@ class Files {
 
 				this.files.push(vf);
 				this._addThumbnail(vf);
+				this.preloadConverters(vf);
 
 				// set converter
 				// TODO: this is weird, we rely on conversionSettings for the right converter but zip archives obv dont have settings to change
@@ -340,6 +347,7 @@ class Files {
 		if (file instanceof VertFile) {
 			this.files.push(file);
 			this._addThumbnail(file);
+			this.preloadConverters(file);
 		} else {
 			// regular files
 			const format = input.from;
@@ -372,6 +380,7 @@ class Files {
 			vf.to = to;
 			this.files.push(vf);
 			this._addThumbnail(vf);
+			this.preloadConverters(vf);
 
 			const convName = converter.name;
 			if (

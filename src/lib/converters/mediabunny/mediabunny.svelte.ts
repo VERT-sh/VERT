@@ -25,8 +25,7 @@ import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 import { registerProresDecoder } from "@mediabunny/prores";
 import { SvelteMap } from "svelte/reactivity";
-import { Converter, FormatInfo, type WorkerStatus } from "../converter.svelte";
-import { error, log } from "#lib/util/logger.svelte";
+import { Converter, FormatInfo } from "../converter.svelte";
 import { m } from "#lib/paraglide/messages";
 import type {
 	SettingDefinition,
@@ -133,7 +132,6 @@ const buildAudioConfig = (
 
 export class MediabunnyConverter extends Converter {
 	public name = "mediabunny";
-	public status: WorkerStatus = $state("ready");
 	public reportsProgress: boolean = true;
 
 	private activeConversions = new SvelteMap<string, Conversion>();
@@ -156,27 +154,17 @@ export class MediabunnyConverter extends Converter {
 		...this.formats.map((f) => new FormatInfo(f, true, true, true, 2)),
 	];
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
-
 	constructor() {
 		super();
 
 		if (!browser) return;
+	}
 
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
-
+	protected async setup(): Promise<void> {
 		// additional mediabunny coders
 		// currently the official ones -- maybe add our own in the future
-		void this.initializeCodecs()
-			.then(() => this.checkStatus())
-			.catch((err) => {
-				this.error(`Failed to initialize Mediabunny codecs: ${err}`);
-				this.status = "error";
-			});
+		await this.initializeCodecs();
+		await this.checkStatus();
 	}
 
 	private async checkStatus() {
@@ -357,6 +345,8 @@ export class MediabunnyConverter extends Converter {
 		to: string,
 		settings: ConversionSettings,
 	): Promise<VertFile> {
+		await this.init();
+
 		this.trackConversion(file);
 		const toFormat = to.startsWith(".") ? to.slice(1) : to;
 		const originalName = file.file.name.split(".").slice(0, -1).join(".");

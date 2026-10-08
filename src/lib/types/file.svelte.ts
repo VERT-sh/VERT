@@ -204,7 +204,7 @@ export class VertFile {
 			.filter((converter) => {
 				if (
 					unavailableConverters[converter.name] ||
-					!converter.isReady()
+					!converter.isAvailable()
 				)
 					return false;
 				if (
@@ -255,7 +255,7 @@ export class VertFile {
 		return this.converters.some((converter) => {
 			if (
 				this.unavailableConverters[converter.name] ||
-				!converter.isReady()
+				!converter.isAvailable()
 			)
 				return false;
 

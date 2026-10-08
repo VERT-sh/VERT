@@ -67,8 +67,9 @@ export const CONVERTER_META: Record<
 };
 
 export const STATUS_CLASSES: Record<string, string> = {
-	"not-ready": "bg-button text-muted",
+	idle: "bg-button text-muted",
 	downloading: "bg-accent-blue text-black",
+	initializing: "bg-accent-blue text-black",
 	ready: "bg-accent-green text-black",
 	"partially-ready": "bg-accent-purple text-black",
 	error: "bg-accent-red text-black",
@@ -76,8 +77,9 @@ export const STATUS_CLASSES: Record<string, string> = {
 
 export function getStatusLabels(): Record<string, string> {
 	return {
-		"not-ready": m["settings.debug.converters.statuses.not_ready"](),
+		idle: m["settings.debug.converters.statuses.idle"](),
 		downloading: m["settings.debug.converters.statuses.downloading"](),
+		initializing: m["settings.debug.converters.statuses.initializing"](),
 		ready: m["settings.debug.converters.statuses.ready"](),
 		"partially-ready":
 			m["settings.debug.converters.statuses.partially_ready"](),

@@ -94,7 +94,7 @@
 			if (selectedConverter) return selectedConverter;
 		}
 
-		// prefer a usable converter over a not-ready one
+		// prefer a usable (loaded) converter over one that still has to initialize
 		const readyConverter = availableConverters.find(
 			(c) => c.status === "ready" || c.status === "partially-ready",
 		);
@@ -210,6 +210,10 @@
 	{@const isAudio = converterCategories.audio.includes(name)}
 	{@const isVideo = converterCategories.video.includes(name)}
 	{@const isDocument = converterCategories.doc.includes(name)}
+	{@const isInitializing =
+		currentConverter?.status === "idle" ||
+		currentConverter?.status === "downloading" ||
+		currentConverter?.status === "initializing"}
 	<Panel class="p-5 flex flex-col min-w-0 gap-4 relative">
 		<div class="flex-shrink-0 h-8 w-full flex items-center gap-2">
 			{#if !converters.length}
@@ -265,6 +269,23 @@
 					>
 						{file.name}
 					</h2>
+				{/if}
+			</div>
+			<div
+				class="flex-shrink-0 flex items-center justify-center overflow-visible transition-transform duration-300 {isInitializing
+					? 'w-8 opacity-100'
+					: 'w-0 opacity-0'}"
+			>
+				{#if isInitializing}
+					<Tooltip
+						text={m["convert.tooltips.converter_initializing"]()}
+						position="bottom"
+					>
+						<DownloadIcon
+							size="20"
+							class="animate-bounce text-muted"
+						/>
+					</Tooltip>
 				{/if}
 			</div>
 			<button
@@ -327,25 +348,6 @@
 						})}
 					</p>
 				</div>
-			{:else if currentConverter.status === "downloading"}
-				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
-				>
-					<p class="font-body font-bold">
-						{m["convert.errors.cant_convert"]()}
-					</p>
-					<p class="font-normal">
-						{m["convert.errors.worker_downloading"]({
-							type: isAudio
-								? m["convert.errors.audio"]()
-								: isVideo
-									? m["convert.errors.video"]()
-									: isDocument
-										? m["convert.errors.doc"]()
-										: m["convert.errors.image"](),
-						})}
-					</p>
-				</div>
 			{:else if currentConverter.status === "error"}
 				<div
 					class="h-full flex flex-col text-center justify-center text-failure"
@@ -355,25 +357,6 @@
 					</p>
 					<p class="font-normal">
 						{m["convert.errors.worker_error"]({
-							type: isAudio
-								? m["convert.errors.audio"]()
-								: isVideo
-									? m["convert.errors.video"]()
-									: isDocument
-										? m["convert.errors.doc"]()
-										: m["convert.errors.image"](),
-						})}
-					</p>
-				</div>
-			{:else if currentConverter.status === "not-ready"}
-				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
-				>
-					<p class="font-body font-bold">
-						{m["convert.errors.cant_convert"]()}
-					</p>
-					<p class="font-normal">
-						{m["convert.errors.worker_timeout"]({
 							type: isAudio
 								? m["convert.errors.audio"]()
 								: isVideo
