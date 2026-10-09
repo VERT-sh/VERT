@@ -40,6 +40,7 @@
 	import SettingsModal from "#lib/components/functional/popups/SettingsModal.svelte";
 	import { ToastManager } from "#lib/util/toast.svelte";
 	import { vertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
+	import clsx from "clsx";
 
 	let processedFileIds = $state(new Set<string>());
 
@@ -272,18 +273,30 @@
 				{/if}
 			</div>
 			<div
-				class="flex-shrink-0 flex items-center justify-center overflow-visible transition-transform duration-300 {isInitializing
-					? 'w-8 opacity-100'
-					: 'w-0 opacity-0'}"
+				class={clsx(
+					"flex-shrink-0 flex items-center justify-center overflow-visible transition-transform duration-300",
+					isInitializing ? "w-8 opacity-100" : "w-0 opacity-0",
+				)}
 			>
 				{#if isInitializing}
 					<Tooltip
-						text={m["convert.tooltips.converter_initializing"]()}
+						text={m["convert.tooltips.converter_initializing"]({
+							type: isAudio
+								? m["convert.errors.audio"]()
+								: isVideo
+									? m["convert.errors.video"]()
+									: isDocument
+										? m["convert.errors.doc"]()
+										: m["convert.errors.image"](),
+						})}
 						position="bottom"
 					>
 						<DownloadIcon
 							size="20"
-							class="animate-bounce text-muted"
+							class={clsx(
+								"text-muted",
+								$effects && "animate-bounce",
+							)}
 						/>
 					</Tooltip>
 				{/if}
