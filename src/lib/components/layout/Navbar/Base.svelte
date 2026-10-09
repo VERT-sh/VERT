@@ -173,13 +173,14 @@
 		{#if linkRect && isInitialized}
 			<div
 				class="absolute bg-panel-highlight rounded-xl"
-				style="width: {linkRect.width}px; height: {linkRect.height}px; top: {linkRect.top -
-					(containerRect?.top || 0)}px; left: {linkRect.left -
-					(containerRect?.left || 0)}px; opacity: {isSecretPage
-					? 0
-					: 1}; {$effects
-					? `transition: left var(--transition) ${duration}ms, top var(--transition) ${duration}ms, opacity var(--transition) ${duration}ms;`
-					: ''}"
+				style:width="{linkRect.width}px"
+				style:height="{linkRect.height}px"
+				style:top="{linkRect.top - (containerRect?.top || 0)}px"
+				style:left="{linkRect.left - (containerRect?.left || 0)}px"
+				style:opacity={isSecretPage ? 0 : 1}
+				style:transition={$effects
+					? `left var(--transition) ${duration}ms, top var(--transition) ${duration}ms, opacity var(--transition) ${duration}ms`
+					: null}
 			></div>
 		{/if}
 		<a

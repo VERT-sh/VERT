@@ -84,10 +84,10 @@
 
 <div
 	class="fixed top-0 left-0 w-screen h-screen -z-40 pointer-events-none"
-	style="background-color: {color.color}; 
-	mask-image: {maskImage}; 
-	-webkit-mask-image: {maskImage};
-	transition: background-color {duration}ms {transition};"
+	style:background-color={color.color}
+	style:mask-image={maskImage}
+	style:-webkit-mask-image={maskImage}
+	style:transition="background-color {duration}ms {transition}"
 ></div>
 
 {#if page.url.pathname === "/convert/" && files.files.length === 1}
@@ -95,13 +95,13 @@
 		"linear-gradient(to top, transparent 5%, rgba(0, 0, 0, 0.5) 100%)"}
 	<div
 		class="fixed top-0 left-0 w-screen h-screen -z-50"
-		style="background-image: url({files.files[0].blobUrl});
-		background-size: cover;
-		background-position: center;
-		background-repeat: no-repeat;
-		filter: blur(10px);
-		mask-image: {bgMask};
-		-webkit-mask-image: {bgMask};"
+		style:background-image="url({files.files[0].blobUrl})"
+		style:background-size="cover"
+		style:background-position="center"
+		style:background-repeat="no-repeat"
+		style:filter="blur(10px)"
+		style:mask-image={bgMask}
+		style:-webkit-mask-image={bgMask}
 		transition:fade={{ duration, easing: quintOut }}
 	></div>
 {/if}

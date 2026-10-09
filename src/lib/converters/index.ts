@@ -29,6 +29,14 @@ export const converterCategories = {
 	doc: ["pandoc"],
 };
 
+export type ConverterCategory = keyof typeof converterCategories;
+
+export const categoryByConverter = Object.fromEntries(
+	Object.entries(converterCategories).flatMap(([category, names]) =>
+		names.map((name) => [name, category as ConverterCategory] as const),
+	),
+) as Record<string, ConverterCategory>;
+
 export function getConverterByFormat(format: string) {
 	for (const converter of converters) {
 		if (converter.supportedFormats.some((f) => f.name === format)) {

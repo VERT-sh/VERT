@@ -199,14 +199,13 @@
 
 	<div
 		class="flex flex-col gap-3 w-full overflow-visible"
-		style="height: {paymentState !== 'prepay' ? 0 : 124}px;
-		transform: scaleY({paymentState !== 'prepay' ? 0 : 1});
-		opacity: {paymentState !== 'prepay' ? 0 : 1};
-		filter: blur({paymentState !== 'prepay' ? 4 : 0}px);
-		transition: height {payDuration}ms {transition}, 
-					opacity {payDuration - 200}ms {transition}, 
-					transform {payDuration}ms {transition},
-					filter {payDuration}ms {transition};"
+		style:height="{paymentState !== 'prepay' ? 0 : 124}px"
+		style:transform="scaleY({paymentState !== 'prepay' ? 0 : 1})"
+		style:opacity={paymentState !== "prepay" ? 0 : 1}
+		style:filter="blur({paymentState !== 'prepay' ? 4 : 0}px)"
+		style:transition="height {payDuration}ms {transition}, opacity {payDuration -
+			200}ms {transition}, transform {payDuration}ms {transition}, filter {payDuration}ms
+		{transition}"
 	>
 		<div class="flex gap-3 w-full">
 			<button
@@ -249,7 +248,7 @@
 							"bg-accent-red text-black": amount === preset,
 						},
 					)}
-					style={i === 2 ? "grid-column: 3;" : ""}
+					style:grid-column={i === 2 ? "3" : null}
 				>
 					${preset} USD
 				</button>

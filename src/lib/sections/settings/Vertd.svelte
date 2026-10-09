@@ -20,7 +20,20 @@
 	let vertdCommit = $state<string | null>(null);
 	let abortController: AbortController | null = null;
 
+	const vertdStatusLabel = $derived.by(() => {
+		if (vertdCommit === null) return m["settings.vertd.unavailable"]();
+		if (vertdCommit === "loading") return m["settings.vertd.loading"]();
+		// legacy commitId passed into message for languages that aren't updated yet (and to avoid "undefined" showing)
+		return m["settings.vertd.available"]({ commitId: vertdCommit });
+	});
+
 	const { settings = $bindable() }: { settings: ISettings } = $props();
+
+	const vertdSizeLimitLabel = $derived.by(() => {
+		if (vertdCommit === null) return "N/A";
+		const size = formatBytes($vertdSizeLimit);
+		return size === "0 B" ? "unlimited" : size;
+	});
 
 	$effect(() => {
 		if (abortController) abortController.abort();
@@ -78,11 +91,7 @@
 				})}
 			>
 				{m["settings.vertd.status"]()}
-				{vertdCommit
-					? vertdCommit === "loading"
-						? m["settings.vertd.loading"]()
-						: m["settings.vertd.available"]()
-					: m["settings.vertd.unavailable"]()}
+				{vertdStatusLabel}
 			</p>
 
 			<p class="text-sm text-muted font-normal">
@@ -170,12 +179,7 @@
 					{/if}
 					<p class="text-sm text-muted font-normal">
 						{m["settings.vertd.info"]({
-							sizeLimit:
-								vertdCommit === null
-									? "N/A"
-									: formatBytes($vertdSizeLimit) === "0 B"
-										? "unlimited"
-										: formatBytes($vertdSizeLimit),
+							sizeLimit: vertdSizeLimitLabel,
 							commitId: vertdCommit ?? "N/A",
 						})}
 					</p>

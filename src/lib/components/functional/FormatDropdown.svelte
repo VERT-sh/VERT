@@ -479,8 +479,10 @@
 	bind:this={dropdown}
 >
 	<button
-		class="relative flex items-center justify-center w-full font-display px-3 py-3.5 bg-button rounded-full overflow-hidden cursor-pointer focus:!outline-none
-		{disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}"
+		class={clsx(
+			"relative flex items-center justify-center w-full font-display px-3 py-3.5 bg-button rounded-full overflow-hidden focus:!outline-none",
+			disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+		)}
 		onclick={() => clickDropdown()}
 		{disabled}
 	>
@@ -549,9 +551,11 @@
 					<input
 						type="text"
 						placeholder={m["convert.dropdown.placeholder"]()}
-						class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground {filteredData.isFallback
-							? 'opacity-50 cursor-not-allowed'
-							: ''}"
+						class={clsx(
+							"flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground",
+							filteredData.isFallback &&
+								"opacity-50 cursor-not-allowed",
+						)}
 						bind:value={searchQuery}
 						oninput={handleSearch}
 						onkeydown={onEnter}
@@ -561,9 +565,10 @@
 						disabled={filteredData.isFallback}
 					/>
 					<span
-						class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center {filteredData.isFallback
-							? 'opacity-50'
-							: ''}"
+						class={clsx(
+							"absolute left-4 top-1/2 -translate-y-1/2 flex items-center",
+							filteredData.isFallback && "opacity-50",
+						)}
 					>
 						<SearchIcon class="w-4 h-4" />
 					</span>
@@ -590,10 +595,12 @@
 			<div class="flex items-center justify-between">
 				{#each filteredData.categories as category (category)}
 					<button
-						class="flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize
-                        {currentCategory === category
-							? 'text-accent border-b-accent'
-							: 'border-b-separator text-muted'}"
+						class={clsx(
+							"flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize",
+							currentCategory === category
+								? "text-accent border-b-accent"
+								: "border-b-separator text-muted",
+						)}
 						onclick={() => selectCategory(category)}
 					>
 						<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
@@ -638,12 +645,14 @@
 								{:else}
 									<button
 										data-selected={format === selected}
-										class="w-full p-2 text-center rounded-xl
-								{format === selected
-											? 'bg-accent text-black'
-											: format === from
-												? 'bg-separator'
-												: 'hover:bg-panel'}"
+										class={clsx(
+											"w-full p-2 text-center rounded-xl",
+											format === selected
+												? "bg-accent text-black"
+												: format === from
+													? "bg-separator"
+													: "hover:bg-panel",
+										)}
 										onclick={() => selectOption(format)}
 									>
 										{format}

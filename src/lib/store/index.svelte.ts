@@ -2,6 +2,7 @@ import { browser } from "$app/env";
 import {
 	byNative,
 	categories,
+	categoryByConverter,
 	converterCategories,
 	converters,
 } from "#lib/converters";
@@ -274,14 +275,7 @@ class Files {
 				);
 
 				const converterName = vf.converters[0].name;
-				const type =
-					converterName === "imagemagick"
-						? "image"
-						: converterName === "ffmpeg"
-							? "audio"
-							: converterName === "pandoc"
-								? "doc"
-								: "video";
+				const type = categoryByConverter[converterName] ?? "video";
 
 				this.files.push(vf);
 				this._addThumbnail(vf);

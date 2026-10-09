@@ -23,7 +23,8 @@
 	font-family: "Host Grotesk";
 	font-style: italic;
 	font-weight: 500;
-	src: url("/src/lib/assets/font/HostGrotesk-MediumItalic.woff2") format("woff2");
+	src: url("/src/lib/assets/font/HostGrotesk-MediumItalic.woff2")
+		format("woff2");
 }
 
 @font-face {

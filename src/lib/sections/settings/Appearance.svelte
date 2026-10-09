@@ -19,6 +19,7 @@
 	import { m } from "#lib/paraglide/messages";
 	import { getLocale } from "#lib/paraglide/runtime";
 	import Dropdown from "#lib/components/functional/Dropdown.svelte";
+	import clsx from "clsx";
 
 	let currentLocale = $state("en");
 
@@ -119,9 +120,10 @@
 						<button
 							bind:this={lightElement}
 							onclick={() => setTheme("light")}
-							class="btn {$effects
-								? ''
-								: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+							class={clsx(
+								"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+								!$effects && "!scale-100",
+							)}
 						>
 							<SunIcon size="24" class="inline-block mr-2" />
 							{m["settings.appearance.light"]()}
@@ -130,9 +132,10 @@
 						<button
 							bind:this={darkElement}
 							onclick={() => setTheme("dark")}
-							class="btn {$effects
-								? ''
-								: '!scale-100'} flex-1 p-4 rounded-lg text-black flex items-center justify-center"
+							class={clsx(
+								"btn flex-1 p-4 rounded-lg text-black flex items-center justify-center",
+								!$effects && "!scale-100",
+							)}
 						>
 							<MoonIcon size="24" class="inline-block mr-2" />
 							{m["settings.appearance.dark"]()}
@@ -154,9 +157,10 @@
 						<button
 							bind:this={enableEffectsElement}
 							onclick={() => setEffects(true)}
-							class="btn {$effects
-								? ''
-								: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+							class={clsx(
+								"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+								!$effects && "!scale-100",
+							)}
 						>
 							<PlayIcon size="24" class="inline-block mr-2" />
 							{m["settings.appearance.enable"]()}
@@ -165,9 +169,10 @@
 						<button
 							bind:this={disableEffectsElement}
 							onclick={() => setEffects(false)}
-							class="btn {$effects
-								? ''
-								: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+							class={clsx(
+								"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+								!$effects && "!scale-100",
+							)}
 						>
 							<PauseIcon size="24" class="inline-block mr-2" />
 							{m["settings.appearance.disable"]()}

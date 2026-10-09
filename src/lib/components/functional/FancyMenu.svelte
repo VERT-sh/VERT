@@ -41,10 +41,9 @@
 	{#if activeLinkIndex !== -1}
 		<div
 			class="absolute pointer-events-none top-1 bg-foreground h-[calc(100%-8px)] rounded-xl"
-			style="width: {navWidth / linkCount - 8}px; left: {(navWidth /
-				linkCount) *
-				activeLinkIndex +
-				4}px; transition: {hasLoaded ? duration - 200 : 0}ms ease left;"
+			style:width="{navWidth / linkCount - 8}px"
+			style:left="{(navWidth / linkCount) * activeLinkIndex + 4}px"
+			style:transition="{hasLoaded ? duration - 200 : 0}ms ease left"
 		></div>
 	{/if}
 	{#each links as { name, url } (url)}

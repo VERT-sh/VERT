@@ -404,7 +404,7 @@
 						>
 							<div
 								class="h-full bg-accent-blue transition-all"
-								style="width: {quotaPercent}%"
+								style:width="{quotaPercent}%"
 							></div>
 						</div>
 						<span class="text-xs text-muted">

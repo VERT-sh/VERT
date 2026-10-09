@@ -7,7 +7,7 @@
 	import { m } from "#lib/paraglide/messages";
 	import type { VertFile } from "#lib/types";
 	import { effects, files } from "#lib/store/index.svelte";
-	import { converterCategories } from "#lib/converters";
+	import { categoryByConverter } from "#lib/converters";
 	import { log, error } from "#lib/util/logger.svelte";
 	import type {
 		ConversionSettings,
@@ -65,25 +65,17 @@
 		return available.find((c) => c.name === name) || available[0];
 	};
 
-	const converterCategoryByName = new Map(
-		Object.entries(converterCategories).flatMap(([category, names]) =>
-			names.map((name) => [name, category] as const),
-		),
-	);
-
 	const getFileType = (vertFile: VertFile) => {
 		const converter = vertFile.converters.find(
 			({ name, supportedFormats }) =>
-				converterCategoryByName.has(name) &&
+				categoryByConverter[name] &&
 				supportedFormats.some(
 					(format) =>
 						format.name === vertFile.from && format.isNative,
 				),
 		);
 
-		return converter
-			? converterCategoryByName.get(converter.name)!
-			: vertFile.from;
+		return converter ? categoryByConverter[converter.name] : vertFile.from;
 	};
 
 	let settings = $state<ConversionSettings>({});

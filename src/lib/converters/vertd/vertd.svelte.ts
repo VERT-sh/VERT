@@ -917,9 +917,7 @@ export class VertdConverter extends Converter {
 			return;
 		}
 
-		this.log(
-			`cancelling conversion for file ${input.name}`,
-		);
+		this.log(`cancelling conversion for file ${input.name}`);
 
 		const { ws, jobId, token } = activeConversion;
 

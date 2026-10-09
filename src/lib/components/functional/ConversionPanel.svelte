@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { effects, files, isMobile } from "#lib/store/index.svelte";
-	import { FolderArchiveIcon, RefreshCwIcon, TrashIcon } from "@lucide/svelte";
+	import {
+		FolderArchiveIcon,
+		RefreshCwIcon,
+		TrashIcon,
+	} from "@lucide/svelte";
 	import Panel from "../visual/Panel.svelte";
 	import Dropdown from "./Dropdown.svelte";
 	import Tooltip from "../visual/Tooltip.svelte";
@@ -72,9 +76,10 @@
 			</button>
 			{#if $isMobile}
 				<button
-					class="btn p-4 {$effects
-						? ''
-						: '!scale-100'} flex gap-3 max-md:w-full"
+					class={clsx(
+						"btn p-4 flex gap-3 max-md:w-full",
+						!$effects && "!scale-100",
+					)}
 					disabled={files.files.length === 0}
 					onclick={() => files.removeAll()}
 				>
@@ -87,9 +92,10 @@
 					position="right"
 				>
 					<button
-						class="btn p-4 {$effects
-							? ''
-							: '!scale-100'} flex gap-3 max-md:w-full"
+						class={clsx(
+							"btn p-4 flex gap-3 max-md:w-full",
+							!$effects && "!scale-100",
+						)}
 						disabled={files.files.length === 0}
 						onclick={() => files.removeAll()}
 					>

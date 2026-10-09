@@ -16,9 +16,8 @@
 	<div
 		class="h-full bg-accent absolute left-0 top-0"
 		class:percentless-animation={progress === null}
-		style={percent
-			? `width: ${percent}%; transition: 500ms linear width;`
-			: ""}
+		style:width={percent ? `${percent}%` : null}
+		style:transition={percent ? "500ms linear width" : null}
 	></div>
 </div>
 

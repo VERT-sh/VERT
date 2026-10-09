@@ -65,25 +65,40 @@
 			{...rest}
 			bind:value
 			{disabled}
-			class="w-full rounded-lg bg-panel border-2 border-button
-					{thin ? 'py-1.5' : 'p-3'}
-					{prefix ? 'pl-[2rem]' : thin ? 'pl-2.5' : 'pl-3'}
-					{extension ? (thin ? 'pr-[3.5rem]' : 'pr-[4rem]') : thin ? 'pr-2.5' : 'pr-3'}
-					{disabled && 'opacity-50 cursor-not-allowed'}
-					{inputClass}"
-		></textarea>
+			class={clsx(
+				"w-full rounded-lg bg-panel border-2 border-button",
+				thin ? "py-1.5" : "p-3",
+				prefix ? "pl-[2rem]" : thin ? "pl-2.5" : "pl-3",
+				extension
+					? thin
+						? "pr-[3.5rem]"
+						: "pr-[4rem]"
+					: thin
+						? "pr-2.5"
+						: "pr-3",
+				disabled && "opacity-50 cursor-not-allowed",
+				inputClass,
+			)}></textarea>
 	{:else}
 		<input
 			{...rest}
 			{type}
 			bind:value
 			{disabled}
-			class="w-full rounded-lg bg-panel border-2 border-button
-					{thin ? 'py-1.5' : 'p-3'}
-					{prefix ? 'pl-[2rem]' : thin ? 'pl-2.5' : 'pl-3'}
-					{extension ? (thin ? 'pr-[3rem]' : 'pr-[4rem]') : thin ? 'pr-2.5' : 'pr-3'}
-					{disabled && 'opacity-50 cursor-not-allowed'}
-					{inputClass}"
+			class={clsx(
+				"w-full rounded-lg bg-panel border-2 border-button",
+				thin ? "py-1.5" : "p-3",
+				prefix ? "pl-[2rem]" : thin ? "pl-2.5" : "pl-3",
+				extension
+					? thin
+						? "pr-[3rem]"
+						: "pr-[4rem]"
+					: thin
+						? "pr-2.5"
+						: "pr-3",
+				disabled && "opacity-50 cursor-not-allowed",
+				inputClass,
+			)}
 		/>
 	{/if}
 
@@ -95,14 +110,16 @@
 	{/if}
 	{#if extension}
 		<div
-			class="absolute right-0 top-0 bottom-0 flex items-center {thin
-				? 'px-2'
-				: 'px-4'}"
+			class={clsx(
+				"absolute right-0 top-0 bottom-0 flex items-center",
+				thin ? "px-2" : "px-4",
+			)}
 		>
 			<span
-				class="bg-button text-black dynadark:text-white rounded {thin
-					? 'text-xs px-2 py-0.5'
-					: 'text-sm px-2 py-1'}">{extension}</span
+				class={clsx(
+					"bg-button text-black dynadark:text-white rounded",
+					thin ? "text-xs px-2 py-0.5" : "text-sm px-2 py-1",
+				)}>{extension}</span
 			>
 		</div>
 	{/if}

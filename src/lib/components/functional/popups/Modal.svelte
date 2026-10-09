@@ -3,6 +3,7 @@
 	import { duration, fade } from "#lib/util/animation";
 	import type { SearchIcon } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
+	import clsx from "clsx";
 
 	export interface ModalButton {
 		text: string;
@@ -126,10 +127,12 @@
 		<div class="flex flex-row items-center gap-2 w-full">
 			{#each buttons as { text, action, primary }, i (`${i}-${text}`)}
 				<button
-					class="hover:scale-105 active:scale-100 duration-200 flex items-center gap-2 p-2 rounded-md {primary ||
-					i === 1
-						? `text-black bg-accent-${color}`
-						: 'bg-button text-black dynadark:text-white'} px-6"
+					class={clsx(
+						"hover:scale-105 active:scale-100 duration-200 flex items-center gap-2 p-2 rounded-md px-6",
+						primary || i === 1
+							? `text-black bg-accent-${color}`
+							: "bg-button text-black dynadark:text-white",
+					)}
 					onclick={() => action()}
 				>
 					{text}

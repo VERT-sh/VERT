@@ -9,6 +9,7 @@
 	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import type { Dialog as DialogType } from "#lib/store/DialogProvider";
+	import clsx from "clsx";
 
 	type Props = DialogType;
 
@@ -74,10 +75,12 @@
 	<div class="flex flex-row items-center justify-between gap-4 w-full">
 		{#each buttons as { text, action }, i (`${i}-${text}`)}
 			<button
-				class="w-full justify-center hover:scale-105 active:scale-100 duration-200 flex items-center gap-2 p-2 rounded-md {i ===
-				1
-					? `bg-accent-${color} text-black`
-					: 'bg-button text-black dynadark:text-white'} px-6"
+				class={clsx(
+					"w-full justify-center hover:scale-105 active:scale-100 duration-200 flex items-center gap-2 p-2 rounded-md px-6",
+					i === 1
+						? `bg-accent-${color} text-black`
+						: "bg-button text-black dynadark:text-white",
+				)}
 				onclick={() => {
 					action();
 					removeDialog(id);

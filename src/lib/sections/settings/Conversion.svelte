@@ -95,11 +95,12 @@
 									<button
 										onclick={() =>
 											(settings.useDefaultFormat = true)}
-										class="btn {$effects
-											? ''
-											: '!scale-100'} {settings.useDefaultFormat
-											? 'selected'
-											: ''} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+										class={clsx(
+											"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+											!$effects && "!scale-100",
+											settings.useDefaultFormat &&
+												"selected",
+										)}
 									>
 										<PlayIcon
 											size="24"
@@ -113,11 +114,12 @@
 									<button
 										onclick={() =>
 											(settings.useDefaultFormat = false)}
-										class="btn {$effects
-											? ''
-											: '!scale-100'} {settings.useDefaultFormat
-											? ''
-											: 'selected'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+										class={clsx(
+											"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+											!$effects && "!scale-100",
+											!settings.useDefaultFormat &&
+												"selected",
+										)}
 									>
 										<PauseIcon
 											size="24"
@@ -211,11 +213,11 @@
 									<button
 										onclick={() =>
 											(settings.metadata = true)}
-										class="btn {$effects
-											? ''
-											: '!scale-100'} {settings.metadata
-											? 'selected'
-											: ''} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+										class={clsx(
+											"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+											!$effects && "!scale-100",
+											settings.metadata && "selected",
+										)}
 									>
 										<PlayIcon
 											size="24"
@@ -229,11 +231,11 @@
 									<button
 										onclick={() =>
 											(settings.metadata = false)}
-										class="btn {$effects
-											? ''
-											: '!scale-100'} {settings.metadata
-											? ''
-											: 'selected'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+										class={clsx(
+											"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+											!$effects && "!scale-100",
+											!settings.metadata && "selected",
+										)}
 									>
 										<PauseIcon
 											size="24"

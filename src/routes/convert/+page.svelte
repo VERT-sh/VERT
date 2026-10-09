@@ -7,8 +7,10 @@
 	import Tooltip from "#lib/components/visual/Tooltip.svelte";
 	import {
 		categories,
+		categoryByConverter,
 		converterCategories,
 		converters,
+		type ConverterCategory,
 	} from "#lib/converters";
 	import {
 		effects,
@@ -41,6 +43,20 @@
 	import { ToastManager } from "#lib/util/toast.svelte";
 	import { vertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
 	import clsx from "clsx";
+
+	const gradientColors: Record<ConverterCategory, string> = {
+		image: "blue",
+		audio: "purple",
+		video: "red",
+		doc: "green",
+	};
+
+	const gradientVars: Record<ConverterCategory, string> = {
+		audio: "--bg-gradient-purple-alt",
+		video: "--bg-gradient-red-alt",
+		doc: "--bg-gradient-green-alt",
+		image: "--bg-gradient-blue-alt",
+	};
 
 	let processedFileIds = $state(new Set<string>());
 
@@ -111,16 +127,7 @@
 
 			const converter = getCurrentConverter(file);
 			if (!converter) return;
-			let category: string | undefined;
-			const isImage = converterCategories.image.includes(converter.name);
-			const isAudio = converterCategories.audio.includes(converter.name);
-			const isVideo = converterCategories.video.includes(converter.name);
-			const isDocument = converterCategories.doc.includes(converter.name);
-
-			if (isImage) category = "image";
-			else if (isAudio) category = "audio";
-			else if (isVideo) category = "video";
-			else if (isDocument) category = "doc";
+			const category = categoryByConverter[converter.name];
 			if (!category) return;
 
 			let targetFormat: string | undefined;
@@ -173,22 +180,11 @@
 		// Set gradient color depending on the file types
 		const fileTypes = files.files
 			.map((file) => {
-				const converterName = getCurrentConverter(file)?.name;
-				if (!converterName) return null;
-				if (converterCategories.image.includes(converterName))
-					return "blue";
-				if (converterCategories.audio.includes(converterName))
-					return "purple";
-				if (converterCategories.video.includes(converterName))
-					return "red";
-				if (converterCategories.doc.includes(converterName))
-					return "green";
-				return null;
+				const category =
+					categoryByConverter[getCurrentConverter(file)?.name ?? ""];
+				return category ? gradientColors[category] : null;
 			})
-			.filter(
-				(type): type is "blue" | "purple" | "red" | "green" =>
-					type !== null,
-			);
+			.filter((type): type is string => type !== null);
 
 		const uniqueTypes = new Set(fileTypes);
 		const type =
@@ -208,6 +204,7 @@
 {#snippet fileItem(file: VertFile)}
 	{@const currentConverter = getCurrentConverter(file)}
 	{@const name = currentConverter?.name || "unknown"}
+	{@const category = categoryByConverter[name]}
 	{@const isAudio = converterCategories.audio.includes(name)}
 	{@const isVideo = converterCategories.video.includes(name)}
 	{@const isDocument = converterCategories.doc.includes(name)}
@@ -395,13 +392,9 @@
 							{:else}
 								<div
 									class="w-full h-full flex items-center justify-center text-black"
-									style="background: var({isAudio
-										? '--bg-gradient-purple-alt'
-										: isVideo
-											? '--bg-gradient-red-alt'
-											: isDocument
-												? '--bg-gradient-green-alt'
-												: '--bg-gradient-blue-alt'})"
+									style:background="var({category
+										? gradientVars[category]
+										: gradientVars.image})"
 								>
 									{#if isAudio}
 										<FileMusicIcon size="56" />
@@ -438,15 +431,17 @@
 									position="bottom"
 								>
 									<button
-										class="btn {$effects
-											? ''
-											: '!scale-100'} p-0 w-14 h-14 text-black {isAudio
-											? 'bg-accent-purple'
-											: isVideo
-												? 'bg-accent-red'
-												: isDocument
-													? 'bg-accent-green'
-													: 'bg-accent-blue'}"
+										class={clsx(
+											"btn p-0 w-14 h-14 text-black",
+											!$effects && "!scale-100",
+											isAudio
+												? "bg-accent-purple"
+												: isVideo
+													? "bg-accent-red"
+													: isDocument
+														? "bg-accent-green"
+														: "bg-accent-blue",
+										)}
 										disabled={!files.isReady(file)}
 										onclick={() => file.convert()}
 									>
@@ -458,9 +453,10 @@
 									position="bottom"
 								>
 									<button
-										class="btn {$effects
-											? ''
-											: '!scale-100'} p-0 w-14 h-14"
+										class={clsx(
+											"btn p-0 w-14 h-14",
+											!$effects && "!scale-100",
+										)}
 										onclick={file.download}
 										disabled={!file.result}
 									>

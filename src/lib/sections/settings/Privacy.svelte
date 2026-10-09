@@ -19,6 +19,7 @@
 	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
 	import { addDialog } from "#lib/store/DialogProvider";
 	import { PUB_PLAUSIBLE_URL } from "$app/env/public";
+	import clsx from "clsx";
 
 	const { settings = $bindable() }: { settings: ISettings } = $props();
 
@@ -221,11 +222,11 @@
 						<div class="flex gap-3 w-full">
 							<button
 								onclick={() => (settings.plausible = true)}
-								class="btn {$effects
-									? ''
-									: '!scale-100'} {settings.plausible
-									? 'selected'
-									: ''} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+								class={clsx(
+									"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+									!$effects && "!scale-100",
+									settings.plausible && "selected",
+								)}
 							>
 								<PlayIcon size="24" class="inline-block mr-2" />
 								{m["settings.privacy.plausible.opt_in"]()}
@@ -233,11 +234,11 @@
 
 							<button
 								onclick={() => (settings.plausible = false)}
-								class="btn {$effects
-									? ''
-									: '!scale-100'} {settings.plausible
-									? ''
-									: 'selected'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+								class={clsx(
+									"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+									!$effects && "!scale-100",
+									!settings.plausible && "selected",
+								)}
 							>
 								<PauseIcon
 									size="24"
@@ -293,9 +294,10 @@
 				<div class="flex gap-3 w-full">
 					<button
 						onclick={loadCacheInfo}
-						class="btn {$effects
-							? ''
-							: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+						class={clsx(
+							"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+							!$effects && "!scale-100",
+						)}
 						disabled={isLoadingCache || isClearingData}
 					>
 						<RefreshCwIcon size="24" class="inline-block mr-2" />
@@ -303,9 +305,10 @@
 					</button>
 					<button
 						onclick={clearCache}
-						class="btn {$effects
-							? ''
-							: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+						class={clsx(
+							"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+							!$effects && "!scale-100",
+						)}
 						disabled={isLoadingCache || isClearingData}
 					>
 						<TrashIcon size="24" class="inline-block mr-2" />
@@ -326,9 +329,10 @@
 
 				<button
 					onclick={clearAllData}
-					class="btn {$effects
-						? ''
-						: '!scale-100'} w-full p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+					class={clsx(
+						"btn w-full p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+						!$effects && "!scale-100",
+					)}
 					disabled={isClearingData}
 				>
 					<TrashIcon size="24" class="inline-block mr-2" />

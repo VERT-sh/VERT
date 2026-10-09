@@ -15,10 +15,8 @@
 		{m["about.why.title"]()}
 	</h2>
 	<p class="text-lg font-normal">
-		{@html sanitize(link(
-			["privacy_link"],
-			m["about.why.description"](),
-			["/privacy"],
-		))}
+		{@html sanitize(
+			link(["privacy_link"], m["about.why.description"](), ["/privacy"]),
+		)}
 	</p>
 </Panel>

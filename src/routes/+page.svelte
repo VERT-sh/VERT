@@ -4,7 +4,13 @@
 	import { converters } from "#lib/converters";
 	import { vertdLoaded } from "#lib/store/index.svelte";
 	import clsx from "clsx";
-	import { AudioLinesIcon, BookTextIcon, CheckIcon, FilmIcon, ImageIcon } from "@lucide/svelte";
+	import {
+		AudioLinesIcon,
+		BookTextIcon,
+		CheckIcon,
+		FilmIcon,
+		ImageIcon,
+	} from "@lucide/svelte";
 	import { m } from "#lib/paraglide/messages";
 	import { OverlayScrollbarsComponent } from "overlayscrollbars-svelte";
 	import { browser } from "$app/env";
@@ -75,9 +81,9 @@
 				.filter((f) => f !== "none")
 				.join(", ");
 
-			const mediabunnyAvailable = converters.find(
-				(c) => c.name === "mediabunny",
-			)?.isAvailable();
+			const mediabunnyAvailable = converters
+				.find((c) => c.name === "mediabunny")
+				?.isAvailable();
 			const vertdReady = $vertdLoaded === true;
 			const videoStatus =
 				vertdReady && mediabunnyAvailable
