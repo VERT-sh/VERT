@@ -92,8 +92,8 @@ export class MagickConverter extends Converter {
 
 	constructor() {
 		super();
-		this.log(`created converter`);
 		if (!browser) return;
+		this.log(`created converter`);
 	}
 
 	protected async download(): Promise<void> {
@@ -106,6 +106,8 @@ export class MagickConverter extends Converter {
 			}
 
 			this.wasm = await response.arrayBuffer();
+			this.status = "ready";
+			return Promise.resolve();
 		} catch (err) {
 			ToastManager.add({
 				type: "error",

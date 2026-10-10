@@ -156,8 +156,8 @@ export class MediabunnyConverter extends Converter {
 
 	constructor() {
 		super();
-
 		if (!browser) return;
+		this.log("created converter");
 	}
 
 	protected async setup(): Promise<void> {

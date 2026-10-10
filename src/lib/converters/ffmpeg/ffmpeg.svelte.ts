@@ -85,9 +85,10 @@ export class FFmpegConverter extends Converter {
 		this.ffmpeg = new FFmpeg();
 		try {
 			await this.ffmpeg.load({ coreURL, wasmURL });
-
 			this.ffmpeg.terminate();
+
 			this.status = "ready";
+			return Promise.resolve();
 		} catch (err) {
 			this.ffmpeg.terminate();
 			ToastManager.add({

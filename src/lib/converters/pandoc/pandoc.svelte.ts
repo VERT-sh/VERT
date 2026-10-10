@@ -16,6 +16,7 @@ export class PandocConverter extends Converter {
 	constructor() {
 		super();
 		if (!browser) return;
+		this.log(`created converter`);
 	}
 
 	protected async download(): Promise<void> {
@@ -24,6 +25,9 @@ export class PandocConverter extends Converter {
 			this.wasm = await fetch("/pandoc.wasm").then((r) =>
 				r.arrayBuffer(),
 			);
+
+			this.status = "ready";
+			return Promise.resolve();
 		} catch (err) {
 			this.error(`Failed to load Pandoc WASM: ${err}`);
 			ToastManager.add({

@@ -104,6 +104,9 @@ export class Converter {
 				this.status = "initializing";
 				await this.setup();
 			}
+
+			this.log(`initialization complete (was ${this.status})`);
+
 			// if the hooks didn't set a terminal status, assume it succeeded
 			if (this.status === "downloading" || this.status === "initializing")
 				this.status = "ready";

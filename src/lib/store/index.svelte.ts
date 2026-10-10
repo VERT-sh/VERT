@@ -21,6 +21,40 @@ import { readSettings } from "#lib/util/settings";
 import { formatFilename } from "#lib/util/file";
 import { vertdFetch } from "#lib/converters/vertd/vertd.svelte";
 
+const IMAGE_FORMATS = new Set(
+	converters
+		.find((c) => c.name === "imagemagick")
+		?.formatStrings((f) => f.fromSupported) ?? [],
+);
+
+const zipExtension = (filename: string): string => {
+	const base = filename.replace(/\\/g, "/").split("/").pop() ?? filename;
+	const dot = base.lastIndexOf(".");
+	return dot === -1 ? "" : base.slice(dot).toLowerCase();
+};
+
+// detect a media sequence zip (frameSequence or DASH) from its members
+function detectSequenceKind(
+	filenames: string[],
+): "frameSequence" | "dash" | undefined {
+	const exts = filenames.map(zipExtension);
+
+	// DASH - an .mpd manifest, or bare .m4s/.m4d segments
+	if (exts.some((ext) => ext === ".mpd" || ext === ".m4s" || ext === ".m4d"))
+		return "dash";
+
+	// frameSequence - all files being the same image format
+	const first = exts[0];
+	if (
+		first &&
+		IMAGE_FORMATS.has(first) &&
+		exts.every((ext) => ext === first)
+	)
+		return "frameSequence";
+
+	return undefined;
+}
+
 class Files {
 	public files = $state<VertFile[]>([]);
 
@@ -215,18 +249,24 @@ class Files {
 		const file = input.file;
 		try {
 			log(["files"], `extracting zip file: ${file.name}`);
-			ToastManager.add({
-				type: "info",
-				message: m["convert.archive_file.extracting"]({
-					filename: file.name,
-				}),
-			});
 
 			const { extractZip } = await import("#lib/util/file");
 			const entries = await extractZip(file);
 
 			const totalEntries = entries.length;
 			log(["files"], `extracted ${totalEntries} files from zip`);
+
+			const sequenceKind = detectSequenceKind(
+				entries.map((entry) => entry.filename),
+			);
+
+			if (sequenceKind === "dash") {
+				await this._handleDashZip(input);
+				return;
+			}
+
+			if (sequenceKind === "frameSequence")
+				input.sequenceKind = "frameSequence";
 
 			// check if all files in zip use the same converter and are compatible
 			// eslint-disable-next-line svelte/prefer-svelte-reactivity
@@ -270,12 +310,14 @@ class Files {
 				const vf = input;
 				vf.to = ".zip";
 				vf.archiveFormats = archiveFiles.map((member) => member.from);
-				vf.converters = converters.filter(
-					(c) => c.name === Array.from(convertersUsed)[0],
-				);
-
-				const converterName = vf.converters[0].name;
-				const type = categoryByConverter[converterName] ?? "video";
+				const mainConverter = Array.from(convertersUsed)[0];
+				vf.converters =
+					vf.sequenceKind === "frameSequence"
+						? converters.filter(
+								(c) =>
+									c.name === "ffmpeg" || c.name === "vertd",
+							)
+						: converters.filter((c) => c.name === mainConverter);
 
 				this.files.push(vf);
 				this._addThumbnail(vf);
@@ -288,6 +330,7 @@ class Files {
 					converter: vf.converters[0].name,
 				};
 
+				const type = categoryByConverter[mainConverter] ?? "video";
 				ToastManager.add({
 					type: "success",
 					message: m["convert.archive_file.detected"]({
@@ -315,6 +358,44 @@ class Files {
 			error(["files"], `error processing zip file: ${e}`);
 			throw e;
 		}
+	}
+
+	private async _handleDashZip(input: VertFile): Promise<void> {
+		const vertd = converters.find((c) => c.name === "vertd");
+		if (!vertd) {
+			throw new Error(
+				"DASH media sequences require the vertd server, which is unavailable",
+			);
+		}
+
+		input.sequenceKind = "dash";
+		input.archiveFormats = [input.from];
+		input.converters = [vertd];
+		input.conversionSettings = {
+			...input.conversionSettings,
+			converter: "vertd",
+			imageSequence: true,
+		};
+
+		this.files.push(input);
+		this._addThumbnail(input);
+		this.preloadConverters(input);
+
+		log(["files"], `detected dash media sequence in ${input.name}`);
+		ToastManager.add({
+			type: "success",
+			message: m["convert.archive_file.detected"]({
+				type: m["convert.archive_file.video"](),
+				filename: input.name,
+			}),
+		});
+		ToastManager.add({
+			type: "success",
+			message: m["convert.archive_file.detected_sequence"]({
+				sequence: m["convert.archive_file.sequence_dash"](),
+				filename: input.name,
+			}),
+		});
 	}
 
 	private async _add(file: VertFile | File) {

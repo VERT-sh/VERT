@@ -50,9 +50,10 @@
 	"convert": {
 		"archive_file": {
 			"extract": "Extract archive",
-			"extracting": "Detected '{filename}' as an archive.",
 			"extracted": "Extracted {extract_count} files from '{filename}'. {ignore_count} items were ignored.",
 			"detected": "Detected {type} files in '{filename}'.",
+			"detected_sequence": "Detected {sequence} sequence in '{filename}'.",
+			"sequence_dash": "DASH media",
 			"audio": "audio",
 			"video": "video",
 			"doc": "document",

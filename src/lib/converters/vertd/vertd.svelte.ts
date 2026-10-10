@@ -23,6 +23,12 @@ interface UploadResponse {
 	to: null;
 	completed: false;
 	totalFrames: number;
+	// for .zip uploads
+	sequence?: {
+		kind: "frameSequence" | "dash";
+		extension: string;
+		entry: string;
+	};
 }
 
 interface RouteRequestMap {
@@ -234,8 +240,10 @@ interface UploadTask {
 const createUploadTask = async (
 	file: VertFile,
 	apiUrl: string,
+	sequenceKind?: "frameSequence" | "dash",
 ): Promise<UploadTask> => {
 	const formData = new FormData();
+	if (sequenceKind) formData.append("sequenceKind", sequenceKind);
 	formData.append("file", file.file, file.name);
 	const xhr = new XMLHttpRequest();
 	xhr.open("POST", `${apiUrl}/api/upload`, true);
@@ -363,6 +371,7 @@ export class VertdConverter extends Converter {
 	private cancelledConversions = new SvelteSet<string>();
 
 	public supportedFormats = [
+		new FormatInfo("zip", true, false, false, 0),
 		...videoFormats
 			.map((f: string) => new FormatInfo(f, true, true, true, 0))
 			.filter((format) => !cantEncode.includes(format.name.slice(1)))
@@ -666,7 +675,11 @@ export class VertdConverter extends Converter {
 			}
 		}
 
-		const uploadTask = await createUploadTask(fileUpload, apiUrl);
+		const uploadTask = await createUploadTask(
+			fileUpload,
+			apiUrl,
+			fileUpload.sequenceKind,
+		);
 		this.activeUploads.set(input.id, uploadTask);
 
 		let uploadRes: UploadResponse;
@@ -675,6 +688,11 @@ export class VertdConverter extends Converter {
 		} finally {
 			this.activeUploads.delete(input.id);
 		}
+
+		if (uploadRes.sequence)
+			this.log(
+				`received sequence upload for ${input.name} (kind: ${uploadRes.sequence.kind}, extension: ${uploadRes.sequence.extension}, entry: ${uploadRes.sequence.entry})`,
+			);
 
 		if (this.cancelledConversions.has(input.id))
 			throw new Error("Conversion cancelled");
@@ -890,7 +908,6 @@ export class VertdConverter extends Converter {
 				}
 			};
 		});
-		this.clearTrackedConversion(input);
 	}
 
 	public async cancel(input: VertFile): Promise<void> {

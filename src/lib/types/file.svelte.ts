@@ -122,6 +122,7 @@ export class VertFile {
 
 	public converters: Converter[] = [];
 	public archiveFormats?: string[];
+	public sequenceKind = $state<"frameSequence" | "dash" | undefined>();
 	private fallbackToastId: number | null = null;
 	private slowConversionToastId: number | null = null;
 	private attemptedConverters = new SvelteSet<string>();
@@ -248,6 +249,17 @@ export class VertFile {
 				const bPriority = bFrom ? bFrom.priority : 1;
 				return bPriority - aPriority;
 			});
+	}
+
+	private fallbackCandidates(): Converter[] {
+		if (!this.isZip()) return this.findConverters([this.from, this.to]);
+
+		// for .zip media sequences
+		return this.converters.filter((c) => {
+			if (this.unavailableConverters[c.name] || !c.isAvailable())
+				return false;
+			return c.name === "ffmpeg" || c.name === "vertd";
+		});
 	}
 
 	// returns true if there is at least one converter that can convert from `from` to `to`
@@ -382,18 +394,39 @@ export class VertFile {
 			if (!this.converters.length) throw new Error("No converters found");
 
 			let converter: Converter | undefined;
+			const isDash = this.sequenceKind === "dash";
 			const isImageSequence =
-				this.conversionSettings.imageSequence && this.isZip();
+				this.isZip() &&
+				(this.conversionSettings.imageSequence || isDash);
 
-			// force ffmpeg for image sequences
-			// TODO: should allow vertd as well probably(?) but maybe in the future
 			if (isImageSequence) {
-				converter = converters.find((c) => c.name === "ffmpeg");
-				if (!converter) {
-					throw new Error(
-						"FFmpeg converter not found for image sequence conversion",
-					);
-				}
+				const supported = (c: Converter) =>
+					c.supportedFormats.some(
+						(f) => f.name === this.from && f.fromSupported,
+					) &&
+					(!this.to ||
+						this.to === ".zip" ||
+						c.supportedFormats.some(
+							(f) => f.name === this.to && f.toSupported,
+						));
+				const candidates = this.converters.filter(
+					(c) =>
+						(c.name === "ffmpeg" || c.name === "vertd") &&
+						!this.unavailableConverters[c.name] &&
+						c.isAvailable() &&
+						supported(c),
+				);
+
+				const preference = isDash
+					? ["vertd"]
+					: this.isLarge()
+						? ["vertd", "ffmpeg"]
+						: ["ffmpeg", "vertd"];
+				const selected = preference
+					.map((name) => candidates.find((c) => c.name === name))
+					.find((c) => c && !this.attemptedConverters.has(c.name));
+
+				if (selected) converter = selected;
 			} else {
 				const customConverter = this.converters.find(
 					(c) => c.name === this.conversionSettings.converter,
@@ -472,7 +505,7 @@ export class VertFile {
 			// for zips: extract > convert each > re-zip
 			// else convert normally
 			res =
-				this.isZip() && !this.conversionSettings.imageSequence
+				this.isZip() && !isImageSequence
 					? await this.convertZip(
 							converter,
 							normalizedSettings.settings,
@@ -500,10 +533,7 @@ export class VertFile {
 			if (this.disposed) return;
 			if (!this.cancelled) this.toastErr(err);
 
-			const compatibleConverters = this.findConverters([
-				this.from,
-				this.to,
-			]);
+			const compatibleConverters = this.fallbackCandidates();
 			const nextConverter = compatibleConverters.find(
 				(c) => !this.attemptedConverters.has(c.name),
 			);

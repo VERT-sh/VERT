@@ -680,53 +680,61 @@
 					>
 						{m["convert.archive_file.extract"]()}
 					</button>
-					<!-- FIXME this is terrible -->
-					<div class="flex flex-col flex-wrap gap-1">
-						<!-- first row -->
-						<div class="flex items-center gap-3">
-							<div
-								class="flex items-center gap-2 flex-1 min-w-0 h-full"
-							>
-								<FancyInput
-									type="checkbox"
-									bind:checked={imageSequence}
-								/>
-								<label for="extract-sequence" class="text-sm">
-									{m[
-										"convert.image_sequence.image_sequence"
-									]()}
-								</label>
+					{#if file.sequenceKind !== "dash"}
+						<!-- FIXME this is terrible -->
+						<div class="flex flex-col flex-wrap gap-1">
+							<!-- first row -->
+							<div class="flex items-center gap-3">
+								<div
+									class="flex items-center gap-2 flex-1 min-w-0 h-full"
+								>
+									<FancyInput
+										type="checkbox"
+										bind:checked={imageSequence}
+									/>
+									<label
+										for="extract-sequence"
+										class="text-sm"
+									>
+										{m[
+											"convert.image_sequence.image_sequence"
+										]()}
+									</label>
+								</div>
+								<div class="w-[80px] shrink-0">
+									<FancyInput
+										thin
+										inputClass="!h-9 !text-xs"
+										type="number"
+										extension="FPS"
+										placeholder="15"
+										bind:value={imageSequenceFPS}
+										disabled={!imageSequence}
+									/>
+								</div>
 							</div>
-							<div class="w-[80px] shrink-0">
-								<FancyInput
-									thin
-									inputClass="!h-9 !text-xs"
-									type="number"
-									extension="FPS"
-									placeholder="15"
-									bind:value={imageSequenceFPS}
-									disabled={!imageSequence}
-								/>
-							</div>
-						</div>
 
-						<!-- second row -->
-						<div class="flex items-center gap-3">
-							<div
-								class="flex items-center gap-2 flex-1 min-w-0 h-full"
-							>
-								<FancyInput
-									type="checkbox"
-									bind:checked={imageSequenceTransparency}
-									disabled={!imageSequence}
-								/>
-								<label for="extract-sequence" class="text-sm">
-									{m["convert.image_sequence.transparency"]()}
-								</label>
+							<!-- second row -->
+							<div class="flex items-center gap-3">
+								<div
+									class="flex items-center gap-2 flex-1 min-w-0 h-full"
+								>
+									<FancyInput
+										type="checkbox"
+										bind:checked={imageSequenceTransparency}
+										disabled={!imageSequence}
+									/>
+									<label
+										for="extract-sequence"
+										class="text-sm"
+									>
+										{m["convert.image_sequence.transparency"]()}
+									</label>
+								</div>
+								<!-- second thing -->
 							</div>
-							<!-- second thing -->
 						</div>
-					</div>
+					{/if}
 				</div>
 			{:else}
 				<div class="border-t border-separator text-base p-2">
