@@ -422,7 +422,12 @@ export class VertFile {
 					: this.isLarge()
 						? ["vertd", "ffmpeg"]
 						: ["ffmpeg", "vertd"];
-				const selected = preference
+				const chosen = this.conversionSettings.converter;
+				const order =
+					chosen && candidates.some((c) => c.name === chosen)
+						? [chosen, ...preference.filter((n) => n !== chosen)]
+						: preference;
+				const selected = order
 					.map((name) => candidates.find((c) => c.name === name))
 					.find((c) => c && !this.attemptedConverters.has(c.name));
 

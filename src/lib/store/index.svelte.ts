@@ -325,9 +325,13 @@ class Files {
 
 				// set converter
 				// TODO: this is weird, we rely on conversionSettings for the right converter but zip archives obv dont have settings to change
+				const defaultConverter =
+					vf.sequenceKind === "frameSequence" && !vf.isLarge()
+						? "ffmpeg"
+						: vf.converters[0].name;
 				vf.conversionSettings = {
 					...vf.conversionSettings,
-					converter: vf.converters[0].name,
+					converter: defaultConverter,
 				};
 
 				const type = categoryByConverter[mainConverter] ?? "video";

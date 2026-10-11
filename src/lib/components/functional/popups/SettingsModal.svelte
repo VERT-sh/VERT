@@ -51,6 +51,14 @@
 		const availableConverters = vertFile.converters.filter(
 			(converter) => !vertFile.unavailableConverters[converter.name],
 		);
+
+		// image sequences can be converted locally (ffmpeg) or on the server (vertd)
+		if (vertFile.sequenceKind)
+			return availableConverters.filter(
+				(converter) =>
+					converter.name === "ffmpeg" || converter.name === "vertd",
+			);
+
 		const supportedConverters = vertFile.findConverters(
 			[vertFile.from, vertFile.to],
 			vertFile.unavailableConverters,
@@ -83,6 +91,9 @@
 	let availableCategories = $state<SettingCategories>({});
 
 	const settingTabs = $derived.by((): SettingCategories => {
+		// sequences expose only Converter tab (ffmpeg/vertd)
+		if (targetFile?.sequenceKind) return { Converter: [] };
+
 		const categories = Object.fromEntries(
 			Object.entries(availableCategories).filter(
 				([, settings]) => settings.length > 0,
@@ -114,6 +125,12 @@
 
 		if (!currentFile) {
 			availableCategories = {};
+			return;
+		}
+
+		if (currentFile.sequenceKind) {
+			availableCategories = {};
+			activeTab = "Converter";
 			return;
 		}
 
@@ -152,8 +169,10 @@
 		const referenceFile = targetFile;
 		const targetFiles =
 			selectedFileId === allFilesValue && referenceFile
-				? files.files.filter(
-						(f) => getFileType(f) === getFileType(referenceFile),
+				? files.files.filter((f) =>
+						referenceFile.sequenceKind
+							? f.sequenceKind === referenceFile.sequenceKind
+							: getFileType(f) === getFileType(referenceFile),
 					)
 				: files.files.filter((f) => f.id === selectedFileId);
 		if (targetFiles.length === 0) {
@@ -174,6 +193,18 @@
 					error(
 						["settings", "modal"],
 						`no converter found for ${targetFile.name}, can't apply settings`,
+					);
+					continue;
+				}
+
+				if (targetFile.sequenceKind) {
+					targetFile.conversionSettings = {
+						...targetFile.conversionSettings,
+						converter: converter.name,
+					};
+					log(
+						["settings", "modal"],
+						`set converter for sequence ${targetFile.name}: ${converter.name}`,
 					);
 					continue;
 				}

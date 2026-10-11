@@ -69,6 +69,7 @@
 	);
 
 	const sequenceFormats = [".webp", ".gif", ".apng", ".mpo"]; // .apng not supported by magick-wasm rn
+	const nonAudioVideoFormats = [".gif", ".webp", ".apng", ".h264"]; // can't carry audio tracks
 
 	$effect(() => {
 		if (!file) return;
@@ -80,11 +81,31 @@
 
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
 
-	const isUnavailable = (format: string): boolean =>
-		!!file && !file.hasAvailableConverter(file.from, format);
-
+	// returns the reason a format is disabled for the current file/settings, or "" (empty string) if it's usable
 	const getUnavailableReason = (format: string): string => {
 		if (!file) return "";
+
+		// image sequences can only output animated formats
+		if (
+			imageSequence &&
+			categories["image"]?.formats.includes(format) &&
+			!sequenceFormats.includes(format)
+		)
+			return m["convert.dropdown.disabled.no_converter"]({
+				from: file.from,
+				to: format,
+			});
+
+		// can't carry audio track
+		if (
+			categories["audio"]?.formats.includes(from ?? "") &&
+			nonAudioVideoFormats.includes(format)
+		)
+			return m["convert.dropdown.disabled.no_converter"]({
+				from: file.from,
+				to: format,
+			});
+
 		// check if any compatible converters are available for this file and format
 		const compatible = file.converters.filter((converter) => {
 			const fromInfo = converter.supportedFormats.find(
@@ -115,28 +136,19 @@
 				fileSize: formatBytes(file.size),
 			});
 
-		return m["convert.dropdown.disabled.no_converter"]({
-			from: file.from,
-			to: format,
-		});
+		if (!file.hasAvailableConverter(file.from, format))
+			return m["convert.dropdown.disabled.no_converter"]({
+				from: file.from,
+				to: format,
+			});
+
+		return "";
 	};
 
-	const shouldHide = (format: string): boolean =>
-		categories["audio"]?.formats.includes(from ?? "") === true &&
-		format === ".gif";
+	const isUnavailable = (format: string): boolean =>
+		!!getUnavailableReason(format);
 
-	const getFormats = (cat: string) => {
-		let formats = (categories[cat]?.formats ?? []).filter(
-			(f) => !shouldHide(f),
-		);
-
-		// if imageSequence is checked, filter image category to sequence formats only
-		if (imageSequence && cat === "image") {
-			formats = formats.filter((f) => sequenceFormats.includes(f));
-		}
-
-		return formats;
-	};
+	const getFormats = (cat: string) => categories[cat]?.formats ?? [];
 
 	const detectCategory = (): string => {
 		if (from) {
@@ -191,10 +203,14 @@
 
 		if (imageSequence) {
 			// TODO: image sequence -> video on vertd?
-			cats.push("video");
+			if (!cats.includes("video")) cats.push("video");
 		} else {
 			// handle special cases
-			if (from === ".gif" || from === ".webp") cats.push("video");
+			if (
+				(from === ".gif" || from === ".webp") &&
+				!cats.includes("video")
+			)
+				cats.push("video");
 			if (from === ".apng") {
 				//cats.push("image"); // -- buggy, magick can't convert from or to apng properly
 				cats = cats.filter((cat) => cat !== "audio");
@@ -220,16 +236,6 @@
 				? currentCategory
 				: availableCategories[0];
 
-		const hiddenFormats: string[] = [];
-
-		// if audio to video, hide these video formats (because they do not want audio tracks lol)
-		const nonAudioVideoFormats = [".gif", ".webp", ".apng", ".h264"];
-		if (
-			activeCategory === "video" &&
-			categories["audio"]?.formats.includes(from ?? "")
-		)
-			hiddenFormats.push(...nonAudioVideoFormats);
-
 		// if no query, return formats for current category
 		if (!searchQuery) {
 			const formats = getFormats(activeCategory ?? "");
@@ -250,7 +256,7 @@
 
 			return {
 				categories: availableCategories,
-				formats: formats.filter((f) => !hiddenFormats.includes(f)),
+				formats,
 				isFallback: false,
 				resolvedCategory: activeCategory ?? currentCategory,
 			};
@@ -258,22 +264,11 @@
 
 		const query = normalize(searchQuery);
 
-		const matches = (f: string, cat?: string) => {
-			if (
-				!normalize(f).includes(query) ||
-				shouldHide(f) ||
-				hiddenFormats.includes(f)
-			)
-				return false;
-			// if imageSequence and image category, only show animated formats
-			if (imageSequence && (cat ?? activeCategory) === "image") {
-				return sequenceFormats.includes(f);
-			}
-			return true;
-		};
+		// disabled formats stay visible (greyed out), so only match on the query
+		const matches = (f: string) => normalize(f).includes(query);
 
 		const matchingCategories = availableCategories.filter((cat) =>
-			(categories[cat]?.formats ?? []).some((f) => matches(f, cat)),
+			(categories[cat]?.formats ?? []).some((f) => matches(f)),
 		);
 
 		if (matchingCategories.length === 0) {
@@ -292,7 +287,7 @@
 				: matchingCategories[0];
 
 		const formats = (categories[resolvedCategory ?? ""]?.formats ?? [])
-			.filter((f) => matches(f, resolvedCategory))
+			.filter((f) => matches(f))
 			.sort((a, b) => {
 				// exact matches first, then original order
 				const aExact = normalize(a) === query;
@@ -304,7 +299,7 @@
 		// show categories with matches, formats from within resolved category
 		return {
 			categories: matchingCategories,
-			formats: formats.filter((f) => !hiddenFormats.includes(f)),
+			formats,
 			isFallback: false,
 			resolvedCategory,
 		};
@@ -625,11 +620,10 @@
 					>
 						{#if filteredData.formats.length > 0}
 							{#each filteredData.formats as format (format)}
-								{@const unavailable = isUnavailable(format)}
-								{#if unavailable}
-									<Tooltip
-										text={getUnavailableReason(format)}
-									>
+								{@const unavailableReason =
+									getUnavailableReason(format)}
+								{#if unavailableReason}
+									<Tooltip text={unavailableReason}>
 										<button
 											data-selected={format === selected}
 											aria-disabled="true"
@@ -728,11 +722,24 @@
 										for="extract-sequence"
 										class="text-sm"
 									>
-										{m["convert.image_sequence.transparency"]()}
+										{m[
+											"convert.image_sequence.transparency"
+										]()}
 									</label>
 								</div>
 								<!-- second thing -->
 							</div>
+						</div>
+					{/if}
+					{#if file.sequenceKind === "frameSequence" && imageSequence}
+						<div class="flex flex-col border-t border-separator">
+							<button
+								class="w-full mt-2 p-2.5 flex gap-3 justify-center text-center rounded-lg bg-accent text-black"
+								onclick={() => ($fileSettings = file)}
+							>
+								<SettingsIcon size="24" />
+								{m["convert.settings.settings"]()}
+							</button>
 						</div>
 					{/if}
 				</div>
