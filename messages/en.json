@@ -207,6 +207,7 @@
 			"video_file": "Video file",
 			"document_file": "Document file",
 			"image_file": "Image file",
+			"archive_file": "Archive file",
 			"convert_file": "Convert this file",
 			"download_file": "Download this file",
 			"converter_initializing": "The {type} conversion tools are currently being downloaded. This only happens once and shouldn't take too long."
@@ -226,9 +227,11 @@
 			"worker_error": "The {type} converter had an error during initialization, please try again later.",
 			"worker_timeout": "The {type} converter is taking longer than expected to initialize, please wait a few more moments or refresh the page.",
 			"audio": "audio",
+			"archive": "archive",
 			"doc": "document",
 			"image": "image",
 			"video": "video",
+			"unknown": "unknown",
 			"vertd": {
 				"server": "what are you doing..? you're supposed to run the vertd server!",
 				"not_found": "Could not find the vertd instance to start video conversion. Are you sure the instance URL is set correctly?",

@@ -23,6 +23,7 @@
 	import Tooltip from "../visual/Tooltip.svelte";
 	import { vertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
 	import { formatBytes } from "#lib/util/file";
+	import { getCodecs } from "#lib/converters/ffmpeg/ffmpeg.codecs.ts";
 
 	type Props = {
 		categories: Categories;
@@ -69,7 +70,6 @@
 	);
 
 	const sequenceFormats = [".webp", ".gif", ".apng", ".mpo"]; // .apng not supported by magick-wasm rn
-	const nonAudioVideoFormats = [".gif", ".webp", ".apng", ".h264"]; // can't carry audio tracks
 
 	$effect(() => {
 		if (!file) return;
@@ -99,7 +99,7 @@
 		// can't carry audio track
 		if (
 			categories["audio"]?.formats.includes(from ?? "") &&
-			nonAudioVideoFormats.includes(format)
+			getCodecs(format).audio === "none"
 		)
 			return m["convert.dropdown.disabled.no_converter"]({
 				from: file.from,

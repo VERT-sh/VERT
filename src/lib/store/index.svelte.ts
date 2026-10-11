@@ -45,11 +45,7 @@ function detectSequenceKind(
 
 	// frameSequence - all files being the same image format
 	const first = exts[0];
-	if (
-		first &&
-		IMAGE_FORMATS.has(first) &&
-		exts.every((ext) => ext === first)
-	)
+	if (first && IMAGE_FORMATS.has(first) && exts.every((ext) => ext === first))
 		return "frameSequence";
 
 	return undefined;

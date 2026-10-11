@@ -29,7 +29,7 @@ export const converterCategories = {
 	doc: ["pandoc"],
 };
 
-export type ConverterCategory = keyof typeof converterCategories;
+export type ConverterCategory = keyof typeof converterCategories | "archive" | "unknown";
 
 export const categoryByConverter = Object.fromEntries(
 	Object.entries(converterCategories).flatMap(([category, names]) =>

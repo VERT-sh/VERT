@@ -8,8 +8,6 @@
 	import {
 		categories,
 		categoryByConverter,
-		converterCategories,
-		converters,
 		type ConverterCategory,
 	} from "#lib/converters";
 	import {
@@ -21,10 +19,13 @@
 		fileSettings,
 	} from "#lib/store/index.svelte";
 	import { VertFile } from "#lib/types";
+	import type { Component } from "svelte";
 	import {
 		AudioLines,
+		ArchiveIcon,
 		BookText,
 		DownloadIcon,
+		FileArchiveIcon,
 		FileMusicIcon,
 		FileQuestionMarkIcon,
 		FileVideoCameraIcon,
@@ -49,6 +50,8 @@
 		audio: "purple",
 		video: "red",
 		doc: "green",
+		archive: "pink",
+		unknown: "pink",
 	};
 
 	const gradientVars: Record<ConverterCategory, string> = {
@@ -56,6 +59,49 @@
 		video: "--bg-gradient-red-alt",
 		doc: "--bg-gradient-green-alt",
 		image: "--bg-gradient-blue-alt",
+		archive: "--bg-gradient-pink-alt",
+		unknown: "--bg-gradient-pink-alt",
+	};
+
+	type FileType = "archive" | ConverterCategory | "unknown";
+
+	const fileTypeIcons: Record<FileType, Component> = {
+		archive: ArchiveIcon,
+		audio: AudioLines,
+		video: FilmIcon,
+		doc: BookText,
+		image: ImageIcon,
+		unknown: FileQuestionMarkIcon,
+	};
+
+	const fileTypeBigIcons: Record<FileType, Component> = {
+		archive: FileArchiveIcon,
+		audio: FileMusicIcon,
+		video: FileVideoCameraIcon,
+		doc: BookText,
+		image: ImageIcon,
+		unknown: ImageOffIcon,
+	};
+
+	const fileTypeColors: Record<FileType, string> = {
+		archive: "bg-accent-pink",
+		audio: "bg-accent-purple",
+		video: "bg-accent-red",
+		doc: "bg-accent-green",
+		image: "bg-accent-blue",
+		unknown: "bg-accent-pink",
+	};
+
+	const getFileType = (file: VertFile): FileType => {
+		if (file.isZip()) return "archive";
+		return (
+			categoryByConverter[getCurrentConverter(file)?.name ?? ""] ??
+			"unknown"
+		);
+	};
+
+	const getFileTypeLabel = (fileType: FileType): string => {
+		return m[`convert.errors.${fileType}`]();
 	};
 
 	let processedFileIds = $state(new Set<string>());
@@ -182,7 +228,11 @@
 			.map((file) => {
 				const category =
 					categoryByConverter[getCurrentConverter(file)?.name ?? ""];
-				return category ? gradientColors[category] : null;
+				return file.isZip()
+					? gradientColors.archive
+					: category
+						? gradientColors[category]
+						: null;
 			})
 			.filter((type): type is string => type !== null);
 
@@ -205,51 +255,28 @@
 	{@const currentConverter = getCurrentConverter(file)}
 	{@const name = currentConverter?.name || "unknown"}
 	{@const category = categoryByConverter[name]}
-	{@const isAudio = converterCategories.audio.includes(name)}
-	{@const isVideo = converterCategories.video.includes(name)}
-	{@const isDocument = converterCategories.doc.includes(name)}
+	{@const fileType = getFileType(file)}
+	{@const Icon = fileTypeIcons[fileType]}
 	{@const isInitializing =
 		currentConverter?.status === "idle" ||
 		currentConverter?.status === "downloading" ||
 		currentConverter?.status === "initializing"}
 	<Panel class="p-5 flex flex-col min-w-0 gap-4 relative">
 		<div class="flex-shrink-0 h-8 w-full flex items-center gap-2">
-			{#if !converters.length}
-				<Tooltip
-					text={m["convert.tooltips.unknown_file"]()}
-					position="bottom"
-				>
-					<FileQuestionMarkIcon size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{:else if isAudio}
-				<Tooltip
-					text={m["convert.tooltips.audio_file"]()}
-					position="bottom"
-				>
-					<AudioLines size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{:else if isVideo}
-				<Tooltip
-					text={m["convert.tooltips.video_file"]()}
-					position="bottom"
-				>
-					<FilmIcon size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{:else if isDocument}
-				<Tooltip
-					text={m["convert.tooltips.document_file"]()}
-					position="bottom"
-				>
-					<BookText size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{:else}
-				<Tooltip
-					text={m["convert.tooltips.image_file"]()}
-					position="bottom"
-				>
-					<ImageIcon size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{/if}
+			<Tooltip
+				text={fileType === "unknown"
+					? m["convert.tooltips.unknown_file"]()
+					: fileType === "archive"
+						? m["convert.tooltips.archive_file"]()
+						: fileType === "doc"
+							? m["convert.tooltips.document_file"]()
+							: fileType === "audio"
+								? m["convert.tooltips.audio_file"]()
+								: m["convert.tooltips.video_file"]()}
+				position="bottom"
+			>
+				<Icon size="24" class="flex-shrink-0" />
+			</Tooltip>
 			<div class="flex-grow overflow-hidden">
 				{#if file.processing}
 					<ProgressBar
@@ -278,13 +305,7 @@
 				{#if isInitializing}
 					<Tooltip
 						text={m["convert.tooltips.converter_initializing"]({
-							type: isAudio
-								? m["convert.errors.audio"]()
-								: isVideo
-									? m["convert.errors.video"]()
-									: isDocument
-										? m["convert.errors.doc"]()
-										: m["convert.errors.image"](),
+							type: getFileTypeLabel(fileType),
 						})}
 						position="bottom"
 					>
@@ -367,13 +388,7 @@
 					</p>
 					<p class="font-normal">
 						{m["convert.errors.worker_error"]({
-							type: isAudio
-								? m["convert.errors.audio"]()
-								: isVideo
-									? m["convert.errors.video"]()
-									: isDocument
-										? m["convert.errors.doc"]()
-										: m["convert.errors.image"](),
+							type: getFileTypeLabel(fileType),
 						})}
 					</p>
 				</div>
@@ -390,21 +405,16 @@
 									alt={file.name}
 								/>
 							{:else}
+								{@const Icon = fileTypeBigIcons[fileType]}
 								<div
 									class="w-full h-full flex items-center justify-center text-black"
-									style:background="var({category
-										? gradientVars[category]
-										: gradientVars.image})"
+									style:background="var({gradientVars[
+										file.isZip()
+											? 'archive'
+											: (category ?? 'unknown')
+									]})"
 								>
-									{#if isAudio}
-										<FileMusicIcon size="56" />
-									{:else if isVideo}
-										<FileVideoCameraIcon size="56" />
-									{:else if isDocument}
-										<BookText size="56" />
-									{:else}
-										<ImageOffIcon size="56" />
-									{/if}
+									<Icon size="56" />
 								</div>
 							{/if}
 						</div>
@@ -434,13 +444,7 @@
 										class={clsx(
 											"btn p-0 w-14 h-14 text-black",
 											!$effects && "!scale-100",
-											isAudio
-												? "bg-accent-purple"
-												: isVideo
-													? "bg-accent-red"
-													: isDocument
-														? "bg-accent-green"
-														: "bg-accent-blue",
+											fileTypeColors[fileType],
 										)}
 										disabled={!files.isReady(file)}
 										onclick={() => file.convert()}
