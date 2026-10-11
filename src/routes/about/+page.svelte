@@ -100,7 +100,9 @@
 
 		// Fetch GitHub contributors
 		try {
-			const response = await fetch(`${GITHUB_API_URL}/contributors`);
+			const response = await fetch(
+				`${GITHUB_API_URL}/contributors?per_page=100`,
+			);
 			if (!response.ok) {
 				ToastManager.add({
 					type: "error",
