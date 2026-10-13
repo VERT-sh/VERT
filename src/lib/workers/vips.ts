@@ -61,7 +61,8 @@ let initialized = false;
 const loadVips = (): Promise<VipsInstance> => {
 	return (vipsPromise ??= Vips({
 		dynamicLibraries: DYNAMIC_LIBRARIES,
-		locateFile: (name: string) => WASM_URLS[name] ?? name,
+		locateFile: (name: string) =>
+			new URL(WASM_URLS[name] ?? name, import.meta.url).href,
 		workaroundCors: true,
 	}).catch((err) => {
 		throw new Error(
