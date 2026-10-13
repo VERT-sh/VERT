@@ -1,5 +1,5 @@
 import { VertFile } from "#lib/types";
-import { Converter, FormatInfo } from "../converter.svelte";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { browser } from "$app/env";
 import { SvelteMap } from "svelte/reactivity";
@@ -205,6 +205,8 @@ export class FFmpegConverter extends Converter {
 	): Promise<VertFile> {
 		this.trackConversion(input);
 		if (!to.startsWith(".")) to = `.${to}`;
+		this.log(`converting ${input.name} (${input.id}) to ${to}`);
+		const startedAt = performance.now();
 
 		const conversionSettings =
 			Object.keys(settings).length > 4 // TODO: find better way to do this lmfao, rn we are just assuming all settings are present if there's at least 5 keys but ts bad
@@ -275,7 +277,7 @@ export class FFmpegConverter extends Converter {
 			}
 
 			await ffmpeg.writeFile("input", buf);
-			this.log(`wrote ${input.name} to ffmpeg virtual fs`);
+			this.log(`wrote ${input.name} (${input.id}) to ffmpeg virtual fs`);
 
 			const specialHandled = await handleSpecialOutput(
 				ffmpeg,
@@ -309,9 +311,14 @@ export class FFmpegConverter extends Converter {
 
 				const outputFileName =
 					input.name.split(".").slice(0, -1).join(".") + to;
-				this.log(`read ${outputFileName} from ffmpeg virtual fs`);
+				this.log(
+					`read ${outputFileName} (${input.id}) from ffmpeg virtual fs`,
+				);
 
 				const outBuf = new Uint8Array(output).buffer.slice(0);
+				this.log(
+					`converted ${input.name} (${input.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
+				);
 				return new VertFile(new File([outBuf], outputFileName), to);
 			}
 		} finally {
@@ -326,11 +333,13 @@ export class FFmpegConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const ffmpeg = this.activeConversions.get(input.id);
 		if (!ffmpeg) {
-			this.error(`no active conversion found for file ${input.name}`);
+			this.error(
+				`no active conversion found for file ${input.name} (${input.id})`,
+			);
 			return;
 		}
 
-		this.log(`cancelling conversion for file ${input.name}`);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
 		ffmpeg.terminate();
 		this.activeConversions.delete(input.id);
@@ -371,7 +380,9 @@ export class FFmpegConverter extends Converter {
 
 		// image sequences -> animated image // video
 		if (isImageSequence) {
-			this.log(`converting image sequence ${input.name} to ${to}`);
+			this.log(
+				`converting image sequence ${input.name} (${input.id}) to ${to}`,
+			);
 
 			const { extractZip } = await import("#lib/util/file");
 			const entries = (await extractZip(input.file)).sort((a, b) =>
@@ -464,7 +475,9 @@ export class FFmpegConverter extends Converter {
 
 		// video to audio
 		if (videoFormats.includes(inputFormat)) {
-			this.log(`Converting video ${input.from} to audio ${to}`);
+			this.log(
+				`Converting video ${input.from} to audio ${to} (${input.name} ${input.id})`,
+			);
 			return [
 				"-i",
 				"input",
@@ -481,7 +494,9 @@ export class FFmpegConverter extends Converter {
 
 		// audio to video
 		if (videoFormats.includes(outputFormat)) {
-			this.log(`Converting audio ${input.from} to video ${to}`);
+			this.log(
+				`Converting audio ${input.from} to video ${to} (${input.name} ${input.id})`,
+			);
 
 			const hasAlbumArt = keepMetadata
 				? await extractAlbumArt(ffmpeg)
@@ -514,7 +529,9 @@ export class FFmpegConverter extends Converter {
 		}
 
 		// audio to audio
-		this.log(`Converting audio ${input.from} to audio ${to}`);
+		this.log(
+			`Converting audio ${input.from} to audio ${to} (${input.name} ${input.id})`,
+		);
 		const { audio: audioCodec } = getCodecs(to, isAlac);
 		if (m4a && keepMetadata) extraArgs.push("-c:v", "copy"); // for album art
 

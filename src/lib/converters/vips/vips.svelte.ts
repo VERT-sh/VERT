@@ -2,7 +2,7 @@ import { browser } from "$app/env";
 import { m } from "#lib/paraglide/messages";
 import { VertFile, type WorkerMessage } from "#lib/types";
 import VipsWorker from "#lib/workers/vips?worker&url";
-import { Converter } from "../converter.svelte";
+import { Converter, formatDuration } from "../converter.svelte";
 import { ToastManager } from "#lib/util/toast.svelte";
 import type {
 	SettingDefinition,
@@ -144,7 +144,8 @@ export class VipsConverter extends Converter {
 		await this.init();
 
 		this.trackConversion(input);
-		this.log(`converting ${input.name} to ${to}`);
+		this.log(`converting ${input.name} (${input.id}) to ${to}`);
+		const startedAt = performance.now();
 
 		if (!this.isolated)
 			throw new Error(
@@ -174,7 +175,9 @@ export class VipsConverter extends Converter {
 
 			const res = await this.waitForMessage(worker);
 			if (res.type === "finished") {
-				this.log(`converted ${input.name} to ${to}`);
+				this.log(
+					`converted ${input.name} (${input.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
+				);
 				return new VertFile(
 					new File([res.output as unknown as BlobPart], input.name),
 					res.zip ? ".zip" : to,
@@ -194,11 +197,13 @@ export class VipsConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const worker = this.activeConversions.get(input.id);
 		if (!worker) {
-			this.error(`no active conversion found for file ${input.name}`);
+			this.error(
+				`no active conversion found for file ${input.name} (${input.id})`,
+			);
 			return;
 		}
 
-		this.log(`cancelling conversion for file ${input.name}`);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
 		worker.terminate();
 		this.activeConversions.delete(input.id);

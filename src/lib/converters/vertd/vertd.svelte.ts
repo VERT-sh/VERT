@@ -7,7 +7,7 @@ import {
 	getVertdCustomHeaders,
 } from "#lib/sections/settings/vertdSettings.svelte";
 import { VertFile } from "#lib/types";
-import { Converter, FormatInfo } from "../converter.svelte";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 import { applyPriorities } from "../priority";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$app/env/public";
 import { ToastManager } from "#lib/util/toast.svelte";
@@ -654,6 +654,8 @@ export class VertdConverter extends Converter {
 	): Promise<VertFile> {
 		this.trackConversion(input);
 		if (to.startsWith(".")) to = to.slice(1);
+		this.log(`converting ${input.name} (${input.id}) to .${to}`);
+		const startedAt = performance.now();
 
 		const fileUpload = input;
 		const apiUrl = await VertdInstance.instance.url();
@@ -667,7 +669,9 @@ export class VertdConverter extends Converter {
 			hash = await fileUpload.hash();
 
 			if (this.blocked(hash)) {
-				this.log(`conversion blocked for file ${input.name}`);
+				this.log(
+					`conversion blocked for file ${input.name} (${input.id})`,
+				);
 				throw new Error(
 					m["convert.errors.vertd.ratelimit"]({
 						filename: input.name,
@@ -692,7 +696,7 @@ export class VertdConverter extends Converter {
 
 		if (uploadRes.sequence)
 			this.log(
-				`received sequence upload for ${input.name} (kind: ${uploadRes.sequence.kind}, extension: ${uploadRes.sequence.extension}, entry: ${uploadRes.sequence.entry})`,
+				`received sequence upload for ${input.name} (${input.id}) (kind: ${uploadRes.sequence.kind}, extension: ${uploadRes.sequence.extension}, entry: ${uploadRes.sequence.entry})`,
 			);
 
 		if (this.cancelledConversions.has(input.id))
@@ -756,7 +760,7 @@ export class VertdConverter extends Converter {
 
 				clearTimeout(connectTimeout);
 				this.log(
-					`opened ws connection to vertd for file ${input.name}`,
+					`opened ws connection to vertd for file ${input.name} (${input.id})`,
 				);
 				const msg: StartJobMessage = {
 					type: "startJob",
@@ -769,11 +773,13 @@ export class VertdConverter extends Converter {
 				};
 				ws.send(JSON.stringify(msg));
 				this.log(JSON.stringify(msg, null, 2));
-				this.log(`sent startJob message for file ${input.name}`);
+				this.log(
+					`sent startJob message for file ${input.name} (${input.id})`,
+				);
 			};
 
 			ws.onerror = () => {
-				this.error(`ws error for file ${input.name}`);
+				this.error(`ws error for file ${input.name} (${input.id})`);
 				rejectConversion(new Error("vertd websocket error"));
 			};
 
@@ -785,7 +791,7 @@ export class VertdConverter extends Converter {
 				}
 
 				this.error(
-					`ws closed unexpectedly for file ${input.name} (code: ${e.code})`,
+					`ws closed unexpectedly for file ${input.name} (${input.id}) (code: ${e.code})`,
 				);
 				rejectConversion(
 					new Error("vertd websocket closed unexpectedly"),
@@ -807,7 +813,9 @@ export class VertdConverter extends Converter {
 					return;
 				}
 
-				this.log(`received message ${msg.type} for file ${input.name}`);
+				this.log(
+					`received message ${msg.type} for file ${input.name} (${input.id})`,
+				);
 				switch (msg.type) {
 					case "progressUpdate": {
 						const data = msg.data;
@@ -821,7 +829,9 @@ export class VertdConverter extends Converter {
 					}
 
 					case "jobRetried": {
-						this.log(`job retrying for file ${input.name}`);
+						this.log(
+							`job retrying for file ${input.name} (${input.id})`,
+						);
 						ToastManager.add({
 							type: "error",
 							message: m["convert.errors.vertd.retry"]({
@@ -832,7 +842,9 @@ export class VertdConverter extends Converter {
 					}
 
 					case "jobFinished": {
-						this.log(`job finished for file ${input.name}`);
+						this.log(
+							`job finished for file ${input.name} (${input.id})`,
+						);
 						try {
 							if (settled) break;
 							const url = `${apiUrl}/api/download/${msg.data.jobId}/${uploadRes.auth}`;
@@ -855,14 +867,17 @@ export class VertdConverter extends Converter {
 									apiUrl,
 								);
 								this.log(
-									`confirmed download for file ${input.name}`,
+									`confirmed download for file ${input.name} (${input.id})`,
 								);
 							} catch (e) {
 								this.error(`failed to confirm download: ${e}`);
 							}
 
+							this.log(
+								`converted ${input.name} (${input.id}) to .${to} in ${formatDuration(performance.now() - startedAt)}`,
+							);
 							resolveConversion(
-								new VertFile(new File([res], input.name), to),
+								new VertFile(new File([res], input.name), `.${to}`),
 							);
 						} catch (e) {
 							// don't count cancellations as failures
@@ -916,14 +931,16 @@ export class VertdConverter extends Converter {
 
 		const activeUpload = this.activeUploads.get(input.id);
 		if (activeUpload) {
-			this.log(`cancelling upload for file ${input.name}`);
+			this.log(`cancelling upload for file ${input.name} (${input.id})`);
 			activeUpload.abort();
 			this.activeUploads.delete(input.id);
 		}
 
 		const activeDownload = this.activeDownloads.get(input.id);
 		if (activeDownload) {
-			this.log(`cancelling download for file ${input.name}`);
+			this.log(
+				`cancelling download for file ${input.name} (${input.id})`,
+			);
 			activeDownload.abort();
 			this.activeDownloads.delete(input.id);
 		}
@@ -931,11 +948,13 @@ export class VertdConverter extends Converter {
 		const activeConversion = this.activeConversions.get(input.id);
 		if (!activeConversion) {
 			if (!activeUpload && !activeDownload)
-				this.error(`no active conversion found for file ${input.name}`);
+				this.error(
+					`no active conversion found for file ${input.name} (${input.id})`,
+				);
 			return;
 		}
 
-		this.log(`cancelling conversion for file ${input.name}`);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
 		const { ws, jobId, token } = activeConversion;
 
@@ -948,7 +967,9 @@ export class VertdConverter extends Converter {
 				},
 			};
 			ws.send(JSON.stringify(cancelMsg));
-			this.log(`sent cancelJob message for file ${input.name}`);
+			this.log(
+				`sent cancelJob message for file ${input.name} (${input.id})`,
+			);
 		}
 
 		ws.close();

@@ -290,7 +290,7 @@
 				{:else}
 					<h2
 						class="text-xl font-body overflow-hidden text-ellipsis whitespace-nowrap"
-						title={file.name}
+						title={`${file.name} (${file.id})`}
 					>
 						{file.name}
 					</h2>
@@ -402,7 +402,7 @@
 								<img
 									class="object-cover w-full h-full"
 									src={file.blobUrl}
-									alt={file.name}
+									alt={`${file.name} (${file.id})`}
 								/>
 							{:else}
 								{@const Icon = fileTypeBigIcons[fileType]}

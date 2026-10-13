@@ -111,6 +111,7 @@
 			},
 			"description": "Editing conversion settings for:",
 			"all_files": "all files",
+			"file_id": "File ID: {id}",
 			"cancel": "Cancel",
 			"apply": "Apply",
 			"none": "No settings available for this format.",

@@ -1,5 +1,6 @@
 import { byNative, converters } from "#lib/converters";
 import type { Converter } from "#lib/converters/converter.svelte";
+import { formatDuration } from "#lib/converters/converter.svelte";
 import { m } from "#lib/paraglide/messages";
 import { ToastManager } from "#lib/util/toast.svelte";
 import { addDialog } from "#lib/store/DialogProvider";
@@ -386,10 +387,11 @@ export class VertFile {
 		if (!this.retryingFallback) this.attemptedConverters.clear();
 		this.cancelled = false;
 		let res: VertFile | undefined;
+		const startedAt = performance.now();
 		try {
 			log(
 				["file", "convert"],
-				`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`,
+				`Starting conversion for ${this.file.name} (${this.id}) from ${this.from} to ${this.to}`,
 			);
 			if (!this.converters.length) throw new Error("No converters found");
 
@@ -524,6 +526,10 @@ export class VertFile {
 				return;
 			}
 			this.result = res;
+			log(
+				["file", "convert"],
+				`finished conversion for ${this.file.name} (${this.id}) to ${this.to} in ${formatDuration(performance.now() - startedAt)}`,
+			);
 			if (this.fallbackToastId !== null) {
 				ToastManager.remove(this.fallbackToastId);
 				this.fallbackToastId = null;
@@ -560,7 +566,7 @@ export class VertFile {
 
 							log(
 								["file", "convert"],
-								`retrying ${this.name} with next compatible converter: ${nextConverter.name}`,
+								`retrying ${this.name} (${this.id}) with next compatible converter: ${nextConverter.name}`,
 							);
 
 							this.conversionSettings = {

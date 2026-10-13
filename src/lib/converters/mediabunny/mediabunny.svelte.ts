@@ -25,7 +25,7 @@ import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 import { registerProresDecoder } from "@mediabunny/prores";
 import { SvelteMap } from "svelte/reactivity";
-import { Converter, FormatInfo } from "../converter.svelte";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 import { applyPriorities } from "../priority";
 import { m } from "#lib/paraglide/messages";
 import type {
@@ -350,6 +350,8 @@ export class MediabunnyConverter extends Converter {
 		await this.init();
 
 		this.trackConversion(file);
+		this.log(`converting ${file.name} (${file.id}) to ${to}`);
+		const startedAt = performance.now();
 		const toFormat = to.startsWith(".") ? to.slice(1) : to;
 		const originalName = file.file.name.split(".").slice(0, -1).join(".");
 		const outputFilename = `${originalName}.${toFormat}`;
@@ -433,7 +435,7 @@ export class MediabunnyConverter extends Converter {
 				const isValid = conversion.isValid;
 				const logMethod = isValid ? this.error : this.log;
 				logMethod(
-					`${discardedTrackCount} discarded track(s) for ${file.name}:\n${discardedTrackList.join("\n")}`,
+					`${discardedTrackCount} discarded track(s) for ${file.name} (${file.id}):\n${discardedTrackList.join("\n")}`,
 				);
 				ToastManager.add({
 					type: isValid ? "warning" : "error", // warning if output created, error if nothing / conversion was completely invalid
@@ -458,6 +460,10 @@ export class MediabunnyConverter extends Converter {
 			};
 
 			await conversion.execute();
+
+			this.log(
+				`converted ${file.name} (${file.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
+			);
 
 			if (streamTargetContext) {
 				const streamedFile = await streamTargetContext.getFile();
@@ -530,11 +536,13 @@ export class MediabunnyConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const conversion = this.activeConversions.get(input.id);
 		if (!conversion) {
-			this.error(`no active conversion found for file ${input.name}`);
+			this.error(
+				`no active conversion found for file ${input.name} (${input.id})`,
+			);
 			return;
 		}
 
-		this.log(`cancelling conversion for file ${input.name}`);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
 		await conversion.cancel();
 	}

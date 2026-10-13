@@ -16,6 +16,16 @@ export type WorkerStatus =
 	| "partially-ready"
 	| "error"; // actual failure during initialization
 
+// human-readable conversion duration, e.g. "450ms" / "1.23s" / "1m 5.4s"
+export function formatDuration(ms: number): string {
+	if (ms < 1000) return `${Math.round(ms)}ms`;
+	const seconds = ms / 1000;
+	if (seconds < 60) return `${seconds.toFixed(2)}s`;
+	const minutes = Math.floor(seconds / 60);
+	const remaining = (seconds % 60).toFixed(1);
+	return `${minutes}m ${remaining}s`;
+}
+
 export class FormatInfo {
 	public name: string;
 

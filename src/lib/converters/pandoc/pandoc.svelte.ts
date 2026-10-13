@@ -1,5 +1,5 @@
 import { VertFile, type WorkerMessage } from "#lib/types";
-import { Converter, FormatInfo } from "../converter.svelte";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 import { browser } from "$app/env";
 import PandocWorker from "#lib/workers/pandoc?worker&url";
 import { ToastManager } from "#lib/util/toast.svelte";
@@ -42,6 +42,8 @@ export class PandocConverter extends Converter {
 		await this.init();
 
 		this.trackConversion(file);
+		this.log(`converting ${file.name} (${file.id}) to ${to}`);
+		const startedAt = performance.now();
 		const worker = new Worker(PandocWorker, {
 			type: "module",
 		});
@@ -104,6 +106,9 @@ export class PandocConverter extends Converter {
 			}
 
 			if (!to.startsWith(".")) to = `.${to}`;
+			this.log(
+				`converted ${file.name} (${file.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
+			);
 			return new VertFile(
 				new File([result.output], file.name),
 				result.isZip ? ".zip" : to,
@@ -118,11 +123,13 @@ export class PandocConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const worker = this.activeConversions.get(input.id);
 		if (!worker) {
-			this.error(`no active conversion found for file ${input.name}`);
+			this.error(
+				`no active conversion found for file ${input.name} (${input.id})`,
+			);
 			return;
 		}
 
-		this.log(`cancelling conversion for file ${input.name}`);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
 		worker.terminate();
 		this.activeConversions.delete(input.id);

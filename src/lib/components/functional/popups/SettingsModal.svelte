@@ -301,6 +301,17 @@
 						settings = {};
 					}}
 				/>
+				{#if selectedFileId !== allFilesValue}
+					<p class="text-xs text-muted mt-1">
+						{m["convert.settings.file_id"]({
+							id: targetFile.id ?? "N/A",
+						})}
+					</p>
+				{:else}
+					<p class="text-xs text-muted mt-1">
+						{m["convert.settings.file_id"]({ id: "N/A" })}
+					</p>
+				{/if}
 			</div>
 
 			<div class="flex items-center justify-between">

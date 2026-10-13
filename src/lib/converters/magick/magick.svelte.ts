@@ -2,7 +2,7 @@ import { browser } from "$app/env";
 import { m } from "#lib/paraglide/messages";
 import { VertFile, type WorkerMessage } from "#lib/types";
 import MagickWorker from "#lib/workers/magick?worker&url";
-import { Converter, FormatInfo } from "../converter.svelte";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 import { applyPriorities } from "../priority";
 import { imageFormats } from "./magick-automated";
 import {
@@ -243,7 +243,8 @@ export class MagickConverter extends Converter {
 		await this.init();
 
 		this.trackConversion(input);
-		this.log(`converting ${input.name} to ${to}`);
+		this.log(`converting ${input.name} (${input.id}) to ${to}`);
+		const startedAt = performance.now();
 
 		// handle converting from SVG manually because magick-wasm doesn't support it
 		if (input.from === ".svg") {
@@ -331,7 +332,9 @@ export class MagickConverter extends Converter {
 
 			const res = await this.waitForMessage(worker);
 			if (res.type === "finished") {
-				this.log(`converted ${input.name} to ${to}`);
+				this.log(
+					`converted ${input.name} (${input.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
+				);
 				return new VertFile(
 					new File([res.output as unknown as BlobPart], input.name),
 					res.zip ? ".zip" : to,
@@ -353,11 +356,13 @@ export class MagickConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const worker = this.activeConversions.get(input.id);
 		if (!worker) {
-			this.error(`no active conversion found for file ${input.name}`);
+			this.error(
+				`no active conversion found for file ${input.name} (${input.id})`,
+			);
 			return;
 		}
 
-		this.log(`cancelling conversion for file ${input.name}`);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
 		worker.terminate();
 		this.activeConversions.delete(input.id);
