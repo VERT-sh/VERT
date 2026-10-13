@@ -1,21 +1,21 @@
 import VertdErrorComponent from "#lib/components/functional/popups/VertdError.svelte";
 import { m } from "#lib/paraglide/messages";
 import { Settings } from "#lib/sections/settings/index.svelte";
-import { SvelteMap, SvelteSet } from "svelte/reactivity";
 import {
 	VertdInstance,
 	getVertdCustomHeaders,
 } from "#lib/sections/settings/vertdSettings.svelte";
 import { VertFile } from "#lib/types";
+import type {
+	ConversionSettings,
+	SettingCategories,
+	SettingDefinition,
+} from "#lib/types/conversion-settings";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { PUB_DISABLE_FAILURE_BLOCKS } from "$app/env/public";
+import { SvelteMap, SvelteSet } from "svelte/reactivity";
 import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 import { applyPriorities } from "../priority";
-import { PUB_DISABLE_FAILURE_BLOCKS } from "$app/env/public";
-import { ToastManager } from "#lib/util/toast.svelte";
-import type {
-	SettingDefinition,
-	SettingCategories,
-	ConversionSettings,
-} from "#lib/types/conversion-settings";
 
 interface UploadResponse {
 	id: string;

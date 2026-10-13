@@ -1,6 +1,6 @@
 import { error, log } from "#lib/util/logger.svelte";
-import { unzip } from "fflate";
 import { downloadZip } from "client-zip";
+import { unzip } from "fflate";
 
 export interface ZipEntry {
 	filename: string;

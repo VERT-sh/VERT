@@ -1,11 +1,11 @@
 import { paraglideVitePlugin } from "@inlang/paraglide-js";
+import svg from "@poppanator/sveltekit-svg";
 import adapter from "@sveltejs/adapter-static";
 import { sveltekit } from "@sveltejs/kit/vite";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
-import { defineConfig, type PluginOption } from "vite";
-import svg from "@poppanator/sveltekit-svg";
-import wasm from "vite-plugin-wasm";
 import { execSync } from "child_process";
+import { defineConfig, type PluginOption } from "vite";
+import wasm from "vite-plugin-wasm";
 
 // coollify removes the .git folder but exposes commit via SOURCE_COMMIT env variable
 let commitHash = process.env.SOURCE_COMMIT

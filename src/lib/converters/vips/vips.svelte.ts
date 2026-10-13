@@ -1,20 +1,20 @@
-import { browser } from "$app/env";
 import { m } from "#lib/paraglide/messages";
 import { VertFile, type WorkerMessage } from "#lib/types";
-import VipsWorker from "#lib/workers/vips?worker&url";
-import { Converter, formatDuration } from "../converter.svelte";
-import { ToastManager } from "#lib/util/toast.svelte";
 import type {
-	SettingDefinition,
-	SettingCategories,
 	ConversionSettings,
+	SettingCategories,
+	SettingDefinition,
 } from "#lib/types/conversion-settings";
-import {
-	vipsFormats,
-	VIPS_QUALITY_FORMATS,
-	VIPS_OPAQUE_FORMATS,
-} from "./formats";
+import { ToastManager } from "#lib/util/toast.svelte";
+import VipsWorker from "#lib/workers/vips?worker&url";
+import { browser } from "$app/env";
 import { SvelteMap } from "svelte/reactivity";
+import { Converter, formatDuration } from "../converter.svelte";
+import {
+	VIPS_OPAQUE_FORMATS,
+	VIPS_QUALITY_FORMATS,
+	vipsFormats,
+} from "./formats";
 
 export class VipsConverter extends Converter {
 	public name = "libvips";

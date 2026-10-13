@@ -1,10 +1,10 @@
-import Vips from "wasm-vips";
-import vipsWasm from "wasm-vips/vips.wasm?url";
-import vipsJxlWasm from "wasm-vips/vips-jxl.wasm?url";
-import vipsHeifWasm from "wasm-vips/vips-heif.wasm?url";
-import vipsResvgWasm from "wasm-vips/vips-resvg.wasm?url";
 import type { WorkerMessage } from "#lib/types";
 import type { ConversionSettings } from "#lib/types/conversion-settings";
+import Vips from "wasm-vips";
+import vipsHeifWasm from "wasm-vips/vips-heif.wasm?url";
+import vipsJxlWasm from "wasm-vips/vips-jxl.wasm?url";
+import vipsResvgWasm from "wasm-vips/vips-resvg.wasm?url";
+import vipsWasm from "wasm-vips/vips.wasm?url";
 
 type VipsInstance = Awaited<ReturnType<typeof Vips>>;
 type VipsImage = ReturnType<VipsInstance["Image"]["newFromBuffer"]>;

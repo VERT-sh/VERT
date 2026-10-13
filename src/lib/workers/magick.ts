@@ -1,4 +1,7 @@
+import type { WorkerMessage } from "#lib/types";
+import type { ConversionSettings } from "#lib/types/conversion-settings";
 import {
+	AlphaAction,
 	ColorSpace,
 	initializeImageMagick,
 	MagickColor,
@@ -6,13 +9,10 @@ import {
 	MagickImage,
 	MagickImageCollection,
 	MagickReadSettings,
-	AlphaAction,
 	type IMagickImage,
 	type IMagickImageCollection,
 } from "@imagemagick/magick-wasm";
 import { makeZip } from "client-zip";
-import type { WorkerMessage } from "#lib/types";
-import type { ConversionSettings } from "#lib/types/conversion-settings";
 
 let magickInitialized = false;
 

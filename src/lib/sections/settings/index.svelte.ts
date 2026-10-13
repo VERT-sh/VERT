@@ -1,13 +1,13 @@
-import { PUB_VERTD_URL } from "$app/env/public";
-import { SvelteMap } from "svelte/reactivity";
 import type { ConversionSpeed } from "#lib/converters/vertd/vertd.svelte";
 import { readSettings } from "#lib/util/settings";
+import { PUB_VERTD_URL } from "$app/env/public";
+import { SvelteMap } from "svelte/reactivity";
 import { VertdInstance } from "./vertdSettings.svelte";
 
 export { default as Appearance } from "./Appearance.svelte";
 export { default as Conversion } from "./Conversion.svelte";
-export { default as Vertd } from "./Vertd.svelte";
 export { default as Privacy } from "./Privacy.svelte";
+export { default as Vertd } from "./Vertd.svelte";
 
 // TODO: clean up settings & button code (componetize)
 

@@ -1,4 +1,3 @@
-import { browser } from "$app/env";
 import {
 	byNative,
 	categories,
@@ -6,21 +5,22 @@ import {
 	converterCategories,
 	converters,
 } from "#lib/converters";
-import { priorityFor } from "#lib/converters/priority";
 import type { Converter } from "#lib/converters/converter.svelte";
-import { error, log } from "#lib/util/logger.svelte";
-import { VertFile } from "#lib/types";
-import { parseBlob, selectCover } from "music-metadata";
-import { get, writable } from "svelte/store";
-import PQueue from "p-queue";
-import { getLocale, setLocale } from "#lib/paraglide/runtime";
-import { m } from "#lib/paraglide/messages";
-import sanitizeHtml from "sanitize-html";
-import { ToastManager } from "#lib/util/toast.svelte";
-import { conversionConcurrency, GB } from "#lib/util/consts";
-import { readSettings } from "#lib/util/settings";
-import { formatFilename } from "#lib/util/file";
+import { priorityFor } from "#lib/converters/priority";
 import { vertdFetch } from "#lib/converters/vertd/vertd.svelte";
+import { m } from "#lib/paraglide/messages";
+import { getLocale, setLocale } from "#lib/paraglide/runtime";
+import { VertFile } from "#lib/types";
+import { conversionConcurrency, GB } from "#lib/util/consts";
+import { formatFilename } from "#lib/util/file";
+import { error, log } from "#lib/util/logger.svelte";
+import { readSettings } from "#lib/util/settings";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { browser } from "$app/env";
+import { parseBlob, selectCover } from "music-metadata";
+import PQueue from "p-queue";
+import sanitizeHtml from "sanitize-html";
+import { get, writable } from "svelte/store";
 
 const IMAGE_FORMATS = new Set(
 	converters

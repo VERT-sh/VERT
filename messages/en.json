@@ -58,6 +58,8 @@
 			"video": "video",
 			"doc": "document",
 			"image": "image",
+			"archive": "archive",
+			"unknown": "unknown",
 			"extract_error": "Error extracting '{filename}': {error}",
 			"conversion_failed": "Failed to convert {count} files in '{filename}'. See '{reportName}' in the archive for more information."
 		},

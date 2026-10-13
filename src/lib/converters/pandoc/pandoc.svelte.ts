@@ -1,10 +1,10 @@
-import { VertFile, type WorkerMessage } from "#lib/types";
-import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
-import { browser } from "$app/env";
-import PandocWorker from "#lib/workers/pandoc?worker&url";
-import { ToastManager } from "#lib/util/toast.svelte";
-import { SvelteMap } from "svelte/reactivity";
 import { m } from "#lib/paraglide/messages";
+import { VertFile, type WorkerMessage } from "#lib/types";
+import { ToastManager } from "#lib/util/toast.svelte";
+import PandocWorker from "#lib/workers/pandoc?worker&url";
+import { browser } from "$app/env";
+import { SvelteMap } from "svelte/reactivity";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 
 export class PandocConverter extends Converter {
 	public name = "pandoc";

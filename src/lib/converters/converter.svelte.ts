@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { error, log } from "#lib/util/logger.svelte";
 import type { VertFile } from "#lib/types";
 import type {
 	ConversionSettings,
 	NormalizedSettings,
 	SettingCategories,
 } from "#lib/types/conversion-settings";
+import { error, log } from "#lib/util/logger.svelte";
 
 export type WorkerStatus =
 	| "idle" // not initialized yet (nothing downloaded)

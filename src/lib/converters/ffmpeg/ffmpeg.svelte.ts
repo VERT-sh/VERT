@@ -1,24 +1,24 @@
-import { VertFile } from "#lib/types";
-import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { browser } from "$app/env";
-import { SvelteMap } from "svelte/reactivity";
 import { m } from "#lib/paraglide/messages";
 import { Settings } from "#lib/sections/settings/index.svelte";
-import { ToastManager } from "#lib/util/toast.svelte";
-import { getCodecs, toArgs } from "./ffmpeg.codecs";
-import { buildImageSequenceCommand } from "./ffmpeg.animated";
-import { extractAlbumArt, avWithArt, avWithBg } from "./utils/ffmpeg";
-import ffmpegCoreURL from "@ffmpeg/core?url";
-import ffmpegWasmURL from "@ffmpeg/core/wasm?url";
+import { VertFile } from "#lib/types";
 import type {
-	SettingCategories,
-	SettingDefinition,
 	ConversionSettings,
 	NormalizedSettings,
+	SettingCategories,
+	SettingDefinition,
 } from "#lib/types/conversion-settings";
-import { videoFormats } from "../vertd/vertd.svelte";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { browser } from "$app/env";
+import ffmpegWasmURL from "@ffmpeg/core/wasm?url";
+import ffmpegCoreURL from "@ffmpeg/core?url";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { SvelteMap } from "svelte/reactivity";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 import { applyPriorities } from "../priority";
+import { videoFormats } from "../vertd/vertd.svelte";
+import { buildImageSequenceCommand } from "./ffmpeg.animated";
+import { getCodecs, toArgs } from "./ffmpeg.codecs";
+import { avWithArt, avWithBg, extractAlbumArt } from "./utils/ffmpeg";
 
 const coreURL = new URL(ffmpegCoreURL, import.meta.url).href;
 const wasmURL = new URL(ffmpegWasmURL, import.meta.url).href;

@@ -1,4 +1,20 @@
+import { m } from "#lib/paraglide/messages";
+import { Settings } from "#lib/sections/settings/index.svelte";
+import { isMobile } from "#lib/store/index.svelte";
 import { VertFile } from "#lib/types";
+import type {
+	ConversionSettings,
+	SettingCategories,
+	SettingDefinition,
+} from "#lib/types/conversion-settings";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { browser } from "$app/env";
+import { registerAacEncoder } from "@mediabunny/aac-encoder";
+import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
+import { registerDtsDecoder, registerDtsEncoder } from "@mediabunny/dts";
+import { registerFlacEncoder } from "@mediabunny/flac-encoder";
+import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
+import { registerProresDecoder } from "@mediabunny/prores";
 import {
 	BlobSource,
 	BufferTarget,
@@ -18,26 +34,10 @@ import {
 	WEBM,
 	WebMOutputFormat,
 } from "mediabunny";
-import { registerAacEncoder } from "@mediabunny/aac-encoder";
-import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
-import { registerDtsDecoder, registerDtsEncoder } from "@mediabunny/dts";
-import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
-import { registerFlacEncoder } from "@mediabunny/flac-encoder";
-import { registerProresDecoder } from "@mediabunny/prores";
 import { SvelteMap } from "svelte/reactivity";
-import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
-import { applyPriorities } from "../priority";
-import { m } from "#lib/paraglide/messages";
-import type {
-	SettingDefinition,
-	SettingCategories,
-	ConversionSettings,
-} from "#lib/types/conversion-settings";
-import { isMobile } from "#lib/store/index.svelte";
-import { ToastManager } from "#lib/util/toast.svelte";
-import { browser } from "$app/env";
 import { get } from "svelte/store";
-import { Settings } from "#lib/sections/settings/index.svelte";
+import { Converter, formatDuration, FormatInfo } from "../converter.svelte";
+import { applyPriorities } from "../priority";
 
 // codec compatibility stuff, based on mediabunny's docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
