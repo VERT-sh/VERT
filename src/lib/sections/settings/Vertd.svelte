@@ -76,7 +76,7 @@
 		<h2 class="text-2xl font-bold">
 			<ServerIcon
 				size="40"
-				class="inline-block -mt-1 mr-2 bg-accent-red p-2 rounded-full overflow-visible"
+				class="-mt-1 mr-2 inline-block overflow-visible rounded-full bg-accent-red p-2"
 				color="black"
 			/>
 			{m["settings.vertd.title"]()}
@@ -94,10 +94,10 @@
 				{vertdStatusLabel}
 			</p>
 
-			<p class="text-sm text-muted font-normal">
+			<p class="text-sm font-normal text-muted">
 				{@html sanitize(m["settings.vertd.description.main"]())}
 			</p>
-			<p class="text-sm text-muted font-normal">
+			<p class="text-sm font-normal text-muted">
 				{@html sanitize(
 					link(
 						"vertd_link",
@@ -106,7 +106,7 @@
 					),
 				)}
 			</p>
-			<p class="text-sm text-muted font-normal">
+			<p class="text-sm font-normal text-muted">
 				{@html sanitize(
 					link(
 						"vertd_link",
@@ -177,7 +177,7 @@
 							bind:value={settings.vertdURL}
 						/>
 					{/if}
-					<p class="text-sm text-muted font-normal">
+					<p class="text-sm font-normal text-muted">
 						{m["settings.vertd.info"]({
 							sizeLimit: vertdSizeLimitLabel,
 							commitId: vertdCommit ?? "N/A",
@@ -190,7 +190,7 @@
 					<p class="text-base font-bold">
 						{m["settings.vertd.conversion_speed.label"]()}
 					</p>
-					<p class="text-sm text-muted font-normal">
+					<p class="text-sm font-normal text-muted">
 						{m["settings.vertd.conversion_speed.description"]()}
 					</p>
 				</div>
@@ -275,7 +275,7 @@
 					<p class="text-base font-bold">
 						{m["settings.vertd.custom_headers.label"]()}
 					</p>
-					<p class="text-sm text-muted font-normal">
+					<p class="text-sm font-normal text-muted">
 						{m["settings.vertd.custom_headers.description"]()}
 					</p>
 					<FancyInput

@@ -106,7 +106,7 @@
 		href={item.url}
 		aria-label={item.name}
 		class={clsx(
-			"min-w-16 md:min-w-32 h-full relative z-10 rounded-xl flex flex-1 items-center justify-center gap-3 overflow-hidden",
+			"relative z-10 flex h-full min-w-16 flex-1 items-center justify-center gap-3 overflow-hidden rounded-xl md:min-w-32",
 			{
 				"bg-panel-highlight":
 					item.activeMatch(page.url.pathname) && !browser,
@@ -114,10 +114,10 @@
 		)}
 		draggable={false}
 	>
-		<div class="grid grid-rows-1 grid-cols-1">
+		<div class="grid grid-cols-1 grid-rows-1">
 			{#key item.name}
 				<div
-					class="w-full row-start-1 col-start-1 h-full flex items-center justify-center gap-3"
+					class="col-start-1 row-start-1 flex h-full w-full items-center justify-center gap-3"
 					in:fade={{
 						duration,
 						easing: quintOut,
@@ -131,7 +131,7 @@
 						<Icon />
 						{#if item.badge}
 							<div
-								class="absolute overflow-hidden grid grid-rows-1 grid-cols-1 -top-1 font-display -right-1 w-fit px-1.5 h-4 rounded-full bg-badge text-on-badge font-medium"
+								class="absolute -right-1 -top-1 grid h-4 w-fit grid-cols-1 grid-rows-1 overflow-hidden rounded-full bg-badge px-1.5 font-display font-medium text-on-badge"
 								style="font-size: 0.7rem;"
 								transition:fade={{
 									duration,
@@ -140,7 +140,7 @@
 							>
 								{#key item.badge}
 									<div
-										class="flex items-center justify-center w-full h-full col-start-1 row-start-1"
+										class="col-start-1 row-start-1 flex h-full w-full items-center justify-center"
 										in:fade={{
 											duration,
 											easing: quintOut,
@@ -157,7 +157,7 @@
 						{/if}
 					</div>
 					<p
-						class="font-medium hidden hyphens-auto break-all md:flex min-w-0"
+						class="hidden min-w-0 hyphens-auto break-all font-medium md:flex"
 					>
 						{item.name}
 					</p>
@@ -168,11 +168,11 @@
 {/snippet}
 
 <div bind:this={container}>
-	<Panel class="max-w-[778px] w-screen h-20 flex items-center gap-3 relative">
+	<Panel class="relative flex h-20 w-screen max-w-[778px] items-center gap-3">
 		{@const linkRect = linkRects.at(selectedIndex) || linkRects[0]}
 		{#if linkRect && isInitialized}
 			<div
-				class="absolute bg-panel-highlight rounded-xl"
+				class="absolute rounded-xl bg-panel-highlight"
 				style:width="{linkRect.width}px"
 				style:height="{linkRect.height}px"
 				style:top="{linkRect.top - (containerRect?.top || 0)}px"
@@ -184,7 +184,7 @@
 			></div>
 		{/if}
 		<a
-			class="w-28 h-full bg-accent rounded-xl items-center justify-center hidden md:flex"
+			class="hidden h-full w-28 items-center justify-center rounded-xl bg-accent md:flex"
 			href="/"
 		>
 			<div class="h-5 w-full">
@@ -194,7 +194,7 @@
 		{#each items as item, i (item.url)}
 			{@render link(item, i)}
 		{/each}
-		<div class="w-0.5 bg-separator h-full hidden md:flex"></div>
+		<div class="hidden h-full w-0.5 bg-separator md:flex"></div>
 		<Tooltip text={m["navbar.toggle_theme"]()} position="right">
 			<button
 				onclick={() => {
@@ -202,10 +202,10 @@
 						document.documentElement.classList.contains("dark");
 					setTheme(isDark ? "light" : "dark");
 				}}
-				class="w-14 h-full items-center justify-center hidden md:flex"
+				class="hidden h-full w-14 items-center justify-center md:flex"
 			>
-				<SunIcon class="dynadark:hidden block" />
-				<MoonIcon class="dynadark:block hidden" />
+				<SunIcon class="block dynadark:hidden" />
+				<MoonIcon class="hidden dynadark:block" />
 			</button>
 		</Tooltip>
 	</Panel>

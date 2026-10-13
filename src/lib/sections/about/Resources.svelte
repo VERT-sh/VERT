@@ -17,9 +17,9 @@
 </script>
 
 <Panel class="flex flex-col gap-4 p-6">
-	<h2 class="text-2xl font-bold flex items-center">
+	<h2 class="flex items-center text-2xl font-bold">
 		<div
-			class="rounded-full bg-accent-purple p-2 inline-block mr-3 w-10 h-10"
+			class="mr-3 inline-block h-10 w-10 rounded-full bg-accent-purple p-2"
 		>
 			<LinkIcon color="black" />
 		</div>
@@ -31,11 +31,11 @@
 			target="_blank"
 			rel="noopener noreferrer"
 			class={clsx(
-				"btn flex-1 gap-2 p-4 rounded-full bg-button text-black dynadark:text-white flex items-center justify-center",
+				"btn flex flex-1 items-center justify-center gap-2 rounded-full bg-button p-4 text-black dynadark:text-white",
 				!$effects && "!scale-100",
 			)}
 		>
-			<MessageCircleMoreIcon size="24" class="inline-block mr-2" />
+			<MessageCircleMoreIcon size="24" class="mr-2 inline-block" />
 			{m["about.resources.discord"]()}
 		</a>
 		<a
@@ -43,11 +43,11 @@
 			target="_blank"
 			rel="noopener noreferrer"
 			class={clsx(
-				"btn flex-1 gap-2 p-4 rounded-full bg-button text-black dynadark:text-white flex items-center justify-center",
+				"btn flex flex-1 items-center justify-center gap-2 rounded-full bg-button p-4 text-black dynadark:text-white",
 				!$effects && "!scale-100",
 			)}
 		>
-			<CodeXmlIcon size="24" class="inline-block mr-2" />
+			<CodeXmlIcon size="24" class="mr-2 inline-block" />
 			{m["about.resources.source"]()}
 		</a>
 		<a
@@ -55,11 +55,11 @@
 			target="_blank"
 			rel="noopener noreferrer"
 			class={clsx(
-				"btn flex-1 gap-2 p-4 rounded-full bg-button text-black dynadark:text-white flex items-center justify-center",
+				"btn flex flex-1 items-center justify-center gap-2 rounded-full bg-button p-4 text-black dynadark:text-white",
 				!$effects && "!scale-100",
 			)}
 		>
-			<MailIcon size="24" class="inline-block mr-2" />
+			<MailIcon size="24" class="mr-2 inline-block" />
 			{m["about.resources.email"]()}
 		</a>
 	</div>

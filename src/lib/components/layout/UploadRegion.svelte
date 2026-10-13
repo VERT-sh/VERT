@@ -8,7 +8,7 @@
 {#if $dropping}
 	<div
 		class={clsx(
-			"fixed w-screen h-screen opacity-40 dynadark:opacity-20 z-[100] pointer-events-none blur-2xl",
+			"pointer-events-none fixed z-[100] h-screen w-screen opacity-40 blur-2xl dynadark:opacity-20",
 			$effects ? "dragoverlay" : "bg-accent-blue",
 		)}
 		class:_dragover={dropping && $effects}

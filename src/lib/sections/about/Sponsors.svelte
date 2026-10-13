@@ -28,26 +28,26 @@
 	}
 </script>
 
-<Panel class="flex flex-col gap-3 p-6 min-h-[280px]">
-	<h2 class="text-2xl font-bold flex items-center">
+<Panel class="flex min-h-[280px] flex-col gap-3 p-6">
+	<h2 class="flex items-center text-2xl font-bold">
 		<div
-			class="rounded-full bg-accent-pink p-2 inline-block mr-3 w-10 h-10"
+			class="mr-3 inline-block h-10 w-10 rounded-full bg-accent-pink p-2"
 		>
 			<PiggyBankIcon color="black" />
 		</div>
 		{m["about.sponsors.title"]()}
 	</h2>
-	<div class="[&>*]:font-normal h-full flex justify-between flex-col gap-4">
-		<div class="flex gap-3 justify-center text-lg">
+	<div class="flex h-full flex-col justify-between gap-4 [&>*]:font-normal">
+		<div class="flex justify-center gap-3 text-lg">
 			<a
 				href="https://eva.pink"
 				target="_blank"
-				class="w-48 h-24 rounded-2xl px-0 btn gap-2 flex flex-col justify-center items-center"
+				class="btn flex h-24 w-48 flex-col items-center justify-center gap-2 rounded-2xl px-0"
 			>
 				<img
 					src={lily}
 					alt="Eva"
-					class="w-full h-full select-none object-cover"
+					class="h-full w-full select-none object-cover"
 				/>
 			</a>
 		</div>
@@ -68,10 +68,10 @@
 					true,
 				),
 			)}
-			<span class="inline-block mx-[2px] relative top-[2px]">
+			<span class="relative top-[2px] mx-[2px] inline-block">
 				<button
 					id="email"
-					class="flex items-center gap-[6px] cursor-pointer"
+					class="flex cursor-pointer items-center gap-[6px]"
 					onclick={copyToClipboard}
 					aria-label="Copy email to clipboard"
 				>
@@ -89,10 +89,10 @@
 
 <style lang="postcss">
 	#email {
-		@apply font-mono bg-gray-200 rounded-md px-1 text-inherit no-underline dynadark:bg-panel-alt dynadark:text-white;
+		@apply rounded-md bg-gray-200 px-1 font-mono text-inherit no-underline dynadark:bg-panel-alt dynadark:text-white;
 	}
 
 	#email:hover {
-		@apply font-mono !bg-accent !text-black rounded-md px-1 duration-200;
+		@apply rounded-md !bg-accent px-1 font-mono !text-black duration-200;
 	}
 </style>

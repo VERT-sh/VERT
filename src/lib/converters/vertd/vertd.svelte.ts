@@ -877,7 +877,10 @@ export class VertdConverter extends Converter {
 								`converted ${input.name} (${input.id}) to .${to} in ${formatDuration(performance.now() - startedAt)}`,
 							);
 							resolveConversion(
-								new VertFile(new File([res], input.name), `.${to}`),
+								new VertFile(
+									new File([res], input.name),
+									`.${to}`,
+								),
 							);
 						} catch (e) {
 							// don't count cancellations as failures

@@ -283,7 +283,7 @@
 	]}
 	onclose={() => onclose?.()}
 >
-	<div class="flex flex-col gap-8 max-h-[calc(100vh-225px)] overflow-y-auto">
+	<div class="flex max-h-[calc(100vh-225px)] flex-col gap-8 overflow-y-auto">
 		{#if targetFile}
 			{@const availableConverters = getAvailableConverters(targetFile)}
 			{@const validConverter = getValidConverter(
@@ -302,13 +302,13 @@
 					}}
 				/>
 				{#if selectedFileId !== allFilesValue}
-					<p class="text-xs text-muted mt-1">
+					<p class="mt-1 text-xs text-muted">
 						{m["convert.settings.file_id"]({
 							id: targetFile.id ?? "N/A",
 						})}
 					</p>
 				{:else}
-					<p class="text-xs text-muted mt-1">
+					<p class="mt-1 text-xs text-muted">
 						{m["convert.settings.file_id"]({ id: "N/A" })}
 					</p>
 				{/if}
@@ -318,9 +318,9 @@
 				{#each Object.keys(settingTabs) as tab (tab)}
 					<button
 						class={clsx(
-							"flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize",
+							"hover:text-muted/20 flex-grow border-b-2 pb-2 text-lg capitalize",
 							activeTab === tab
-								? "text-accent border-b-accent"
+								? "border-b-accent text-accent"
 								: "border-b-separator text-muted",
 						)}
 						onclick={() => (activeTab = tab)}
@@ -341,7 +341,7 @@
 								{#each availableConverters as converter (converter.name)}
 									<button
 										class={clsx(
-											"w-full p-3 text-left rounded-xl border-2 border-button",
+											"w-full rounded-xl border-2 border-button p-3 text-left",
 											converter.name ===
 												validConverter?.name &&
 												"bg-accent-purple text-black",
@@ -374,7 +374,7 @@
 											{setting.label}
 										</p>
 										{#if setting.description}
-											<p class="text-xs text-muted mt-1">
+											<p class="mt-1 text-xs text-muted">
 												{setting.description}
 											</p>
 										{/if}
@@ -437,7 +437,7 @@
 												setting.options?.[rangeValue]
 													?.label ?? rangeValue}
 											<div
-												class="flex items-center mt-2 gap-2"
+												class="mt-2 flex items-center gap-2"
 											>
 												<input
 													type="range"
@@ -455,7 +455,7 @@
 													disabled={setting.disabled}
 												/>
 												<span
-													class="text-sm max-w-28 w-full text-right"
+													class="w-full max-w-28 text-right text-sm"
 													>{rangeLabel}</span
 												>
 											</div>

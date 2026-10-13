@@ -16,7 +16,7 @@
 
 {#if dialogList.length > 0}
 	<div
-		class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-40"
+		class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm"
 		in:fade={{
 			duration,
 			easing: quintOut,

@@ -60,20 +60,20 @@
 	onclick={uploadFiles}
 	bind:this={uploaderButton}
 	class={clsx(
-		"hover:scale-105 active:scale-100 duration-200",
+		"duration-200 hover:scale-105 active:scale-100",
 		!$effects && "!scale-100",
 		classList,
 	)}
 >
 	<Panel
-		class="flex justify-center items-center w-full h-full flex-col pointer-events-none"
+		class="pointer-events-none flex h-full w-full flex-col items-center justify-center"
 	>
 		<div
-			class="w-16 h-16 bg-accent rounded-full flex items-center justify-center p-4"
+			class="flex h-16 w-16 items-center justify-center rounded-full bg-accent p-4"
 		>
-			<UploadIcon class="w-full h-full text-on-accent" />
+			<UploadIcon class="h-full w-full text-on-accent" />
 		</div>
-		<h2 class="text-center text-2xl font-semibold mt-4">
+		<h2 class="mt-4 text-center text-2xl font-semibold">
 			{m["upload.uploader.text"]({
 				action: m["upload.uploader.convert"](),
 			})}

@@ -41,10 +41,10 @@
 
 <Panel class="flex flex-col gap-4">
 	<div
-		class="w-full h-auto flex items-center justify-between flex-col md:flex-row gap-4"
+		class="flex h-auto w-full flex-col items-center justify-between gap-4 md:flex-row"
 	>
 		<div
-			class="flex items-center flex-col md:flex-row gap-2.5 max-md:w-full"
+			class="flex flex-col items-center gap-2.5 max-md:w-full md:flex-row"
 		>
 			<button
 				onclick={() => files.convertAll()}
@@ -77,7 +77,7 @@
 			{#if $isMobile}
 				<button
 					class={clsx(
-						"btn p-4 flex gap-3 max-md:w-full",
+						"btn flex gap-3 p-4 max-md:w-full",
 						!$effects && "!scale-100",
 					)}
 					disabled={files.files.length === 0}
@@ -93,7 +93,7 @@
 				>
 					<button
 						class={clsx(
-							"btn p-4 flex gap-3 max-md:w-full",
+							"btn flex gap-3 p-4 max-md:w-full",
 							!$effects && "!scale-100",
 						)}
 						disabled={files.files.length === 0}
@@ -104,11 +104,11 @@
 				</Tooltip>
 			{/if}
 		</div>
-		<div class="w-full bg-separator h-0.5 flex md:hidden"></div>
+		<div class="flex h-0.5 w-full bg-separator md:hidden"></div>
 		{#if manyFiles}
-			<div class="w-full max-w-64 p-2 flex gap-4 items-center">
+			<div class="flex w-full max-w-64 items-center gap-4 p-2">
 				<div
-					class="flex-shrink-0 -mt-0.5 font-normal text-sm text-muted"
+					class="-mt-0.5 flex-shrink-0 text-sm font-normal text-muted"
 				>
 					{progress}/{length}
 				</div>
@@ -116,11 +116,11 @@
 					<ProgressBar min={0} max={length} {progress} />
 				</div>
 			</div>
-			<div class="w-full bg-separator h-0.5 flex md:hidden"></div>
+			<div class="flex h-0.5 w-full bg-separator md:hidden"></div>
 		{/if}
-		<div class="flex items-center gap-2 w-fit">
+		<div class="flex w-fit items-center gap-2">
 			<p
-				class="whitespace-normal text-xl text-center w-fit px-2 md:px-0 md:text-right"
+				class="w-fit whitespace-normal px-2 text-center text-xl md:px-0 md:text-right"
 			>
 				{m["convert.panel.set_all_to"]()}
 			</p>

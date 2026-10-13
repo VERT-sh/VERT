@@ -140,7 +140,7 @@ const handleMessage = async (
 					image = vips.Image.newFromBuffer(buffer, "[n=-1]");
 				}
 
-                // resize image
+				// resize image
 				const resolution = String(settings.resolution ?? "").trim();
 				if (resolution && resolution !== "auto") {
 					const [width, height] = resolution

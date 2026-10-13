@@ -233,7 +233,7 @@
 <!-- FIXME: if user resizes between desktop/mobile, highlight of page disappears (only shows on original size) -->
 {#key $locale}
 	<div
-		class="flex flex-col min-h-screen h-full w-full overflow-x-hidden"
+		class="flex h-full min-h-screen w-full flex-col overflow-x-hidden"
 		ondrop={dropFiles}
 		ondragenter={(e) => handleDrag(e, true)}
 		ondragover={(e) => handleDrag(e, true)}

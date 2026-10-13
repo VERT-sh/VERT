@@ -70,20 +70,20 @@
 
 {#if page.url.pathname === "/"}
 	<div
-		class="fixed -z-30 top-0 left-0 w-screen h-screen flex items-center justify-center overflow-hidden"
+		class="fixed left-0 top-0 -z-30 flex h-screen w-screen items-center justify-center overflow-hidden"
 		transition:fade={{
 			duration,
 			easing: quintOut,
 		}}
 	>
 		<VertVBig
-			class="fill-[--fg] opacity-10 dynadark:opacity-5 scale-[200%] md:scale-[80%]"
+			class="scale-[200%] fill-[--fg] opacity-10 dynadark:opacity-5 md:scale-[80%]"
 		/>
 	</div>
 {/if}
 
 <div
-	class="fixed top-0 left-0 w-screen h-screen -z-40 pointer-events-none"
+	class="pointer-events-none fixed left-0 top-0 -z-40 h-screen w-screen"
 	style:background-color={color.color}
 	style:mask-image={maskImage}
 	style:-webkit-mask-image={maskImage}
@@ -94,7 +94,7 @@
 	{@const bgMask =
 		"linear-gradient(to top, transparent 5%, rgba(0, 0, 0, 0.5) 100%)"}
 	<div
-		class="fixed top-0 left-0 w-screen h-screen -z-50"
+		class="fixed left-0 top-0 -z-50 h-screen w-screen"
 		style:background-image="url({files.files[0].blobUrl})"
 		style:background-size="cover"
 		style:background-position="center"

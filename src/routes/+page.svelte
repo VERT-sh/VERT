@@ -170,25 +170,25 @@
 	});
 </script>
 
-<div class="max-w-6xl w-full mx-auto px-6 md:px-8">
+<div class="mx-auto w-full max-w-6xl px-6 md:px-8">
 	<div class="flex items-center justify-center pb-10 md:py-16">
 		<div
-			class="flex items-center h-auto gap-12 md:gap-24 md:flex-row flex-col"
+			class="flex h-auto flex-col items-center gap-12 md:flex-row md:gap-24"
 		>
-			<div class="flex-grow w-full text-center md:text-left">
+			<div class="w-full flex-grow text-center md:text-left">
 				<h1
-					class="text-4xl px-12 md:p-0 md:text-6xl flex-wrap tracking-tight leading-tight md:leading-[72px] mb-4 md:mb-6"
+					class="mb-4 flex-wrap px-12 text-4xl leading-tight tracking-tight md:mb-6 md:p-0 md:text-6xl md:leading-[72px]"
 				>
 					{m["upload.title"]()}
 				</h1>
 				<p
-					class="font-normal px-5 md:p-0 text-lg md:text-xl text-black text-muted dynadark:text-muted"
+					class="px-5 text-lg font-normal text-black text-muted dynadark:text-muted md:p-0 md:text-xl"
 				>
 					{m["upload.subtitle"]()}
 				</p>
 			</div>
-			<div class="flex-grow w-full h-72">
-				<Uploader class="w-full h-full" />
+			<div class="h-72 w-full flex-grow">
+				<Uploader class="h-full w-full" />
 			</div>
 		</div>
 	</div>
@@ -198,11 +198,11 @@
 	<div class="mt-10 md:mt-16">
 		<h2 class="text-center text-4xl">{m["upload.cards.title"]()}</h2>
 
-		<div class="flex gap-4 mt-8 md:flex-row flex-col">
+		<div class="mt-8 flex flex-col gap-4 md:flex-row">
 			{#if browser}
 				{#each Object.entries(worker) as [key, s], i (key)}
 					{@const Icon = s.icon}
-					<div class="file-category-card w-full flex flex-col gap-4">
+					<div class="file-category-card flex w-full flex-col gap-4">
 						<div class="file-category-card-inner">
 							<div
 								class={clsx("icon-container", {
@@ -218,7 +218,7 @@
 						</div>
 
 						<div
-							class="file-category-card-content flex-grow relative"
+							class="file-category-card-content relative flex-grow"
 						>
 							<OverlayScrollbarsComponent
 								options={{
@@ -230,12 +230,12 @@
 								defer
 							>
 								<div
-									class="flex flex-col gap-4 h-[12.25rem] relative"
+									class="relative flex h-[12.25rem] flex-col gap-4"
 									bind:this={scrollContainers[i]}
 								>
 									{#if key === "Video"}
 										<p
-											class="flex tems-center justify-center gap-2"
+											class="tems-center flex justify-center gap-2"
 										>
 											<CheckIcon size="20" />
 											<Tooltip
@@ -254,7 +254,7 @@
 														]()}
 													</a>
 													<span
-														class="text-red-500 -ml-0.5"
+														class="-ml-0.5 text-red-500"
 														>*</span
 													>
 												</span>
@@ -262,7 +262,7 @@
 										</p>
 									{:else}
 										<p
-											class="flex tems-center justify-center gap-2"
+											class="tems-center flex justify-center gap-2"
 										>
 											<CheckIcon size="20" />
 											{m[
@@ -278,7 +278,7 @@
 										)}
 									</p>
 									<div
-										class="flex flex-col items-center relative"
+										class="relative flex flex-col items-center"
 									>
 										<b
 											>{m[
@@ -286,7 +286,7 @@
 											]()}&nbsp;</b
 										>
 										<p
-											class="flex flex-wrap justify-center leading-tight px-2"
+											class="flex flex-wrap justify-center px-2 leading-tight"
 										>
 											{#each s.formats.split(", ") as format, index (format)}
 												{@const isPartial =
@@ -295,7 +295,7 @@
 													? format.slice(0, -1)
 													: format}
 												<span
-													class="text-sm font-normal flex items-center relative"
+													class="relative flex items-center text-sm font-normal"
 												>
 													{#if isPartial}
 														<Tooltip
@@ -323,7 +323,7 @@
 							<!-- bottom blur if scrollable -->
 							{#if showBlur[i]}
 								<div
-									class="absolute left-0 bottom-0 w-full h-10 pointer-events-none"
+									class="pointer-events-none absolute bottom-0 left-0 h-10 w-full"
 									style="background: linear-gradient(to top, var(--bg-panel), transparent 65%);"
 								></div>
 							{/if}
@@ -337,11 +337,11 @@
 
 <style lang="postcss">
 	.file-category-card {
-		@apply bg-panel rounded-2xl p-5 shadow-panel relative;
+		@apply relative rounded-2xl bg-panel p-5 shadow-panel;
 	}
 
 	.file-category-card p {
-		@apply font-normal text-center text-sm;
+		@apply text-center text-sm font-normal;
 	}
 
 	.file-category-card-inner {
@@ -349,10 +349,10 @@
 	}
 
 	.file-category-card-content {
-		@apply flex flex-col text-center justify-between;
+		@apply flex flex-col justify-between text-center;
 	}
 
 	.icon-container {
-		@apply p-2 rounded-full text-on-accent;
+		@apply rounded-full p-2 text-on-accent;
 	}
 </style>

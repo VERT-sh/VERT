@@ -261,8 +261,8 @@
 		currentConverter?.status === "idle" ||
 		currentConverter?.status === "downloading" ||
 		currentConverter?.status === "initializing"}
-	<Panel class="p-5 flex flex-col min-w-0 gap-4 relative">
-		<div class="flex-shrink-0 h-8 w-full flex items-center gap-2">
+	<Panel class="relative flex min-w-0 flex-col gap-4 p-5">
+		<div class="flex h-8 w-full flex-shrink-0 items-center gap-2">
 			<Tooltip
 				text={fileType === "unknown"
 					? m["convert.tooltips.unknown_file"]()
@@ -289,7 +289,7 @@
 					/>
 				{:else}
 					<h2
-						class="text-xl font-body overflow-hidden text-ellipsis whitespace-nowrap"
+						class="overflow-hidden text-ellipsis whitespace-nowrap font-body text-xl"
 						title={`${file.name} (${file.id})`}
 					>
 						{file.name}
@@ -298,7 +298,7 @@
 			</div>
 			<div
 				class={clsx(
-					"flex-shrink-0 flex items-center justify-center overflow-visible transition-transform duration-300",
+					"flex flex-shrink-0 items-center justify-center overflow-visible transition-transform duration-300",
 					isInitializing ? "w-8 opacity-100" : "w-0 opacity-0",
 				)}
 			>
@@ -320,7 +320,7 @@
 				{/if}
 			</div>
 			<button
-				class="flex-shrink-0 w-8 rounded-full hover:bg-panel-alt h-full flex items-center justify-center"
+				class="flex h-full w-8 flex-shrink-0 items-center justify-center rounded-full hover:bg-panel-alt"
 				onclick={() => files.remove(file)}
 			>
 				<XIcon size="24" class="text-muted" />
@@ -329,7 +329,7 @@
 		{#if !currentConverter}
 			{#if file.name.startsWith("vertd")}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
@@ -340,7 +340,7 @@
 				</div>
 			{:else}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
@@ -357,7 +357,7 @@
 			{@const isLarge = file.isLarge()}
 			{#if formatInfo && !formatInfo.fromSupported}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
@@ -368,7 +368,7 @@
 				</div>
 			{:else if isLarge && !file.supportsStreaming()}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
@@ -381,7 +381,7 @@
 				</div>
 			{:else if currentConverter.status === "error"}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
@@ -395,19 +395,19 @@
 			{:else}
 				<div class="flex flex-row justify-between">
 					<div
-						class="flex gap-4 w-full h-[152px] overflow-hidden relative"
+						class="relative flex h-[152px] w-full gap-4 overflow-hidden"
 					>
-						<div class="w-1/2 h-full overflow-hidden rounded-xl">
+						<div class="h-full w-1/2 overflow-hidden rounded-xl">
 							{#if file.blobUrl}
 								<img
-									class="object-cover w-full h-full"
+									class="h-full w-full object-cover"
 									src={file.blobUrl}
 									alt={`${file.name} (${file.id})`}
 								/>
 							{:else}
 								{@const Icon = fileTypeBigIcons[fileType]}
 								<div
-									class="w-full h-full flex items-center justify-center text-black"
+									class="flex h-full w-full items-center justify-center text-black"
 									style:background="var({gradientVars[
 										file.isZip()
 											? 'archive'
@@ -420,10 +420,10 @@
 						</div>
 					</div>
 					<div
-						class="absolute top-16 right-0 mr-4 pl-2 h-[calc(100%-83px)] w-[calc(50%-38px)] pr-4 pb-1 flex items-center justify-center aspect-square"
+						class="absolute right-0 top-16 mr-4 flex aspect-square h-[calc(100%-83px)] w-[calc(50%-38px)] items-center justify-center pb-1 pl-2 pr-4"
 					>
 						<div
-							class="w-[122px] h-fit flex flex-col gap-2 items-center justify-center"
+							class="flex h-fit w-[122px] flex-col items-center justify-center gap-2"
 						>
 							<FormatDropdown
 								{categories}
@@ -434,7 +434,7 @@
 								{file}
 							/>
 							<div
-								class="w-full flex items-center justify-between"
+								class="flex w-full items-center justify-between"
 							>
 								<Tooltip
 									text={m["convert.tooltips.convert_file"]()}
@@ -442,7 +442,7 @@
 								>
 									<button
 										class={clsx(
-											"btn p-0 w-14 h-14 text-black",
+											"btn h-14 w-14 p-0 text-black",
 											!$effects && "!scale-100",
 											fileTypeColors[fileType],
 										)}
@@ -458,7 +458,7 @@
 								>
 									<button
 										class={clsx(
-											"btn p-0 w-14 h-14",
+											"btn h-14 w-14 p-0",
 											!$effects && "!scale-100",
 										)}
 										onclick={file.download}
@@ -476,27 +476,27 @@
 	</Panel>
 {/snippet}
 
-<div class="flex flex-col justify-center items-center gap-8 -mt-4 px-4 md:p-0">
-	<div class="max-w-[778px] w-full">
+<div class="-mt-4 flex flex-col items-center justify-center gap-8 px-4 md:p-0">
+	<div class="w-full max-w-[778px]">
 		<ConversionPanel />
 	</div>
 
 	<div
-		class="w-full max-w-[778px] grid grid-cols-1 md:grid-cols-2 auto-rows-[240px] gap-4 md:p-0"
+		class="grid w-full max-w-[778px] auto-rows-[240px] grid-cols-1 gap-4 md:grid-cols-2 md:p-0"
 	>
 		{#each files.files as file, i (file.id)}
 			{#if files.files.length >= 2 && i === 1}
 				<Uploader
-					class="w-full h-full col-start-1 row-start-1 md:col-start-2"
+					class="col-start-1 row-start-1 h-full w-full md:col-start-2"
 				/>
 			{/if}
 			{@render fileItem(file)}
 			{#if files.files.length < 2}
-				<Uploader class="w-full h-full" />
+				<Uploader class="h-full w-full" />
 			{/if}
 		{/each}
 		{#if files.files.length === 0}
-			<Uploader class="w-full h-full col-span-2" />
+			<Uploader class="col-span-2 h-full w-full" />
 		{/if}
 	</div>
 </div>

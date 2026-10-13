@@ -57,16 +57,16 @@
 	});
 </script>
 
-<div class="flex flex-col h-full items-center">
-	<h1 class="hidden md:block text-[40px] tracking-tight leading-[72px] mb-6">
-		<SettingsIcon size="40" class="inline-block -mt-2 mr-2" />
+<div class="flex h-full flex-col items-center">
+	<h1 class="mb-6 hidden text-[40px] leading-[72px] tracking-tight md:block">
+		<SettingsIcon size="40" class="-mt-2 mr-2 inline-block" />
 		{m["settings.title"]()}
 	</h1>
 
 	<div
-		class="w-full max-w-[1280px] flex flex-col md:flex-row gap-4 p-4 md:px-4 md:py-0"
+		class="flex w-full max-w-[1280px] flex-col gap-4 p-4 md:flex-row md:px-4 md:py-0"
 	>
-		<div class="flex flex-col gap-4 flex-1">
+		<div class="flex flex-1 flex-col gap-4">
 			<Settings.Conversion bind:settings />
 			{#if !DISABLE_ALL_EXTERNAL_REQUESTS}
 				<Settings.Vertd bind:settings />
@@ -75,7 +75,7 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-col gap-4 flex-1">
+		<div class="flex flex-1 flex-col gap-4">
 			<Settings.Appearance />
 			{#if !DISABLE_ALL_EXTERNAL_REQUESTS}
 				<Settings.Privacy bind:settings />

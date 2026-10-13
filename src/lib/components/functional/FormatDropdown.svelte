@@ -487,20 +487,20 @@
 </script>
 
 <div
-	class="relative w-full min-w-fit text-xl font-medium text-center"
+	class="relative w-full min-w-fit text-center text-xl font-medium"
 	bind:this={dropdown}
 >
 	<button
 		class={clsx(
-			"relative flex items-center justify-center w-full font-display px-3 py-3.5 bg-button rounded-full overflow-hidden focus:!outline-none",
-			disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+			"relative flex w-full items-center justify-center overflow-hidden rounded-full bg-button px-3 py-3.5 font-display focus:!outline-none",
+			disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
 		)}
 		onclick={() => clickDropdown()}
 		{disabled}
 	>
 		<!-- <p>{selected}</p> -->
 		<div
-			class="grid grid-cols-1 grid-rows-1 w-fit flex-grow-0 max-h-[2.5rem] overflow-hidden"
+			class="grid max-h-[2.5rem] w-fit flex-grow-0 grid-cols-1 grid-rows-1 overflow-hidden"
 		>
 			{#key selected}
 				<p
@@ -512,7 +512,7 @@
 						duration,
 						easing: quintOut,
 					}}
-					class="col-start-1 row-start-1 text-center font-body font-medium truncate max-w-[4rem]"
+					class="col-start-1 row-start-1 max-w-[4rem] truncate text-center font-body font-medium"
 				>
 					{selected || "N/A"}
 				</p>
@@ -520,7 +520,7 @@
 			{#if currentCategory}
 				{#each categories[currentCategory].formats as option (option)}
 					<p
-						class="col-start-1 row-start-1 invisible pointer-events-none truncate max-w-[2.5rem]"
+						class="pointer-events-none invisible col-start-1 row-start-1 max-w-[2.5rem] truncate"
 					>
 						{option}
 					</p>
@@ -528,7 +528,7 @@
 			{/if}
 		</div>
 		<ChevronDownIcon
-			class="w-4 h-4 ml-3 mt-0.5 flex-shrink-0"
+			class="ml-3 mt-0.5 h-4 w-4 flex-shrink-0"
 			style="transform: rotate({open
 				? 180
 				: 0}deg); transition: transform {duration}ms {transition};"
@@ -543,30 +543,30 @@
 			}}
 			class={clsx(
 				$isMobile
-					? "fixed inset-x-0 bottom-0 w-full z-[200] shadow-xl bg-panel-alt shadow-black/25 rounded-t-2xl overflow-hidden"
-					: "min-w-full shadow-xl bg-panel-alt shadow-black/25 absolute top-full mt-2 z-50 rounded-2xl overflow-hidden",
+					? "fixed inset-x-0 bottom-0 z-[200] w-full overflow-hidden rounded-t-2xl bg-panel-alt shadow-xl shadow-black/25"
+					: "absolute top-full z-50 mt-2 min-w-full overflow-hidden rounded-2xl bg-panel-alt shadow-xl shadow-black/25",
 				!$isMobile && {
 					"w-[320%]": dropdownSize === "large",
 					"w-[250%]": dropdownSize === "default",
 					"w-[150%]": dropdownSize === "small",
 				},
 				!$isMobile && {
-					"-translate-x-1/2 left-1/2": dropdownPosition === "center",
+					"left-1/2 -translate-x-1/2": dropdownPosition === "center",
 					"left-0": dropdownPosition === "left",
 					"right-0": dropdownPosition === "right",
 				},
 			)}
 		>
 			<!-- search box -->
-			<div class="p-3 w-full">
+			<div class="w-full p-3">
 				<div class="relative">
 					<input
 						type="text"
 						placeholder={m["convert.dropdown.placeholder"]()}
 						class={clsx(
-							"flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground",
+							"w-full flex-grow rounded-lg bg-panel !pl-11 !pr-3 text-foreground",
 							filteredData.isFallback &&
-								"opacity-50 cursor-not-allowed",
+								"cursor-not-allowed opacity-50",
 						)}
 						bind:value={searchQuery}
 						oninput={handleSearch}
@@ -578,11 +578,11 @@
 					/>
 					<span
 						class={clsx(
-							"absolute left-4 top-1/2 -translate-y-1/2 flex items-center",
+							"absolute left-4 top-1/2 flex -translate-y-1/2 items-center",
 							filteredData.isFallback && "opacity-50",
 						)}
 					>
-						<SearchIcon class="w-4 h-4" />
+						<SearchIcon class="h-4 w-4" />
 					</span>
 					{#if searchQuery}
 						<span
@@ -599,7 +599,7 @@
 			</div>
 			<!-- fallback message -->
 			{#if filteredData.isFallback}
-				<div class="pb-4 text-center text-muted text-base">
+				<div class="pb-4 text-center text-base text-muted">
 					{m["convert.dropdown.fallback"]()}
 				</div>
 			{/if}
@@ -608,9 +608,9 @@
 				{#each filteredData.categories as category (category)}
 					<button
 						class={clsx(
-							"flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize",
+							"hover:text-muted/20 flex-grow border-b-2 pb-2 text-lg capitalize",
 							currentCategory === category
-								? "text-accent border-b-accent"
+								? "border-b-accent text-accent"
 								: "border-b-separator text-muted",
 						)}
 						onclick={() => selectCategory(category)}
@@ -624,7 +624,7 @@
 			<div use:animateHeight>
 				{#key currentCategory}
 					<div
-						class="max-h-80 overflow-y-auto grid grid-cols-3 gap-2 p-2"
+						class="grid max-h-80 grid-cols-3 gap-2 overflow-y-auto p-2"
 						in:fade={{
 							duration: duration,
 							easing: quintOut,
@@ -644,7 +644,7 @@
 										<button
 											data-selected={format === selected}
 											aria-disabled="true"
-											class="w-full p-2 text-center rounded-xl opacity-45 cursor-not-allowed"
+											class="w-full cursor-not-allowed rounded-xl p-2 text-center opacity-45"
 											tabindex="0"
 											onclick={(e) => e.preventDefault()}
 											onkeydown={(e) =>
@@ -657,7 +657,7 @@
 									<button
 										data-selected={format === selected}
 										class={clsx(
-											"w-full p-2 text-center rounded-xl",
+											"w-full rounded-xl p-2 text-center",
 											format === selected
 												? "bg-accent text-black"
 												: format === from
@@ -671,7 +671,7 @@
 								{/if}
 							{/each}
 						{:else}
-							<div class="col-span-3 text-center p-4 text-muted">
+							<div class="col-span-3 p-4 text-center text-muted">
 								{searchQuery
 									? m["convert.dropdown.no_results"]()
 									: m["convert.dropdown.no_formats"]()}
@@ -683,10 +683,10 @@
 			<!-- format options -->
 			{#if file?.name.toLowerCase().endsWith(".zip")}
 				<div
-					class="flex flex-col gap-2 p-2 border-t border-separator text-base"
+					class="flex flex-col gap-2 border-t border-separator p-2 text-base"
 				>
 					<button
-						class="w-full p-2 text-center rounded-lg bg-accent text-black"
+						class="w-full rounded-lg bg-accent p-2 text-center text-black"
 						onclick={() => extract()}
 					>
 						{m["convert.archive_file.extract"]()}
@@ -697,7 +697,7 @@
 							<!-- first row -->
 							<div class="flex items-center gap-3">
 								<div
-									class="flex items-center gap-2 flex-1 min-w-0 h-full"
+									class="flex h-full min-w-0 flex-1 items-center gap-2"
 								>
 									<FancyInput
 										type="checkbox"
@@ -728,7 +728,7 @@
 							<!-- second row -->
 							<div class="flex items-center gap-3">
 								<div
-									class="flex items-center gap-2 flex-1 min-w-0 h-full"
+									class="flex h-full min-w-0 flex-1 items-center gap-2"
 								>
 									<FancyInput
 										type="checkbox"
@@ -751,7 +751,7 @@
 					{#if file.sequenceKind === "frameSequence" && imageSequence}
 						<div class="flex flex-col border-t border-separator">
 							<button
-								class="w-full mt-2 p-2.5 flex gap-3 justify-center text-center rounded-lg bg-accent text-black"
+								class="mt-2 flex w-full justify-center gap-3 rounded-lg bg-accent p-2.5 text-center text-black"
 								onclick={() => ($fileSettings = file)}
 							>
 								<SettingsIcon size="24" />
@@ -761,9 +761,9 @@
 					{/if}
 				</div>
 			{:else}
-				<div class="border-t border-separator text-base p-2">
+				<div class="border-t border-separator p-2 text-base">
 					<button
-						class="w-full p-2.5 flex gap-3 justify-center text-center rounded-lg bg-accent text-black"
+						class="flex w-full justify-center gap-3 rounded-lg bg-accent p-2.5 text-center text-black"
 						onclick={() => {
 							if (file) $fileSettings = file;
 							else $fileSettings = undefined; // all files

@@ -6,9 +6,9 @@
 </script>
 
 <Panel class="flex flex-col gap-3 p-6">
-	<h2 class="text-2xl font-bold flex items-center">
+	<h2 class="flex items-center text-2xl font-bold">
 		<div
-			class="rounded-full bg-accent-pink p-2 inline-block mr-3 w-10 h-10"
+			class="mr-3 inline-block h-10 w-10 rounded-full bg-accent-pink p-2"
 		>
 			<MessageCircleQuestionMarkIcon color="black" />
 		</div>

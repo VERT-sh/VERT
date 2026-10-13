@@ -184,9 +184,9 @@
 
 <Panel class="flex flex-col gap-8 p-6">
 	<div class="flex flex-col gap-3">
-		<h2 class="text-2xl font-bold flex items-center">
+		<h2 class="flex items-center text-2xl font-bold">
 			<div
-				class="rounded-full bg-accent-red p-2 inline-block mr-3 w-10 h-10"
+				class="mr-3 inline-block h-10 w-10 rounded-full bg-accent-red p-2"
 			>
 				<HeartIcon color="black" />
 			</div>
@@ -198,7 +198,7 @@
 	</div>
 
 	<div
-		class="flex flex-col gap-3 w-full overflow-visible"
+		class="flex w-full flex-col gap-3 overflow-visible"
 		style:height="{paymentState !== 'prepay' ? 0 : 124}px"
 		style:transform="scaleY({paymentState !== 'prepay' ? 0 : 1})"
 		style:opacity={paymentState !== "prepay" ? 0 : 1}
@@ -207,18 +207,18 @@
 			200}ms {transition}, transform {payDuration}ms {transition}, filter {payDuration}ms
 		{transition}"
 	>
-		<div class="flex gap-3 w-full">
+		<div class="flex w-full gap-3">
 			<button
 				onclick={() => (type = "one-time")}
 				class={clsx(
-					"btn flex-1 p-4 rounded-lg flex items-center justify-center",
+					"btn flex flex-1 items-center justify-center rounded-lg p-4",
 					{
 						"!scale-100": !$effects,
 						"bg-accent-red text-black": type === "one-time",
 					},
 				)}
 			>
-				<HandCoinsIcon size="24" class="inline-block mr-2" />
+				<HandCoinsIcon size="24" class="mr-2 inline-block" />
 				{m["about.donate.one_time"]()}
 			</button>
 
@@ -226,23 +226,23 @@
 				disabled
 				onclick={() => (type = "monthly")}
 				class={clsx(
-					"btn flex-1 p-4 rounded-lg flex items-center justify-center",
+					"btn flex flex-1 items-center justify-center rounded-lg p-4",
 					{
 						"!scale-100": !$effects,
 						"bg-accent-red text-black": type === "monthly",
 					},
 				)}
 			>
-				<CalendarHeartIcon size="24" class="inline-block mr-2" />
+				<CalendarHeartIcon size="24" class="mr-2 inline-block" />
 				{m["about.donate.monthly"]()}
 			</button>
 		</div>
-		<div class="grid grid-cols-4 gap-3 w-full">
+		<div class="grid w-full grid-cols-4 gap-3">
 			{#each presetAmounts as preset, i (preset)}
 				<button
 					onclick={() => amountClick(preset)}
 					class={clsx(
-						"btn p-4 rounded-lg flex items-center justify-center",
+						"btn flex items-center justify-center rounded-lg p-4",
 						{
 							"!scale-100": !$effects,
 							"bg-accent-red text-black": amount === preset,
@@ -265,7 +265,7 @@
 		</div>
 	</div>
 
-	<div class="flex flex-row justify-center w-full">
+	<div class="flex w-full flex-row justify-center">
 		<div
 			role="button"
 			tabindex="0"
@@ -276,26 +276,26 @@
 			}}
 			onclick={paymentClick}
 			class={clsx(
-				"btn flex-1 p-3 relative rounded-3xl bg-accent-red border-2 border-accent-red h-14 text-black",
+				"btn relative h-14 flex-1 rounded-3xl border-2 border-accent-red bg-accent-red p-3 text-black",
 				{
-					"h-[450px] rounded-2xl bg-transparent cursor-auto !scale-100 -mt-10 -mb-2":
+					"-mb-2 -mt-10 h-[450px] !scale-100 cursor-auto rounded-2xl bg-transparent":
 						paymentState !== "prepay",
 					"!scale-100": !$effects,
 				},
 			)}
 			style="transition: height {payDuration}ms {transition}, border-radius {payDuration}ms {transition}, background-color {payDuration}ms {transition}, transform {payDuration}ms {transition}, margin {payDuration}ms {transition}; will-change: height, border-radius, background-color, transform, margin;"
 		>
-			<div class="grid grid-cols-1 grid-rows-1 w-full h-full">
+			<div class="grid h-full w-full grid-cols-1 grid-rows-1">
 				{#if paymentState !== "prepay"}
 					<div
 						transition:fade={{
 							duration: payDuration,
 							easing: quintOut,
 						}}
-						class="row-start-1 col-start-1 flex w-full h-full flex-col gap-4"
+						class="col-start-1 row-start-1 flex h-full w-full flex-col gap-4"
 					>
 						<div
-							class="flex-grow max-h-full overflow-y-auto overflow-x-hidden"
+							class="max-h-full flex-grow overflow-y-auto overflow-x-hidden"
 						>
 							{#if stripe && clientSecret}
 								<Elements {stripe} {clientSecret} bind:elements>
@@ -313,7 +313,7 @@
 								disabled={!stripe ||
 									!clientSecret ||
 									!enablePay}
-								class="btn w-full h-12 bg-accent-red text-black rounded-full mt-4"
+								class="btn mt-4 h-12 w-full rounded-full bg-accent-red text-black"
 								onclick={donate}
 							>
 								{m["about.donate.donate_amount"]({
@@ -331,9 +331,9 @@
 							easing: quintOut,
 						}}
 						onclick={paymentClick}
-						class="row-start-1 col-start-1 flex justify-center items-center"
+						class="col-start-1 row-start-1 flex items-center justify-center"
 					>
-						<WalletIcon size="24" class="inline-block mr-2" />
+						<WalletIcon size="24" class="mr-2 inline-block" />
 						{m["about.donate.pay_now"]()}
 					</div>
 				{/if}

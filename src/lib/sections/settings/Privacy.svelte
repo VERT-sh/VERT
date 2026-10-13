@@ -191,7 +191,7 @@
 		<h2 class="text-2xl font-bold">
 			<ChartColumnIcon
 				size="40"
-				class="inline-block -mt-1 mr-2 bg-accent-blue p-2 rounded-full"
+				class="-mt-1 mr-2 inline-block rounded-full bg-accent-blue p-2"
 				color="black"
 			/>
 			{m["settings.privacy.title"]()}
@@ -203,7 +203,7 @@
 						<p class="text-base font-bold">
 							{m["settings.privacy.plausible.title"]()}
 						</p>
-						<p class="text-sm text-muted font-normal">
+						<p class="text-sm font-normal text-muted">
 							{@html sanitize(
 								link(
 									["plausible_link", "analytics_link"],
@@ -218,31 +218,31 @@
 							)}
 						</p>
 					</div>
-					<div class="flex flex-col gap-3 w-full">
-						<div class="flex gap-3 w-full">
+					<div class="flex w-full flex-col gap-3">
+						<div class="flex w-full gap-3">
 							<button
 								onclick={() => (settings.plausible = true)}
 								class={clsx(
-									"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+									"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
 									!$effects && "!scale-100",
 									settings.plausible && "selected",
 								)}
 							>
-								<PlayIcon size="24" class="inline-block mr-2" />
+								<PlayIcon size="24" class="mr-2 inline-block" />
 								{m["settings.privacy.plausible.opt_in"]()}
 							</button>
 
 							<button
 								onclick={() => (settings.plausible = false)}
 								class={clsx(
-									"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+									"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
 									!$effects && "!scale-100",
 									!settings.plausible && "selected",
 								)}
 							>
 								<PauseIcon
 									size="24"
-									class="inline-block mr-2"
+									class="mr-2 inline-block"
 								/>
 								{m["settings.privacy.plausible.opt_out"]()}
 							</button>
@@ -255,17 +255,17 @@
 					<p class="text-base font-bold">
 						{m["settings.privacy.cache.title"]()}
 					</p>
-					<p class="text-sm text-muted font-normal">
+					<p class="text-sm font-normal text-muted">
 						{m["settings.privacy.cache.description"]()}
 					</p>
 				</div>
 
 				<div class="grid grid-cols-2 gap-4">
-					<div class="bg-button p-4 rounded-lg">
+					<div class="rounded-lg bg-button p-4">
 						<div class="text-sm text-muted">
 							{m["settings.privacy.cache.total_size"]()}
 						</div>
-						<div class="text-lg font-bold flex items-center gap-2">
+						<div class="flex items-center gap-2 text-lg font-bold">
 							{#if isLoadingCache}
 								<RefreshCwIcon size="16" class="animate-spin" />
 								{m["settings.privacy.cache.loading_cache"]()}
@@ -276,11 +276,11 @@
 							{/if}
 						</div>
 					</div>
-					<div class="bg-button p-4 rounded-lg">
+					<div class="rounded-lg bg-button p-4">
 						<div class="text-sm text-muted">
 							{m["settings.privacy.cache.files_cached_label"]()}
 						</div>
-						<div class="text-lg font-bold flex items-center gap-2">
+						<div class="flex items-center gap-2 text-lg font-bold">
 							{#if isLoadingCache}
 								<RefreshCwIcon size="16" class="animate-spin" />
 								{m["settings.privacy.cache.loading_cache"]()}
@@ -291,27 +291,27 @@
 					</div>
 				</div>
 
-				<div class="flex gap-3 w-full">
+				<div class="flex w-full gap-3">
 					<button
 						onclick={loadCacheInfo}
 						class={clsx(
-							"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+							"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
 							!$effects && "!scale-100",
 						)}
 						disabled={isLoadingCache || isClearingData}
 					>
-						<RefreshCwIcon size="24" class="inline-block mr-2" />
+						<RefreshCwIcon size="24" class="mr-2 inline-block" />
 						{m["settings.privacy.cache.refresh_cache"]()}
 					</button>
 					<button
 						onclick={clearCache}
 						class={clsx(
-							"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+							"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
 							!$effects && "!scale-100",
 						)}
 						disabled={isLoadingCache || isClearingData}
 					>
-						<TrashIcon size="24" class="inline-block mr-2" />
+						<TrashIcon size="24" class="mr-2 inline-block" />
 						{m["settings.privacy.cache.clear_cache"]()}
 					</button>
 				</div>
@@ -322,7 +322,7 @@
 					<p class="text-base font-bold">
 						{m["settings.privacy.site_data.title"]()}
 					</p>
-					<p class="text-sm text-muted font-normal">
+					<p class="text-sm font-normal text-muted">
 						{m["settings.privacy.site_data.description"]()}
 					</p>
 				</div>
@@ -330,12 +330,12 @@
 				<button
 					onclick={clearAllData}
 					class={clsx(
-						"btn w-full p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+						"btn flex w-full items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
 						!$effects && "!scale-100",
 					)}
 					disabled={isClearingData}
 				>
-					<TrashIcon size="24" class="inline-block mr-2" />
+					<TrashIcon size="24" class="mr-2 inline-block" />
 					{m["settings.privacy.site_data.clear_all_data"]()}
 				</button>
 			</div>
@@ -343,7 +343,7 @@
 			<div class="flex justify-center">
 				<a
 					href="/debug"
-					class="text-xs text-muted hover:text-foreground transition-colors flex items-center gap-1"
+					class="flex items-center gap-1 text-xs text-muted transition-colors hover:text-foreground"
 				>
 					<BugIcon size="14" />
 					{m["settings.privacy.debug_link"]()}

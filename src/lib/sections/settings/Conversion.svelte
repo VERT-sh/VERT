@@ -24,7 +24,7 @@
 		<h2 class="text-2xl font-bold">
 			<RefreshCwIcon
 				size="40"
-				class="inline-block -mt-1 mr-2 bg-accent p-2 rounded-full"
+				class="-mt-1 mr-2 inline-block rounded-full bg-accent p-2"
 				color="black"
 			/>
 			{m["settings.conversion.title"]()}
@@ -35,7 +35,7 @@
 					<p class="text-base font-bold">
 						{m["settings.conversion.filename.format"]()}
 					</p>
-					<p class="text-sm text-muted font-normal">
+					<p class="text-sm font-normal text-muted">
 						{@html sanitize(
 							m["settings.conversion.filename.description"](),
 						)}
@@ -51,7 +51,7 @@
 			<div class="flex flex-col gap-4">
 				<button
 					onclick={() => (showAdvanced = !showAdvanced)}
-					class="bg-button flex items-center justify-between p-4 rounded-lg text-black dynadark:text-white w-full"
+					class="flex w-full items-center justify-between rounded-lg bg-button p-4 text-black dynadark:text-white"
 				>
 					<span class="text-base font-bold"
 						>{m["settings.conversion.advanced_settings"]()}</span
@@ -67,11 +67,11 @@
 					class={clsx(
 						"flex flex-col gap-8 transition-all duration-300 ease-in-out",
 						{
-							"max-h-[2000px] opacity-100 overflow-visible":
+							"max-h-[2000px] overflow-visible opacity-100":
 								showAdvanced,
 						},
 						{
-							"max-h-0 opacity-0 overflow-hidden -mb-4":
+							"-mb-4 max-h-0 overflow-hidden opacity-0":
 								!showAdvanced,
 						},
 					)}
@@ -84,19 +84,19 @@
 										"settings.conversion.default_format.label"
 									]()}
 								</p>
-								<p class="text-sm text-muted font-normal">
+								<p class="text-sm font-normal text-muted">
 									{m[
 										"settings.conversion.default_format.description"
 									]()}
 								</p>
 							</div>
-							<div class="flex flex-col gap-3 w-full">
-								<div class="flex gap-3 w-full">
+							<div class="flex w-full flex-col gap-3">
+								<div class="flex w-full gap-3">
 									<button
 										onclick={() =>
 											(settings.useDefaultFormat = true)}
 										class={clsx(
-											"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+											"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
 											!$effects && "!scale-100",
 											settings.useDefaultFormat &&
 												"selected",
@@ -104,7 +104,7 @@
 									>
 										<PlayIcon
 											size="24"
-											class="inline-block mr-2"
+											class="mr-2 inline-block"
 										/>
 										{m[
 											"settings.conversion.default_format.enable"
@@ -115,7 +115,7 @@
 										onclick={() =>
 											(settings.useDefaultFormat = false)}
 										class={clsx(
-											"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+											"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
 											!$effects && "!scale-100",
 											!settings.useDefaultFormat &&
 												"selected",
@@ -123,7 +123,7 @@
 									>
 										<PauseIcon
 											size="24"
-											class="inline-block mr-2"
+											class="mr-2 inline-block"
 										/>
 										{m[
 											"settings.conversion.default_format.disable"
@@ -132,7 +132,7 @@
 								</div>
 							</div>
 							<div
-								class="grid gap-3 grid-cols-2 md:grid-cols-4"
+								class="grid grid-cols-2 gap-3 md:grid-cols-4"
 								class:opacity-50={!settings.useDefaultFormat}
 							>
 								<div class="flex flex-col gap-2">
@@ -202,26 +202,26 @@
 								<p class="text-base font-bold">
 									{m["settings.conversion.metadata.label"]()}
 								</p>
-								<p class="text-sm text-muted font-normal">
+								<p class="text-sm font-normal text-muted">
 									{m[
 										"settings.conversion.metadata.description"
 									]()}
 								</p>
 							</div>
-							<div class="flex flex-col gap-3 w-full">
-								<div class="flex gap-3 w-full">
+							<div class="flex w-full flex-col gap-3">
+								<div class="flex w-full gap-3">
 									<button
 										onclick={() =>
 											(settings.metadata = true)}
 										class={clsx(
-											"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+											"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
 											!$effects && "!scale-100",
 											settings.metadata && "selected",
 										)}
 									>
 										<PlayIcon
 											size="24"
-											class="inline-block mr-2"
+											class="mr-2 inline-block"
 										/>
 										{m[
 											"settings.conversion.metadata.keep"
@@ -232,14 +232,14 @@
 										onclick={() =>
 											(settings.metadata = false)}
 										class={clsx(
-											"btn flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+											"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
 											!$effects && "!scale-100",
 											!settings.metadata && "selected",
 										)}
 									>
 										<PauseIcon
 											size="24"
-											class="inline-block mr-2"
+											class="mr-2 inline-block"
 										/>
 										{m[
 											"settings.conversion.metadata.remove"
@@ -253,7 +253,7 @@
 								<p class="text-base font-bold">
 									{m["settings.conversion.quality.label"]()}
 								</p>
-								<p class="text-sm text-muted font-normal">
+								<p class="text-sm font-normal text-muted">
 									{m[
 										"settings.conversion.quality.description"
 									]()}
