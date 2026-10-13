@@ -25,6 +25,21 @@ const DYNAMIC_LIBRARIES = [
 const NO_QUALITY = new Set([".gif", ".svg", ".ppm", ".pnm"]);
 const OPAQUE = new Set([".jpg", ".jpeg", ".jpe", ".jfif", ".ppm", ".pnm"]);
 
+const COLOURSPACES: Record<string, string> = {
+	srgb: "srgb",
+	rgb: "rgb",
+	cmyk: "cmyk",
+	lab: "lab",
+	xyz: "xyz",
+	gray: "b-w",
+};
+
+const BAND_FORMATS: Record<string, string> = {
+	8: "uchar",
+	16: "ushort",
+	32: "float",
+};
+
 const isWasmException = (err: unknown): err is WebAssembly.Exception =>
 	typeof WebAssembly !== "undefined" &&
 	typeof WebAssembly.Exception === "function" &&
@@ -112,6 +127,9 @@ const handleMessage = async (
 
 			let image: VipsImage | null = null;
 			let flattened: VipsImage | null = null;
+			let resized: VipsImage | null = null;
+			let colourspace: VipsImage | null = null;
+			let cast: VipsImage | null = null;
 
 			try {
 				image = vips.Image.newFromBuffer(buffer);
@@ -122,12 +140,38 @@ const handleMessage = async (
 					image = vips.Image.newFromBuffer(buffer, "[n=-1]");
 				}
 
-				let source = image;
+                // resize image
+				const resolution = String(settings.resolution ?? "").trim();
+				if (resolution && resolution !== "auto") {
+					const [width, height] = resolution
+						.split("x")
+						.map((dim: string) => Number.parseInt(dim, 10));
+					if (width && width > 0) {
+						resized = image.thumbnailImage(width, {
+							...(height && height > 0 ? { height } : {}),
+						});
+					}
+				}
+				let source = resized ?? image;
+
+				// colour space conversion
+				const space = COLOURSPACES[settings.colorSpace as string];
+				if (space) {
+					colourspace = source.colourspace(space);
+					source = colourspace;
+				}
+
+				// bit depth / band format
+				const bandFormat = BAND_FORMATS[String(settings.depth ?? "")];
+				if (bandFormat) {
+					cast = source.cast(bandFormat);
+					source = cast;
+				}
 
 				// flatten transparency when the target can't store alpha or the user opted out
 				const keepAlpha = settings.transparency !== false;
-				if ((!keepAlpha || OPAQUE.has(to)) && image.hasAlpha()) {
-					flattened = image.flatten({ background: [255, 255, 255] });
+				if ((!keepAlpha || OPAQUE.has(to)) && source.hasAlpha()) {
+					flattened = source.flatten({ background: [255, 255, 255] });
 					source = flattened;
 				}
 
@@ -143,7 +187,10 @@ const handleMessage = async (
 					error: `vips failed to convert ${from} to ${to}: ${formatError(err)}`,
 				};
 			} finally {
+				cast?.delete();
+				colourspace?.delete();
 				flattened?.delete();
+				resized?.delete();
 				image?.delete();
 			}
 		}

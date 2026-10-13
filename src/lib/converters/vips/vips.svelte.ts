@@ -69,7 +69,6 @@ export class VipsConverter extends Converter {
 		input: VertFile,
 	): Promise<SettingCategories> {
 		const to = input.to.toLowerCase();
-
 		const settings: SettingDefinition[] = [];
 
 		if (VIPS_QUALITY_FORMATS.has(to)) {
@@ -82,6 +81,38 @@ export class VipsConverter extends Converter {
 				placeholder: m["convert.settings.image.quality.placeholder"](),
 			});
 		}
+
+		settings.push({
+			key: "resolution",
+			label: m["convert.settings.image.resolution.label"](),
+			type: "text",
+			default: "",
+			placeholder: m["convert.settings.image.resolution.placeholder"](),
+		});
+
+		settings.push({
+			key: "depth",
+			label: m["convert.settings.image.depth.label"](),
+			type: "text",
+			default: "",
+			placeholder: m["convert.settings.image.depth.placeholder"](),
+		});
+
+		settings.push({
+			key: "colorSpace",
+			label: m["convert.settings.image.color_space"](),
+			type: "select",
+			default: "auto",
+			options: [
+				{ value: "auto", label: "Auto" },
+				{ value: "srgb", label: "sRGB" },
+				{ value: "rgb", label: "RGB" },
+				{ value: "cmyk", label: "CMYK" },
+				{ value: "lab", label: "CIELAB" },
+				{ value: "xyz", label: "CIEXYZ" },
+				{ value: "gray", label: "Grayscale" },
+			],
+		});
 
 		if (!VIPS_OPAQUE_FORMATS.has(to)) {
 			settings.push({
