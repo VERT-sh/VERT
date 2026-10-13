@@ -77,6 +77,7 @@
 		file.conversionSettings.imageSequenceFPS = imageSequenceFPS;
 		file.conversionSettings.imageSequenceTransparency =
 			imageSequenceTransparency;
+		files.syncSequenceConverters(file);
 	});
 
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
@@ -84,6 +85,13 @@
 	// returns the reason a format is disabled for the current file/settings, or "" (empty string) if it's usable
 	const getUnavailableReason = (format: string): string => {
 		if (!file) return "";
+
+		// zip + image sequence / per-image mode
+		const isZip = file.isZip();
+		const sequenceMode = isZip && imageSequence;
+		const sourceFormat = isZip
+			? (file.archiveFormats?.[0] ?? file.from)
+			: file.from;
 
 		// image sequences can only output animated formats
 		if (
@@ -106,22 +114,31 @@
 				to: format,
 			});
 
-		// check if any compatible converters are available for this file and format
-		const compatible = file.converters.filter((converter) => {
-			const fromInfo = converter.supportedFormats.find(
-				(info) => info.name === file.from,
+		// converters that can produce this format for this file
+		const compatible = file.converters
+			.filter((converter) => {
+				const toInfo = converter.supportedFormats.find(
+					(info) => info.name === format,
+				);
+				if (!toInfo || !toInfo.toSupported) return false;
+
+				// if sequence mode, converters handle the archives itself (rather than its contents)
+				if (sequenceMode) return true;
+
+				const fromInfo = converter.supportedFormats.find(
+					(info) => info.name === sourceFormat,
+				);
+				return (
+					!!fromInfo &&
+					fromInfo.fromSupported &&
+					(fromInfo.isNative || toInfo.isNative)
+				);
+			})
+			.filter(
+				(converter) =>
+					!file.unavailableConverters[converter.name] &&
+					converter.isAvailable(),
 			);
-			const toInfo = converter.supportedFormats.find(
-				(info) => info.name === format,
-			);
-			return (
-				!!fromInfo &&
-				!!toInfo &&
-				fromInfo.fromSupported &&
-				toInfo.toSupported &&
-				(fromInfo.isNative || toInfo.isNative)
-			);
-		});
 
 		const largeFile = compatible.some(
 			(converter) =>
@@ -136,7 +153,7 @@
 				fileSize: formatBytes(file.size),
 			});
 
-		if (!file.hasAvailableConverter(file.from, format))
+		if (compatible.length === 0)
 			return m["convert.dropdown.disabled.no_converter"]({
 				from: file.from,
 				to: format,

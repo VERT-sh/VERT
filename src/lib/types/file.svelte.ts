@@ -401,14 +401,11 @@ export class VertFile {
 
 			if (isImageSequence) {
 				const supported = (c: Converter) =>
+					!this.to ||
+					this.to === ".zip" ||
 					c.supportedFormats.some(
-						(f) => f.name === this.from && f.fromSupported,
-					) &&
-					(!this.to ||
-						this.to === ".zip" ||
-						c.supportedFormats.some(
-							(f) => f.name === this.to && f.toSupported,
-						));
+						(f) => f.name === this.to && f.toSupported,
+					);
 				const candidates = this.converters.filter(
 					(c) =>
 						(c.name === "ffmpeg" || c.name === "vertd") &&
@@ -417,6 +414,7 @@ export class VertFile {
 						supported(c),
 				);
 
+				// dash + large files go to the server, everything else prefers ffmpeg
 				const preference = isDash
 					? ["vertd"]
 					: this.isLarge()

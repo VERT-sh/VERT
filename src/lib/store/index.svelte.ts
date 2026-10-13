@@ -6,6 +6,7 @@ import {
 	converterCategories,
 	converters,
 } from "#lib/converters";
+import { priorityFor } from "#lib/converters/priority";
 import type { Converter } from "#lib/converters/converter.svelte";
 import { error, log } from "#lib/util/logger.svelte";
 import { VertFile } from "#lib/types";
@@ -93,6 +94,48 @@ class Files {
 	private preloadConverters(file: VertFile): void {
 		const [preferred] = this.getRequiredConverters(file);
 		void preferred?.init();
+	}
+
+	// for frame sequences, toggle between video engines when on, per-image engines when off.
+	public syncSequenceConverters(file: VertFile): void {
+		if (file.sequenceKind !== "frameSequence") return;
+
+		const sequenceMode = file.conversionSettings.imageSequence === true;
+		const candidates = sequenceMode
+			? converters.filter(
+					(c) => c.name === "ffmpeg" || c.name === "vertd",
+				)
+			: converters;
+
+		file.converters = candidates;
+
+		const current = file.conversionSettings.converter;
+		if (current && candidates.some((c) => c.name === current)) return;
+
+		const fallback = sequenceMode
+			? !file.isLarge() && candidates.some((c) => c.name === "ffmpeg")
+				? "ffmpeg"
+				: (candidates.find((c) => c.name === "vertd")?.name ??
+					candidates[0]?.name)
+			: ([...candidates].sort(
+					(a, b) =>
+						priorityFor(
+							b.name,
+							file.archiveFormats?.[0] ?? file.from,
+						) -
+						priorityFor(
+							a.name,
+							file.archiveFormats?.[0] ?? file.from,
+						),
+				)[0]?.name ?? candidates[0]?.name);
+
+		if (fallback) {
+			file.conversionSettings = {
+				...file.conversionSettings,
+				converter: fallback,
+			};
+			void candidates.find((c) => c.name === fallback)?.init();
+		}
 	}
 
 	public requiredConverters = $derived(
@@ -309,26 +352,48 @@ class Files {
 				const mainConverter = Array.from(convertersUsed)[0];
 				vf.converters =
 					vf.sequenceKind === "frameSequence"
-						? converters.filter(
-								(c) =>
-									c.name === "ffmpeg" || c.name === "vertd",
-							)
+						? vf.conversionSettings.imageSequence
+							? converters.filter(
+									(c) =>
+										c.name === "ffmpeg" ||
+										c.name === "vertd",
+								)
+							: converters
 						: converters.filter((c) => c.name === mainConverter);
 
 				this.files.push(vf);
 				this._addThumbnail(vf);
-				this.preloadConverters(vf);
 
-				// set converter
 				// TODO: this is weird, we rely on conversionSettings for the right converter but zip archives obv dont have settings to change
-				const defaultConverter =
-					vf.sequenceKind === "frameSequence" && !vf.isLarge()
-						? "ffmpeg"
-						: vf.converters[0].name;
+				let defaultConverter: string;
+				if (
+					vf.sequenceKind === "frameSequence" &&
+					vf.conversionSettings.imageSequence
+				) {
+					// sequence mode prefers ffmpeg, then falls back to vertd
+					const has = (name: string) =>
+						vf.converters.some((c) => c.name === name);
+					defaultConverter =
+						!vf.isLarge() && has("ffmpeg")
+							? "ffmpeg"
+							: has("vertd")
+								? "vertd"
+								: vf.converters[0].name;
+				} else {
+					// pick first inner format (if multiple) for priority check, since all files should be compatible with the same converter
+					const inner = vf.archiveFormats?.[0] ?? vf.from;
+					defaultConverter =
+						[...vf.converters].sort(
+							(a, b) =>
+								priorityFor(b.name, inner) -
+								priorityFor(a.name, inner),
+						)[0]?.name ?? vf.converters[0].name;
+				}
 				vf.conversionSettings = {
 					...vf.conversionSettings,
 					converter: defaultConverter,
 				};
+				this.preloadConverters(vf);
 
 				const type = categoryByConverter[mainConverter] ?? "video";
 				ToastManager.add({
