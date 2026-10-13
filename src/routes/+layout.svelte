@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { goto, beforeNavigate, afterNavigate } from "$app/navigation";
+	import { resolve } from "$app/paths";
 
 	import { PUB_PLAUSIBLE_URL, PUB_HOSTNAME } from "$app/env/public";
 	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "#lib/util/consts";
@@ -55,7 +56,7 @@
 		dropping.set(false);
 		const oldLength = files.files.length;
 		await files.addAsync(e.dataTransfer?.files);
-		if (files.files.length !== oldLength) goto("/convert");
+		if (files.files.length !== oldLength) goto(resolve("/convert"));
 	};
 
 	const handleDrag = (e: DragEvent, drag: boolean) => {
@@ -69,7 +70,7 @@
 		e.preventDefault();
 		const oldLength = files.files.length;
 		await files.addAsync(clipboardData.files);
-		if (files.files.length !== oldLength) goto("/convert");
+		if (files.files.length !== oldLength) goto(resolve("/convert"));
 	};
 
 	onMount(() => {

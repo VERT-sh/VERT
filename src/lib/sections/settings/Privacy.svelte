@@ -19,6 +19,7 @@
 	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
 	import { addDialog } from "#lib/store/DialogProvider";
 	import { PUB_PLAUSIBLE_URL } from "$app/env/public";
+	import { resolve } from "$app/paths";
 	import clsx from "clsx";
 
 	const { settings = $bindable() }: { settings: ISettings } = $props();
@@ -342,7 +343,7 @@
 
 			<div class="flex justify-center">
 				<a
-					href="/debug"
+					href={resolve("/debug")}
 					class="flex items-center gap-1 text-xs text-muted transition-colors hover:text-foreground"
 				>
 					<BugIcon size="14" />

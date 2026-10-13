@@ -29,7 +29,7 @@
 		<a
 			href={DISCORD_URL}
 			target="_blank"
-			rel="noopener noreferrer"
+			rel="external noopener noreferrer"
 			class={clsx(
 				"btn flex flex-1 items-center justify-center gap-2 rounded-full bg-button p-4 text-black dynadark:text-white",
 				!$effects && "!scale-100",
@@ -41,7 +41,7 @@
 		<a
 			href={GITHUB_URL_VERT}
 			target="_blank"
-			rel="noopener noreferrer"
+			rel="external noopener noreferrer"
 			class={clsx(
 				"btn flex flex-1 items-center justify-center gap-2 rounded-full bg-button p-4 text-black dynadark:text-white",
 				!$effects && "!scale-100",

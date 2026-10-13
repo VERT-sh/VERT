@@ -5,6 +5,7 @@
 	import { onMount } from "svelte";
 	import { effects, files } from "#lib/store/index.svelte";
 	import { goto } from "$app/navigation";
+	import { resolve } from "$app/paths";
 	import { m } from "#lib/paraglide/messages";
 
 	type Props = {
@@ -25,7 +26,7 @@
 		if (!fileInput) return;
 		const oldLength = files.files.length;
 		await files.addAsync(fileInput.files);
-		if (files.files.length !== oldLength) goto("/convert");
+		if (files.files.length !== oldLength) goto(resolve("/convert"));
 	};
 
 	onMount(() => {

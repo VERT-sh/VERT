@@ -23,7 +23,7 @@
 		<a
 			href={github}
 			target="_blank"
-			rel="noopener noreferrer"
+			rel="external noopener noreferrer"
 			class="flex-shrink-0"
 		>
 			<img

@@ -8,6 +8,7 @@
 
 <script lang="ts">
 	import { goto } from "$app/navigation";
+	import { resolve } from "$app/paths";
 	import { page } from "$app/state";
 	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$app/env/public";
 	// please do not change these!
@@ -177,7 +178,7 @@
 					});
 			}
 
-			goto("/about");
+			goto(resolve("/about"));
 		}
 	});
 </script>

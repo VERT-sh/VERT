@@ -1,6 +1,8 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { browser } from "$app/env";
 	import { page } from "$app/state";
+	import type { ResolvedPathname } from "$app/types";
 	import { duration, fly } from "#lib/util/animation";
 	import clsx from "clsx";
 	import { onMount, tick } from "svelte";
@@ -10,7 +12,7 @@
 	interface Props {
 		links: {
 			name: string;
-			url: string;
+			url: ResolvedPathname;
 			activeMatch: (pathname: string) => boolean;
 		}[];
 		shouldGoBack: Writable<boolean> | null;

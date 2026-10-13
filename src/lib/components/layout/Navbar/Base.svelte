@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { browser } from "$app/env";
 	import { page } from "$app/state";
 	import { duration, fade } from "#lib/util/animation";
@@ -21,6 +22,7 @@
 	import Panel from "../../visual/Panel.svelte";
 	import Logo from "../../visual/svg/Logo.svelte";
 	import { beforeNavigate } from "$app/navigation";
+	import { resolve } from "$app/paths";
 	import Tooltip from "#lib/components/visual/Tooltip.svelte";
 	import { m } from "#lib/paraglide/messages";
 
@@ -41,7 +43,7 @@
 		},
 		{
 			name: m["navbar.convert"](),
-			url: "/convert/",
+			url: "/convert",
 			activeMatch: (pathname) =>
 				pathname === "/convert/" || pathname === "/convert",
 			icon: RefreshCwIcon,
@@ -49,13 +51,13 @@
 		},
 		{
 			name: m["navbar.settings"](),
-			url: "/settings/",
+			url: "/settings",
 			activeMatch: (pathname) => pathname.startsWith("/settings"),
 			icon: SettingsIcon,
 		},
 		{
 			name: m["navbar.about"](),
-			url: "/about/",
+			url: "/about",
 			activeMatch: (pathname) => pathname.startsWith("/about"),
 			icon: InfoIcon,
 		},
@@ -185,7 +187,7 @@
 		{/if}
 		<a
 			class="hidden h-full w-28 items-center justify-center rounded-xl bg-accent md:flex"
-			href="/"
+			href={resolve("/")}
 		>
 			<div class="h-5 w-full">
 				<Logo />
