@@ -1,4 +1,6 @@
+import { m } from "#lib/paraglide/messages.js";
 import { browser } from "$app/env";
+import { ToastManager } from "./toast.svelte";
 
 const COI_RELOAD_KEY = "vertCoiReloaded";
 
@@ -48,11 +50,32 @@ class ServiceWorkerManager {
 
 		if (controlled || isolated) {
 			// success (or resumed) — allow a future reload for SW updates
-			sessionStorage.removeItem(COI_RELOAD_KEY);
-			if (controlled && !isolated)
+
+			if (sessionStorage.getItem(COI_RELOAD_KEY) && isolated) {
+				// page was reloaded and is now isolated
+				ToastManager.add({
+					type: "info",
+					message: m["workers.sw.reload_success"](),
+				});
+				sessionStorage.removeItem(COI_RELOAD_KEY);
+			} else if (sessionStorage.getItem(COI_RELOAD_KEY) && !isolated) {
+				// page was reloaded but is still not isolated
+				ToastManager.add({
+					type: "error",
+					message: m["workers.sw.reload_error"](),
+				});
+				sessionStorage.removeItem(COI_RELOAD_KEY);
+			}
+
+			if (controlled && !isolated) {
 				console.warn(
-					"[SW Manager] service worker active but page is not cross-origin isolated; wasm-vips will be unavailable.",
+					"[SW Manager] service worker active but page is not cross-origin isolated. wasm-vips and other features may not work.",
 				);
+				ToastManager.add({
+					type: "error",
+					message: m["workers.sw.not_isolated"](),
+				});
+			}
 			return;
 		}
 

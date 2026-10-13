@@ -524,6 +524,11 @@
 		"warnings": {
 			"settings_change": "Changed setting '{setting}' from '{oldValue}' to '{newValue}' for '{file}' ({to}) to prevent conversion failure.",
 			"file_type_mismatch": "File '{filename}' is named {expected}, but was detected as {actual}. This may cause conversion issues."
+		},
+		"sw": {
+			"reload_success": "Your page was reloaded automatically to enable cross-origin isolation, which is required for certain features to work.",
+			"reload_error": "Your page was reloaded automatically to enable cross-origin isolation, which is required for certain features to work, however it was not enabled successfully. Some features may not work as expected.",
+			"not_isolated": "Cross-origin isolation is not enabled, which is required for certain features to work. Some features may not work as expected."
 		}
 	},
 	"privacy": {
