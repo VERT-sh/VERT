@@ -1,9 +1,6 @@
 import type { WorkerMessage } from "#lib/types";
 import type { ConversionSettings } from "#lib/types/conversion-settings";
 import Vips from "wasm-vips";
-import vipsHeifWasm from "wasm-vips/vips-heif.wasm?url";
-import vipsJxlWasm from "wasm-vips/vips-jxl.wasm?url";
-import vipsResvgWasm from "wasm-vips/vips-resvg.wasm?url";
 import vipsWasm from "wasm-vips/vips.wasm?url";
 
 type VipsInstance = Awaited<ReturnType<typeof Vips>>;
@@ -11,16 +8,10 @@ type VipsImage = ReturnType<VipsInstance["Image"]["newFromBuffer"]>;
 
 const WASM_URLS: Record<string, string> = {
 	"vips.wasm": vipsWasm,
-	"vips-jxl.wasm": vipsJxlWasm,
-	"vips-heif.wasm": vipsHeifWasm,
-	"vips-resvg.wasm": vipsResvgWasm,
 };
 
-const DYNAMIC_LIBRARIES = [
-	"vips-jxl.wasm",
-	"vips-heif.wasm",
-	"vips-resvg.wasm",
-];
+// note: dynamic libraries still cause wasm-vips to take a long time to (or never) initialize, imagemagick handles all these anyways
+const DYNAMIC_LIBRARIES: string[] = [];
 
 const NO_QUALITY = new Set([".gif", ".svg", ".ppm", ".pnm"]);
 const OPAQUE = new Set([".jpg", ".jpeg", ".jpe", ".jfif", ".ppm", ".pnm"]);
