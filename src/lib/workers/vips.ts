@@ -191,13 +191,18 @@ const handleMessage = async (
 	}
 };
 
-onmessage = async (e: MessageEvent<WorkerMessage>) => {
-	const message = e.data;
-	try {
-		const res = await handleMessage(message);
-		if (!res) return;
-		postMessage({ ...res, id: message.id });
-	} catch (err) {
-		postMessage({ type: "error", error: formatError(err), id: message.id });
-	}
-};
+if (self.name !== "em-pthread")
+	onmessage = async (e: MessageEvent<WorkerMessage>) => {
+		const message = e.data;
+		try {
+			const res = await handleMessage(message);
+			if (!res) return;
+			postMessage({ ...res, id: message.id });
+		} catch (err) {
+			postMessage({
+				type: "error",
+				error: formatError(err),
+				id: message.id,
+			});
+		}
+	};
