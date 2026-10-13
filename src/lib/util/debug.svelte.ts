@@ -44,6 +44,11 @@ export const CONVERTER_META: Record<
 		icon: ImageIcon,
 		accent: "bg-accent-blue",
 	},
+	libvips: {
+		category: "image",
+		icon: ImageIcon,
+		accent: "bg-accent-blue-alt",
+	},
 	ffmpeg: {
 		category: "audio",
 		icon: AudioLinesIcon,

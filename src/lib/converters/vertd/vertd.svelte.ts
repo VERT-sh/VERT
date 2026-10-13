@@ -8,6 +8,7 @@ import {
 } from "#lib/sections/settings/vertdSettings.svelte";
 import { VertFile } from "#lib/types";
 import { Converter, FormatInfo } from "../converter.svelte";
+import { applyPriorities } from "../priority";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$app/env/public";
 import { ToastManager } from "#lib/util/toast.svelte";
 import type {
@@ -370,15 +371,15 @@ export class VertdConverter extends Converter {
 
 	private cancelledConversions = new SvelteSet<string>();
 
-	public supportedFormats = [
+	public supportedFormats = applyPriorities("vertd", [
 		new FormatInfo("zip", true, false, false, 0),
 		...videoFormats
-			.map((f: string) => new FormatInfo(f, true, true, true, 0))
+			.map((f: string) => new FormatInfo(f, true, true, true))
 			.filter((format) => !cantEncode.includes(format.name.slice(1)))
 			.filter((format) => !cantDecode.includes(format.name.slice(1))),
-		...cantEncode.map((f) => new FormatInfo(f, true, false, true, 0)),
-		...cantDecode.map((f) => new FormatInfo(f, false, true, true, 0)),
-	];
+		...cantEncode.map((f) => new FormatInfo(f, true, false, true)),
+		...cantDecode.map((f) => new FormatInfo(f, false, true, true)),
+	]);
 
 	private codecs: CodecsResponse = { videoCodecs: [], audioCodecs: [] };
 

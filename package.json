@@ -76,7 +76,8 @@
 		"sanitize-html": "^2.18.0",
 		"svelte-stripe": "^2.0.0",
 		"vert-wasm": "^0.0.2",
-		"vite-plugin-wasm": "^3.6.0"
+		"vite-plugin-wasm": "^3.6.0",
+		"wasm-vips": "^0.0.19"
 	},
 	"trustedDependencies": [
 		"@parcel/watcher",

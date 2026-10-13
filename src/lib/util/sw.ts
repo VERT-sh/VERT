@@ -1,5 +1,7 @@
 import { browser } from "$app/env";
 
+const COI_RELOAD_KEY = "vertCoiReloaded";
+
 export interface CacheInfo {
 	totalSize: number;
 	fileCount: number;
@@ -28,12 +30,40 @@ class ServiceWorkerManager {
 			);
 
 			this.initialized = true;
+
+			await navigator.serviceWorker.ready;
+			this.ensureCrossOriginIsolation();
 		} catch (error) {
 			console.error(
 				"[SW Manager] service worker registration failed:",
 				error,
 			);
 		}
+	}
+
+	// ensure we are cross-origin isolated (COOP/COEP) so we can use SharedArrayBuffer
+	private ensureCrossOriginIsolation(): void {
+		const controlled = !!navigator.serviceWorker.controller;
+		const isolated = window.crossOriginIsolated === true;
+
+		if (controlled || isolated) {
+			// success (or resumed) — allow a future reload for SW updates
+			sessionStorage.removeItem(COI_RELOAD_KEY);
+			if (controlled && !isolated)
+				console.warn(
+					"[SW Manager] service worker active but page is not cross-origin isolated; wasm-vips will be unavailable.",
+				);
+			return;
+		}
+
+		// already reloaded once and still not isolated, don't infinite loop
+		if (sessionStorage.getItem(COI_RELOAD_KEY)) return;
+
+		sessionStorage.setItem(COI_RELOAD_KEY, "controlling");
+		console.log(
+			"[SW Manager] reloading to let the service worker enable cross-origin isolation",
+		);
+		window.location.reload();
 	}
 
 	async getCacheInfo(): Promise<CacheInfo> {

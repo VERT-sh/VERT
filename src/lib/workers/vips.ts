@@ -1,0 +1,164 @@
+import Vips from "wasm-vips";
+import vipsWasm from "wasm-vips/vips.wasm?url";
+import vipsJxlWasm from "wasm-vips/vips-jxl.wasm?url";
+import vipsHeifWasm from "wasm-vips/vips-heif.wasm?url";
+import vipsResvgWasm from "wasm-vips/vips-resvg.wasm?url";
+import type { WorkerMessage } from "#lib/types";
+import type { ConversionSettings } from "#lib/types/conversion-settings";
+
+type VipsInstance = Awaited<ReturnType<typeof Vips>>;
+type VipsImage = ReturnType<VipsInstance["Image"]["newFromBuffer"]>;
+
+const WASM_URLS: Record<string, string> = {
+	"vips.wasm": vipsWasm,
+	"vips-jxl.wasm": vipsJxlWasm,
+	"vips-heif.wasm": vipsHeifWasm,
+	"vips-resvg.wasm": vipsResvgWasm,
+};
+
+const DYNAMIC_LIBRARIES = [
+	"vips-jxl.wasm",
+	"vips-heif.wasm",
+	"vips-resvg.wasm",
+];
+
+const NO_QUALITY = new Set([".gif", ".svg", ".ppm", ".pnm"]);
+const OPAQUE = new Set([".jpg", ".jpeg", ".jpe", ".jfif", ".ppm", ".pnm"]);
+
+const isWasmException = (err: unknown): err is WebAssembly.Exception =>
+	typeof WebAssembly !== "undefined" &&
+	typeof WebAssembly.Exception === "function" &&
+	err instanceof WebAssembly.Exception;
+
+const formatError = (err: unknown): string => {
+	if (isWasmException(err)) {
+		const payload = (err as { message?: unknown }).message;
+		if (Array.isArray(payload)) {
+			const parts = payload.filter(
+				(part): part is string =>
+					typeof part === "string" && part.length > 0,
+			);
+			if (parts.length) return parts.join(": ").trim();
+		} else if (typeof payload === "string" && payload.length) {
+			return payload;
+		}
+	}
+
+	if (err instanceof Error) return err.message;
+	return String(err);
+};
+
+let vips: VipsInstance | null = null;
+let vipsPromise: Promise<VipsInstance> | null = null;
+let initialized = false;
+
+const loadVips = (): Promise<VipsInstance> => {
+	return (vipsPromise ??= Vips({
+		dynamicLibraries: DYNAMIC_LIBRARIES,
+		locateFile: (name: string) => WASM_URLS[name] ?? name,
+		workaroundCors: true,
+	}).catch((err) => {
+		throw new Error(
+			`wasm-vips failed to initialise (is the page cross-origin isolated?): ${err}`,
+		);
+	}));
+};
+
+const conversionOptions = (
+	to: string,
+	settings: ConversionSettings,
+): Record<string, unknown> => {
+	const options: Record<string, unknown> = {};
+
+	if (!settings.metadata || settings.metadata === "false")
+		options.strip = true;
+
+	const quality = Number(settings.quality ?? settings.compression);
+	if (!Number.isNaN(quality) && quality > 0 && !NO_QUALITY.has(to))
+		options.Q = Math.min(100, quality);
+
+	return options;
+};
+
+const handleMessage = async (
+	message: WorkerMessage,
+): Promise<Partial<WorkerMessage>> => {
+	switch (message.type) {
+		case "load": {
+			try {
+				vips = await loadVips();
+				initialized = true;
+				return { type: "loaded" };
+			} catch (err) {
+				return { type: "error", error: formatError(err) };
+			}
+		}
+		case "convert": {
+			if (!initialized || !vips)
+				return { type: "error", error: "wasm-vips not initialized" };
+
+			const to = message.to.startsWith(".")
+				? message.to.toLowerCase()
+				: `.${message.to.toLowerCase()}`;
+			const from = message.input.from;
+
+			const settings = JSON.parse(
+				message.conversionSettings || "{}",
+			) as ConversionSettings;
+
+			const buffer = new Uint8Array(
+				await message.input.file.arrayBuffer(),
+			);
+
+			let image: VipsImage | null = null;
+			let flattened: VipsImage | null = null;
+
+			try {
+				image = vips.Image.newFromBuffer(buffer);
+
+				// re-read with every page/frame if the image is animated
+				if (image.getTypeof("n-pages") > 0) {
+					image.delete();
+					image = vips.Image.newFromBuffer(buffer, "[n=-1]");
+				}
+
+				let source = image;
+
+				// flatten transparency when the target can't store alpha or the user opted out
+				const keepAlpha = settings.transparency !== false;
+				if ((!keepAlpha || OPAQUE.has(to)) && image.hasAlpha()) {
+					flattened = image.flatten({ background: [255, 255, 255] });
+					source = flattened;
+				}
+
+				const result = source.writeToBuffer(
+					to,
+					conversionOptions(to, settings),
+				);
+
+				return { type: "finished", output: result };
+			} catch (err) {
+				return {
+					type: "error",
+					error: `vips failed to convert ${from} to ${to}: ${formatError(err)}`,
+				};
+			} finally {
+				flattened?.delete();
+				image?.delete();
+			}
+		}
+		default:
+			return { type: "error", error: "Unknown message type" };
+	}
+};
+
+onmessage = async (e: MessageEvent<WorkerMessage>) => {
+	const message = e.data;
+	try {
+		const res = await handleMessage(message);
+		if (!res) return;
+		postMessage({ ...res, id: message.id });
+	} catch (err) {
+		postMessage({ type: "error", error: formatError(err), id: message.id });
+	}
+};

@@ -65,7 +65,14 @@ export default defineConfig(({ command }) => {
 				"@ffmpeg/core-mt",
 				"@ffmpeg/ffmpeg",
 				"@ffmpeg/util",
+				"wasm-vips",
 			],
+		},
+		server: {
+			headers: {
+				"Cross-Origin-Embedder-Policy": "credentialless",
+				"Cross-Origin-Opener-Policy": "same-origin",
+			},
 		},
 		build: {
 			target: "esnext",

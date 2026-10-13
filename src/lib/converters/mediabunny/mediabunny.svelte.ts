@@ -26,6 +26,7 @@ import { registerFlacEncoder } from "@mediabunny/flac-encoder";
 import { registerProresDecoder } from "@mediabunny/prores";
 import { SvelteMap } from "svelte/reactivity";
 import { Converter, FormatInfo } from "../converter.svelte";
+import { applyPriorities } from "../priority";
 import { m } from "#lib/paraglide/messages";
 import type {
 	SettingDefinition,
@@ -150,9 +151,10 @@ export class MediabunnyConverter extends Converter {
 		"ts",
 	];
 
-	public supportedFormats: FormatInfo[] = [
-		...this.formats.map((f) => new FormatInfo(f, true, true, true, 2)),
-	];
+	public supportedFormats: FormatInfo[] = applyPriorities(
+		"mediabunny",
+		this.formats.map((f) => new FormatInfo(f, true, true, true)),
+	);
 
 	constructor() {
 		super();

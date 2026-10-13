@@ -18,6 +18,7 @@ import type {
 	NormalizedSettings,
 } from "#lib/types/conversion-settings";
 import { videoFormats } from "../vertd/vertd.svelte";
+import { applyPriorities } from "../priority";
 
 const coreURL = new URL(ffmpegCoreURL, import.meta.url).href;
 const wasmURL = new URL(ffmpegWasmURL, import.meta.url).href;
@@ -33,7 +34,7 @@ export class FFmpegConverter extends Converter {
 	// non supported audio to video formats
 	private cantConvert: string[] = ["ogx"];
 
-	public supportedFormats = [
+	public supportedFormats = applyPriorities("ffmpeg", [
 		new FormatInfo("mp3", true, true),
 		new FormatInfo("wav", true, true),
 		new FormatInfo("flac", true, true),
@@ -66,10 +67,10 @@ export class FFmpegConverter extends Converter {
 			//  exclude cantConvert from audio to video
 			(f: string) => {
 				const isCantConvert = this.cantConvert.includes(f);
-				return new FormatInfo(f, true, !isCantConvert, false, 0);
+				return new FormatInfo(f, true, !isCantConvert, false);
 			},
 		),
-	];
+	]);
 
 	public readonly reportsProgress = true;
 

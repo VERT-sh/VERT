@@ -1,9 +1,10 @@
 import type { Categories } from "#lib/types";
-import type { Converter } from "./converter.svelte";
+import type { Converter, WorkerStatus } from "./converter.svelte";
 import { FFmpegConverter } from "./ffmpeg/ffmpeg.svelte";
 import { PandocConverter } from "./pandoc/pandoc.svelte";
 import { VertdConverter } from "./vertd/vertd.svelte";
 import { MagickConverter } from "./magick/magick.svelte";
+import { VipsConverter } from "./vips/vips.svelte";
 import { MediabunnyConverter } from "./mediabunny/mediabunny.svelte";
 import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
 
@@ -11,6 +12,7 @@ import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
 const getConverters = (): Converter[] => {
 	const converters: Converter[] = [
 		new MagickConverter(),
+		new VipsConverter(),
 		new FFmpegConverter(),
 		new PandocConverter(),
 		new MediabunnyConverter(),
@@ -23,13 +25,14 @@ const getConverters = (): Converter[] => {
 
 export const converters = getConverters();
 export const converterCategories = {
-	image: ["imagemagick"],
+	image: ["libvips", "imagemagick"],
 	video: ["mediabunny", "vertd"],
 	audio: ["ffmpeg"],
 	doc: ["pandoc"],
 };
 
-export type ConverterCategory = keyof typeof converterCategories | "archive" | "unknown";
+export type ConverterCategory =
+	keyof typeof converterCategories | "archive" | "unknown";
 
 export const categoryByConverter = Object.fromEntries(
 	Object.entries(converterCategories).flatMap(([category, names]) =>
@@ -69,10 +72,13 @@ categories.video.formats = [
 			),
 	),
 ];
-categories.image.formats =
-	converters
-		.find((c) => converterCategories.image.includes(c.name))
-		?.formatStrings((f) => f.toSupported) || [];
+categories.image.formats = [
+	...new Set(
+		converters
+			.filter((c) => converterCategories.image.includes(c.name))
+			.flatMap((c) => c.formatStrings((f) => f.toSupported)),
+	),
+];
 categories.doc.formats =
 	converters
 		.find((c) => converterCategories.doc.includes(c.name))
@@ -90,3 +96,29 @@ export const byNative = (format: string) => {
 		return 0;
 	};
 };
+
+export function categoryStatus(category: ConverterCategory): WorkerStatus {
+	const names =
+		(converterCategories as Record<string, string[]>)[category] ?? [];
+	const all = converters.filter((c) => names.includes(c.name));
+	const available = all.filter((c) => c.isAvailable());
+	const members = available.length ? available : all;
+
+	if (!members.length) return "idle";
+
+	const isReady = (s: WorkerStatus) =>
+		s === "ready" || s === "partially-ready";
+	const readyCount = members.filter((c) => isReady(c.status)).length;
+
+	if (readyCount === members.length) return "ready";
+	if (readyCount > 0) return "partially-ready";
+	if (members.some((c) => c.status === "error")) return "error";
+	if (
+		members.some(
+			(c) => c.status === "downloading" || c.status === "initializing",
+		)
+	)
+		return "downloading";
+
+	return "idle";
+}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Uploader from "#lib/components/functional/Uploader.svelte";
 	import Tooltip from "#lib/components/visual/Tooltip.svelte";
-	import { converters } from "#lib/converters";
+	import { converters, categoryStatus } from "#lib/converters";
 	import { vertdLoaded } from "#lib/store/index.svelte";
 	import clsx from "clsx";
 	import {
@@ -29,6 +29,20 @@
 			)
 			.join(", ") || "none";
 
+	const getImageFormats = () =>
+		Array.from(
+			new Set(
+				converters
+					.filter((c) => ["imagemagick", "libvips"].includes(c.name))
+					.flatMap((c) =>
+						c.supportedFormats.map(
+							(f) =>
+								`${f.name}${f.fromSupported && f.toSupported ? "" : "*"}`,
+						),
+					),
+			),
+		).join(", ");
+
 	const worker: {
 		[key: string]: {
 			formats: string;
@@ -46,28 +60,22 @@
 			};
 		} = {
 			Images: {
-				formats: getSupportedFormats("imagemagick"),
+				formats: getImageFormats(),
 				icon: ImageIcon,
 				title: m["upload.cards.images"](),
-				status:
-					converters.find((c) => c.name === "imagemagick")?.status ||
-					"idle",
+				status: categoryStatus("image"),
 			},
 			Audio: {
 				formats: getSupportedFormats("ffmpeg"),
 				icon: AudioLinesIcon,
 				title: m["upload.cards.audio"](),
-				status:
-					converters.find((c) => c.name === "ffmpeg")?.status ||
-					"idle",
+				status: categoryStatus("audio") || "idle",
 			},
 			Documents: {
 				formats: getSupportedFormats("pandoc"),
 				icon: BookTextIcon,
 				title: m["upload.cards.documents"](),
-				status:
-					converters.find((c) => c.name === "pandoc")?.status ||
-					"idle",
+				status: categoryStatus("doc") || "idle",
 			},
 		};
 

@@ -505,6 +505,7 @@
 			"general": "Error converting '{file}': {message}",
 			"cancel": "Error canceling conversion for '{file}': {message}",
 			"magick": "Error in Magick worker, image conversion may not work as expected.",
+			"vips": "Error in libvips worker, image conversion may not work as expected.",
 			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
 			"mediabunny": {

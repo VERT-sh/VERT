@@ -3,6 +3,7 @@ import { m } from "#lib/paraglide/messages";
 import { VertFile, type WorkerMessage } from "#lib/types";
 import MagickWorker from "#lib/workers/magick?worker&url";
 import { Converter, FormatInfo } from "../converter.svelte";
+import { applyPriorities } from "../priority";
 import { imageFormats } from "./magick-automated";
 import {
 	formatsWithoutMetadataRemoval,
@@ -25,7 +26,7 @@ export class MagickConverter extends Converter {
 
 	private activeConversions = new SvelteMap<string, Worker>();
 
-	public supportedFormats = [
+	public supportedFormats = applyPriorities("imagemagick", [
 		// manually tested formats
 		new FormatInfo("png", true, true),
 		new FormatInfo("jpeg", true, true),
@@ -86,7 +87,7 @@ export class MagickConverter extends Converter {
 
 		// formats added from maya's somewhat automated testing
 		...imageFormats,
-	];
+	]);
 
 	public readonly reportsProgress = false;
 

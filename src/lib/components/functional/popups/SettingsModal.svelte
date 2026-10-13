@@ -197,6 +197,8 @@
 					continue;
 				}
 
+				void converter.init();
+
 				if (targetFile.sequenceKind) {
 					targetFile.conversionSettings = {
 						...targetFile.conversionSettings,
