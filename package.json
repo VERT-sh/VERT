@@ -23,6 +23,7 @@
 		"@sveltejs/kit": "^3.0.1",
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@types/eslint": "^9.6.1",
+		"@types/node": "24",
 		"@types/sanitize-html": "^2.16.2",
 		"autoprefixer": "^10.6.1",
 		"css-select": "5.1.0",
@@ -41,7 +42,8 @@
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.71.2",
 		"vite": "^8.3.4",
-		"vite-plugin-top-level-await": "^1.6.0"
+		"vite-plugin-top-level-await": "^1.6.0",
+		"vite-plugin-wasm": "^3.6.0"
 	},
 	"dependencies": {
 		"@bjorn3/browser_wasi_shim": "^0.4.2",
@@ -60,7 +62,6 @@
 		"@mediabunny/mp3-encoder": "^1.61.4",
 		"@mediabunny/prores": "^1.61.4",
 		"@stripe/stripe-js": "^10.0.0",
-		"@types/node": "24",
 		"byte-data": "^19.0.1",
 		"client-zip": "^2.5.1",
 		"clsx": "^2.1.1",
@@ -77,7 +78,6 @@
 		"sanitize-html": "^2.18.0",
 		"svelte-stripe": "^2.0.0",
 		"vert-wasm": "^0.0.2",
-		"vite-plugin-wasm": "^3.6.0",
 		"wasm-vips": "^0.0.19"
 	},
 	"trustedDependencies": [
