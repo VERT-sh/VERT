@@ -232,6 +232,8 @@ export class VertFile {
 						(f) => f.name === this.to,
 					);
 					if (!theirFrom || !theirTo) return false;
+					if (!theirFrom.fromSupported || !theirTo.toSupported)
+						return false;
 					if (!theirFrom.isNative && !theirTo.isNative) return false;
 				}
 
