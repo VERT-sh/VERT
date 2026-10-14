@@ -5,6 +5,7 @@ import { FFmpegConverter } from "./ffmpeg/ffmpeg.svelte";
 import { MagickConverter } from "./magick/magick.svelte";
 import { MediabunnyConverter } from "./mediabunny/mediabunny.svelte";
 import { PandocConverter } from "./pandoc/pandoc.svelte";
+import { VectorizerConverter } from "./vectorizer/vectorizer.svelte";
 import { VertdConverter } from "./vertd/vertd.svelte";
 import { VipsConverter } from "./vips/vips.svelte";
 
@@ -13,6 +14,7 @@ const getConverters = (): Converter[] => {
 	const converters: Converter[] = [
 		new MagickConverter(),
 		new VipsConverter(),
+		new VectorizerConverter(),
 		new FFmpegConverter(),
 		new PandocConverter(),
 		new MediabunnyConverter(),
@@ -25,7 +27,7 @@ const getConverters = (): Converter[] => {
 
 export const converters = getConverters();
 export const converterCategories = {
-	image: ["libvips", "imagemagick"],
+	image: ["libvips", "imagemagick", "vectorizer"],
 	video: ["mediabunny", "vertd"],
 	audio: ["ffmpeg"],
 	doc: ["pandoc"],

@@ -20,6 +20,8 @@
         "@mediabunny/flac-encoder": "^1.61.4",
         "@mediabunny/mp3-encoder": "^1.61.4",
         "@mediabunny/prores": "^1.61.4",
+        "@neplex/vectorizer": "^0.1.0",
+        "@neplex/vectorizer-wasm32-wasi": "https://registry.npmjs.org/@neplex/vectorizer-wasm32-wasi/-/vectorizer-wasm32-wasi-0.1.0.tgz",
         "@stripe/stripe-js": "^10.0.0",
         "byte-data": "^19.0.1",
         "client-zip": "^2.5.1",
@@ -192,6 +194,36 @@
     "@mediabunny/prores": ["@mediabunny/prores@1.61.4", "", { "dependencies": { "turbores": "^1.2.2" }, "peerDependencies": { "mediabunny": "^1.49.0" } }, "sha512-HLm4d7UGZDMh7L1r5ME/KTgJzr0b/1ht1A6WkWtVIRY0CquPMP/u9wAbXPIp8Z9wx3AiCTGMuD4OYAMpLLVORw=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.2.5", "", { "dependencies": { "@tybys/wasm-util": "^0.10.3" }, "peerDependencies": { "@emnapi/core": "^1.7.1 || ^2.0.0-alpha.4", "@emnapi/runtime": "^1.7.1 || ^2.0.0-alpha.4" } }, "sha512-HshSvXzmBxNzqejd3k/KemgQ3hdREUYFRRrgxOZ+gPljDIsO2SDZrVZMd4Z/HsxudQbE62OVyVFE8z9BCurfjA=="],
+
+    "@neplex/vectorizer": ["@neplex/vectorizer@0.1.0", "", { "dependencies": { "commander": "^14.0.3", "picocolors": "^1.1.1" }, "optionalDependencies": { "@neplex/vectorizer-android-arm-eabi": "0.1.0", "@neplex/vectorizer-android-arm64": "0.1.0", "@neplex/vectorizer-darwin-arm64": "0.1.0", "@neplex/vectorizer-darwin-x64": "0.1.0", "@neplex/vectorizer-freebsd-x64": "0.1.0", "@neplex/vectorizer-linux-arm-gnueabihf": "0.1.0", "@neplex/vectorizer-linux-arm64-gnu": "0.1.0", "@neplex/vectorizer-linux-arm64-musl": "0.1.0", "@neplex/vectorizer-linux-x64-gnu": "0.1.0", "@neplex/vectorizer-linux-x64-musl": "0.1.0", "@neplex/vectorizer-wasm32-wasi": "0.1.0", "@neplex/vectorizer-win32-arm64-msvc": "0.1.0", "@neplex/vectorizer-win32-ia32-msvc": "0.1.0", "@neplex/vectorizer-win32-x64-msvc": "0.1.0" }, "bin": { "vectorizer": "cli/index.mjs" } }, "sha512-J2cfkJG0hmOsC+QiPfkNSe8U68vW5SdaM8PjLMVgacmKfOtZKbU5syz3BqlfYoMlPjJlfzYdxwfH4GiAz5vLUQ=="],
+
+    "@neplex/vectorizer-android-arm-eabi": ["@neplex/vectorizer-android-arm-eabi@0.1.0", "", { "os": "android", "cpu": "arm" }, "sha512-QFCkiMEahk0zatLuEtUaTCLPfF6YfoPVSUPjxgkuNQJUc9By4s00Bk9LZK1DcM4O404MQauGxQPZF8r8U7NwWg=="],
+
+    "@neplex/vectorizer-android-arm64": ["@neplex/vectorizer-android-arm64@0.1.0", "", { "os": "android", "cpu": "arm64" }, "sha512-+o3+9ahO14z+8lLQ/wZ9bY2DKZsyLtwqabaglfYXjXb8gV+cwNV0UBCEDvd2k21WXb/aYrar55Ayf8cNa+79Sg=="],
+
+    "@neplex/vectorizer-darwin-arm64": ["@neplex/vectorizer-darwin-arm64@0.1.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-6nPJgRwm+tZj4b4X8GEcKJUzPgrZaixYo5MLZ1/H40Vp5+UI4Ma9qx0ZsIyh/zhENddYPb7me7EjH0U3O9+JCA=="],
+
+    "@neplex/vectorizer-darwin-x64": ["@neplex/vectorizer-darwin-x64@0.1.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-WnEtZLR1WG9satz3ZJ791nu7SCCDU7p00egqqGZFhQAmNRM3D0dC4bSfeJmLPvGifvCY9dqQo1XNswgpb0rPzg=="],
+
+    "@neplex/vectorizer-freebsd-x64": ["@neplex/vectorizer-freebsd-x64@0.1.0", "", { "os": "freebsd", "cpu": "x64" }, "sha512-OSANfJirQvS9iyHbZFMoa8gT9Ife1YIhyWeAvLUqniUmQ1q3lAcONKPP14xClhznDI2a0m51H6NvCjvXMgBDrQ=="],
+
+    "@neplex/vectorizer-linux-arm-gnueabihf": ["@neplex/vectorizer-linux-arm-gnueabihf@0.1.0", "", { "os": "linux", "cpu": "arm" }, "sha512-5Wm7rkYY6G6oSdb6Ee3LKtUkzYjtUvIUiIR80FtVNW6S3/d0HHzePKXljtric24fJsKPb/aWJzHZDqWy1T+bVQ=="],
+
+    "@neplex/vectorizer-linux-arm64-gnu": ["@neplex/vectorizer-linux-arm64-gnu@0.1.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-7mvnTzzUW02tFx/Qun7FpO8d81g5xj05a+sd88s38VngE10euzQCiDgGRApxfHSBuiZ2pY7BDmEiZP5FKN8dvg=="],
+
+    "@neplex/vectorizer-linux-arm64-musl": ["@neplex/vectorizer-linux-arm64-musl@0.1.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-+WecJ4zyeVQgT1ZIJNH5z6IomkKeTQKWlq8W2eYLfKNKv/UZ0Wj09ANnkFPoZeagk6jH4WdPs/L/Ot6MwO44Dg=="],
+
+    "@neplex/vectorizer-linux-x64-gnu": ["@neplex/vectorizer-linux-x64-gnu@0.1.0", "", { "os": "linux", "cpu": "x64" }, "sha512-ZZOdYvIdygg61c1eSXdBDxPKLrVDAYLaPX7mJtgAM+3C3kSuiDKQHWUGqhcFTlo2oDSWA93Bc0pqaVJBdGW3tA=="],
+
+    "@neplex/vectorizer-linux-x64-musl": ["@neplex/vectorizer-linux-x64-musl@0.1.0", "", { "os": "linux", "cpu": "x64" }, "sha512-T9QgcxddN7mF/8JrA1FNr7F3EwKKwWFFl2v8tndRtDU1N/2wLj+1drSzgJZjxcTjlMG3yOcLhDqFXq7Nsxwwkg=="],
+
+    "@neplex/vectorizer-wasm32-wasi": ["@neplex/vectorizer-wasm32-wasi@https://registry.npmjs.org/@neplex/vectorizer-wasm32-wasi/-/vectorizer-wasm32-wasi-0.1.0.tgz", { "dependencies": { "@napi-rs/wasm-runtime": "^1.1.4" } }, "sha512-rEQs14UTfQqh69uxwRo2aJiDzymdOx+j/5pl7sDuEITsx/6nb60dsZkd8gkyuNzBeYSTt8lSSL3sxEmHXQauPw=="],
+
+    "@neplex/vectorizer-win32-arm64-msvc": ["@neplex/vectorizer-win32-arm64-msvc@0.1.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-QdzriEzZHlzaCFZKw4GgMZ2cUomD+fAgOFs4qYVFQ9K2weyJzTNsCam3gb6xZFhFJ/REPVbNdAB46W6RyAjLBA=="],
+
+    "@neplex/vectorizer-win32-ia32-msvc": ["@neplex/vectorizer-win32-ia32-msvc@0.1.0", "", { "os": "win32", "cpu": "ia32" }, "sha512-z6E5GQcFCQMdJ5HeoHg5KpJJSuq0MPxW2HhPgOjWYnykF4aIwtLAqQdnNTQtKpuunsjoLtK9iqx82+BYX/f64w=="],
+
+    "@neplex/vectorizer-win32-x64-msvc": ["@neplex/vectorizer-win32-x64-msvc@0.1.0", "", { "os": "win32", "cpu": "x64" }, "sha512-OuFcznF1+CIs09X94PsfiyxwgkPpH8ZQQ81aPRjexFdLLLt5UpIOlsbUK2Ypb5u/bC/lCOpuUfP/bVP205YinQ=="],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 
@@ -908,6 +940,10 @@
     "@eslint-community/eslint-utils/eslint-visitor-keys": ["eslint-visitor-keys@3.4.3", "", {}, "sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag=="],
 
     "@inlang/sdk/uuid": ["uuid@14.0.3", "", { "bin": { "uuid": "dist-node/bin/uuid" } }, "sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw=="],
+
+    "@neplex/vectorizer/@neplex/vectorizer-wasm32-wasi": ["@neplex/vectorizer-wasm32-wasi@0.1.0", "", { "dependencies": { "@napi-rs/wasm-runtime": "^1.1.4" }, "cpu": "none" }, "sha512-rEQs14UTfQqh69uxwRo2aJiDzymdOx+j/5pl7sDuEITsx/6nb60dsZkd8gkyuNzBeYSTt8lSSL3sxEmHXQauPw=="],
+
+    "@neplex/vectorizer/commander": ["commander@14.0.3", "", {}, "sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw=="],
 
     "@types/dom-mediacapture-transform/@types/dom-webcodecs": ["@types/dom-webcodecs@0.1.19", "", {}, "sha512-+yFUIDUaASFz0vQpWBErPxun/Lb+F0TdrlTsj50gm7K797YzEx2TmV6fEiwciHyFNghlZYPgQXH5qRcwMHcJFQ=="],
 

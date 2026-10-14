@@ -61,6 +61,8 @@
 		"@mediabunny/flac-encoder": "^1.61.4",
 		"@mediabunny/mp3-encoder": "^1.61.4",
 		"@mediabunny/prores": "^1.61.4",
+		"@neplex/vectorizer": "^0.1.0",
+		"@neplex/vectorizer-wasm32-wasi": "https://registry.npmjs.org/@neplex/vectorizer-wasm32-wasi/-/vectorizer-wasm32-wasi-0.1.0.tgz",
 		"@stripe/stripe-js": "^10.0.0",
 		"byte-data": "^19.0.1",
 		"client-zip": "^2.5.1",

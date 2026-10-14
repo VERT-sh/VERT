@@ -17,6 +17,7 @@ import {
 	ImageIcon,
 	RefreshCwIcon,
 	ServerIcon,
+	ShapesIcon,
 } from "@lucide/svelte";
 import type { Component } from "svelte";
 
@@ -48,6 +49,11 @@ export const CONVERTER_META: Record<
 		category: "image",
 		icon: ImageIcon,
 		accent: "bg-accent-blue-alt",
+	},
+	vectorizer: {
+		category: "image",
+		icon: ShapesIcon,
+		accent: "bg-accent-purple",
 	},
 	ffmpeg: {
 		category: "audio",

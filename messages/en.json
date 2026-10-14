@@ -139,7 +139,14 @@
 				},
 				"color_space": "Color space",
 				"transparency": "Transparency",
-				"single_size": "Single size image"
+				"single_size": "Single size image",
+				"vectorize": {
+					"detail": "Vectorization detail",
+					"detail_bw": "Black & white",
+					"detail_poster": "Poster (flat colors)",
+					"detail_photo": "Photo (gradients)",
+					"optimize": "Optimize SVG"
+				}
 			},
 			"audio": {
 				"bitrate": {
@@ -509,6 +516,7 @@
 			"cancel": "Error canceling conversion for '{file}': {message}",
 			"magick": "Error in Magick worker, image conversion may not work as expected.",
 			"vips": "Error in libvips worker, image conversion may not work as expected.",
+			"vectorizer": "Error in vectorizer worker, image vectorization may not work as expected.",
 			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
 			"mediabunny": {
