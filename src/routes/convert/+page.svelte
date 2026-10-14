@@ -214,12 +214,14 @@
 			}
 
 			file.to = targetFormat;
+			files.preloadConverters(file);
 			processedFileIds.add(file.id);
 		});
 	});
 
 	const handleSelect = (option: string, file: VertFile) => {
 		file.result = null;
+		files.preloadConverters(file);
 	};
 
 	$effect(() => {

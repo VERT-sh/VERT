@@ -90,8 +90,8 @@ class Files {
 		);
 	}
 
-	// preload first required converter when added to list
-	private preloadConverters(file: VertFile): void {
+	// preload first required converter when added to list (or changing format)
+	public preloadConverters(file: VertFile): void {
 		const [preferred] = this.getRequiredConverters(file);
 		void preferred?.init();
 	}
