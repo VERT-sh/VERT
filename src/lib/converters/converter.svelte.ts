@@ -233,6 +233,35 @@ export class Converter {
 		return this.status === "ready" || this.status === "partially-ready";
 	}
 
+	/**
+	 * Optional human-readable label for the concrete engine build in use
+	 * (e.g. "64-bit"). Returns null for converters without selectable variants.
+	 */
+	public getVariantLabel(): string | null {
+		return null;
+	}
+
+	/**
+	 * Optional list of selectable engine variants for this converter, shown in
+	 * the per-file converter picker. Returns null when the converter has none.
+	 */
+	public getVariantOptions(): { value: string; label: string }[] | null {
+		return null;
+	}
+
+	/**
+	 * The currently selected variant value (matches a `getVariantOptions` value),
+	 * or null when the converter has no variants.
+	 */
+	public getVariantValue(): string | null {
+		return null;
+	}
+
+	/**
+	 * Apply a variant selection made in the picker.
+	 */
+	public setVariant(_value: string): void {}
+
 	public formatStrings(predicate?: (f: FormatInfo) => boolean) {
 		if (predicate) {
 			return this.supportedFormats.filter(predicate).map((f) => f.name);

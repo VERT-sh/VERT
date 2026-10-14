@@ -73,6 +73,13 @@
 		return available.find((c) => c.name === name) || available[0];
 	};
 
+	const shouldShowConverterTab = (vertFile: VertFile) => {
+		const available = getAvailableConverters(vertFile);
+		if (available.length > 1) return true;
+		const [only] = available;
+		return !!only && (only.getVariantOptions()?.length ?? 0) > 0;
+	};
+
 	const getFileType = (vertFile: VertFile) => {
 		const converter = vertFile.converters.find(
 			({ name, supportedFormats }) =>
@@ -101,7 +108,7 @@
 		);
 
 		return {
-			...(targetFile && getAvailableConverters(targetFile).length > 1
+			...(targetFile && shouldShowConverterTab(targetFile)
 				? { Converter: [] }
 				: {}),
 			...categories,
@@ -140,8 +147,7 @@
 				if (cancelled) return;
 
 				availableCategories = categories;
-				const hasConverterTab =
-					getAvailableConverters(currentFile).length > 1;
+				const hasConverterTab = shouldShowConverterTab(currentFile);
 				if (
 					(!hasConverterTab && activeTab === "Converter") ||
 					(activeTab !== "Converter" && !categories[activeTab])
@@ -339,11 +345,16 @@
 						{#if activeTab === "Converter"}
 							<div class="flex flex-col gap-2">
 								{#each availableConverters as converter (converter.name)}
+									{@const variantLabel =
+										converter.getVariantLabel()}
+									{@const variantOptions =
+										converter.getVariantOptions()}
+									{@const isSelected =
+										converter.name === validConverter?.name}
 									<button
 										class={clsx(
 											"w-full rounded-xl border-2 border-button p-3 text-left",
-											converter.name ===
-												validConverter?.name &&
+											isSelected &&
 												"bg-accent-purple text-black",
 											$effects && "transition",
 										)}
@@ -351,8 +362,33 @@
 											settings.converter = converter.name;
 										}}
 									>
-										{converter.name}
+										{converter.name}{variantLabel
+											? ` (${variantLabel})`
+											: ""}
 									</button>
+									{#if isSelected && variantOptions}
+										<div
+											class="ml-3 flex flex-wrap gap-2"
+										>
+											{#each variantOptions as option (option.value)}
+												<button
+													class={clsx(
+														"rounded-lg border-2 border-button px-3 py-1.5 text-sm",
+														converter.getVariantValue() ===
+															option.value &&
+															"bg-accent-purple text-black",
+														$effects && "transition",
+													)}
+													onclick={() =>
+														converter.setVariant(
+															option.value,
+														)}
+												>
+													{option.label}
+												</button>
+											{/each}
+										</div>
+									{/if}
 								{/each}
 							</div>
 						{:else if availableCategories[activeTab]?.length}

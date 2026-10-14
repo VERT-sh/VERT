@@ -4,6 +4,7 @@ import {
 	AlphaAction,
 	ColorSpace,
 	initializeImageMagick,
+	initializeImageMagickx64,
 	MagickColor,
 	MagickFormat,
 	MagickImage,
@@ -37,7 +38,10 @@ const handleMessage = async (
 
 				const wasmBytes = new Uint8Array(message.wasm);
 
-				await initializeImageMagick(wasmBytes);
+				const initialize = message.x64
+					? initializeImageMagickx64
+					: initializeImageMagick;
+				await initialize(wasmBytes);
 				magickInitialized = true;
 				return { type: "loaded" };
 			} catch (error) {

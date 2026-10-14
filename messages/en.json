@@ -114,6 +114,13 @@
 			"description": "Editing conversion settings for:",
 			"all_files": "all files",
 			"file_id": "File ID: {id}",
+			"engines": {
+				"auto": "Auto",
+				"magick_x64": "64-bit",
+				"magick_x86": "32-bit",
+				"ffmpeg_mt": "Multi-threaded",
+				"ffmpeg_st": "Single-threaded"
+			},
 			"cancel": "Cancel",
 			"apply": "Apply",
 			"none": "No settings available for this format.",
@@ -532,6 +539,10 @@
 		"warnings": {
 			"settings_change": "Changed setting '{setting}' from '{oldValue}' to '{newValue}' for '{file}' ({to}) to prevent conversion failure.",
 			"file_type_mismatch": "File '{filename}' is named {expected}, but was detected as {actual}. This may cause conversion issues."
+		},
+		"info": {
+			"magick_x64_unavailable": "64-bit ImageMagick isn't supported in this browser, falling back to the 32-bit version. Very large images may fail to convert.",
+			"ffmpeg_mt_unavailable": "Multi-threaded FFmpeg isn't available in this browser, falling back to the single-threaded version. Conversions may be slower."
 		},
 		"sw": {
 			"reload_success": "Your page was reloaded automatically to enable cross-origin isolation, which is required for certain features to work.",

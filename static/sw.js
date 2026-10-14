@@ -1,4 +1,4 @@
-const CACHE_NAME = "vert-wasm-cache-v5"; // updated when workers update
+const CACHE_NAME = "vert-wasm-cache-v6"; // updated when workers update
 
 let coepCredentialless = false;
 

@@ -10,8 +10,10 @@ import { ToastManager } from "#lib/util/toast.svelte";
 import MagickWorker from "#lib/workers/magick?worker&url";
 import { browser } from "$app/env";
 import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";
+import magickWasmX64 from "@imagemagick/magick-wasm/x64/magick.wasm?url";
 import { SvelteMap } from "svelte/reactivity";
 import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
+import { EngineVariants, type MagickVariant } from "../engine-variants.svelte";
 import { applyPriorities } from "../priority";
 import { imageFormats } from "./magick-automated";
 import {
@@ -23,6 +25,10 @@ export class MagickConverter extends Converter {
 	public name = "imagemagick";
 	public ready = $state(false);
 	public wasm: ArrayBuffer = null!;
+
+	private loadedVariant: "x64" | "x86" | null = null;
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	private wasmCache = new Map<string, ArrayBuffer>();
 
 	private activeConversions = new SvelteMap<string, Worker>();
 
@@ -97,17 +103,67 @@ export class MagickConverter extends Converter {
 		this.log(`created converter`);
 	}
 
+	public getVariantLabel(): string | null {
+		const variants = EngineVariants.instance;
+		const variant =
+			variants.magick !== "auto"
+				? variants.magick
+				: variants.magickX64Supported === null
+					? null
+					: variants.magickActive;
+		if (!variant) return null;
+		return variant === "x64"
+			? m["convert.settings.engines.magick_x64"]()
+			: m["convert.settings.engines.magick_x86"]();
+	}
+
+	public getVariantOptions() {
+		return [
+			{ value: "auto", label: m["convert.settings.engines.auto"]() },
+			{
+				value: "x64",
+				label: m["convert.settings.engines.magick_x64"](),
+			},
+			{
+				value: "x86",
+				label: m["convert.settings.engines.magick_x86"](),
+			},
+		];
+	}
+
+	public getVariantValue(): string {
+		return EngineVariants.instance.magick;
+	}
+
+	public setVariant(value: string): void {
+		EngineVariants.instance.setMagick(value as MagickVariant);
+	}
+
 	protected async download(): Promise<void> {
 		try {
-			const response = await fetch(magickWasm);
-			if (!response.ok) {
-				throw new Error(
-					`Failed to fetch WASM: ${response.status} ${response.statusText}`,
+			const variants = EngineVariants.instance;
+			await variants.resolve();
+
+			// forced 64-bit on a browser without memory64 -> fall back to 32-bit
+			if (variants.magick === "x64" && variants.magickX64Supported === false) {
+				this.log(
+					"64-bit magick-wasm requested but memory64 is unsupported, using 32-bit",
 				);
+				ToastManager.add({
+					type: "info",
+					message: m["workers.info.magick_x64_unavailable"](),
+				});
 			}
 
-			this.wasm = await response.arrayBuffer();
+			const useX64 = variants.magickActive === "x64";
+
+			this.wasm = await this.fetchWasm(
+				useX64 ? magickWasmX64 : magickWasm,
+			);
+			this.loadedVariant = useX64 ? "x64" : "x86";
+
 			this.status = "ready";
+			this.log(`using ${this.loadedVariant} magick-wasm`);
 			return Promise.resolve();
 		} catch (err) {
 			ToastManager.add({
@@ -116,6 +172,22 @@ export class MagickConverter extends Converter {
 			});
 			throw err;
 		}
+	}
+
+	private async fetchWasm(url: string): Promise<ArrayBuffer> {
+		const cached = this.wasmCache.get(url);
+		if (cached) return cached;
+
+		const response = await fetch(url);
+		if (!response.ok) {
+			throw new Error(
+				`Failed to fetch WASM: ${response.status} ${response.statusText}`,
+			);
+		}
+
+		const bytes = await response.arrayBuffer();
+		this.wasmCache.set(url, bytes);
+		return bytes;
 	}
 
 	public async getAvailableSettings(
@@ -242,6 +314,10 @@ export class MagickConverter extends Converter {
 	): Promise<VertFile> {
 		await this.init();
 
+		await EngineVariants.instance.resolve();
+		if (EngineVariants.instance.magickActive !== this.loadedVariant)
+			await this.download();
+
 		this.trackConversion(input);
 		this.log(`converting ${input.name} (${input.id}) to ${to}`);
 		const startedAt = performance.now();
@@ -286,6 +362,7 @@ export class MagickConverter extends Converter {
 			const loadMsg: WorkerMessage = {
 				type: "load",
 				wasm: this.wasm,
+				x64: this.loadedVariant === "x64",
 				id: input.id,
 			};
 			worker.postMessage(loadMsg);
