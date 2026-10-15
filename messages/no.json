@@ -92,31 +92,44 @@
         },
         "errors": {
             "cant_convert": "Vi kan ikke konvertere denne filen.",
-            "vertd_server": "hva gjør du..? du skal kjøre vertd-serveren!",
-            "vertd_generic_view": "Vis feildetaljer",
-            "vertd_generic_body": "En feil oppstod under konvertering av videoen din. Vil du sende denne videoen til utviklerne for å hjelpe med å fikse feilen? Kun videofilen din vil bli sendt. Ingen identifiserende informasjon lastes opp.",
-            "vertd_generic_title": "Feil ved videokonvertering",
-            "vertd_generic_yes": "Send video",
-            "vertd_generic_no": "Ikke send",
-            "vertd_failed_to_keep": "Kunne ikke beholde videoen på serveren: {error}",
-            "vertd_details": "Vis feildetaljer",
-            "vertd_details_body": "Hvis du trykker send, <b>vil videoen din også bli vedlagt</b> sammen med feilloggen som alltid rapporteres til oss for gjennomgang. Følgende informasjon er loggen vi automatisk mottar:",
-            "vertd_details_footer": "Denne informasjonen brukes kun til feilsøking og vil aldri bli delt. Se vår [privacy_link]personvernerklæring[/privacy_link] for mer informasjon.",
-            "vertd_details_job_id": "<b>Jobb-ID:</b> {jobId}",
-            "vertd_details_from": "<b>Fra format:</b> {from}",
-            "vertd_details_to": "<b>Til format:</b> {to}",
-            "vertd_details_error_message": "<b>Feilmelding:</b> [view_link]Vis feillogger[/view_link]",
-            "vertd_details_close": "Lukk",
-            "vertd_ratelimit": "Videoen din, '{filename}', har feilet å konvertere flere ganger. For å forhindre overbelastning av serveren er videre konverteringsforsøk for denne filen midlertidig blokkert. Prøv igjen senere.",
             "unsupported_format": "Kun bilde-, video-, lyd- og dokumentfiler støttes",
             "format_output_only": "Dette formatet kan for øyeblikket kun brukes som utdata (konverteres til), ikke som input.",
-            "vertd_not_found": "Kunne ikke finne vertd-instansen for å starte videokonvertering. Er du sikker på at instans-URL-en er satt riktig?",
             "worker_downloading": "{type}-konverteren initialiseres for øyeblikket, vennligst vent noen øyeblikk.",
             "worker_error": "{type}-konverteren fikk en feil under initialisering, prøv igjen senere.",
             "worker_timeout": "{type}-konverteren tar lengre tid enn forventet å initialisere, vennligst vent litt til eller oppdater siden.",
             "audio": "lyd",
             "doc": "dokument",
-            "image": "bilde"
+            "image": "bilde",
+            "vertd": {
+                "server": "hva gjør du..? du skal kjøre vertd-serveren!",
+                "details": {
+                    "view": "Vis feildetaljer",
+                    "body": "Hvis du trykker send, <b>vil videoen din også bli vedlagt</b> sammen med feilloggen som alltid rapporteres til oss for gjennomgang. Følgende informasjon er loggen vi automatisk mottar:",
+                    "footer": "Denne informasjonen brukes kun til feilsøking og vil aldri bli delt. Se vår [privacy_link]personvernerklæring[/privacy_link] for mer informasjon.",
+                    "job_id": "<b>Jobb-ID:</b> {jobId}",
+                    "from": "<b>Fra format:</b> {from}",
+                    "to": "<b>Til format:</b> {to}",
+                    "error_message": "<b>Feilmelding:</b> [view_link]Vis feillogger[/view_link]",
+                    "close": "Lukk"
+                },
+                "generic": {
+                    "title": "Feil ved videokonvertering",
+                    "view": "Vis feildetaljer",
+					"body": "En feil oppstod under konvertering av videoen din. Vil du sende denne videoen til utviklerne for å hjelpe med å fikse feilen? Kun videofilen din vil bli sendt. Ingen identifiserende informasjon lastes opp.",
+                    "yes": "Send video",
+                    "no": "Ikke send"
+                },
+                "failed_to_keep": "Kunne ikke beholde videoen på serveren: {error}",
+                "ratelimit": "Videoen din, '{filename}', har feilet å konvertere flere ganger. For å forhindre overbelastning av serveren er videre konverteringsforsøk for denne filen midlertidig blokkert. Prøv igjen senere.",
+                "not_found": "Kunne ikke finne vertd-instansen for å starte videokonvertering. Er du sikker på at instans-URL-en er satt riktig?"
+            }
+        },
+        "settings": {
+            "audio": {
+                "sample_rate": {
+                    "label": "Samplingsfrekvens (Hz)"
+                }
+            }
         }
     },
     "settings": {
@@ -126,39 +139,54 @@
         },
         "appearance": {
             "title": "Utseende",
-            "brightness_theme": "Lysstyrketema",
-            "brightness_description": "Vil du ha et solfylt smell, eller en rolig ensom natt?",
             "light": "Lyst",
             "dark": "Mørkt",
-            "effect_settings": "Effektinnstillinger",
-            "effect_description": "Vil du ha fancy effekter, eller en mer statisk opplevelse?",
             "enable": "Aktiver",
-            "disable": "Deaktiver"
+            "disable": "Deaktiver",
+            "brightness": {
+                "theme": "Lysstyrketema",
+                "description": "Vil du ha et solfylt smell, eller en rolig ensom natt?"
+            },
+            "effect": {
+                "settings": "Effektinnstillinger",
+                "description": "Vil du ha fancy effekter, eller en mer statisk opplevelse?"
+            },
+            "language": {
+                "title": "Språk",
+                "description": "Velg ønsket språk for VERT-grensesnittet."
+            }
         },
         "conversion": {
             "title": "Konvertering",
             "advanced_settings": "Avanserte innstillinger",
-            "filename_format": "Filnavnformat",
             "filename_description": "Dette bestemmer navnet på filen ved nedlasting, <b>uten filendelsen.</b> Du kan bruke følgende maler i formatet, som vil bli erstattet med relevant informasjon: <b>%name%</b> for det opprinnelige filnavnet, <b>%extension%</b> for den opprinnelige filendelsen, og <b>%date%</b> for en dato når filen ble konvertert.",
-            "placeholder": "VERT_%name%",
-            "default_format": "Standard konverteringsformat",
-            "default_format_enable": "Aktiver",
-            "default_format_disable": "Deaktiver",
-            "default_format_description": "Dette endrer standardformatet som velges når du laster opp en fil av denne filtypen.",
-            "default_format_image": "Bilder",
-            "default_format_video": "Videoer",
-            "default_format_audio": "Lyd",
-            "default_format_document": "Dokumenter",
-            "metadata": "Filmetadata",
-            "metadata_description": "Dette endrer om metadata (EXIF, sanginfo, osv.) på den opprinnelige filen beholdes i konverterte filer.",
-            "keep": "Behold",
-            "remove": "Fjern",
-            "quality": "Konverteringskvalitet",
-            "quality_description": "Dette endrer standard utgangskvalitet for konverterte filer (i sin kategori). Høyere verdier kan føre til lengre konverteringstid og filstørrelse.",
-            "quality_video": "Dette endrer standard utgangskvalitet for konverterte videofiler. Høyere verdier kan føre til lengre konverteringstid og filstørrelse.",
+            "default_format": {
+                "image": "Bilder",
+                "audio": "Lyd",
+                "document": "Dokumenter",
+                "enable": "Aktiver",
+                "disable": "Deaktiver",
+                "label": "Standard konverteringsformat",
+                "description": "Dette endrer standardformatet som velges når du laster opp en fil av denne filtypen.",
+                "video": "Videoer"
+            },
+            "metadata": {
+                "label": "Filmetadata",
+                "description": "Dette endrer om metadata (EXIF, sanginfo, osv.) på den opprinnelige filen beholdes i konverterte filer.",
+                "keep": "Behold",
+                "remove": "Fjern"
+            },
+            "quality": {
+                "label": "Konverteringskvalitet",
+                "description": "Dette endrer standard utgangskvalitet for konverterte filer (i sin kategori). Høyere verdier kan føre til lengre konverteringstid og filstørrelse.",
+                "video": "Dette endrer standard utgangskvalitet for konverterte videofiler. Høyere verdier kan føre til lengre konverteringstid og filstørrelse.",
+                "images": "Bilde (%)"
+            },
             "quality_audio": "Lyd (kbps)",
-            "quality_images": "Bilde (%)",
-            "rate": "Samplingsfrekvens (Hz)"
+            "filename": {
+                "format": "Filnavnformat",
+                "placeholder": "VERT_%name%"
+            }
         },
         "vertd": {
             "title": "Videokonvertering",
@@ -168,51 +196,57 @@
             "unavailable": "utilgjengelig (er url-en riktig?)",
             "description": "<code>vertd</code>-prosjektet er en server-wrapper for FFmpeg. Dette lar deg konvertere videoer gjennom VERTs webgrensesnitt, samtidig som du kan bruke kraften til GPU-en din for å gjøre det så raskt som mulig.",
             "hosting_info": "Vi hoster en offentlig instans for din bekvemmelighet, men det er ganske enkelt å hoste din egen på PC-en eller serveren din hvis du vet hva du gjør. Du kan laste ned server-binærfiler [vertd_link]her[/vertd_link] - prosessen med å sette dette opp vil bli enklere i fremtiden, så følg med!",
-            "instance": "Instans",
-            "url_placeholder": "Eksempel: http://localhost:24153",
-            "conversion_speed": "Konverteringshastighet",
-            "speed_description": "Dette beskriver avveiningen mellom hastighet og kvalitet. Raskere hastigheter gir lavere kvalitet, men får jobben gjort raskere.",
-            "speeds": {
-                "very_slow": "Veldig treg",
-                "slower": "Tregere",
-                "slow": "Treg",
-                "medium": "Middels",
-                "fast": "Rask",
-                "ultra_fast": "Ekstremt rask"
+            "instance": {
+                "label": "Instans",
+                "url_placeholder": "Eksempel: http://localhost:24153",
+                "auto": "Auto (anbefalt)",
+                "eu": "Falkenstein, Tyskland",
+                "us": "Washington, USA",
+                "custom": "Egendefinert"
             },
-            "auto_instance": "Auto (anbefalt)",
-            "eu_instance": "Falkenstein, Tyskland",
-            "us_instance": "Washington, USA",
-            "custom_instance": "Egendefinert"
+            "conversion_speed": {
+                "speeds": {
+                    "very_slow": "Veldig treg",
+                    "slower": "Tregere",
+                    "slow": "Treg",
+                    "medium": "Middels",
+                    "fast": "Rask",
+                    "ultra_fast": "Ekstremt rask"
+                },
+                "label": "Konverteringshastighet",
+                "description": "Dette beskriver avveiningen mellom hastighet og kvalitet. Raskere hastigheter gir lavere kvalitet, men får jobben gjort raskere."
+            }
         },
         "privacy": {
             "title": "Personvern og data",
-            "plausible_title": "Plausible-analyse",
-            "plausible_description": "Vi bruker [plausible_link]Plausible[/plausible_link], et personvernfokusert analyseverktøy, for å samle helt anonyme statistikker. All data er anonymisert og aggregert, og ingen identifiserbar informasjon blir noen gang sendt eller lagret. Du kan se analysen [analytics_link]her[/analytics_link] og velge å melde deg ut nedenfor.",
-            "opt_in": "Meld inn",
-            "opt_out": "Meld ut",
-            "cache_title": "Cache-håndtering",
-            "cache_description": "Vi cacher konverteringsfilene i nettleseren din slik at du ikke trenger å laste dem ned på nytt hver gang, noe som forbedrer ytelsen og reduserer databruk.",
-            "refresh_cache": "Oppdater cache",
-            "clear_cache": "Tøm cache",
-            "files_cached": "{size} ({count} filer)",
-            "loading_cache": "Laster...",
-            "total_size": "Total størrelse",
-            "files_cached_label": "Filer i cache",
-            "cache_cleared": "Cache tømt!",
-            "cache_clear_error": "Kunne ikke tømme cache.",
-            "site_data_title": "Nettsteddata-håndtering",
-            "site_data_description": "Tøm alle nettsteddata inkludert innstillinger og cachede filer, tilbakestill VERT til standard og last inn siden på nytt.",
-            "clear_all_data": "Tøm alle nettsteddata",
-            "clear_all_data_confirm_title": "Tøm alle nettsteddata?",
-            "clear_all_data_confirm": "Dette vil tilbakestille alle innstillinger og cache, og deretter laste inn siden på nytt. Denne handlingen kan ikke angres.",
-            "clear_all_data_cancel": "Avbryt",
-            "all_data_cleared": "Alle nettsteddata er tømt! Laster inn siden på nytt...",
-            "all_data_clear_error": "Kunne ikke tømme alle nettsteddata."
-        },
-        "language": {
-            "title": "Språk",
-            "description": "Velg ønsket språk for VERT-grensesnittet."
+            "plausible": {
+                "title": "Plausible-analyse",
+                "description": "Vi bruker [plausible_link]Plausible[/plausible_link], et personvernfokusert analyseverktøy, for å samle helt anonyme statistikker. All data er anonymisert og aggregert, og ingen identifiserbar informasjon blir noen gang sendt eller lagret. Du kan se analysen [analytics_link]her[/analytics_link] og velge å melde deg ut nedenfor.",
+                "opt_in": "Meld inn",
+                "opt_out": "Meld ut"
+            },
+            "cache": {
+                "title": "Cache-håndtering",
+                "description": "Vi cacher konverteringsfilene i nettleseren din slik at du ikke trenger å laste dem ned på nytt hver gang, noe som forbedrer ytelsen og reduserer databruk.",
+                "refresh_cache": "Oppdater cache",
+                "clear_cache": "Tøm cache",
+                "files_cached": "{size} ({count} filer)",
+                "loading_cache": "Laster...",
+                "total_size": "Total størrelse",
+                "files_cached_label": "Filer i cache",
+                "cache_cleared": "Cache tømt!",
+                "cache_clear_error": "Kunne ikke tømme cache."
+            },
+            "site_data": {
+                "title": "Nettsteddata-håndtering",
+                "description": "Tøm alle nettsteddata inkludert innstillinger og cachede filer, tilbakestill VERT til standard og last inn siden på nytt.",
+                "clear_all_data": "Tøm alle nettsteddata",
+                "clear_all_data_confirm_title": "Tøm alle nettsteddata?",
+                "clear_all_data_confirm": "Dette vil tilbakestille alle innstillinger og cache, og deretter laste inn siden på nytt. Denne handlingen kan ikke angres.",
+                "clear_all_data_cancel": "Avbryt",
+                "all_data_cleared": "Alle nettsteddata er tømt! Laster inn siden på nytt...",
+                "all_data_clear_error": "Kunne ikke tømme alle nettsteddata."
+            }
         }
     },
     "about": {
@@ -260,9 +294,9 @@
             "roles": {
                 "lead_developer": "Hovedutvikler; konverteringsbackend, UI-implementering",
                 "developer": "Utvikler; UI-implementering",
-                "designer": "Designer; UX, merkevarebygging, markedsføring",
-                "docker_ci": "Vedlikehold av Docker & CI-støtte",
-                "former_cofounder": "Tidligere medgründer & designer"
+                "liam": "Designer; UX, merkevarebygging, markedsføring",
+                "azure": "Vedlikehold av Docker & CI-støtte",
+                "realmy": "Tidligere medgründer & designer"
             }
         },
         "errors": {
