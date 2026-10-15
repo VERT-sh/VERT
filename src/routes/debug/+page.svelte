@@ -470,6 +470,7 @@
 										</span>
 										<div class="flex min-w-0 flex-col">
 											<span
+												title={converter.name}
 												class="truncate text-sm font-bold"
 												>{converter.name}</span
 											>
