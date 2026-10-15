@@ -148,6 +148,15 @@ export class PandocConverter extends Converter {
 		new FormatInfo("epub", true, true),
 		new FormatInfo("odt", true, true),
 		new FormatInfo("docbook", true, true),
+		new FormatInfo("ipynb", true, true),
+		new FormatInfo("typ", true, true),
+		new FormatInfo("opml", true, true),
+		new FormatInfo("org", true, true),
+		new FormatInfo("fb2", true, true),
+		new FormatInfo("tex", true, true),
+		new FormatInfo("man", true, true),
+		new FormatInfo("jats", true, true),
+		new FormatInfo("adoc", false, true),
 	];
 }
 

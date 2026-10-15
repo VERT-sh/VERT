@@ -82,6 +82,13 @@ export const getCodecs = (
 			return { video: "libx264", audio: "aac" };
 		case ".voc":
 			return { video: "libx264", audio: "pcm_u8" };
+		case ".tta":
+			return { video: "libx264", audio: "tta" };
+
+		case ".ivf":
+			return { video: "libvpx", audio: "none" };
+		case ".y4m":
+			return { video: "libx264", audio: "none" };
 
 		// animated images
 		case ".gif":
@@ -131,6 +138,7 @@ export const toArgs = (ext: string, isAlac: boolean = false): string[] => {
 	if (codecs.audio === "aac") args.push("-strict", "experimental");
 
 	if (ext === ".divx") args.unshift("-f", "avi");
+	if (ext === ".y4m") args.unshift("-f", "yuv4mpegpipe"); // y4m is a pseudo-muxer, needs an explicit -f
 	if (ext === ".mxf") args.push("-strict", "unofficial");
 
 	return args;

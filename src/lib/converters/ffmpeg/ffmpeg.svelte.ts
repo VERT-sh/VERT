@@ -9,18 +9,15 @@ import type {
 } from "#lib/types/conversion-settings";
 import { ToastManager } from "#lib/util/toast.svelte";
 import { browser } from "$app/env";
-import ffmpegWasmURL from "@ffmpeg/core/wasm?url";
-import ffmpegCoreURL from "@ffmpeg/core?url";
 import ffmpegMtWasmURL from "@ffmpeg/core-mt/wasm?url";
 import ffmpegMtWorkerRaw from "@ffmpeg/core-mt/worker?raw";
 import ffmpegMtCoreURL from "@ffmpeg/core-mt?url";
+import ffmpegWasmURL from "@ffmpeg/core/wasm?url";
+import ffmpegCoreURL from "@ffmpeg/core?url";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { SvelteMap } from "svelte/reactivity";
 import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
-import {
-	EngineVariants,
-	type FFmpegVariant,
-} from "../engine-variants.svelte";
+import { EngineVariants, type FFmpegVariant } from "../engine-variants.svelte";
 import { applyPriorities } from "../priority";
 import { videoFormats } from "../vertd/vertd.svelte";
 import { buildImageSequenceCommand } from "./ffmpeg.animated";
@@ -53,7 +50,7 @@ export class FFmpegConverter extends Converter {
 	private activeConversions = new SvelteMap<string, FFmpeg>();
 
 	// non supported audio to video formats
-	private cantConvert: string[] = ["ogx"];
+	private cantConvert: string[] = ["ogx", "y4m", "ivf"]; // y4m/ivf are uncompressed/raw video containers without audio
 
 	public supportedFormats = applyPriorities("ffmpeg", [
 		new FormatInfo("mp3", true, true),
@@ -84,6 +81,9 @@ export class FFmpegConverter extends Converter {
 		new FormatInfo("au", true, true),
 		new FormatInfo("m4b", true, true),
 		new FormatInfo("voc", true, true),
+		new FormatInfo("tta", true, true),
+		new FormatInfo("amr", true, false), // only decode in ffmpeg-wasm
+		new FormatInfo("ape", true, false),
 		...videoFormats.map(
 			//  exclude cantConvert from audio to video
 			(f: string) => {
@@ -154,7 +154,9 @@ export class FFmpegConverter extends Converter {
 					this.status = "ready";
 					return Promise.resolve();
 				} catch (fallbackErr) {
-					this.error(`single-threaded ffmpeg core failed too: ${fallbackErr}`);
+					this.error(
+						`single-threaded ffmpeg core failed too: ${fallbackErr}`,
+					);
 				}
 			}
 

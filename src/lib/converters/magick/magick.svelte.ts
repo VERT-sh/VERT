@@ -145,7 +145,10 @@ export class MagickConverter extends Converter {
 			await variants.resolve();
 
 			// forced 64-bit on a browser without memory64 -> fall back to 32-bit
-			if (variants.magick === "x64" && variants.magickX64Supported === false) {
+			if (
+				variants.magick === "x64" &&
+				variants.magickX64Supported === false
+			) {
 				this.log(
 					"64-bit magick-wasm requested but memory64 is unsupported, using 32-bit",
 				);

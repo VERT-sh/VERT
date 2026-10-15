@@ -347,7 +347,7 @@ const downloadTask = (url: string, file: VertFile): DownloadTask => {
 };
 
 // prettier-ignore
-export const videoFormats: string[] = ["mp4", "mkv", "webm", "avi", "wmv", "mov", "gif", "apng", "webp", "mts", "ts", "m2ts", "mpg", "mpeg", "flv", "f4v", "vob", "m4v", "3gp", "3g2", "mxf", "ogx", "ogv", "gxf", "rm", "rmvb", "h264", "divx", "swf", "amv", "asf", "nut"];
+export const videoFormats: string[] = ["mp4", "mkv", "webm", "avi", "wmv", "mov", "gif", "apng", "webp", "mts", "ts", "m2ts", "mpg", "mpeg", "flv", "f4v", "vob", "m4v", "3gp", "3g2", "mxf", "ogx", "ogv", "gxf", "rm", "rmvb", "h264", "divx", "swf", "amv", "asf", "nut", "ivf", "y4m"];
 const cantEncode: string[] = ["rm", "rmvb"];
 const cantDecode: string[] = [];
 

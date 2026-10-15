@@ -367,9 +367,7 @@
 											: ""}
 									</button>
 									{#if isSelected && variantOptions}
-										<div
-											class="ml-3 flex flex-wrap gap-2"
-										>
+										<div class="ml-3 flex flex-wrap gap-2">
 											{#each variantOptions as option (option.value)}
 												<button
 													class={clsx(
@@ -377,7 +375,8 @@
 														converter.getVariantValue() ===
 															option.value &&
 															"bg-accent-purple text-black",
-														$effects && "transition",
+														$effects &&
+															"transition",
 													)}
 													onclick={() =>
 														converter.setVariant(

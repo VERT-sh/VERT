@@ -35,7 +35,16 @@ type Format =
 	| ".odt"
 	| ".docbook"
 	| ".html"
-	| ".markdown";
+	| ".markdown"
+	| ".ipynb"
+	| ".typ"
+	| ".opml"
+	| ".org"
+	| ".fb2"
+	| ".tex"
+	| ".man"
+	| ".jats"
+	| ".adoc";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleMessage = async (message: WorkerMessage): Promise<any> => {
@@ -89,7 +98,6 @@ const formatToReader = (format: Format): string => {
 		case ".md":
 		case ".markdown":
 			return "markdown";
-		case ".doc":
 		case ".docx":
 			return "docx";
 		case ".csv":
@@ -110,6 +118,24 @@ const formatToReader = (format: Format): string => {
 			return "rtf";
 		case ".rst":
 			return "rst";
+		case ".ipynb":
+			return "ipynb";
+		case ".typ":
+			return "typst";
+		case ".opml":
+			return "opml";
+		case ".org":
+			return "org";
+		case ".fb2":
+			return "fb2";
+		case ".tex":
+			return "latex";
+		case ".man":
+			return "man";
+		case ".jats":
+			return "jats";
+		case ".adoc":
+			return "asciidoc";
 	}
 
 	throw new Error(`Unsupported format: ${format}`);
