@@ -79,6 +79,7 @@
 		"qoa-format": "^1.0.1",
 		"riff-file": "^1.0.3",
 		"sanitize-html": "^2.18.0",
+		"spessasynth_core": "^4.3.22",
 		"svelte-stripe": "^2.0.0",
 		"vert-wasm": "^0.0.2",
 		"wasm-feature-detect": "^1.9.0",

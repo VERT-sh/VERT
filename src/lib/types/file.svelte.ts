@@ -336,6 +336,7 @@ export class VertFile {
 				mpg: "mpeg",
 				mpe: "mpeg",
 				mpv: "mpeg",
+				midi: "mid",
 			};
 			const fileExtension = this.originalFrom.slice(1);
 			const isPngContainer =

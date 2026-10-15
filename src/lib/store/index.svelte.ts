@@ -168,11 +168,15 @@ class Files {
 
 	private _addThumbnail = async (file: VertFile) => {
 		this.thumbnailQueue.add(async () => {
+			// for now only ffmpeg are "real" audio files that music-metadata can read
 			const isAudio = converters
-				.find((c) => converterCategories.audio.includes(c.name))
-				?.supportedFormats.filter((f) => f.isNative)
-				.map((f) => f.name)
-				?.includes(file.from.toLowerCase());
+				.filter((c) => c.name === "ffmpeg")
+				.flatMap((c) =>
+					c.supportedFormats
+						.filter((f) => f.isNative)
+						.map((f) => f.name),
+				)
+				.includes(file.from.toLowerCase());
 			const isVideo = converters
 				.find((c) => converterCategories.video.includes(c.name))
 				?.supportedFormats.filter((f) => f.isNative)
@@ -509,9 +513,13 @@ class Files {
 			const category = Object.keys(categories).find((name) =>
 				categories[name].formats.includes(format),
 			);
-			const to = category
-				? categories[category].formats.find((f) => f !== format)
-				: converter.formatStrings().find((f) => f !== format);
+			// first format (in category order) the file can actually convert to
+			const candidates = category
+				? categories[category].formats
+				: converter.formatStrings();
+			const to = candidates.find(
+				(f) => f !== format && input.hasAvailableConverter(format, f),
+			);
 			if (!to) {
 				log(["files"], `no output format found for ${file.name}`);
 				return;

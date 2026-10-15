@@ -525,6 +525,7 @@
 			"vips": "Error in libvips worker, image conversion may not work as expected.",
 			"vectorizer": "Error in vectorizer worker, image vectorization may not work as expected.",
 			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
+			"spessasynth": "Error in the MIDI / SoundFont converter, some features may not work as expected.",
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
 			"mediabunny": {
 				"init": "Error loading Mediabunny, video conversion may not work as expected.",

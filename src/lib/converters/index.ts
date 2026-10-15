@@ -5,6 +5,7 @@ import { FFmpegConverter } from "./ffmpeg/ffmpeg.svelte";
 import { MagickConverter } from "./magick/magick.svelte";
 import { MediabunnyConverter } from "./mediabunny/mediabunny.svelte";
 import { PandocConverter } from "./pandoc/pandoc.svelte";
+import { SpessaSynthConverter } from "./spessasynth/spessasynth.svelte";
 import { VectorizerConverter } from "./vectorizer/vectorizer.svelte";
 import { VertdConverter } from "./vertd/vertd.svelte";
 import { VipsConverter } from "./vips/vips.svelte";
@@ -16,6 +17,8 @@ const getConverters = (): Converter[] => {
 		new VipsConverter(),
 		new VectorizerConverter(),
 		new FFmpegConverter(),
+		new SpessaSynthConverter("midi"),
+		new SpessaSynthConverter("soundfont"),
 		new PandocConverter(),
 		new MediabunnyConverter(),
 	];
@@ -29,7 +32,7 @@ export const converters = getConverters();
 export const converterCategories = {
 	image: ["libvips", "imagemagick", "vectorizer"],
 	video: ["mediabunny", "vertd"],
-	audio: ["ffmpeg"],
+	audio: ["ffmpeg", "spessasynth-midi", "spessasynth-soundfont"],
 	doc: ["pandoc"],
 };
 
@@ -58,11 +61,17 @@ export const categories: Categories = {
 	doc: { formats: [""], canConvertTo: [] },
 };
 
-categories.audio.formats =
-	converters
-		.find((c) => converterCategories.audio.includes(c.name))
-		?.supportedFormats.filter((f) => f.toSupported && f.isNative)
-		.map((f) => f.name) || [];
+categories.audio.formats = [
+	...new Set(
+		converters
+			.filter((c) => converterCategories.audio.includes(c.name))
+			.flatMap((c) =>
+				c.supportedFormats
+					.filter((f) => f.toSupported && f.isNative)
+					.map((f) => f.name),
+			),
+	),
+];
 categories.video.formats = [
 	...new Set(
 		converters

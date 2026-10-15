@@ -15,6 +15,7 @@ import {
 	BookTextIcon,
 	FilmIcon,
 	ImageIcon,
+	MusicIcon,
 	RefreshCwIcon,
 	ServerIcon,
 	ShapesIcon,
@@ -58,6 +59,16 @@ export const CONVERTER_META: Record<
 	ffmpeg: {
 		category: "audio",
 		icon: AudioLinesIcon,
+		accent: "bg-accent-purple",
+	},
+	"spessasynth-midi": {
+		category: "audio",
+		icon: MusicIcon,
+		accent: "bg-accent-purple",
+	},
+	"spessasynth-soundfont": {
+		category: "audio",
+		icon: MusicIcon,
 		accent: "bg-accent-purple",
 	},
 	pandoc: {

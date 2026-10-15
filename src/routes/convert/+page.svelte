@@ -204,13 +204,18 @@
 				}
 			}
 
-			// or use first available format (or if default format is same as input)
+			// or use the first format the file can actually convert to
 			if (!targetFormat) {
-				const firstDiff = categories[category]?.formats.find(
-					(f) => f !== file.from,
-				);
+				const formats = categories[category]?.formats ?? [];
 				targetFormat =
-					firstDiff || categories[category]?.formats[0] || "";
+					formats.find(
+						(f) =>
+							f !== file.from &&
+							file.hasAvailableConverter(file.from, f),
+					) ??
+					formats.find((f) => f !== file.from) ??
+					formats[0] ??
+					"";
 			}
 
 			file.to = targetFormat;
