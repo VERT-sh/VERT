@@ -182,6 +182,16 @@
 					"fast": "Lower quality (faster)",
 					"ultra_fast": "Lowest quality (fastest)"
 				},
+				"local_speed": {
+					"title": "Conversion speed",
+					"description": "This controls the encoder preset for the local FFmpeg converter. Local video conversion is very slow - higher quality settings can take a long time. This is overridden if you manually set a video bitrate.",
+					"very_slow": "Highest quality (very slow)",
+					"slower": "Higher quality (slower)",
+					"slow": "High quality (slow)",
+					"medium": "Medium quality (average)",
+					"fast": "Lower quality (faster)",
+					"ultra_fast": "Lowest quality (fastest)"
+				},
 				"fps": {
 					"label": "Frame rate (FPS)",
 					"placeholder": "e.g. 24, 30, 60"
@@ -535,6 +545,8 @@
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
 			"invalid_channels": "Invalid audio channel count: {channels}",
+			"ffmpeg_video_unsupported": "Encoding to {to} is not supported by the local FFmpeg converter.",
+			"ffmpeg_video_no_audio_encoder": "No audio encoder is available for {to} in the local FFmpeg converter.",
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
 		},
 		"warnings": {

@@ -52,11 +52,12 @@
 			(converter) => !vertFile.unavailableConverters[converter.name],
 		);
 
-		// image sequences can be converted locally (ffmpeg) or on the server (vertd)
+		// image sequences can be converted locally (local ffmpeg) or on the server (vertd)
 		if (vertFile.sequenceKind)
 			return availableConverters.filter(
 				(converter) =>
-					converter.name === "ffmpeg" || converter.name === "vertd",
+					converter.name === "ffmpeg-video" ||
+					converter.name === "vertd",
 			);
 
 		const supportedConverters = vertFile.findConverters(

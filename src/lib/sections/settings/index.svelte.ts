@@ -24,10 +24,11 @@ export interface ISettings {
 	metadata: boolean;
 	plausible: boolean;
 	vertdURL: string;
-	vertdSpeed: ConversionSpeed; // videos
+	vertdSpeed: ConversionSpeed; // videos (vertd)
 	vertdBlockedHashes: Map<string, Date[]>; // hashes of files blocked from vertd conversion
 	vertdCustomHeaders: string; // custom headers to send to the vertd server
 	magickQuality: number; // images
+	ffmpegVideoSpeed: ConversionSpeed; // videos (local ffmpeg.wasm)
 }
 
 export class Settings {
@@ -49,6 +50,7 @@ export class Settings {
 		vertdBlockedHashes: new SvelteMap<string, Date[]>(),
 		vertdCustomHeaders: "",
 		magickQuality: 90,
+		ffmpegVideoSpeed: "medium",
 	});
 
 	public save() {

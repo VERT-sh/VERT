@@ -103,7 +103,7 @@ class Files {
 		const sequenceMode = file.conversionSettings.imageSequence === true;
 		const candidates = sequenceMode
 			? converters.filter(
-					(c) => c.name === "ffmpeg" || c.name === "vertd",
+					(c) => c.name === "ffmpeg-video" || c.name === "vertd",
 				)
 			: converters;
 
@@ -113,8 +113,9 @@ class Files {
 		if (current && candidates.some((c) => c.name === current)) return;
 
 		const fallback = sequenceMode
-			? !file.isLarge() && candidates.some((c) => c.name === "ffmpeg")
-				? "ffmpeg"
+			? !file.isLarge() &&
+				candidates.some((c) => c.name === "ffmpeg-video")
+				? "ffmpeg-video"
 				: (candidates.find((c) => c.name === "vertd")?.name ??
 					candidates[0]?.name)
 			: ([...candidates].sort(
@@ -359,7 +360,7 @@ class Files {
 						? vf.conversionSettings.imageSequence
 							? converters.filter(
 									(c) =>
-										c.name === "ffmpeg" ||
+										c.name === "ffmpeg-video" ||
 										c.name === "vertd",
 								)
 							: converters
@@ -374,12 +375,12 @@ class Files {
 					vf.sequenceKind === "frameSequence" &&
 					vf.conversionSettings.imageSequence
 				) {
-					// sequence mode prefers ffmpeg, then falls back to vertd
+					// sequence mode prefers local ffmpeg, then falls back to vertd
 					const has = (name: string) =>
 						vf.converters.some((c) => c.name === name);
 					defaultConverter =
-						!vf.isLarge() && has("ffmpeg")
-							? "ffmpeg"
+						!vf.isLarge() && has("ffmpeg-video")
+							? "ffmpeg-video"
 							: has("vertd")
 								? "vertd"
 								: vf.converters[0].name;

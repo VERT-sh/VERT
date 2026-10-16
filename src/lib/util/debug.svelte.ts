@@ -81,6 +81,11 @@ export const CONVERTER_META: Record<
 		icon: FilmIcon,
 		accent: "bg-accent-red",
 	},
+	"ffmpeg-video": {
+		category: "video",
+		icon: FilmIcon,
+		accent: "bg-accent-purple",
+	},
 	vertd: {
 		category: "video",
 		icon: ServerIcon,

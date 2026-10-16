@@ -1,7 +1,8 @@
 import type { Categories } from "#lib/types";
 import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
 import type { Converter, WorkerStatus } from "./converter.svelte";
-import { FFmpegConverter } from "./ffmpeg/ffmpeg.svelte";
+import { FFmpegConverter } from "./ffmpeg/audio/ffmpeg.audio.svelte";
+import { FFmpegVideoConverter } from "./ffmpeg/video/ffmpeg.video.svelte";
 import { MagickConverter } from "./magick/magick.svelte";
 import { MediabunnyConverter } from "./mediabunny/mediabunny.svelte";
 import { PandocConverter } from "./pandoc/pandoc.svelte";
@@ -21,6 +22,7 @@ const getConverters = (): Converter[] => {
 		new SpessaSynthConverter("soundfont"),
 		new PandocConverter(),
 		new MediabunnyConverter(),
+		new FFmpegVideoConverter(),
 	];
 
 	if (!DISABLE_ALL_EXTERNAL_REQUESTS) converters.push(new VertdConverter());
@@ -31,7 +33,7 @@ const getConverters = (): Converter[] => {
 export const converters = getConverters();
 export const converterCategories = {
 	image: ["libvips", "imagemagick", "vectorizer"],
-	video: ["mediabunny", "vertd"],
+	video: ["mediabunny", "vertd", "ffmpeg-video"],
 	audio: ["ffmpeg", "spessasynth-midi", "spessasynth-soundfont"],
 	doc: ["pandoc"],
 };

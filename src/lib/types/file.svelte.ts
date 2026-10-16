@@ -261,7 +261,7 @@ export class VertFile {
 		return this.converters.filter((c) => {
 			if (this.unavailableConverters[c.name] || !c.isAvailable())
 				return false;
-			return c.name === "ffmpeg" || c.name === "vertd";
+			return c.name === "ffmpeg-video" || c.name === "vertd";
 		});
 	}
 
@@ -413,18 +413,18 @@ export class VertFile {
 					);
 				const candidates = this.converters.filter(
 					(c) =>
-						(c.name === "ffmpeg" || c.name === "vertd") &&
+						(c.name === "ffmpeg-video" || c.name === "vertd") &&
 						!this.unavailableConverters[c.name] &&
 						c.isAvailable() &&
 						supported(c),
 				);
 
-				// dash + large files go to the server, everything else prefers ffmpeg
+				// dash + large files go to the server, everything else prefers local ffmpeg
 				const preference = isDash
 					? ["vertd"]
 					: this.isLarge()
-						? ["vertd", "ffmpeg"]
-						: ["ffmpeg", "vertd"];
+						? ["vertd", "ffmpeg-video"]
+						: ["ffmpeg-video", "vertd"];
 				const chosen = this.conversionSettings.converter;
 				const order =
 					chosen && candidates.some((c) => c.name === chosen)

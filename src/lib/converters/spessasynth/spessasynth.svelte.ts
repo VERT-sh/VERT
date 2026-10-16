@@ -135,7 +135,7 @@ export class SpessaSynthConverter extends Converter {
 		worker: Worker,
 		type?: string,
 		timeout = 0,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	): Promise<any> {
 		return new Promise((resolve, reject) => {
 			let timer: ReturnType<typeof setTimeout> | undefined;

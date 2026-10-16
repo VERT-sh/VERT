@@ -7,47 +7,19 @@ import type {
 	SettingCategories,
 	SettingDefinition,
 } from "#lib/types/conversion-settings";
-import { ToastManager } from "#lib/util/toast.svelte";
 import { browser } from "$app/env";
-import ffmpegMtWasmURL from "@ffmpeg/core-mt/wasm?url";
-import ffmpegMtWorkerRaw from "@ffmpeg/core-mt/worker?raw";
-import ffmpegMtCoreURL from "@ffmpeg/core-mt?url";
-import ffmpegWasmURL from "@ffmpeg/core/wasm?url";
-import ffmpegCoreURL from "@ffmpeg/core?url";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { SvelteMap } from "svelte/reactivity";
-import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
-import { EngineVariants, type FFmpegVariant } from "../engine-variants.svelte";
-import { applyPriorities } from "../priority";
-import { videoFormats } from "../vertd/vertd.svelte";
-import { buildImageSequenceCommand } from "./ffmpeg.animated";
-import { getCodecs, toArgs } from "./ffmpeg.codecs";
-import { avWithArt, avWithBg, extractAlbumArt } from "./utils/ffmpeg";
-
-const coreURL = new URL(ffmpegCoreURL, import.meta.url).href;
-const wasmURL = new URL(ffmpegWasmURL, import.meta.url).href;
-const mtCoreURL = new URL(ffmpegMtCoreURL, import.meta.url).href;
-const mtWasmURL = new URL(ffmpegMtWasmURL, import.meta.url).href;
-
-// The pthread worker ffmpeg-core-mt spawns is a *classic* worker, but the ESM
-// worker file only runs as a module and Vite injects an import into it in dev,
-// so serve it as a blob of the raw source instead (works in dev and prod).
-// ..whatever the ai said above. i didn't know how to fix this but it works so uuuuh, sorry -maya
-let mtWorkerURL: string | undefined;
-const getMtWorkerURL = (): string =>
-	(mtWorkerURL ??= URL.createObjectURL(
-		new Blob([ffmpegMtWorkerRaw], { type: "text/javascript" }),
-	));
+import { FormatInfo, formatDuration } from "../../converter.svelte";
+import { applyPriorities } from "../../priority";
+import { videoFormats } from "../../vertd/vertd.svelte";
+import { BaseFFmpegConverter } from "../ffmpeg.base.svelte";
+import { getCodecs, toArgs } from "../ffmpeg.codecs";
+import { avWithArt, avWithBg, extractAlbumArt } from "../utils/ffmpeg";
 
 // TODO: differentiate in UI? (not native formats)
-export class FFmpegConverter extends Converter {
+export class FFmpegConverter extends BaseFFmpegConverter {
 	public name = "ffmpeg";
 	public ready = $state(false);
-
-	private loadedVariant: "mt" | "st" | null = null;
-	private requestedVariant: "mt" | "st" | null = null;
-
-	private activeConversions = new SvelteMap<string, FFmpeg>();
 
 	// non supported audio to video formats
 	private cantConvert: string[] = ["ogx", "y4m", "ivf"]; // y4m/ivf are uncompressed/raw video containers without audio
@@ -93,89 +65,10 @@ export class FFmpegConverter extends Converter {
 		),
 	]);
 
-	public readonly reportsProgress = true;
-
 	constructor() {
 		super();
 		if (!browser) return;
 		this.log(`created converter`);
-	}
-
-	public getVariantLabel(): string | null {
-		const variant = EngineVariants.instance.ffmpegActive;
-		return variant === "mt"
-			? m["convert.settings.engines.ffmpeg_mt"]()
-			: m["convert.settings.engines.ffmpeg_st"]();
-	}
-
-	public getVariantOptions() {
-		return [
-			{ value: "auto", label: m["convert.settings.engines.auto"]() },
-			{
-				value: "mt",
-				label: m["convert.settings.engines.ffmpeg_mt"](),
-			},
-			{
-				value: "st",
-				label: m["convert.settings.engines.ffmpeg_st"](),
-			},
-		];
-	}
-
-	public getVariantValue(): string {
-		return EngineVariants.instance.ffmpeg;
-	}
-
-	public setVariant(value: string): void {
-		EngineVariants.instance.setFfmpeg(value as FFmpegVariant);
-	}
-
-	protected async download(): Promise<void> {
-		// this is just to cache the wasm and js for when we actually use it. we're not using this ffmpeg instance
-		if (!browser) return;
-		this.resolveThreads();
-
-		try {
-			await this.probeCore();
-			this.status = "ready";
-			return Promise.resolve();
-		} catch (err) {
-			if (this.loadedVariant === "mt") {
-				this.log(
-					`multi-threaded ffmpeg core failed to load, falling back to single-threaded: ${err}`,
-				);
-				ToastManager.add({
-					type: "info",
-					message: m["workers.info.ffmpeg_mt_unavailable"](),
-				});
-				this.loadedVariant = "st";
-				try {
-					await this.probeCore();
-					this.status = "ready";
-					return Promise.resolve();
-				} catch (fallbackErr) {
-					this.error(
-						`single-threaded ffmpeg core failed too: ${fallbackErr}`,
-					);
-				}
-			}
-
-			ToastManager.add({
-				type: "error",
-				message: m["workers.errors.ffmpeg"](),
-			});
-			throw err;
-		}
-	}
-
-	// load (and immediately discard) a worker to validate and/or cache
-	private async probeCore(): Promise<void> {
-		const ffmpeg = new FFmpeg();
-		try {
-			await ffmpeg.load(this.loadConfig());
-		} finally {
-			ffmpeg.terminate();
-		}
 	}
 
 	public async getAvailableSettings(): Promise<SettingCategories> {
@@ -297,10 +190,7 @@ export class FFmpegConverter extends Converter {
 		const isAlac = to === ".alac";
 		if (isAlac) to = ".m4a";
 
-		await this.init();
-
-		if (EngineVariants.instance.ffmpegActive !== this.requestedVariant)
-			await this.download();
+		await this.ensureCore();
 
 		let conversionError: string | null = null;
 		const ffmpeg = await this.setupFFmpeg(input);
@@ -411,61 +301,6 @@ export class FFmpegConverter extends Converter {
 		}
 	}
 
-	public async cancel(input: VertFile): Promise<void> {
-		const ffmpeg = this.activeConversions.get(input.id);
-		if (!ffmpeg) {
-			this.error(
-				`no active conversion found for file ${input.name} (${input.id})`,
-			);
-			return;
-		}
-
-		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
-
-		ffmpeg.terminate();
-		this.activeConversions.delete(input.id);
-	}
-
-	private async setupFFmpeg(input: VertFile): Promise<FFmpeg> {
-		const ffmpeg = new FFmpeg();
-
-		ffmpeg.on("progress", (progress) => {
-			input.progress = progress.progress * 100;
-		});
-
-		await ffmpeg.load(this.loadConfig());
-
-		return ffmpeg;
-	}
-
-	private resolveThreads(): void {
-		const variants = EngineVariants.instance;
-
-		if (variants.ffmpeg === "mt" && !variants.ffmpegMtSupported) {
-			this.log(
-				"multi-threaded ffmpeg requested but the page is not cross-origin isolated, using single-threaded",
-			);
-			ToastManager.add({
-				type: "info",
-				message: m["workers.info.ffmpeg_mt_unavailable"](),
-			});
-		}
-
-		this.loadedVariant = variants.ffmpegActive;
-		this.requestedVariant = this.loadedVariant;
-		this.log(`using ${this.loadedVariant} ffmpeg core`);
-	}
-
-	private loadConfig() {
-		return this.loadedVariant === "mt"
-			? {
-					coreURL: mtCoreURL,
-					wasmURL: mtWasmURL,
-					workerURL: getMtWorkerURL(),
-				}
-			: { coreURL, wasmURL };
-	}
-
 	private async buildConversionCommand(
 		ffmpeg: FFmpeg,
 		input: VertFile,
@@ -476,59 +311,10 @@ export class FFmpegConverter extends Converter {
 		const inputFormat = input.from.slice(1);
 		const outputFormat = to.slice(1);
 		const m4a = isAlac || to === ".m4a";
-		const isImageSequence = input.isZip() && settings.imageSequence;
 
 		const userBitrate = settings.bitrate;
 		const userSampleRate = settings.sampleRate;
 		const keepMetadata = settings.metadata;
-
-		// image sequences -> animated image // video
-		if (isImageSequence) {
-			this.log(
-				`converting image sequence ${input.name} (${input.id}) to ${to}`,
-			);
-
-			const { extractZip } = await import("#lib/util/file");
-			const entries = (await extractZip(input.file)).sort((a, b) =>
-				a.filename.localeCompare(b.filename, undefined, {
-					numeric: true,
-					sensitivity: "base",
-				}),
-			);
-
-			if (!entries.length)
-				throw new Error("No images found in zip archive");
-
-			const imageFiles: Array<{ name: string }> = [];
-
-			for (const [index, entry] of entries.entries()) {
-				const fileName =
-					entry.filename.split("/").pop() ?? entry.filename;
-				const ext = fileName.split(".").pop()?.toLowerCase();
-				if (!ext) continue;
-
-				const paddedName = `img${String(index + 1).padStart(5, "0")}.${ext}`;
-				await ffmpeg.writeFile(paddedName, entry.data);
-				imageFiles.push({ name: paddedName });
-			}
-
-			if (!imageFiles.length)
-				throw new Error("No images found in zip archive");
-
-			const listContent = imageFiles
-				.map(
-					(image) =>
-						`file '${image.name}'\nduration ${1 / (settings.imageSequenceFPS || 15)}`,
-				)
-				.join("\n");
-			await ffmpeg.writeFile(
-				"frames.txt",
-				`${listContent}\nfile '${imageFiles[imageFiles.length - 1].name}'\n`,
-			);
-			this.log(`wrote ${imageFiles.length} images to ffmpeg virtual fs`);
-
-			return buildImageSequenceCommand(outputFormat, settings, isAlac);
-		}
 
 		// else normal single file conversion
 
@@ -655,13 +441,6 @@ export class FFmpegConverter extends Converter {
 		];
 	}
 }
-
-// const handleSpecialInput = async (
-// 	ffmpeg: FFmpeg,
-// 	input: VertFile,
-// ): Promise<VertFile | null> => {
-//
-// }
 
 const parseChannels = (value: ConversionSettings[string]): number | null => {
 	const text = String(value ?? "").trim();
