@@ -30,64 +30,67 @@
 }
 
 @mixin light {
-	// general
-	--accent-pink: hsl(302, 100%, 76%);
-	--accent-pink-alt: hsl(302, 100%, 50%);
-	--accent-pink-muted: hsl(302, 98%, 42%);
+	// general - MTU Aero Engines Polska palette
+	--mtu-blue: #003963;
+	--mtu-blue-dark: #002744;
+	--mtu-steel: #7D9DB1;
+	--accent-pink: #7D9DB1;
+	--accent-pink-alt: #003963;
+	--accent-pink-muted: #003963;
 	--accent-red: hsl(348, 100%, 80%);
 	--accent-red-alt: hsl(348, 100%, 50%);
-	--accent-purple: hsl(264, 100%, 81%);
-	--accent-purple-alt: hsl(264, 100%, 50%);
-	--accent-blue: hsl(220, 100%, 78%);
-	--accent-blue-alt: hsl(220, 100%, 50%);
+	--accent-purple: #7D9DB1;
+	--accent-purple-alt: #003963;
+	--accent-blue: #003963;
+	--accent-blue-alt: #7D9DB1;
 	--accent-green: hsl(140, 70%, 74%);
 	--accent-green-alt: hsl(140, 66%, 55%);
-	--accent: var(--accent-pink);
-	--accent-alt: var(--accent-pink-alt);
-	--accent-pink-transparent: hsla(303, 100%, 50%, 0);
+	--accent: #003963;
+	--accent-alt: #7D9DB1;
+	--accent-pink-transparent: rgba(0, 57, 99, 0);
 	--accent-red-transparent: hsla(348, 100%, 50%, 0);
-	--accent-purple-transparent: hsla(264, 100%, 50%, 0);
-	--accent-blue-transparent: hsla(220, 100%, 50%, 0);
+	--accent-purple-transparent: rgba(125, 157, 177, 0);
+	--accent-blue-transparent: rgba(0, 57, 99, 0);
 	--accent-green-transparent: hsla(140, 70%, 30%, 0);
 
 	// foregrounds
-	--fg: hsl(0, 0%, 0%);
-	--fg-muted: hsla(0, 0%, 0%, 0.6);
-	--fg-on-accent: hsl(0, 0%, 0%);
-	--fg-on-badge: hsl(0, 0%, 0%);
+	--fg: #001829;
+	--fg-muted: rgba(0, 39, 68, 0.65);
+	--fg-on-accent: #ffffff;
+	--fg-on-badge: #ffffff;
 	// readable version of the accent color
-	--fg-accent: var(--accent-pink-muted);
+	--fg-accent: #003963;
 	--fg-failure: var(--accent-red-alt);
 
 	--text-panel: hsl(0, 0%, 100%);
 
 	// backgrounds
-	--bg: hsl(0, 0%, 95%);
+	--bg: #f2f5f8;
 
-	--bg-gradient-from: var(--accent-pink);
-	--bg-gradient-to: hsla(303, 100%, 50%, 0);
-	--bg-gradient-pink-from: var(--accent-pink);
-	--bg-gradient-pink-to: hsla(303, 100%, 50%, 0);
-	--bg-gradient-pink-alt-from: var(--accent-pink);
-	--bg-gradient-pink-alt-to: hsl(303, 100%, 91%);
+	--bg-gradient-from: rgba(0, 57, 99, 0.16);
+	--bg-gradient-to: rgba(0, 57, 99, 0);
+	--bg-gradient-pink-from: rgba(125, 157, 177, 0.2);
+	--bg-gradient-pink-to: rgba(125, 157, 177, 0);
+	--bg-gradient-pink-alt-from: #7D9DB1;
+	--bg-gradient-pink-alt-to: #e5edf2;
 	--bg-gradient-red-from: var(--accent-red);
 	--bg-gradient-red-to: hsla(348, 100%, 50%, 0);
 	--bg-gradient-red-alt-from: var(--accent-red);
 	--bg-gradient-red-alt-to: hsl(348, 100%, 91%);
-	--bg-gradient-purple-from: var(--accent-purple);
-	--bg-gradient-purple-to: hsla(264, 100%, 50%, 0);
-	--bg-gradient-purple-alt-from: var(--accent-purple);
-	--bg-gradient-purple-alt-to: hsl(264, 100%, 91%);
-	--bg-gradient-blue-from: var(--accent-blue);
-	--bg-gradient-blue-to: hsla(220, 100%, 50%, 0);
-	--bg-gradient-blue-alt-from: var(--accent-blue);
-	--bg-gradient-blue-alt-to: hsl(220, 100%, 91%);
+	--bg-gradient-purple-from: rgba(0, 57, 99, 0.16);
+	--bg-gradient-purple-to: rgba(0, 57, 99, 0);
+	--bg-gradient-purple-alt-from: #003963;
+	--bg-gradient-purple-alt-to: #e5edf2;
+	--bg-gradient-blue-from: rgba(0, 57, 99, 0.2);
+	--bg-gradient-blue-to: rgba(0, 57, 99, 0);
+	--bg-gradient-blue-alt-from: #003963;
+	--bg-gradient-blue-alt-to: #7D9DB1;
 	--bg-gradient-green-from: var(--accent-green);
 	--bg-gradient-green-to: hsla(140, 70%, 30%, 0);
 	--bg-gradient-green-alt-from: var(--accent-green-alt);
 	--bg-gradient-green-alt-to: hsl(140, 70%, 91%);
-	--bg-gradient-image-from: hsla(0, 0%, 95%, 0.5);
-	--bg-gradient-image-to: hsla(0, 0%, 95%, 1);
+	--bg-gradient-image-from: rgba(242, 245, 248, 0.5);
+	--bg-gradient-image-to: rgba(242, 245, 248, 1);
 
 	--bg-gradient: linear-gradient(
 		to bottom,
@@ -149,73 +152,76 @@
 		var(--bg-gradient-image-from),
 		var(--bg-gradient-image-to) 100%
 	);
-	--bg-panel: hsl(0, 0%, 100%);
-	--bg-panel-highlight: hsl(0, 0%, 92%);
-	--bg-separator: hsla(0, 0%, 0%, 0.2);
-	--bg-button: var(--bg-panel-highlight);
-	--bg-badge: var(--accent-pink);
-	--bg-input: #e0e0e0;
+	--bg-panel: #ffffff;
+	--bg-panel-highlight: #e4ecf2;
+	--bg-separator: rgba(0, 57, 99, 0.15);
+	--bg-button: #e4ecf2;
+	--bg-badge: #003963;
+	--bg-input: #e0e9f0;
 
-	--shadow-panel: 0 2px 4px 0 hsla(0, 0%, 0%, 0.15);
+	--shadow-panel: 0 2px 6px 0 rgba(0, 57, 99, 0.08);
 }
 
 @mixin dark {
-	// general
-	--accent-pink: hsl(302, 100%, 76%);
-	--accent-pink-alt: hsl(302, 100%, 50%);
+	// general - MTU Aero Engines Polska palette (dark mode)
+	--mtu-blue: #2583c7;
+	--mtu-blue-dark: #003963;
+	--mtu-steel: #7D9DB1;
+	--accent-pink: #7D9DB1;
+	--accent-pink-alt: #2583c7;
 	--accent-red: hsl(348, 100%, 80%);
 	--accent-red-alt: hsl(348, 100%, 50%);
-	--accent-purple: hsl(264, 100%, 81%);
-	--accent-purple-alt: hsl(264, 100%, 50%);
-	--accent-blue: hsl(220, 100%, 78%);
-	--accent-blue-alt: hsl(220, 100%, 50%);
-	--accent: var(--accent-pink);
-	--accent-alt: var(--accent-pink-alt);
+	--accent-purple: #7D9DB1;
+	--accent-purple-alt: #2583c7;
+	--accent-blue: #7D9DB1;
+	--accent-blue-alt: #2583c7;
+	--accent: #2583c7;
+	--accent-alt: #7D9DB1;
 	--accent-green: hsl(140, 70%, 74%);
 	--accent-green-alt: hsl(140, 64%, 42%);
-	--accent-pink-transparent: hsla(303, 100%, 50%, 0);
+	--accent-pink-transparent: rgba(125, 157, 177, 0);
 	--accent-red-transparent: hsla(348, 100%, 50%, 0);
-	--accent-purple-transparent: hsla(264, 100%, 50%, 0);
-	--accent-blue-transparent: hsla(220, 100%, 50%, 0);
+	--accent-purple-transparent: rgba(125, 157, 177, 0);
+	--accent-blue-transparent: rgba(37, 131, 199, 0);
 	--accent-green-transparent: hsla(140, 70%, 30%, 0);
 
 	// foregrounds
-	--fg: hsl(0, 0%, 100%);
-	--fg-muted: hsla(0, 0%, 100%, 0.65);
-	--fg-on-accent: hsl(0, 0%, 0%);
-	--fg-on-badge: hsl(0, 0%, 0%);
-	--fg-accent: var(--accent);
+	--fg: #f4f8fb;
+	--fg-muted: rgba(215, 230, 242, 0.65);
+	--fg-on-accent: #ffffff;
+	--fg-on-badge: #ffffff;
+	--fg-accent: #7D9DB1;
 	--fg-failure: var(--accent-red);
 
 	// backgrounds
-	--bg: hsl(220, 5%, 15%);
+	--bg: #09131d;
 
-	--text-panel: hsl(220, 4%, 24%);
+	--text-panel: #0f1f2d;
 
-	--bg-gradient-from: hsla(303, 100%, 50%, 0.1);
-	--bg-gradient-to: hsla(303, 100%, 50%, 0);
-	--bg-gradient-pink-from: hsla(303, 100%, 50%, 0.1);
-	--bg-gradient-pink-to: hsla(303, 100%, 50%, 0);
-	--bg-gradient-pink-alt-from: var(--accent-pink);
-	--bg-gradient-pink-alt-to: hsl(303, 100%, 91%);
+	--bg-gradient-from: rgba(37, 131, 199, 0.15);
+	--bg-gradient-to: rgba(37, 131, 199, 0);
+	--bg-gradient-pink-from: rgba(125, 157, 177, 0.15);
+	--bg-gradient-pink-to: rgba(125, 157, 177, 0);
+	--bg-gradient-pink-alt-from: #7D9DB1;
+	--bg-gradient-pink-alt-to: #17293a;
 	--bg-gradient-red-from: hsla(348, 100%, 50%, 0.1);
 	--bg-gradient-red-to: hsla(348, 100%, 50%, 0);
 	--bg-gradient-red-alt-from: var(--accent-red);
 	--bg-gradient-red-alt-to: hsl(348, 100%, 91%);
-	--bg-gradient-purple-from: hsla(264, 100%, 50%, 0.1);
-	--bg-gradient-purple-to: hsla(264, 100%, 50%, 0);
-	--bg-gradient-purple-alt-from: var(--accent-purple);
-	--bg-gradient-purple-alt-to: hsl(264, 100%, 91%);
-	--bg-gradient-blue-from: hsla(220, 100%, 50%, 0.1);
-	--bg-gradient-blue-to: hsla(220, 100%, 50%, 0);
-	--bg-gradient-blue-alt-from: var(--accent-blue);
-	--bg-gradient-blue-alt-to: hsl(220, 100%, 91%);
+	--bg-gradient-purple-from: rgba(37, 131, 199, 0.15);
+	--bg-gradient-purple-to: rgba(37, 131, 199, 0);
+	--bg-gradient-purple-alt-from: #2583c7;
+	--bg-gradient-purple-alt-to: #17293a;
+	--bg-gradient-blue-from: rgba(37, 131, 199, 0.18);
+	--bg-gradient-blue-to: rgba(37, 131, 199, 0);
+	--bg-gradient-blue-alt-from: #2583c7;
+	--bg-gradient-blue-alt-to: #7D9DB1;
 	--bg-gradient-green-from: hsla(140, 70%, 30%, 0.1);
 	--bg-gradient-green-to: hsla(140, 70%, 30%, 0);
 	--bg-gradient-green-alt-from: var(--accent-green-alt);
 	--bg-gradient-green-alt-to: hsl(140, 70%, 91%);
-	--bg-gradient-image-from: hsla(220, 5%, 12%, 0.5);
-	--bg-gradient-image-to: hsla(220, 5%, 12%, 1);
+	--bg-gradient-image-from: rgba(9, 19, 29, 0.5);
+	--bg-gradient-image-to: rgba(9, 19, 29, 1);
 
 	--bg-gradient: linear-gradient(
 		to bottom,
@@ -277,13 +283,13 @@
 		var(--bg-gradient-image-from),
 		var(--bg-gradient-image-to) 100%
 	);
-	--bg-panel: hsl(220, 4%, 24%);
-	--bg-panel-highlight: hsl(220, 2%, 32%);
-	--bg-separator: hsl(220, 4%, 28%);
-	--bg-button: hsl(220, 6%, 34%);
-	--bg-badge: var(--accent-pink);
+	--bg-panel: #0f1c28;
+	--bg-panel-highlight: #17293a;
+	--bg-separator: #1b3246;
+	--bg-button: #1a2f43;
+	--bg-badge: #003963;
 
-	--shadow-panel: 0 4px 6px 0 hsla(0, 0%, 0%, 0.15);
+	--shadow-panel: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
 
 	color-scheme: dark;
 }
@@ -336,7 +342,7 @@ body {
 }
 
 .selected {
-	@apply bg-accent-purple !text-black;
+	@apply bg-accent !text-on-accent;
 }
 
 .transition {

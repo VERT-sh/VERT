@@ -10,7 +10,6 @@
 	} from "$lib/store/index.svelte";
 	import clsx from "clsx";
 	import {
-		InfoIcon,
 		MoonIcon,
 		RefreshCw,
 		SettingsIcon,
@@ -20,6 +19,7 @@
 	import { quintOut } from "svelte/easing";
 	import Panel from "../../visual/Panel.svelte";
 	import Logo from "../../visual/svg/Logo.svelte";
+	import MTULogo from "../../visual/svg/MTULogo.svelte";
 	import { beforeNavigate } from "$app/navigation";
 	import Tooltip from "$lib/components/visual/Tooltip.svelte";
 	import { m } from "$lib/paraglide/messages";
@@ -52,12 +52,6 @@
 			url: "/settings/",
 			activeMatch: (pathname) => pathname.startsWith("/settings"),
 			icon: SettingsIcon,
-		},
-		{
-			name: m["navbar.about"](),
-			url: "/about/",
-			activeMatch: (pathname) => pathname.startsWith("/about"),
-			icon: InfoIcon,
 		},
 	]);
 
@@ -183,11 +177,12 @@
 			></div>
 		{/if}
 		<a
-			class="w-28 h-full bg-accent rounded-xl items-center justify-center hidden md:flex"
+			class="px-6 h-full bg-accent text-on-accent rounded-xl items-center justify-center hidden md:flex"
 			href="/"
+			title="MTU Aero Engines Polska"
 		>
-			<div class="h-5 w-full">
-				<Logo />
+			<div class="h-12 w-auto flex items-center justify-center">
+				<MTULogo class="h-11 w-auto text-white" withDescriptor={true} />
 			</div>
 		</a>
 		{#each items as item, i (item.url)}

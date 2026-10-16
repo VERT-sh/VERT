@@ -99,8 +99,7 @@
 		<h2 class="text-2xl font-bold">
 			<PaletteIcon
 				size="40"
-				class="inline-block -mt-1 mr-2 bg-accent-purple p-2 rounded-full"
-				color="black"
+				class="inline-block -mt-1 mr-2 bg-accent text-on-accent p-2 rounded-full"
 			/>
 			{m["settings.appearance.title"]()}
 		</h2>

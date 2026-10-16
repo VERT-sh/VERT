@@ -21,11 +21,11 @@
 		fileInput.click();
 	};
 
-	const handleFileChange = async () => {
+	const handleFileChange = () => {
 		if (!fileInput) return;
 		const oldLength = files.files.length;
-		await files.addAsync(fileInput.files);
-		if (files.files.length !== oldLength) goto("/convert");
+		files.add(fileInput.files);
+		if (oldLength !== files.files.length) goto("/convert");
 	};
 
 	onMount(() => {

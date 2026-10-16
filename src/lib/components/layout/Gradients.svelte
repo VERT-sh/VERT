@@ -2,6 +2,7 @@
 	import { page } from "$app/state";
 	import { duration, transition } from "$lib/util/animation";
 	import VertVBig from "$lib/assets/vert-bg.svg?component";
+	import MTUTurbine from "$lib/components/visual/svg/MTUTurbine.svelte";
 	import { files, gradientColor } from "$lib/store/index.svelte";
 	import { quintOut } from "svelte/easing";
 	import { fade } from "$lib/util/animation";
@@ -25,11 +26,6 @@
 		{
 			matcher: (path) => path === "/settings/",
 			color: "var(--bg-gradient-blue-from)",
-			at: 25,
-		},
-		{
-			matcher: (path) => path === "/about/",
-			color: "var(--bg-gradient-from)",
 			at: 25,
 		},
 		{
@@ -76,8 +72,8 @@
 			easing: quintOut,
 		}}
 	>
-		<VertVBig
-			class="fill-[--fg] opacity-10 dynadark:opacity-5 scale-[200%] md:scale-[80%]"
+		<MTUTurbine
+			class="fill-[#003963] opacity-10 dynadark:fill-[#7D9DB1] dynadark:opacity-10 scale-[160%] md:scale-[75%]"
 		/>
 	</div>
 {/if}

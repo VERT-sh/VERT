@@ -175,11 +175,11 @@
 </script>
 
 <svelte:head>
-	<title>{VERT_NAME}</title>
-	<meta name="theme-color" content="#F2ABEE" />
+	<title>{VERT_NAME} • MTU Aero Engines Polska</title>
+	<meta name="theme-color" content="#003963" />
 	<meta
 		name="title"
-		content="{VERT_NAME} — Free, fast, and awesome file converter"
+		content="{VERT_NAME} • MTU Aero Engines Polska"
 	/>
 	<meta
 		name="description"
@@ -256,7 +256,6 @@
 		<Layout.Dialogs />
 
 		<div>
-			<Layout.Footer />
 			<Navbar.Mobile />
 		</div>
 	</div>

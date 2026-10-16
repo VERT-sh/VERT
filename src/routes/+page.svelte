@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Uploader from "$lib/components/functional/Uploader.svelte";
 	import Tooltip from "$lib/components/visual/Tooltip.svelte";
+	import MTUTurbine from "$lib/components/visual/svg/MTUTurbine.svelte";
+	import MTULogo from "$lib/components/visual/svg/MTULogo.svelte";
 	import { converters } from "$lib/converters";
 	import { vertdLoaded } from "$lib/store/index.svelte";
 	import clsx from "clsx";
@@ -159,6 +161,17 @@
 			class="flex items-center h-auto gap-12 md:gap-24 md:flex-row flex-col"
 		>
 			<div class="flex-grow w-full text-center md:text-left">
+				<div
+					class="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-panel border border-separator mb-6 shadow-panel"
+				>
+					<MTULogo class="h-8 md:h-9 w-auto text-accent" withDescriptor={true} />
+					<div class="h-6 w-px bg-separator"></div>
+					<span
+						class="text-xs md:text-sm font-bold tracking-widest uppercase text-muted"
+					>
+						Polska
+					</span>
+				</div>
 				<h1
 					class="text-4xl px-12 md:p-0 md:text-6xl flex-wrap tracking-tight leading-tight md:leading-[72px] mb-4 md:mb-6"
 				>

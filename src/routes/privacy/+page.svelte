@@ -38,7 +38,7 @@
 						["about_link", "stripe_link"],
 						m["privacy.donations.description"](),
 						[
-							"/about",
+							"/",
 							"https://stripe.com/docs/disputes/prevention/advanced-fraud-detection",
 						],
 						[false, true],
