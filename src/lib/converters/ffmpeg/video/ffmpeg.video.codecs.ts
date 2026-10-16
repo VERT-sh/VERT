@@ -11,7 +11,7 @@ export const FORMAT_CODECS: Record<string, FormatCodecSupport> = {
 		audio: ["aac", "mp3", "ac3", "eac3", "alac", "flac", "libopus"],
 	},
 	webm: {
-		video: ["vp9", "vp8"],
+		video: ["vp8", "vp9"],
 		audio: ["libopus", "libvorbis"],
 	},
 	avi: {
@@ -71,7 +71,7 @@ export const FORMAT_CODECS: Record<string, FormatCodecSupport> = {
 		audio: ["aac"],
 	},
 	mxf: {
-		video: ["prores", "dnxhd", "h264", "mpeg2video", "mjpeg"],
+		video: ["h264", "mpeg2video"],
 		audio: ["pcm_s24le", "pcm_s16le", "pcm_s32le"],
 	},
 	gxf: {
