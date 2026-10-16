@@ -16,6 +16,14 @@ Thumbs.db
 !.env.example
 !.env.test
 
+# Terraform local state and provider cache
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+terraform.tfvars.json
+
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*

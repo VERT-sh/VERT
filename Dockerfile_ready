@@ -1,4 +1,4 @@
-FROM oven/bun AS builder
+FROM vert-sh/vert:builder AS builder
 
 WORKDIR /app
 
@@ -20,13 +20,13 @@ ENV PUB_DONATION_URL=${PUB_DONATION_URL}
 ENV PUB_STRIPE_KEY=${PUB_STRIPE_KEY}
 ENV PUB_DISABLE_FAILURE_BLOCKS=${PUB_DISABLE_FAILURE_BLOCKS}
 
-COPY package.json ./
+# COPY package.json ./
 
-RUN apt-get update && \
-	apt-get install -y --no-install-recommends git && \
-	rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && \
+# 	apt-get install -y --no-install-recommends git && \
+# 	rm -rf /var/lib/apt/lists/*
 
-RUN bun install
+# RUN bun install
 
 COPY . ./
 
