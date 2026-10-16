@@ -11,6 +11,7 @@ import type {
 	SettingCategories,
 	SettingDefinition,
 } from "#lib/types/conversion-settings";
+import { formatError } from "#lib/util/error";
 import { ToastManager } from "#lib/util/toast.svelte";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$app/env/public";
 import { SvelteMap, SvelteSet } from "svelte/reactivity";
@@ -221,18 +222,6 @@ const progressEstimate = (
 	return progress * progressEstimates[type] + previousValues;
 };
 
-const formatError = (message: unknown): string => {
-	if (typeof message === "string") return message;
-	if (message instanceof Error) return message.message;
-	if (message === undefined) return "Unknown Vertd error";
-
-	try {
-		return JSON.stringify(message);
-	} catch {
-		return String(message);
-	}
-};
-
 interface UploadTask {
 	promise: Promise<UploadResponse>;
 	abort: () => void;
@@ -265,7 +254,7 @@ const createUploadTask = async (
 				console.log("xhr.responseText");
 				const res = JSON.parse(xhr.responseText);
 				if (res.type === "error") {
-					reject(res.data);
+					reject(new Error(formatError(res.data)));
 					return;
 				}
 				resolve(res.data);
@@ -904,8 +893,8 @@ export class VertdConverter extends Converter {
 					}
 
 					case "error": {
-						const errorMessage = formatError(msg.data.message);
-						this.error(`error: ${errorMessage}`);
+						const errorText = formatError(msg.data.message);
+						this.error(`error: ${errorText}`);
 						if (hash) this.failure(hash);
 
 						rejectConversion({
@@ -915,7 +904,7 @@ export class VertdConverter extends Converter {
 								auth: uploadRes.auth,
 								from: input.from,
 								to: to,
-								errorMessage,
+								errorMessage: errorText,
 							},
 						});
 						break;

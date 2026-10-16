@@ -74,7 +74,7 @@ const readJson = async <T>(
 	];
 
 	try {
-        // ffprobe in ffmpeg-wasm always returns -1 even on success, so rely on the JSON output instead of the return code
+		// ffprobe in ffmpeg-wasm always returns -1 even on success, so rely on the JSON output instead of the return code
 		await ffmpeg.ffprobe(args);
 
 		const raw = (await ffmpeg.readFile(probeFile, "utf8")) as string;

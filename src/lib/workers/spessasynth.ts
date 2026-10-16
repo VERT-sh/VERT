@@ -1,4 +1,5 @@
 import type { WorkerMessage } from "#lib/types";
+import { formatError } from "#lib/util/error";
 import ffmpegWasmURL from "@ffmpeg/core/wasm?url";
 import ffmpegCoreURL from "@ffmpeg/core?url";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
@@ -106,7 +107,7 @@ const handleMessage = async (
 			throw new Error("Conversion produced an empty file");
 		return { type: "finished", output };
 	} catch (err) {
-		return { type: "error", error: (err as Error).message };
+		return { type: "error", error: formatError(err) };
 	}
 };
 

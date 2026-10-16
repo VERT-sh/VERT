@@ -1,3 +1,4 @@
+import { formatError } from "#lib/util/error";
 import { error, log } from "#lib/util/logger.svelte";
 import { downloadZip } from "client-zip";
 import { unzip } from "fflate";
@@ -16,8 +17,8 @@ export async function extractZip(file: File): Promise<ZipEntry[]> {
 	return new Promise((resolve, reject) => {
 		unzip(uint8Array, (err, unzipped) => {
 			if (err) {
-				error(["zip"], `failed to extract zip: ${err.message}`);
-				reject(new Error(`Failed to extract zip: ${err.message}`));
+				error(["zip"], `failed to extract zip: ${formatError(err)}`);
+				reject(new Error(`Failed to extract zip: ${formatError(err)}`));
 				return;
 			}
 

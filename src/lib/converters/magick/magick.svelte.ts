@@ -29,6 +29,8 @@ export class MagickConverter extends Converter {
 	private loadedVariant: "x64" | "x86" | null = null;
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	private wasmCache = new Map<string, ArrayBuffer>();
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	private workerCancellation = new Map<Worker, AbortController>();
 
 	private activeConversions = new SvelteMap<string, Worker>();
 
@@ -345,22 +347,12 @@ export class MagickConverter extends Converter {
 			type: "module",
 		});
 		this.activeConversions.set(input.id, worker);
+		const cancellation = new AbortController();
+		this.workerCancellation.set(worker, cancellation);
 
 		try {
-			await Promise.race([
-				this.waitForMessage(worker, "ready"),
-				new Promise((_, reject) =>
-					setTimeout(
-						() =>
-							reject(
-								new Error(
-									"Magick worker ready timeout after 10 seconds",
-								),
-							),
-						10000,
-					),
-				),
-			]);
+			await this.waitForMessage(worker, "ready", 10000);
+			cancellation.signal.throwIfAborted();
 
 			const loadMsg: WorkerMessage = {
 				type: "load",
@@ -370,20 +362,7 @@ export class MagickConverter extends Converter {
 			};
 			worker.postMessage(loadMsg);
 
-			await Promise.race([
-				this.waitForMessage(worker, "loaded"),
-				new Promise((_, reject) =>
-					setTimeout(
-						() =>
-							reject(
-								new Error(
-									"Magick worker initialization timeout after 30 seconds",
-								),
-							),
-						30000,
-					),
-				),
-			]);
+			await this.waitForMessage(worker, "loaded", 30000);
 
 			// every other format handled by magick worker
 			const conversionSettings = // vertd expects object not string json
@@ -396,6 +375,7 @@ export class MagickConverter extends Converter {
 							}, // use defaults if not provided
 				);
 
+			cancellation.signal.throwIfAborted();
 			const convertMsg: WorkerMessage = {
 				type: "convert",
 				id: input.id,
@@ -427,6 +407,8 @@ export class MagickConverter extends Converter {
 
 			throw new Error("Unknown message type");
 		} finally {
+			cancellation.abort();
+			this.workerCancellation.delete(worker);
 			this.clearTrackedConversion(input);
 			this.activeConversions.delete(input.id);
 			worker.terminate();
@@ -444,37 +426,64 @@ export class MagickConverter extends Converter {
 
 		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
+		this.workerCancellation.get(worker)?.abort();
 		worker.terminate();
 		this.activeConversions.delete(input.id);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private waitForMessage(worker: Worker, type?: string): Promise<any> {
+	private waitForMessage(
+		worker: Worker,
+		type?: string,
+		timeout?: number,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	): Promise<any> {
+		const signal = this.workerCancellation.get(worker)!.signal;
 		return new Promise((resolve, reject) => {
+			let timeoutId: ReturnType<typeof setTimeout> | undefined;
+			const cleanup = () => {
+				worker.removeEventListener("message", onMessage);
+				worker.removeEventListener("error", onError);
+				signal.removeEventListener("abort", onAbort);
+				if (timeoutId !== undefined) clearTimeout(timeoutId);
+			};
+			const onAbort = () => {
+				cleanup();
+				reject(signal.reason);
+			};
 			const onMessage = (e: MessageEvent) => {
 				if (type && e.data.type === type) {
-					worker.removeEventListener("message", onMessage);
-					worker.removeEventListener("error", onError);
+					cleanup();
 					resolve(e.data);
 				} else if (!type) {
-					worker.removeEventListener("message", onMessage);
-					worker.removeEventListener("error", onError);
+					cleanup();
 					resolve(e.data);
 				} else if (e.data.type === "error") {
-					worker.removeEventListener("message", onMessage);
-					worker.removeEventListener("error", onError);
+					cleanup();
 					reject(new Error(e.data.error));
 				}
 			};
 
 			const onError = (e: ErrorEvent) => {
-				worker.removeEventListener("message", onMessage);
-				worker.removeEventListener("error", onError);
+				cleanup();
 				reject(new Error(`Worker error: ${e.message}`));
 			};
 
+			if (signal.aborted) {
+				onAbort();
+				return;
+			}
+			signal.addEventListener("abort", onAbort);
 			worker.addEventListener("message", onMessage);
 			worker.addEventListener("error", onError);
+			if (timeout !== undefined)
+				timeoutId = setTimeout(() => {
+					cleanup();
+					reject(
+						new Error(
+							`Magick worker ${type === "ready" ? "ready" : "initialization"} timeout after ${timeout / 1000} seconds`,
+						),
+					);
+				}, timeout);
 		});
 	}
 

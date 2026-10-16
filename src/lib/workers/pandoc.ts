@@ -1,10 +1,8 @@
 import type { WorkerMessage } from "#lib/types";
+import { formatError } from "#lib/util/error";
 import { makeZip } from "client-zip";
 import type { PandocInstance } from "pandoc-wasm/core";
 import { createPandocInstance } from "pandoc-wasm/core";
-
-const formatError = (err: unknown): string =>
-	err instanceof Error ? err.message : String(err);
 
 type Format =
 	| ".md"

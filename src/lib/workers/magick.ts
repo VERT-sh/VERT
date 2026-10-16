@@ -1,5 +1,6 @@
 import type { WorkerMessage } from "#lib/types";
 import type { ConversionSettings } from "#lib/types/conversion-settings";
+import { formatError } from "#lib/util/error";
 import {
 	AlphaAction,
 	ColorSpace,
@@ -47,7 +48,7 @@ const handleMessage = async (
 			} catch (error) {
 				return {
 					type: "error",
-					error: `error loading magick-wasm: ${(error as Error).message}`,
+					error: `error loading magick-wasm: ${formatError(error)}`,
 				};
 			}
 		}
@@ -158,9 +159,7 @@ const handleSpecialInput = async (
 			const { renderDicomToPng } = await loadDicomHelpers();
 			return await renderDicomToPng(new Uint8Array(buffer));
 		} catch (error) {
-			throw new Error(
-				`Failed to parse DICOM: ${(error as Error).message}`,
-			);
+			throw new Error(`Failed to parse DICOM: ${formatError(error)}`);
 		}
 	}
 
@@ -269,7 +268,7 @@ const handleSpecialOutput = async (
 		} catch (error) {
 			return {
 				type: "error",
-				error: `Failed to parse ANI: ${(error as Error).message}`,
+				error: `Failed to parse ANI: ${formatError(error)}`,
 			};
 		}
 	}
@@ -506,7 +505,7 @@ onmessage = async (e) => {
 	} catch (e) {
 		postMessage({
 			type: "error",
-			error: e,
+			error: formatError(e),
 			id: message.id,
 		});
 	}

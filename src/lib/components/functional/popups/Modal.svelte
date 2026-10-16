@@ -9,6 +9,7 @@
 		text: string;
 		action: () => void;
 		primary?: boolean;
+		disabled?: boolean;
 	}
 
 	export interface ModalBadge {
@@ -21,7 +22,7 @@
 		icon: typeof SearchIcon;
 		title: string;
 		color: string;
-		badge: ModalBadge | null;
+		badge?: ModalBadge | null;
 		buttons: ModalButton[];
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		children: () => any;
@@ -124,11 +125,13 @@
 			{@render children()}
 		</div>
 
-		<div class="flex w-full flex-row items-center gap-2">
-			{#each buttons as { text, action, primary }, i (`${i}-${text}`)}
+		<div class="flex w-full flex-row flex-wrap items-center gap-2">
+			{#each buttons as { text, action, primary, disabled }, i (`${i}-${text}`)}
 				<button
+					{disabled}
 					class={clsx(
-						"flex items-center gap-2 rounded-md p-2 px-6 duration-200 hover:scale-105 active:scale-100",
+						"flex items-center gap-2 rounded-md p-2 px-6 duration-200",
+						"enabled:hover:scale-105 enabled:active:scale-100 disabled:cursor-not-allowed disabled:opacity-50",
 						primary || i === 1
 							? `text-black bg-accent-${color}`
 							: "bg-button text-black dynadark:text-white",

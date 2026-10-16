@@ -1,5 +1,6 @@
 import type { WorkerMessage } from "#lib/types";
 import type { ConversionSettings } from "#lib/types/conversion-settings";
+import { formatError } from "#lib/util/error";
 import {
 	buildConfig,
 	DETAIL_LEVELS,
@@ -8,9 +9,6 @@ import {
 } from "#lib/vectorizer";
 
 let ready: Promise<void> | null = null;
-
-const formatError = (err: unknown): string =>
-	err instanceof Error ? err.message : String(err);
 
 const log = (...msg: unknown[]) => console.log("[vectorizer]", ...msg);
 const error = (...msg: unknown[]) => console.error("[vectorizer]", ...msg);

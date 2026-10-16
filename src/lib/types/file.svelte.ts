@@ -8,6 +8,7 @@ import { m } from "#lib/paraglide/messages";
 import { addDialog } from "#lib/store/DialogProvider";
 import { MAX_ARRAY_BUFFER_SIZE } from "#lib/store/index.svelte";
 import { conversionConcurrency } from "#lib/util/consts";
+import { formatError } from "#lib/util/error";
 import { formatFilename } from "#lib/util/file";
 import { error, log } from "#lib/util/logger.svelte";
 import { readSettings } from "#lib/util/settings";
@@ -705,10 +706,7 @@ export class VertFile {
 							}
 						} catch (err) {
 							if (!this.cancelled) {
-								const message =
-									err instanceof Error
-										? err.message
-										: String(err);
+								const message = formatError(err);
 								failedFiles[index] = `${filename}: ${message}`;
 								error(
 									["file", "zip"],
@@ -844,7 +842,7 @@ export class VertFile {
 		if (typeof castedErr === "string") {
 			toastMsg = castedErr;
 		} else if (castedErr instanceof Error) {
-			toastMsg = castedErr.message;
+			toastMsg = formatError(castedErr);
 		} else {
 			toastMsg = castedErr;
 		}

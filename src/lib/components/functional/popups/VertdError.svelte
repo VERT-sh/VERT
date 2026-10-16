@@ -13,6 +13,7 @@
 	import { vertdFetch } from "#lib/converters/vertd/vertd.svelte";
 
 	import { m } from "#lib/paraglide/messages";
+	import { formatError } from "#lib/util/error";
 	import { ToastManager, type ToastProps } from "#lib/util/toast.svelte";
 	import { addDialog } from "#lib/store/DialogProvider";
 	import VertdErrorDetails from "./VertdErrorDetails.svelte";
@@ -52,7 +53,7 @@
 			ToastManager.add({
 				type: "error",
 				message: m["convert.errors.vertd.failed_to_keep"]({
-					error: (e as Error).message || e || "Unknown error",
+					error: formatError(e),
 				}),
 			});
 		}

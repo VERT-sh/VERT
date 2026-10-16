@@ -1,5 +1,6 @@
 import type { WorkerMessage } from "#lib/types";
 import type { ConversionSettings } from "#lib/types/conversion-settings";
+import { formatError } from "#lib/util/error";
 import Vips from "wasm-vips";
 import vipsWasm from "wasm-vips/vips.wasm?url";
 
@@ -29,29 +30,6 @@ const BAND_FORMATS: Record<string, string> = {
 	8: "uchar",
 	16: "ushort",
 	32: "float",
-};
-
-const isWasmException = (err: unknown): err is WebAssembly.Exception =>
-	typeof WebAssembly !== "undefined" &&
-	typeof WebAssembly.Exception === "function" &&
-	err instanceof WebAssembly.Exception;
-
-const formatError = (err: unknown): string => {
-	if (isWasmException(err)) {
-		const payload = (err as { message?: unknown }).message;
-		if (Array.isArray(payload)) {
-			const parts = payload.filter(
-				(part): part is string =>
-					typeof part === "string" && part.length > 0,
-			);
-			if (parts.length) return parts.join(": ").trim();
-		} else if (typeof payload === "string" && payload.length) {
-			return payload;
-		}
-	}
-
-	if (err instanceof Error) return err.message;
-	return String(err);
 };
 
 let vips: VipsInstance | null = null;

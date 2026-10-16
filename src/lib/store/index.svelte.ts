@@ -12,6 +12,7 @@ import { m } from "#lib/paraglide/messages";
 import { getLocale, setLocale } from "#lib/paraglide/runtime";
 import { VertFile } from "#lib/types";
 import { conversionConcurrency, GB } from "#lib/util/consts";
+import { formatError } from "#lib/util/error";
 import { formatFilename } from "#lib/util/file";
 import { error, log } from "#lib/util/logger.svelte";
 import { readSettings } from "#lib/util/settings";
@@ -483,7 +484,7 @@ class Files {
 					type: "error",
 					message: m["convert.archive_file.extract_error"]({
 						filename: input.file.name,
-						error: String(err),
+						error: formatError(err),
 					}),
 				});
 			}
@@ -557,7 +558,7 @@ class Files {
 				type: "error",
 				message: m["workers.errors.general"]({
 					file: input.name,
-					message: String(err),
+					message: formatError(err),
 				}),
 			});
 		});

@@ -32,8 +32,12 @@
 	} from "#lib/util/logger.svelte";
 
 	let { children } = $props();
-	let enablePlausible = $state(false);
 	let isAprilFools = $state(false);
+	let enablePlausible = $derived(
+		!!PUB_PLAUSIBLE_URL &&
+			Settings.instance.settings.plausible &&
+			!DISABLE_ALL_EXTERNAL_REQUESTS,
+	);
 
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	let scrollPositions = new Map<string, number>();
@@ -160,10 +164,6 @@
 	});
 
 	$effect(() => {
-		enablePlausible =
-			!!PUB_PLAUSIBLE_URL &&
-			Settings.instance.settings.plausible &&
-			!DISABLE_ALL_EXTERNAL_REQUESTS;
 		if (!enablePlausible && browser) {
 			// reset pushState on opt-out so that plausible stops firing events on page navigation
 			history.pushState = History.prototype.pushState;

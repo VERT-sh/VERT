@@ -4,7 +4,6 @@ import { ToastManager } from "#lib/util/toast.svelte";
 import PandocWorker from "#lib/workers/pandoc?worker&url";
 import { browser } from "$app/env";
 import pandocWasm from "pandoc-wasm/wasm?url";
-import { SvelteMap } from "svelte/reactivity";
 import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 
 export class PandocConverter extends Converter {
@@ -12,7 +11,10 @@ export class PandocConverter extends Converter {
 	public ready = $state(false);
 	public wasm: ArrayBuffer = null!;
 
-	private activeConversions = new SvelteMap<string, Worker>();
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	private activeConversions = new Map<string, Worker>();
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	private workerCancellation = new Map<Worker, AbortController>();
 
 	constructor() {
 		super();
@@ -48,6 +50,8 @@ export class PandocConverter extends Converter {
 		});
 
 		this.activeConversions.set(file.id, worker);
+		const cancellation = new AbortController();
+		this.workerCancellation.set(worker, cancellation);
 
 		try {
 			const loadMsg: WorkerMessage = {
@@ -56,7 +60,8 @@ export class PandocConverter extends Converter {
 				id: file.id,
 			};
 			worker.postMessage(loadMsg);
-			await waitForMessage(worker, "loaded");
+			await waitForMessage(worker, cancellation.signal, "loaded");
+			cancellation.signal.throwIfAborted();
 			const convertMsg: WorkerMessage = {
 				type: "convert",
 				to,
@@ -70,7 +75,7 @@ export class PandocConverter extends Converter {
 				conversionSettings: "", // no settings for pandoc yet
 			};
 			worker.postMessage(convertMsg);
-			const result = await waitForMessage(worker);
+			const result = await waitForMessage(worker, cancellation.signal);
 			if (result.type === "error") {
 				const error = result.error.toString();
 				switch (result.errorKind) {
@@ -113,6 +118,8 @@ export class PandocConverter extends Converter {
 				result.zip ? ".zip" : to,
 			);
 		} finally {
+			cancellation.abort();
+			this.workerCancellation.delete(worker);
 			this.clearTrackedConversion(file);
 			this.activeConversions.delete(file.id);
 			worker.terminate();
@@ -130,6 +137,7 @@ export class PandocConverter extends Converter {
 
 		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
+		this.workerCancellation.get(worker)?.abort();
 		worker.terminate();
 		this.activeConversions.delete(input.id);
 	}
@@ -159,18 +167,37 @@ export class PandocConverter extends Converter {
 	];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function waitForMessage(worker: Worker, type?: string): Promise<any> {
-	return new Promise((resolve) => {
-		const onMessage = (e: MessageEvent) => {
-			if (type && e.data.type === type) {
-				worker.removeEventListener("message", onMessage);
-				resolve(e.data);
-			} else {
-				worker.removeEventListener("message", onMessage);
-				resolve(e.data);
-			}
+function waitForMessage(
+	worker: Worker,
+	signal: AbortSignal,
+	type?: string,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+	return new Promise((resolve, reject) => {
+		const cleanup = () => {
+			worker.removeEventListener("message", onMessage);
+			worker.removeEventListener("error", onError);
+			signal.removeEventListener("abort", onAbort);
 		};
+		const onAbort = () => {
+			cleanup();
+			reject(signal.reason);
+		};
+		const onMessage = (e: MessageEvent) => {
+			if (type && e.data.type !== type && e.data.type !== "error") return;
+			cleanup();
+			resolve(e.data);
+		};
+		const onError = (e: ErrorEvent) => {
+			cleanup();
+			reject(new Error(`Worker error: ${e.message}`));
+		};
+		if (signal.aborted) {
+			onAbort();
+			return;
+		}
+		signal.addEventListener("abort", onAbort);
 		worker.addEventListener("message", onMessage);
+		worker.addEventListener("error", onError);
 	});
 }
