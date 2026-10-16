@@ -4,18 +4,8 @@ on:
     push:
         branches: ["main"]
         tags: ["v*"]
-        paths:
-            - "src/**"
-            - "static/**"
-            - "Dockerfile"
-            - ".dockerignore"
     pull_request:
         branches: ["main"]
-        paths:
-            - "src/**"
-            - "static/**"
-            - "Dockerfile"
-            - ".dockerignore"
     workflow_dispatch:
 
 jobs:
@@ -24,6 +14,7 @@ jobs:
         permissions:
             contents: read
             packages: write
+            id-token: write
 
         steps:
             - uses: actions/checkout@v4
@@ -49,7 +40,7 @@ jobs:
                       type=ref,event=pr
                       type=semver,pattern={{version}}
                       type=semver,pattern={{major}}.{{minor}}
-                      type=sha,format=short
+                      type=sha,format=long,prefix=sha-
                       type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
 
             - name: Build and push
@@ -66,7 +57,47 @@ jobs:
                       PUB_ENV=production
                       PUB_HOSTNAME=${{ vars.PUB_HOSTNAME || '' }}
                       PUB_PLAUSIBLE_URL=${{ vars.PUB_PLAUSIBLE_URL || '' }}
-                      PUB_VERTD_URL=https://vertd.vert.sh
-                      PUB_DISABLE_ALL_EXTERNAL_REQUESTS=false
+                      PUB_VERTD_URL=${{ vars.PUB_VERTD_URL || '' }}
+                      PUB_DISABLE_ALL_EXTERNAL_REQUESTS=${{ vars.PUB_DISABLE_ALL_EXTERNAL_REQUESTS || 'true' }}
                       PUB_DONATION_URL=https://donations.vert.sh
                       PUB_STRIPE_KEY=pk_live_51TlrPaFTPjkhEGBSu5Kwy5jJQYxcX5yUUHXiH5g7Xzvb0NKzDqbooc126HjlW35uUkfAgQN2ruEoCuyQynoxpKaA00ojFgQ116
+
+    deploy-to-azure:
+        needs: build-and-push
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.AZURE_CONTAINER_APP_NAME != ''
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
+
+        steps:
+            - name: Log in to Azure with OIDC
+              uses: azure/login@v2
+              with:
+                  client-id: ${{ vars.AZURE_CLIENT_ID }}
+                  tenant-id: ${{ vars.AZURE_TENANT_ID }}
+                  subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+            - name: Install Container Apps CLI extension
+              run: az extension add --name containerapp --upgrade
+
+            - name: Configure GHCR image pull credentials
+              env:
+                  GHCR_USERNAME: ${{ secrets.GHCR_PULL_USERNAME }}
+                  GHCR_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+              run: |
+                  az containerapp registry set \
+                    --name "${{ vars.AZURE_CONTAINER_APP_NAME }}" \
+                    --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+                    --server ghcr.io \
+                    --username "$GHCR_USERNAME" \
+                    --password "$GHCR_TOKEN"
+
+            - name: Deploy commit image
+              env:
+                  GHCR_IMAGE: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+              run: |
+                  az containerapp update \
+                    --name "${{ vars.AZURE_CONTAINER_APP_NAME }}" \
+                    --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+                    --image "$(echo "$GHCR_IMAGE" | tr '[:upper:]' '[:lower:]')"
