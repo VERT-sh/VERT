@@ -34,6 +34,7 @@
 		dropdownSize?: "default" | "large" | "small";
 		file?: VertFile;
 		allowEmpty?: boolean;
+		forceHideSettings?: boolean;
 	};
 
 	let {
@@ -45,6 +46,7 @@
 		dropdownSize = "default",
 		file,
 		allowEmpty = false,
+		forceHideSettings = false,
 	}: Props = $props();
 
 	let open = $state(false);
@@ -748,7 +750,7 @@
 							</div>
 						</div>
 					{/if}
-					{#if file.sequenceKind === "frameSequence" && imageSequence}
+					{#if file.sequenceKind === "frameSequence" && imageSequence && !forceHideSettings}
 						<div class="flex flex-col border-t border-separator">
 							<button
 								class="mt-2 flex w-full justify-center gap-3 rounded-lg bg-accent p-2.5 text-center text-black"
@@ -760,7 +762,7 @@
 						</div>
 					{/if}
 				</div>
-			{:else}
+			{:else if file && !forceHideSettings}
 				<div class="border-t border-separator p-2 text-base">
 					<button
 						class="flex w-full justify-center gap-3 rounded-lg bg-accent p-2.5 text-center text-black"

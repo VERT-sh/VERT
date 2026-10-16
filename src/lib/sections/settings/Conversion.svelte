@@ -148,6 +148,7 @@
 											settings.defaultFormat.image
 										}
 										disabled={!settings.useDefaultFormat}
+										forceHideSettings
 									/>
 								</div>
 								<div class="flex flex-col gap-2">
@@ -163,6 +164,7 @@
 											settings.defaultFormat.audio
 										}
 										disabled={!settings.useDefaultFormat}
+										forceHideSettings
 									/>
 								</div>
 								<div class="flex flex-col gap-2">
@@ -178,6 +180,7 @@
 											settings.defaultFormat.video
 										}
 										disabled={!settings.useDefaultFormat}
+										forceHideSettings
 									/>
 								</div>
 								<div class="flex flex-col gap-2">
@@ -193,6 +196,7 @@
 											settings.defaultFormat.document
 										}
 										disabled={!settings.useDefaultFormat}
+										forceHideSettings
 									/>
 								</div>
 							</div>
