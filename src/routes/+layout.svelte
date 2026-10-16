@@ -175,11 +175,11 @@
 </script>
 
 <svelte:head>
-	<title>{VERT_NAME} • MTU Aero Engines Polska</title>
+	<title>{VERT_NAME} • MTU Aero Engines</title>
 	<meta name="theme-color" content="#003963" />
 	<meta
 		name="title"
-		content="{VERT_NAME} • MTU Aero Engines Polska"
+		content="{VERT_NAME} • MTU Aero Engines"
 	/>
 	<meta
 		name="description"

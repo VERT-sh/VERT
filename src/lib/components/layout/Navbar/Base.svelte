@@ -179,7 +179,7 @@
 		<a
 			class="px-6 h-full bg-accent text-on-accent rounded-xl items-center justify-center hidden md:flex"
 			href="/"
-			title="MTU Aero Engines Polska"
+			title="MTU Aero Engines"
 		>
 			<div class="h-12 w-auto flex items-center justify-center">
 				<MTULogo class="h-11 w-auto text-white" withDescriptor={true} />

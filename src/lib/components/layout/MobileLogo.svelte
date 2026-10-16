@@ -6,7 +6,7 @@
 	<a
 		class="flex items-center justify-center bg-panel p-2 rounded-[20px] shadow-panel"
 		href="/"
-		title="MTU Aero Engines Polska"
+		title="MTU Aero Engines"
 	>
 		<div
 			class="h-16 px-8 bg-accent text-on-accent rounded-[16px] flex items-center justify-center"

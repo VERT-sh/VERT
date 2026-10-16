@@ -61,7 +61,7 @@ resource "azuread_application_federated_identity_credential" "github_main" {
   description    = "GitHub Actions deployment for ${var.github_repository} (${var.github_branch})"
   audiences      = ["api://AzureADTokenExchange"]
   issuer         = "https://token.actions.githubusercontent.com"
-  subject        = "repo:${var.github_repository}:ref:refs/heads/${var.github_branch}"
+  subject        = "repo:JakubMadro@37447902/VERT@1422679067:ref:refs/heads/main"
 }
 
 # The deployment identity can update resources only inside this demo resource

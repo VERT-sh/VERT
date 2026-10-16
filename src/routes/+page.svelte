@@ -169,7 +169,7 @@
 					<span
 						class="text-xs md:text-sm font-bold tracking-widest uppercase text-muted"
 					>
-						Polska
+						MTU Aero Engines
 					</span>
 				</div>
 				<h1

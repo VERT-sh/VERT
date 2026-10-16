@@ -2,10 +2,9 @@
 	type Props = {
 		class?: string;
 		withDescriptor?: boolean;
-		polska?: boolean;
 	};
 
-	let { class: className = "h-8", withDescriptor = true, polska = false }: Props = $props();
+	let { class: className = "h-8", withDescriptor = true }: Props = $props();
 </script>
 
 <svg
