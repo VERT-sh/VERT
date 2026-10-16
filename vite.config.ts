@@ -4,10 +4,13 @@ import adapter from "@sveltejs/adapter-static";
 import { sveltekit } from "@sveltejs/kit/vite";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import { execSync } from "child_process";
+import { resolve } from "node:path";
 import { defineConfig, type PluginOption } from "vite";
 import wasm from "vite-plugin-wasm";
 
-// coollify removes the .git folder but exposes commit via SOURCE_COMMIT env variable
+const pandocPath = (path: string) => resolve("node_modules/pandoc-wasm", path);
+
+// coolify removes the .git folder but exposes commit via SOURCE_COMMIT env variable
 let commitHash = process.env.SOURCE_COMMIT
 	? process.env.SOURCE_COMMIT.substring(0, 7) // shorten it lol
 	: "unknown";
@@ -55,6 +58,19 @@ export default defineConfig(({ command }) => {
 
 	return {
 		plugins,
+		resolve: {
+			alias: [
+				{
+					find: "pandoc-wasm/core",
+					replacement: pandocPath("src/core.js"),
+				},
+				{
+					// regex so it also matches the "?url" query suffix (a plain string wouldn't)
+					find: /^pandoc-wasm\/wasm/,
+					replacement: pandocPath("src/pandoc.wasm"),
+				},
+			],
+		},
 		worker: {
 			plugins: () => [wasm()],
 			format: "es",

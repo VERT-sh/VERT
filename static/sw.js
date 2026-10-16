@@ -1,9 +1,9 @@
-const CACHE_NAME = "vert-wasm-cache-v6"; // updated when workers update
+const CACHE_NAME = "vert-wasm-cache-v7"; // updated when workers update
 
 let coepCredentialless = false;
 
 const WASM_FILES = [
-	"/pandoc.wasm", // from https://github.com/haskell-wasm/pandoc-wasm
+	// any static wasm files that should be cached
 ];
 
 const WASM_URL_PATTERNS = [
@@ -11,6 +11,7 @@ const WASM_URL_PATTERNS = [
 	/\/assets\/.*worker.*\.js$/, // prod worker files
 	/magick.*\.wasm$/, // magick-wasm (unneeded?)
 	/vips.*\.wasm$/, // wasm-vips (main + dynamic libs)
+	/pandoc.*\.wasm$/, // pandoc-wasm
 	/\/ffmpeg-core[^/]*\.(js|wasm)$/, // ffmpeg wasm core
 ];
 

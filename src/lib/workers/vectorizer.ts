@@ -63,7 +63,7 @@ const handleMessage = async (
 					const optimizeStartedAt = performance.now();
 					svg = optimizeSync(raw, { multipass: true });
 					log(
-						`optimized svg in ${Math.round(performance.now() - optimizeStartedAt)}ms (${raw.length} -> ${svg.length} chars)`,
+						`optimized svg in ${Math.round(performance.now() - optimizeStartedAt)}ms (${raw.length} to ${svg.length} chars)`,
 					);
 				}
 

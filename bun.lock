@@ -5,7 +5,6 @@
     "": {
       "name": "vert",
       "dependencies": {
-        "@bjorn3/browser_wasi_shim": "^0.4.2",
         "@ffmpeg/core": "0.12.10",
         "@ffmpeg/core-mt": "0.12.10",
         "@ffmpeg/ffmpeg": "^0.12.15",
@@ -35,6 +34,7 @@
         "overlayscrollbars": "^2.16.0",
         "overlayscrollbars-svelte": "^0.5.5",
         "p-queue": "^10.0.0",
+        "pandoc-wasm": "^1.1.0",
         "qoa-format": "^1.0.1",
         "riff-file": "^1.0.3",
         "sanitize-html": "^2.18.1",
@@ -765,6 +765,8 @@
     "p-queue": ["p-queue@10.0.0", "", {}, "sha512-P2wrCri3bhGLPo3kX7qYVXbo/5GvaVATU0DpO24CbeT53Y4z35t8JUWku04ERpXHUYB5rPMi3TkWE3fmJgx5rA=="],
 
     "pako": ["pako@2.2.0", "", {}, "sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w=="],
+
+    "pandoc-wasm": ["pandoc-wasm@1.1.0", "", { "dependencies": { "@bjorn3/browser_wasi_shim": "^0.4.2" } }, "sha512-IoWBsC/cbSZe71rcRtxXUxG+Auf8aGDHKYOQZA6OdwmUL2xdpQaqrSGhPa+6zfLdSar7cnyAmTWt6KU9n5kBjQ=="],
 
     "parse-srcset": ["parse-srcset@1.0.2", "", {}, "sha512-/2qh0lav6CmI15FzA3i/2Bzk2zCgQhGMkvhOhKNcBVQ1ldgpbfiNTVslmooUmWJcADi1f1kIeynbDRVzNlfR6Q=="],
 

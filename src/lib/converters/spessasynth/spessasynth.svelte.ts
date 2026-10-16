@@ -131,8 +131,12 @@ export class SpessaSynthConverter extends Converter {
 		this.activeConversions.delete(input.id);
 	}
 
+	private waitForMessage(
+		worker: Worker,
+		type?: string,
+		timeout = 0,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private waitForMessage(worker: Worker, type?: string, timeout = 0): Promise<any> {
+	): Promise<any> {
 		return new Promise((resolve, reject) => {
 			let timer: ReturnType<typeof setTimeout> | undefined;
 			const onMessage = (e: MessageEvent) => {

@@ -46,7 +46,6 @@
 		"vite-plugin-wasm": "^3.6.0"
 	},
 	"dependencies": {
-		"@bjorn3/browser_wasi_shim": "^0.4.2",
 		"@ffmpeg/core": "0.12.10",
 		"@ffmpeg/core-mt": "0.12.10",
 		"@ffmpeg/ffmpeg": "^0.12.15",
@@ -76,6 +75,7 @@
 		"overlayscrollbars": "^2.16.0",
 		"overlayscrollbars-svelte": "^0.5.5",
 		"p-queue": "^10.0.0",
+		"pandoc-wasm": "^1.1.0",
 		"qoa-format": "^1.0.1",
 		"riff-file": "^1.0.3",
 		"sanitize-html": "^2.18.1",

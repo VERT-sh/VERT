@@ -99,7 +99,7 @@ const handleMessage = async (
 				convertMIDI(buffer, to, message.input.name),
 			);
 		} else {
-			throw new Error(`Unsupported conversion: ${from} -> ${to}`);
+			throw new Error(`Unsupported conversion: ${from} to ${to}`);
 		}
 
 		if (!output.length)
