@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { duration, fade } from "$lib/util/animation";
 	import { quintOut } from "svelte/easing";
-	import Dialog from "../functional/Dialog.svelte";
+	import Dialog from "../functional/popups/Dialog.svelte";
 	import {
 		type Dialog as DialogType,
 		dialogs,
@@ -16,7 +16,7 @@
 
 {#if dialogList.length > 0}
 	<div
-		class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-40"
+		class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-40"
 		in:fade={{
 			duration,
 			easing: quintOut,
@@ -26,7 +26,7 @@
 			easing: quintOut,
 		}}
 	>
-		{#each dialogList as dialog, i}
+		{#each dialogList as dialog, i (dialog.id)}
 			{#if i === 0}
 				<Dialog {...dialog} />
 			{/if}

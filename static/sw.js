@@ -1,7 +1,7 @@
-const CACHE_NAME = "vert-wasm-cache-v2"; // updated when workers update
+const CACHE_NAME = "vert-wasm-cache-v3"; // updated when workers update
 
 const WASM_FILES = [
-	"/pandoc.wasm",
+	"/pandoc.wasm", // from https://github.com/haskell-wasm/pandoc-wasm
 	"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js",
 	"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm",
 ];
@@ -24,10 +24,49 @@ function shouldCacheUrl(url) {
 	);
 }
 
-self.addEventListener("install", (event) => {
+const REVALIDATE_URLS = WASM_FILES.filter((file) => file.startsWith("/"));
+
+function shouldRevalidate(url) {
+	const urlObj = new URL(url);
+	return REVALIDATE_URLS.includes(urlObj.pathname);
+}
+
+// compare the headers nginx/browsers send for static files so we only rewrite the cache when the file changed
+function cacheSignature(response) {
+	return (
+		response.headers.get("etag") ||
+		response.headers.get("last-modified") ||
+		response.headers.get("content-length") ||
+		""
+	);
+}
+
+async function revalidate(request) {
+	try {
+		const cache = await caches.open(CACHE_NAME);
+		const cached = await cache.match(request);
+		if (!cached) return;
+
+		const response = await fetch(request, { cache: "no-cache" });
+		// 304 or any non-2xx means the cached copy is still current
+		if (!response.ok) return;
+
+		const signature = cacheSignature(response);
+		const cachedSignature = cacheSignature(cached);
+
+		if (!signature || signature !== cachedSignature) {
+			await cache.put(request, response);
+			console.log("[SW] revalidated and updated:", request.url);
+		}
+	} catch (err) {
+		console.warn("[SW] revalidation failed:", request.url, err);
+	}
+}
+
+self.addEventListener("install", (e) => {
 	console.log("[SW] installing service worker");
 
-	event.waitUntil(
+	e.waitUntil(
 		caches.open(CACHE_NAME).then((cache) => {
 			const staticFiles = WASM_FILES.filter((file) =>
 				file.startsWith("/"),
@@ -44,8 +83,8 @@ self.addEventListener("install", (event) => {
 	self.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
-	event.waitUntil(
+self.addEventListener("activate", (e) => {
+	e.waitUntil(
 		caches
 			.keys()
 			.then((cacheNames) => {
@@ -67,15 +106,17 @@ self.addEventListener("activate", (event) => {
 	);
 });
 
-self.addEventListener("fetch", (event) => {
-	const request = event.request;
+self.addEventListener("fetch", (e) => {
+	const request = e.request;
 
 	if (!shouldCacheUrl(request.url)) {
 		return; // Let the request go through normally if not a target URL
 	}
 
-    // else intercept request
-	event.respondWith(
+	// else intercept request
+	const revalidateInBackground = shouldRevalidate(request.url);
+
+	e.respondWith(
 		caches.match(request).then((cachedResponse) => {
 			if (cachedResponse) {
 				console.log("[SW] serving from cache:", request.url);
@@ -121,14 +162,19 @@ self.addEventListener("fetch", (event) => {
 				});
 		}),
 	);
+
+	// refresh same-origin wasm in the background so a redeploy is picked up, even while the cached copy is served
+	if (revalidateInBackground) e.waitUntil(revalidate(request));
 });
 
-self.addEventListener("message", (event) => {
-    if (!event.data) return;
-    const type = event.data.type;
+self.addEventListener("message", (e) => {
+	if (!e.data) return;
+	const type = e.data.type;
+	const port = e.ports?.[0];
 
 	if (type === "GET_CACHE_INFO") {
-		event.waitUntil(
+		if (!port) return;
+		e.waitUntil(
 			caches.open(CACHE_NAME).then(async (cache) => {
 				const keys = await cache.keys();
 				let totalSize = 0;
@@ -159,7 +205,7 @@ self.addEventListener("message", (event) => {
 					}
 				}
 
-				event.ports[0].postMessage({
+				port.postMessage({
 					totalSize,
 					fileCount: files.length,
 					files,
@@ -169,7 +215,8 @@ self.addEventListener("message", (event) => {
 	}
 
 	if (type === "CLEAR_CACHE") {
-		event.waitUntil(
+		if (!port) return;
+		e.waitUntil(
 			caches
 				.delete(CACHE_NAME)
 				.then(() => {
@@ -177,11 +224,11 @@ self.addEventListener("message", (event) => {
 					return caches.open(CACHE_NAME);
 				})
 				.then(() => {
-					event.ports[0].postMessage({ success: true });
+					port.postMessage({ success: true });
 				})
 				.catch((err) => {
 					console.error("[SW] failed to clear cache:", err);
-					event.ports[0].postMessage({
+					port.postMessage({
 						success: false,
 						error: err.message,
 					});

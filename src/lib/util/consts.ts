@@ -17,3 +17,11 @@ export const DISABLE_ALL_EXTERNAL_REQUESTS =
 	PUB_DISABLE_ALL_EXTERNAL_REQUESTS === "true";
 
 export const GB = 1024 * 1024 * 1024;
+
+export function conversionConcurrency(): number {
+	const cores =
+		typeof navigator !== "undefined"
+			? navigator.hardwareConcurrency || 4
+			: 4;
+	return Math.max(1, cores - 1); // leave one core free just cause
+}

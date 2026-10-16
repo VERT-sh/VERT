@@ -4,7 +4,7 @@
 	import { converters } from "$lib/converters";
 	import { vertdLoaded } from "$lib/store/index.svelte";
 	import clsx from "clsx";
-	import { AudioLines, BookText, Check, Film, Image } from "lucide-svelte";
+	import { AudioLines, BookText, Check, Film, Image } from "@lucide/svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { OverlayScrollbarsComponent } from "overlayscrollbars-svelte";
 	import { browser } from "$app/environment";
@@ -66,11 +66,32 @@
 		};
 
 		if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
+			const formats = Array.from(
+				new Set([
+					...getSupportedFormats("vertd").split(", "),
+					...getSupportedFormats("mediabunny").split(", "),
+				]),
+			)
+				.filter((f) => f !== "none")
+				.join(", ");
+
+			const mediabunnyStatus = converters.find(
+				(c) => c.name === "mediabunny",
+			)?.status;
+			const vertdReady = $vertdLoaded === true;
+			const mediabunnyReady = mediabunnyStatus === "ready";
+			const videoStatus =
+				vertdReady && mediabunnyReady
+					? "ready"
+					: vertdReady || mediabunnyReady
+						? "partially-ready"
+						: "not-ready";
+
 			output.Video = {
-				formats: getSupportedFormats("vertd"),
+				formats,
 				icon: Film,
 				title: m["upload.cards.video"](),
-				status: $vertdLoaded === true ? "ready" : "not-ready", // not using converter.status for this
+				status: videoStatus as WorkerStatus,
 			};
 		}
 
@@ -99,6 +120,8 @@
 		switch (status) {
 			case "downloading":
 				return m["upload.cards.status.downloading"]();
+			case "partially-ready":
+				return m["upload.cards.status.partially_ready"]();
 			case "ready":
 				return m["upload.cards.status.ready"]();
 			default:
@@ -231,9 +254,11 @@
 										</p>
 									{/if}
 									<p>
-										{@html sanitize(m["upload.cards.status.text"]({
-											status: getStatusText(s.status),
-										}))}
+										{@html sanitize(
+											m["upload.cards.status.text"]({
+												status: getStatusText(s.status),
+											}),
+										)}
 									</p>
 									<div
 										class="flex flex-col items-center relative"
@@ -278,11 +303,11 @@
 									</div>
 								</div>
 							</OverlayScrollbarsComponent>
-							<!-- blur at bottom if scrollable - positioned relative to the card container -->
+							<!-- bottom blur if scrollable -->
 							{#if showBlur[i]}
 								<div
 									class="absolute left-0 bottom-0 w-full h-10 pointer-events-none"
-									style={`background: linear-gradient(to top, var(--bg-panel), transparent 100%);`}
+									style={`background: linear-gradient(to top, var(--bg-panel), transparent 65%);`}
 								></div>
 							{/if}
 						</div>

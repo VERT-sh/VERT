@@ -22,7 +22,7 @@ VERT is built in Svelte and TypeScript.
 - Conversion settings
 - User-friendly interface built with Svelte
 
-<sup>\* Non-local video conversion is available with our official instance, but the [daemon](https://github.com/VERT-sh/vertd) is easily self-hostable to maintain privacy and fully local functionality.</sup>
+<sup>\* Local video conversion in-browser is supported, but some conversion may require server-side processing. Server video conversion is available with our official instance, but the [daemon](https://github.com/VERT-sh/vertd) is easily self-hostable to maintain privacy and fully local functionality.</sup>
 
 ## Documentation
 
@@ -31,16 +31,20 @@ VERT is built in Svelte and TypeScript.
 - [Using Docker](./docs/DOCKER.md)
 - [Video Conversion](./docs/VIDEO_CONVERSION.md)
 
+## Contributing
+
+Refer to our contributing guidelines before opening an issue or pull request here: [CONTRIBUTING.md](./CONTRIBUTING.md)
+
 ## License
 
 This project is licensed under the AGPL-3.0 License, please see the [LICENSE](LICENSE) file for details.
 
 ## Star History
 
-<a href="https://www.star-history.com/#VERT-sh/VERT&Date">
+<a href="https://star-history.dera.page/#VERT-sh/VERT&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=VERT-sh/VERT&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=VERT-sh/VERT&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=VERT-sh/VERT&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=VERT-sh/VERT&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=VERT-sh/VERT&type=Date" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=VERT-sh/VERT&type=Date" />
  </picture>
 </a>

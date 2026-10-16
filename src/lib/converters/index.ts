@@ -1,26 +1,33 @@
 import type { Categories } from "$lib/types";
 import type { Converter } from "./converter.svelte";
-import { FFmpegConverter } from "./ffmpeg.svelte";
-import { PandocConverter } from "./pandoc.svelte";
-import { VertdConverter } from "./vertd.svelte";
-import { MagickConverter } from "./magick.svelte";
+import { FFmpegConverter } from "./ffmpeg/ffmpeg.svelte";
+import { PandocConverter } from "./pandoc/pandoc.svelte";
+import { VertdConverter } from "./vertd/vertd.svelte";
+import { MagickConverter } from "./magick/magick.svelte";
+import { MediabunnyConverter } from "./mediabunny/mediabunny.svelte";
 import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
 
+// TODO: change this to include category with initialization to replace converterCategories and maybe categories as well
 const getConverters = (): Converter[] => {
 	const converters: Converter[] = [
 		new MagickConverter(),
 		new FFmpegConverter(),
+		new PandocConverter(),
+		new MediabunnyConverter(),
 	];
 
-	if (!DISABLE_ALL_EXTERNAL_REQUESTS) {
-		converters.push(new VertdConverter());
-	}
+	if (!DISABLE_ALL_EXTERNAL_REQUESTS) converters.push(new VertdConverter());
 
-	converters.push(new PandocConverter());
 	return converters;
 };
 
 export const converters = getConverters();
+export const converterCategories = {
+	image: ["imagemagick"],
+	video: ["mediabunny", "vertd"],
+	audio: ["ffmpeg"],
+	doc: ["pandoc"],
+};
 
 export function getConverterByFormat(format: string) {
 	for (const converter of converters) {
@@ -40,21 +47,27 @@ export const categories: Categories = {
 
 categories.audio.formats =
 	converters
-		.find((c) => c.name === "ffmpeg")
+		.find((c) => converterCategories.audio.includes(c.name))
 		?.supportedFormats.filter((f) => f.toSupported && f.isNative)
 		.map((f) => f.name) || [];
-categories.video.formats =
-	converters
-		.find((c) => c.name === "vertd")
-		?.supportedFormats.filter((f) => f.toSupported && f.isNative)
-		.map((f) => f.name) || [];
+categories.video.formats = [
+	...new Set(
+		converters
+			.filter((c) => converterCategories.video.includes(c.name))
+			.flatMap((c) =>
+				c.supportedFormats
+					.filter((f) => f.toSupported && f.isNative)
+					.map((f) => f.name),
+			),
+	),
+];
 categories.image.formats =
 	converters
-		.find((c) => c.name === "imagemagick")
+		.find((c) => converterCategories.image.includes(c.name))
 		?.formatStrings((f) => f.toSupported) || [];
 categories.doc.formats =
 	converters
-		.find((c) => c.name === "pandoc")
+		.find((c) => converterCategories.doc.includes(c.name))
 		?.supportedFormats.filter((f) => f.toSupported && f.isNative)
 		.map((f) => f.name) || [];
 

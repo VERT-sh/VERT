@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from "$lib/paraglide/messages";
 	import { link, sanitize } from "$lib/store/index.svelte";
-	import { ShieldCheckIcon } from "lucide-svelte";
+	import { ShieldCheckIcon } from "@lucide/svelte";
 </script>
 
 <div class="flex flex-col h-full items-center">
@@ -37,7 +37,10 @@
 					link(
 						["about_link", "stripe_link"],
 						m["privacy.donations.description"](),
-						["/about", "https://stripe.com/docs/disputes/prevention/advanced-fraud-detection"],
+						[
+							"/about",
+							"https://stripe.com/docs/disputes/prevention/advanced-fraud-detection",
+						],
 						[false, true],
 					),
 				)}
@@ -58,7 +61,7 @@
 				{m["privacy.conversion_errors.footer"]()}
 			</div>
 
-			<h3 class="text-xl mt-4 mb-2">{m["privacy.analytics.title"]()}</h3>
+			<h2 class="text-2xl mt-4 mb-2">{m["privacy.analytics.title"]()}</h2>
 			<p class="mb-4">
 				{@html sanitize(
 					link(
@@ -73,9 +76,19 @@
 				)}
 			</p>
 
-			<h3 class="text-xl mt-4 mb-2">
+			<h2 class="text-2xl mt-4 mb-2">{m["privacy.debugging.title"]()}</h2>
+			<p class="mb-4">
+				{@html link(
+					["settings_link"],
+					m["privacy.debugging.description"](),
+					["/settings"],
+					[false],
+				)}
+			</p>
+
+			<h2 class="text-2xl mt-4 mb-2">
 				{m["privacy.local_storage.title"]()}
-			</h3>
+			</h2>
 			<p class="mb-4">
 				{@html sanitize(
 					link(
@@ -87,7 +100,7 @@
 				)}
 			</p>
 
-			<h3 class="text-xl mt-4 mb-2">{m["privacy.contact.title"]()}</h3>
+			<h2 class="text-2xl mt-4 mb-2">{m["privacy.contact.title"]()}</h2>
 			<p class="mb-0">
 				{@html sanitize(
 					link(

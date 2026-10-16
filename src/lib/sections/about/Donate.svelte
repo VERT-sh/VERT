@@ -10,9 +10,11 @@
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$env/static/public";
-	const OFFICIAL_DONATION_URL = "https://donations.vert.sh";
-	const OFFICIAL_STRIPE_KEY =
-		"pk_live_51RDVmAGSxPVad6bQwzVNnbc28nlmzA30krLWk1fefCMpUPiSRPkavMMbGqa8A3lUaOCMlsUEVy2CWDYg0ip3aPpL00ZJlsMkf2";
+	// please do not change these!
+	const OFFICIAL_DONATION_URL = atob("aHR0cHM6Ly9kb25hdGlvbnMudmVydC5zaA==");
+	const OFFICIAL_STRIPE_KEY = atob(
+		"cGtfbGl2ZV81MVRsclBhRlRQamtoRUdCU3U1S3d5NWpKUVl4Y1g1eVVVSFhpSDVnN1h6dmIwTkt6RHFib29jMTI2SGpsVzM1dVVrZkFnUU4ycnVFb0N1eVF5bm94cEthQTAwb2pGZ1ExMTY=",
+	);
 	const isOfficial =
 		PUB_DONATION_URL === OFFICIAL_DONATION_URL &&
 		PUB_STRIPE_KEY === OFFICIAL_STRIPE_KEY;
@@ -30,13 +32,13 @@
 		HandCoinsIcon,
 		HeartIcon,
 		WalletIcon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import { Elements, PaymentElement } from "svelte-stripe";
 	import { quintOut } from "svelte/easing";
 	import { m } from "$lib/paraglide/messages";
 	import { ToastManager } from "$lib/util/toast.svelte";
-	import { log } from "$lib/util/logger";
+	import { log } from "$lib/util/logger.svelte";
 
 	let amount = $state(1);
 	let customAmount = $state("");
@@ -48,7 +50,7 @@
 	let paymentState = $state<"prepay" | "fetching" | "details">("prepay");
 	let enablePay = $state(false);
 	let clientSecret = $state<string | null>(null);
-	let elements: StripeElements | null = $state(null);
+	let elements: StripeElements | undefined = $state();
 
 	const amountClick = (preset: number) => {
 		amount = preset;
@@ -149,7 +151,7 @@
 
 		paymentState = "prepay";
 		clientSecret = null;
-		elements = null;
+		elements = undefined;
 		amount = 1;
 		customAmount = "";
 		type = "one-time";
@@ -299,8 +301,8 @@
 							{#if stripe && clientSecret}
 								<Elements {stripe} {clientSecret} bind:elements>
 									<PaymentElement
-										on:change={(e) => {
-											enablePay = e.detail.complete;
+										onchange={(e) => {
+											enablePay = e.complete;
 										}}
 									/>
 								</Elements>
