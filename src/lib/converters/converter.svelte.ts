@@ -7,6 +7,7 @@ import type {
 	SettingCategories,
 } from "#lib/types/conversion-settings";
 import { error, log } from "#lib/util/logger.svelte";
+import { canonicalCodecName, codecLabel } from "./codec-labels";
 
 export type WorkerStatus =
 	| "idle" // not initialized yet (nothing downloaded)
@@ -161,10 +162,62 @@ export class Converter {
 		to: string,
 		settings: ConversionSettings,
 	): Promise<NormalizedSettings> {
-		return {
-			settings: { ...settings },
-			changes: [],
-		};
+		const normalized = { ...settings };
+		const changes: NormalizedSettings["changes"] = [];
+
+		// only codec values need cross-converter translation, so skip the settings
+		// lookup (which may hit the network for vertd) when there are none set
+		const hasCodecValue = Object.entries(normalized).some(
+			([key, value]) =>
+				key.toLowerCase().endsWith("codec") &&
+				value !== undefined &&
+				value !== null &&
+				value !== "auto",
+		);
+		if (!hasCodecValue) return { settings: normalized, changes };
+
+		let categories: SettingCategories = {};
+		try {
+			categories = await this.getAvailableSettings(input);
+		} catch (err) {
+			this.error(`failed to load settings for normalization: ${err}`);
+			return { settings: normalized, changes };
+		}
+
+		// translate codec values to the canonical name, finding a matching option in the new converter's settings
+		// (e.g. mediabunny's "avc" is vertd's "h264")
+		for (const setting of Object.values(categories).flat()) {
+			if (setting.type !== "select" || !setting.options?.length) continue;
+
+			const value = normalized[setting.key];
+			if (value === undefined || value === null) continue;
+			if (setting.options.some((option) => option.value === value))
+				continue;
+
+			const match = setting.options.find(
+				(option) =>
+					canonicalCodecName(String(option.value)) ===
+					canonicalCodecName(String(value)),
+			);
+			const newValue = match?.value ?? setting.default;
+
+			if (newValue === undefined) {
+				// no equivalent and no default, drop the unknown value
+				delete normalized[setting.key];
+				continue;
+			}
+			if (newValue === value) continue;
+
+			normalized[setting.key] = newValue;
+			changes.push({
+				setting: setting.key,
+				oldValue: codecLabel(String(value)),
+				newValue: codecLabel(String(newValue)),
+				file: input.name,
+			});
+		}
+
+		return { settings: normalized, changes };
 	}
 
 	private startTimeout() {

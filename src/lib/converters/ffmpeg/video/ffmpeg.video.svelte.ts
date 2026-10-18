@@ -9,6 +9,7 @@ import type {
 } from "#lib/types/conversion-settings";
 import { browser } from "$app/env";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { codecOptions, filterCommonCodecs } from "../../codec-labels";
 import { FormatInfo, formatDuration } from "../../converter.svelte";
 import { applyPriorities } from "../../priority";
 import { videoFormats } from "../../vertd/vertd.svelte";
@@ -161,10 +162,12 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...(support?.video ?? []).map((codec) => ({
-					value: encoderFor(codec),
-					label: codec,
-				})),
+				...codecOptions(
+					filterCommonCodecs(
+						(support?.video ?? []).map(encoderFor),
+						"video",
+					),
+				),
 			],
 		};
 
@@ -184,10 +187,12 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...(support?.audio ?? []).map((codec) => ({
-					value: encoderFor(codec),
-					label: codec,
-				})),
+				...codecOptions(
+					filterCommonCodecs(
+						(support?.audio ?? []).map(encoderFor),
+						"audio",
+					),
+				),
 			],
 		};
 

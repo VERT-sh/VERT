@@ -15,6 +15,7 @@ import { formatError } from "#lib/util/error";
 import { ToastManager } from "#lib/util/toast.svelte";
 import { PUB_DISABLE_FAILURE_BLOCKS } from "$app/env/public";
 import { SvelteMap, SvelteSet } from "svelte/reactivity";
+import { type CodecInfo, codecOptions, toCodecInfo } from "../codec-labels";
 import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 import { applyPriorities } from "../priority";
 
@@ -41,18 +42,36 @@ interface RouteRequestMap {
 }
 
 interface CodecsResponse {
-	videoCodecs: string[];
-	audioCodecs: string[];
+	videoCodecs: CodecInfo[];
+	audioCodecs: CodecInfo[];
 }
+
+type CodecsRouteResponse = {
+	format?: string;
+	videoCodecs?: (CodecInfo | string)[];
+	audioCodecs?: (CodecInfo | string)[];
+	codec?: string;
+	formats?: string[];
+};
 
 interface RouteResponseMap {
 	"/api/upload": UploadResponse;
 	"/api/version": string;
 	"/api/size_limit": number | null;
 	"/api/keep": void;
-	"/api/codecs": string[]; // get list of all codecs supported by vertd server
-	[key: `/api/codecs/${string}`]: unknown; // list of codecs for this format
-	[key: `/api/codecs/support/${string}`]: unknown; // list of formats supporting this codec -- i dont know how this works in ts, i have to put both as unknown since this and /api/codecs are different types (CodecsResponse & string[]) and TS errors
+	// get list of all codecs supported by vertd server
+	"/api/codecs": {
+		video: CodecInfo[];
+		audio: CodecInfo[];
+		all: CodecInfo[];
+	};
+	// list of codecs for this format
+	[key: `/api/codecs/${string}`]: CodecsRouteResponse;
+	// list of formats supporting this codec
+	[key: `/api/codecs/support/${string}`]: {
+		codec: string;
+		formats: string[];
+	};
 	[key: `/api/confirm/${string}/${string}`]: void; // confirm download - job id, token
 }
 
@@ -474,11 +493,15 @@ export class VertdConverter extends Converter {
 				baseUrl,
 			);
 
+			const nextCodecs: CodecsResponse = {
+				videoCodecs: (codecsJson.videoCodecs || []).map(toCodecInfo),
+				audioCodecs: (codecsJson.audioCodecs || []).map(toCodecInfo),
+			};
 			const previousCodecs = JSON.stringify(this.codecs);
-			const newCodecs = JSON.stringify(codecsJson);
+			const newCodecs = JSON.stringify(nextCodecs);
 
 			if (previousCodecs !== newCodecs) {
-				this.codecs = codecsJson as CodecsResponse;
+				this.codecs = nextCodecs;
 				this.log(`updated codecs from vertd: ${newCodecs}`);
 			}
 		} catch (e) {
@@ -528,10 +551,7 @@ export class VertdConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...(this.codecs.videoCodecs || []).map((codec) => ({
-					value: codec,
-					label: codec,
-				})),
+				...codecOptions(this.codecs.videoCodecs),
 			],
 		};
 
@@ -555,10 +575,7 @@ export class VertdConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...(this.codecs.audioCodecs || []).map((codec) => ({
-					value: codec,
-					label: codec,
-				})),
+				...codecOptions(this.codecs.audioCodecs),
 			],
 		};
 

@@ -8,10 +8,12 @@
 	import type { VertFile } from "#lib/types";
 	import { effects, files } from "#lib/store/index.svelte";
 	import { categoryByConverter } from "#lib/converters";
+	import { canonicalCodecName } from "#lib/converters/codec-labels";
 	import { log, error } from "#lib/util/logger.svelte";
 	import type {
 		ConversionSettings,
 		SettingCategories,
+		SettingDefinition,
 	} from "#lib/types/conversion-settings";
 	import clsx from "clsx";
 	import { animateHeight, duration, fade } from "#lib/util/animation";
@@ -98,6 +100,48 @@
 	let activeTab = $state("Converter");
 	let availableCategories = $state<SettingCategories>({});
 
+	// resolve a value against a setting's options, translating codec aliases (e.g. mediabunny's "avc" is vertd's "h264")
+	const resolveSettingValue = (
+		value: unknown,
+		setting: SettingDefinition,
+	) => {
+		const options = setting.options ?? [];
+		if (options.some((option) => option.value === value)) return value;
+
+		const match = options.find(
+			(option) =>
+				canonicalCodecName(String(option.value)) ===
+				canonicalCodecName(String(value)),
+		);
+
+		return match?.value ?? setting.default;
+	};
+
+	// drop/translate values that the given settings don't support
+	const sanitizeSettings = (
+		current: ConversionSettings,
+		categories: SettingCategories,
+	) => {
+		const sanitized = { ...current };
+
+		for (const setting of Object.values(categories).flat()) {
+			if (
+				setting.type !== "select" ||
+				sanitized[setting.key] === undefined
+			)
+				continue;
+
+			const resolved = resolveSettingValue(
+				sanitized[setting.key],
+				setting,
+			);
+			if (resolved === undefined) delete sanitized[setting.key];
+			else sanitized[setting.key] = resolved;
+		}
+
+		return sanitized;
+	};
+
 	const settingTabs = $derived.by((): SettingCategories => {
 		// sequences expose only Converter tab (ffmpeg/vertd)
 		if (targetFile?.sequenceKind) return { Converter: [] };
@@ -148,6 +192,14 @@
 				if (cancelled) return;
 
 				availableCategories = categories;
+				const sanitized = sanitizeSettings(settings, categories);
+				for (const key of Object.keys(settings)) {
+					if (!(key in sanitized)) delete settings[key];
+				}
+				for (const [key, value] of Object.entries(sanitized)) {
+					if (settings[key] !== value) settings[key] = value;
+				}
+
 				const hasConverterTab = shouldShowConverterTab(currentFile);
 				if (
 					(!hasConverterTab && activeTab === "Converter") ||
@@ -226,9 +278,9 @@
 						.map((setting) => setting.key),
 				);
 				const applicableSettings = Object.fromEntries(
-					Object.entries(settings).filter(([key]) =>
-						supportedKeys.has(key),
-					),
+					Object.entries(
+						sanitizeSettings(settings, categories),
+					).filter(([key]) => supportedKeys.has(key)),
 				);
 				const defaultSettings = Object.fromEntries(
 					Object.values(categories)
@@ -239,7 +291,11 @@
 				// apply defaults, then existing settings, then new settings on top
 				targetFile.conversionSettings = {
 					...defaultSettings,
-					...targetFile.conversionSettings,
+					// existing settings may come from another converter (e.g. "avc")
+					...sanitizeSettings(
+						targetFile.conversionSettings,
+						categories,
+					),
 					...applicableSettings,
 					converter: converter.name,
 				};
@@ -425,14 +481,15 @@
 																}
 															: opt,
 												) || []}
-												selected={settings[
-													setting.key
-												] ??
-													targetFile
-														.conversionSettings[
-														setting.key
-													] ??
-													setting.default}
+												selected={resolveSettingValue(
+													settings[setting.key] ??
+														targetFile
+															.conversionSettings[
+															setting.key
+														] ??
+														setting.default,
+													setting,
+												)}
 												style="settings"
 												onselect={(value) =>
 													handleSettingChange(

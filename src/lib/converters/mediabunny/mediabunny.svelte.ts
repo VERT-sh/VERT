@@ -36,6 +36,7 @@ import {
 } from "mediabunny";
 import { SvelteMap } from "svelte/reactivity";
 import { get } from "svelte/store";
+import { codecOptions, filterCommonCodecs } from "../codec-labels";
 import { Converter, formatDuration, FormatInfo } from "../converter.svelte";
 import { applyPriorities } from "../priority";
 
@@ -260,7 +261,10 @@ export class MediabunnyConverter extends Converter {
 		};
 
 		const toFormat = input.to;
-		const supportedVideoCodecs = getCompatibleCodecs("video", toFormat);
+		const supportedVideoCodecs = filterCommonCodecs(
+			getCompatibleCodecs("video", toFormat),
+			"video",
+		);
 		const videoCodec: SettingDefinition = {
 			key: "videoCodec",
 			label: m["convert.settings.video.codec.video"](),
@@ -268,14 +272,14 @@ export class MediabunnyConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...supportedVideoCodecs.map((codec) => ({
-					value: codec,
-					label: codec,
-				})),
+				...codecOptions(supportedVideoCodecs),
 			],
 		};
 
-		const supportedAudioCodecs = getCompatibleCodecs("audio", toFormat);
+		const supportedAudioCodecs = filterCommonCodecs(
+			getCompatibleCodecs("audio", toFormat),
+			"audio",
+		);
 		const audioCodec: SettingDefinition = {
 			key: "audioCodec",
 			label: m["convert.settings.video.codec.audio"](),
@@ -283,10 +287,7 @@ export class MediabunnyConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...supportedAudioCodecs.map((codec) => ({
-					value: codec,
-					label: codec,
-				})),
+				...codecOptions(supportedAudioCodecs),
 			],
 		};
 

@@ -15,23 +15,12 @@
 	} from "#lib/util/consts";
 	import { m } from "#lib/paraglide/messages";
 	import { ToastManager } from "#lib/util/toast.svelte";
-	// import { dev } from "$app/environment";
-	// import { page } from "$app/state";
-
-	/* interface Donator {
-		name: string;
-		amount?: string | number;
-		avatar: string;
-	} */
-
 	interface Contributor {
 		name: string;
 		github: string;
 		avatar: string;
 		role?: string;
 	}
-
-	// const donors: Donator[] = [];
 
 	const mainContribs: Contributor[] = [
 		{

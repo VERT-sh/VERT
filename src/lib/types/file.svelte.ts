@@ -492,6 +492,8 @@ export class VertFile {
 					["file", "settings"],
 					`changed setting "${change.setting}" from "${change.oldValue}" to "${change.newValue}" for file ${change.file}`,
 				);
+				this.conversionSettings[change.setting] =
+					normalizedSettings.settings[change.setting];
 				ToastManager.add({
 					type: "warning",
 					message: m["workers.warnings.settings_change"]({
