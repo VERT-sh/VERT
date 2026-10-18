@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @import url(@fontsource/radio-canada-big/600.css);
-@import url("$lib/assets/style/host-grotesk.css");
+@import url("#lib/assets/style/host-grotesk.css");
 
 :root {
 	--font-body:
@@ -309,7 +309,7 @@
 }
 
 body {
-	@apply text-foreground font-body font-semibold overflow-x-hidden;
+	@apply overflow-x-hidden font-body font-semibold text-foreground;
 	width: 100vw;
 	background-color: var(--bg);
 	background-size: 100vw 100vh;
@@ -321,17 +321,17 @@ body {
 }
 
 .hoverable {
-	@apply hover:scale-105 duration-200;
+	@apply duration-200 hover:scale-105;
 	will-change: transform;
 }
 
 .hoverable-md {
-	@apply hover:scale-110 duration-200;
+	@apply duration-200 hover:scale-110;
 	will-change: transform;
 }
 
 .hoverable-lg {
-	@apply hover:scale-[1.15] duration-200;
+	@apply duration-200 hover:scale-[1.15];
 	will-change: transform;
 }
 
@@ -353,7 +353,7 @@ body {
 	}
 
 	.btn {
-		@apply transition bg-button flex items-center justify-center overflow-hidden relative cursor-pointer px-6 h-14 rounded-full font-medium focus:!outline-none hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none hoverable;
+		@apply hoverable relative flex h-14 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-button px-6 font-medium transition hover:scale-105 focus:!outline-none active:scale-95 disabled:pointer-events-none disabled:opacity-50;
 	}
 
 	.btn.highlight {
@@ -370,7 +370,7 @@ body {
 	}
 
 	code {
-		@apply font-mono bg-gray-200 rounded-md px-1 dynadark:bg-panel-alt dynadark:text-white;
+		@apply rounded-md bg-gray-200 px-1 font-mono dynadark:bg-panel-alt dynadark:text-white;
 	}
 
 	p a {
@@ -379,7 +379,7 @@ body {
 
 	input[type="text"],
 	select.dropdown {
-		@apply w-full p-3 rounded-lg bg-panel border-2 border-button pl-3;
+		@apply w-full rounded-lg border-2 border-button bg-panel p-3 pl-3;
 	}
 
 	input[type="number"]::-webkit-inner-spin-button,
@@ -394,33 +394,33 @@ body {
 	}
 
 	input[type="text"]::placeholder {
-		@apply text-muted font-normal;
+		@apply font-normal text-muted;
 	}
 
 	input[type="text"]:focus {
-		@apply outline outline-accent outline-2;
+		@apply outline outline-2 outline-accent;
 		outline-offset: -2px;
 	}
 
 	input[type="checkbox"] {
-		@apply appearance-none w-5 h-5 rounded-md border-2 border-button cursor-pointer;
+		@apply h-5 w-5 cursor-pointer appearance-none rounded-md border-2 border-button;
 		outline-offset: -2px;
 	}
 
 	input[type="checkbox"]:hover {
-		@apply bg-button border-accent;
+		@apply border-accent bg-button;
 	}
 
 	input[type="checkbox"]:checked {
-		@apply bg-accent border-accent;
+		@apply border-accent bg-accent;
 	}
 
 	input[type="checkbox"]:focus {
-		@apply outline outline-accent outline-2;
+		@apply outline outline-2 outline-accent;
 	}
 
 	input[type="range"].range-slider {
-		@apply w-full h-[10px] appearance-none bg-transparent;
+		@apply h-[10px] w-full appearance-none bg-transparent;
 	}
 
 	input[type="range"].range-slider:focus {
@@ -435,7 +435,7 @@ body {
 	}
 
 	input[type="range"].range-slider::-webkit-slider-thumb {
-		@apply bg-panel w-[18px] h-[18px] -mt-1 rounded-full cursor-pointer shadow-md;
+		@apply -mt-1 h-[18px] w-[18px] cursor-pointer rounded-full bg-panel shadow-md;
 		appearance: none;
 		border: 2px solid var(--accent);
 	}
@@ -446,7 +446,7 @@ body {
 	}
 
 	input[type="range"].range-slider::-moz-range-thumb {
-		@apply bg-panel border-2 border-accent w-4 h-4 rounded-full cursor-pointer shadow-md;
+		@apply h-4 w-4 cursor-pointer rounded-full border-2 border-accent bg-panel shadow-md;
 	}
 
 	hr {

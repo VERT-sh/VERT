@@ -1,4 +1,20 @@
-import { VertFile } from "$lib/types";
+import { m } from "#lib/paraglide/messages";
+import { Settings } from "#lib/sections/settings/index.svelte";
+import { isMobile } from "#lib/store/index.svelte";
+import { VertFile } from "#lib/types";
+import type {
+	ConversionSettings,
+	SettingCategories,
+	SettingDefinition,
+} from "#lib/types/conversion-settings";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { browser } from "$app/env";
+import { registerAacEncoder } from "@mediabunny/aac-encoder";
+import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
+import { registerDtsDecoder, registerDtsEncoder } from "@mediabunny/dts";
+import { registerFlacEncoder } from "@mediabunny/flac-encoder";
+import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
+import { registerProresDecoder } from "@mediabunny/prores";
 import {
 	BlobSource,
 	BufferTarget,
@@ -18,25 +34,11 @@ import {
 	WEBM,
 	WebMOutputFormat,
 } from "mediabunny";
-import { registerAacEncoder } from "@mediabunny/aac-encoder";
-import { registerAc3Decoder, registerAc3Encoder } from "@mediabunny/ac3";
-import { registerDtsDecoder, registerDtsEncoder } from "@mediabunny/dts";
-import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
-import { registerFlacEncoder } from "@mediabunny/flac-encoder";
-import { registerProresDecoder } from "@mediabunny/prores";
-import { Converter, FormatInfo, type WorkerStatus } from "../converter.svelte";
-import { error, log } from "$lib/util/logger.svelte";
-import { m } from "$lib/paraglide/messages";
-import type {
-	SettingDefinition,
-	SettingCategories,
-	ConversionSettings,
-} from "$lib/types/conversion-settings";
-import { isMobile } from "$lib/store/index.svelte";
-import { ToastManager } from "$lib/util/toast.svelte";
-import { browser } from "$app/environment";
+import { SvelteMap } from "svelte/reactivity";
 import { get } from "svelte/store";
-import { Settings } from "$lib/sections/settings/index.svelte";
+import { codecOptions, filterCommonCodecs } from "../codec-labels";
+import { Converter, formatDuration, FormatInfo } from "../converter.svelte";
+import { applyPriorities } from "../priority";
 
 // codec compatibility stuff, based on mediabunny's docs
 // https://mediabunny.dev/guide/supported-formats-and-codecs#compatibility-table
@@ -132,10 +134,9 @@ const buildAudioConfig = (
 
 export class MediabunnyConverter extends Converter {
 	public name = "mediabunny";
-	public status: WorkerStatus = $state("ready");
 	public reportsProgress: boolean = true;
 
-	private activeConversions = new Map<string, Conversion>();
+	private activeConversions = new SvelteMap<string, Conversion>();
 
 	private formats: string[] = [
 		"mp4",
@@ -151,31 +152,22 @@ export class MediabunnyConverter extends Converter {
 		"ts",
 	];
 
-	public supportedFormats: FormatInfo[] = [
-		...this.formats.map((f) => new FormatInfo(f, true, true, true, 2)),
-	];
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
+	public supportedFormats: FormatInfo[] = applyPriorities(
+		"mediabunny",
+		this.formats.map((f) => new FormatInfo(f, true, true, true)),
+	);
 
 	constructor() {
 		super();
-
 		if (!browser) return;
+		this.log("created converter");
+	}
 
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
-
+	protected async setup(): Promise<void> {
 		// additional mediabunny coders
 		// currently the official ones -- maybe add our own in the future
-		void this.initializeCodecs()
-			.then(() => this.checkStatus())
-			.catch((err) => {
-				this.error(`Failed to initialize Mediabunny codecs: ${err}`);
-				this.status = "error";
-			});
+		await this.initializeCodecs();
+		await this.checkStatus();
 	}
 
 	private async checkStatus() {
@@ -269,7 +261,10 @@ export class MediabunnyConverter extends Converter {
 		};
 
 		const toFormat = input.to;
-		const supportedVideoCodecs = getCompatibleCodecs("video", toFormat);
+		const supportedVideoCodecs = filterCommonCodecs(
+			getCompatibleCodecs("video", toFormat),
+			"video",
+		);
 		const videoCodec: SettingDefinition = {
 			key: "videoCodec",
 			label: m["convert.settings.video.codec.video"](),
@@ -277,14 +272,14 @@ export class MediabunnyConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...supportedVideoCodecs.map((codec) => ({
-					value: codec,
-					label: codec,
-				})),
+				...codecOptions(supportedVideoCodecs),
 			],
 		};
 
-		const supportedAudioCodecs = getCompatibleCodecs("audio", toFormat);
+		const supportedAudioCodecs = filterCommonCodecs(
+			getCompatibleCodecs("audio", toFormat),
+			"audio",
+		);
 		const audioCodec: SettingDefinition = {
 			key: "audioCodec",
 			label: m["convert.settings.video.codec.audio"](),
@@ -292,10 +287,7 @@ export class MediabunnyConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...supportedAudioCodecs.map((codec) => ({
-					value: codec,
-					label: codec,
-				})),
+				...codecOptions(supportedAudioCodecs),
 			],
 		};
 
@@ -356,7 +348,11 @@ export class MediabunnyConverter extends Converter {
 		to: string,
 		settings: ConversionSettings,
 	): Promise<VertFile> {
+		await this.init();
+
 		this.trackConversion(file);
+		this.log(`converting ${file.name} (${file.id}) to ${to}`);
+		const startedAt = performance.now();
 		const toFormat = to.startsWith(".") ? to.slice(1) : to;
 		const originalName = file.file.name.split(".").slice(0, -1).join(".");
 		const outputFilename = `${originalName}.${toFormat}`;
@@ -440,7 +436,7 @@ export class MediabunnyConverter extends Converter {
 				const isValid = conversion.isValid;
 				const logMethod = isValid ? this.error : this.log;
 				logMethod(
-					`${discardedTrackCount} discarded track(s) for ${file.name}:\n${discardedTrackList.join("\n")}`,
+					`${discardedTrackCount} discarded track(s) for ${file.name} (${file.id}):\n${discardedTrackList.join("\n")}`,
 				);
 				ToastManager.add({
 					type: isValid ? "warning" : "error", // warning if output created, error if nothing / conversion was completely invalid
@@ -465,6 +461,10 @@ export class MediabunnyConverter extends Converter {
 			};
 
 			await conversion.execute();
+
+			this.log(
+				`converted ${file.name} (${file.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
+			);
 
 			if (streamTargetContext) {
 				const streamedFile = await streamTargetContext.getFile();
@@ -537,11 +537,13 @@ export class MediabunnyConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const conversion = this.activeConversions.get(input.id);
 		if (!conversion) {
-			this.error(`no active conversion found for file ${input.name}`);
+			this.error(
+				`no active conversion found for file ${input.name} (${input.id})`,
+			);
 			return;
 		}
 
-		this.log(`cancelling conversion for file ${input.name}`);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
 		await conversion.cancel();
 	}

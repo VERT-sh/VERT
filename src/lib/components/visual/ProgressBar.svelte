@@ -12,13 +12,12 @@
 	);
 </script>
 
-<div class="w-full h-1 bg-panel-alt rounded-full overflow-hidden relative">
+<div class="relative h-1 w-full overflow-hidden rounded-full bg-panel-alt">
 	<div
-		class="h-full bg-accent absolute left-0 top-0"
+		class="absolute left-0 top-0 h-full bg-accent"
 		class:percentless-animation={progress === null}
-		style={percent
-			? `width: ${percent}%; transition: 500ms linear width;`
-			: ""}
+		style:width={percent ? `${percent}%` : null}
+		style:transition={percent ? "500ms linear width" : null}
 	></div>
 </div>
 

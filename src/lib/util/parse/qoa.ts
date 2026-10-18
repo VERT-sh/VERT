@@ -1,5 +1,5 @@
 // @ts-expect-error - no types for qoa-format
-import { encode, decode } from "qoa-format";
+import { decode, encode } from "qoa-format";
 
 export type QoaPcmData = {
 	sampleRate: number;

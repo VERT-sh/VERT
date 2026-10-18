@@ -5,8 +5,8 @@
 // re-invent the wheel, BUT the library they provide (ani-cursor)
 // doesn't expose the internals.
 
-import { RIFFFile } from "riff-file";
 import { unpackArray, unpackString } from "byte-data";
+import { RIFFFile } from "riff-file";
 
 type Chunk = {
 	format: string;

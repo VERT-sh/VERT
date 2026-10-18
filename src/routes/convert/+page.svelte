@@ -1,15 +1,15 @@
 <script lang="ts">
-	import ConversionPanel from "$lib/components/functional/ConversionPanel.svelte";
-	import FormatDropdown from "$lib/components/functional/FormatDropdown.svelte";
-	import Uploader from "$lib/components/functional/Uploader.svelte";
-	import Panel from "$lib/components/visual/Panel.svelte";
-	import ProgressBar from "$lib/components/visual/ProgressBar.svelte";
-	import Tooltip from "$lib/components/visual/Tooltip.svelte";
+	import ConversionPanel from "#lib/components/functional/ConversionPanel.svelte";
+	import FormatDropdown from "#lib/components/functional/FormatDropdown.svelte";
+	import Uploader from "#lib/components/functional/Uploader.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
+	import ProgressBar from "#lib/components/visual/ProgressBar.svelte";
+	import Tooltip from "#lib/components/visual/Tooltip.svelte";
 	import {
 		categories,
-		converterCategories,
-		converters,
-	} from "$lib/converters";
+		categoryByConverter,
+		type ConverterCategory,
+	} from "#lib/converters";
 	import {
 		effects,
 		files,
@@ -17,29 +17,92 @@
 		showGradient,
 		dropdownStates,
 		fileSettings,
-	} from "$lib/store/index.svelte";
-	import { VertFile } from "$lib/types";
+	} from "#lib/store/index.svelte";
+	import { VertFile } from "#lib/types";
+	import type { Component } from "svelte";
 	import {
 		AudioLines,
+		ArchiveIcon,
 		BookText,
 		DownloadIcon,
+		FileArchiveIcon,
 		FileMusicIcon,
-		FileQuestionIcon,
-		FileVideo2,
+		FileQuestionMarkIcon,
+		FileVideoCameraIcon,
 		FilmIcon,
 		ImageIcon,
 		ImageOffIcon,
 		RotateCwIcon,
 		XIcon,
 	} from "@lucide/svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { Settings } from "$lib/sections/settings/index.svelte";
-	import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
-	import { GB } from "$lib/util/consts";
-	import { formatBytes } from "$lib/util/file";
-	import SettingsModal from "$lib/components/functional/popups/SettingsModal.svelte";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { Settings } from "#lib/sections/settings/index.svelte";
+	import { MAX_ARRAY_BUFFER_SIZE } from "#lib/store/index.svelte";
+	import { GB } from "#lib/util/consts";
+	import { formatBytes } from "#lib/util/file";
+	import SettingsModal from "#lib/components/functional/popups/SettingsModal.svelte";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import { vertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
+	import clsx from "clsx";
+
+	const gradientColors: Record<ConverterCategory, string> = {
+		image: "blue",
+		audio: "purple",
+		video: "red",
+		doc: "green",
+		archive: "pink",
+		unknown: "pink",
+	};
+
+	const gradientVars: Record<ConverterCategory, string> = {
+		audio: "--bg-gradient-purple-alt",
+		video: "--bg-gradient-red-alt",
+		doc: "--bg-gradient-green-alt",
+		image: "--bg-gradient-blue-alt",
+		archive: "--bg-gradient-pink-alt",
+		unknown: "--bg-gradient-pink-alt",
+	};
+
+	type FileType = "archive" | ConverterCategory | "unknown";
+
+	const fileTypeIcons: Record<FileType, Component> = {
+		archive: ArchiveIcon,
+		audio: AudioLines,
+		video: FilmIcon,
+		doc: BookText,
+		image: ImageIcon,
+		unknown: FileQuestionMarkIcon,
+	};
+
+	const fileTypeBigIcons: Record<FileType, Component> = {
+		archive: FileArchiveIcon,
+		audio: FileMusicIcon,
+		video: FileVideoCameraIcon,
+		doc: BookText,
+		image: ImageIcon,
+		unknown: ImageOffIcon,
+	};
+
+	const fileTypeColors: Record<FileType, string> = {
+		archive: "bg-accent-pink",
+		audio: "bg-accent-purple",
+		video: "bg-accent-red",
+		doc: "bg-accent-green",
+		image: "bg-accent-blue",
+		unknown: "bg-accent-pink",
+	};
+
+	const getFileType = (file: VertFile): FileType => {
+		if (file.isZip()) return "archive";
+		return (
+			categoryByConverter[getCurrentConverter(file)?.name ?? ""] ??
+			"unknown"
+		);
+	};
+
+	const getFileTypeLabel = (fileType: FileType): string => {
+		return m[`convert.errors.${fileType}`]();
+	};
 
 	let processedFileIds = $state(new Set<string>());
 
@@ -94,7 +157,7 @@
 			if (selectedConverter) return selectedConverter;
 		}
 
-		// prefer a usable converter over a not-ready one
+		// prefer a usable (loaded) converter over one that still has to initialize
 		const readyConverter = availableConverters.find(
 			(c) => c.status === "ready" || c.status === "partially-ready",
 		);
@@ -110,16 +173,7 @@
 
 			const converter = getCurrentConverter(file);
 			if (!converter) return;
-			let category: string | undefined;
-			const isImage = converterCategories.image.includes(converter.name);
-			const isAudio = converterCategories.audio.includes(converter.name);
-			const isVideo = converterCategories.video.includes(converter.name);
-			const isDocument = converterCategories.doc.includes(converter.name);
-
-			if (isImage) category = "image";
-			else if (isAudio) category = "audio";
-			else if (isVideo) category = "video";
-			else if (isDocument) category = "doc";
+			const category = categoryByConverter[converter.name];
 			if (!category) return;
 
 			let targetFormat: string | undefined;
@@ -150,44 +204,44 @@
 				}
 			}
 
-			// or use first available format (or if default format is same as input)
+			// or use the first format the file can actually convert to
 			if (!targetFormat) {
-				const firstDiff = categories[category]?.formats.find(
-					(f) => f !== file.from,
-				);
+				const formats = categories[category]?.formats ?? [];
 				targetFormat =
-					firstDiff || categories[category]?.formats[0] || "";
+					formats.find(
+						(f) =>
+							f !== file.from &&
+							file.hasAvailableConverter(file.from, f),
+					) ??
+					formats.find((f) => f !== file.from) ??
+					formats[0] ??
+					"";
 			}
 
 			file.to = targetFormat;
+			files.preloadConverters(file);
 			processedFileIds.add(file.id);
 		});
 	});
 
 	const handleSelect = (option: string, file: VertFile) => {
 		file.result = null;
+		files.preloadConverters(file);
 	};
 
 	$effect(() => {
 		// Set gradient color depending on the file types
 		const fileTypes = files.files
 			.map((file) => {
-				const converterName = getCurrentConverter(file)?.name;
-				if (!converterName) return null;
-				if (converterCategories.image.includes(converterName))
-					return "blue";
-				if (converterCategories.audio.includes(converterName))
-					return "purple";
-				if (converterCategories.video.includes(converterName))
-					return "red";
-				if (converterCategories.doc.includes(converterName))
-					return "green";
-				return null;
+				const category =
+					categoryByConverter[getCurrentConverter(file)?.name ?? ""];
+				return file.isZip()
+					? gradientColors.archive
+					: category
+						? gradientColors[category]
+						: null;
 			})
-			.filter(
-				(type): type is "blue" | "purple" | "red" | "green" =>
-					type !== null,
-			);
+			.filter((type): type is string => type !== null);
 
 		const uniqueTypes = new Set(fileTypes);
 		const type =
@@ -207,47 +261,29 @@
 {#snippet fileItem(file: VertFile)}
 	{@const currentConverter = getCurrentConverter(file)}
 	{@const name = currentConverter?.name || "unknown"}
-	{@const isAudio = converterCategories.audio.includes(name)}
-	{@const isVideo = converterCategories.video.includes(name)}
-	{@const isDocument = converterCategories.doc.includes(name)}
-	<Panel class="p-5 flex flex-col min-w-0 gap-4 relative">
-		<div class="flex-shrink-0 h-8 w-full flex items-center gap-2">
-			{#if !converters.length}
-				<Tooltip
-					text={m["convert.tooltips.unknown_file"]()}
-					position="bottom"
-				>
-					<FileQuestionIcon size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{:else if isAudio}
-				<Tooltip
-					text={m["convert.tooltips.audio_file"]()}
-					position="bottom"
-				>
-					<AudioLines size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{:else if isVideo}
-				<Tooltip
-					text={m["convert.tooltips.video_file"]()}
-					position="bottom"
-				>
-					<FilmIcon size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{:else if isDocument}
-				<Tooltip
-					text={m["convert.tooltips.document_file"]()}
-					position="bottom"
-				>
-					<BookText size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{:else}
-				<Tooltip
-					text={m["convert.tooltips.image_file"]()}
-					position="bottom"
-				>
-					<ImageIcon size="24" class="flex-shrink-0" />
-				</Tooltip>
-			{/if}
+	{@const category = categoryByConverter[name]}
+	{@const fileType = getFileType(file)}
+	{@const Icon = fileTypeIcons[fileType]}
+	{@const isInitializing =
+		currentConverter?.status === "idle" ||
+		currentConverter?.status === "downloading" ||
+		currentConverter?.status === "initializing"}
+	<Panel class="relative flex min-w-0 flex-col gap-4 p-5">
+		<div class="flex h-8 w-full flex-shrink-0 items-center gap-2">
+			<Tooltip
+				text={fileType === "unknown"
+					? m["convert.tooltips.unknown_file"]()
+					: fileType === "archive"
+						? m["convert.tooltips.archive_file"]()
+						: fileType === "doc"
+							? m["convert.tooltips.document_file"]()
+							: fileType === "audio"
+								? m["convert.tooltips.audio_file"]()
+								: m["convert.tooltips.video_file"]()}
+				position="bottom"
+			>
+				<Icon size="24" class="flex-shrink-0" />
+			</Tooltip>
 			<div class="flex-grow overflow-hidden">
 				{#if file.processing}
 					<ProgressBar
@@ -260,15 +296,38 @@
 					/>
 				{:else}
 					<h2
-						class="text-xl font-body overflow-hidden text-ellipsis whitespace-nowrap"
-						title={file.name}
+						class="overflow-hidden text-ellipsis whitespace-nowrap font-body text-xl"
+						title={`${file.name} (${file.id})`}
 					>
 						{file.name}
 					</h2>
 				{/if}
 			</div>
+			<div
+				class={clsx(
+					"flex flex-shrink-0 items-center justify-center overflow-visible transition-transform duration-300",
+					isInitializing ? "w-8 opacity-100" : "w-0 opacity-0",
+				)}
+			>
+				{#if isInitializing}
+					<Tooltip
+						text={m["convert.tooltips.converter_initializing"]({
+							type: getFileTypeLabel(fileType),
+						})}
+						position="bottom"
+					>
+						<DownloadIcon
+							size="20"
+							class={clsx(
+								"text-muted",
+								$effects && "animate-bounce",
+							)}
+						/>
+					</Tooltip>
+				{/if}
+			</div>
 			<button
-				class="flex-shrink-0 w-8 rounded-full hover:bg-panel-alt h-full flex items-center justify-center"
+				class="flex h-full w-8 flex-shrink-0 items-center justify-center rounded-full hover:bg-panel-alt"
 				onclick={() => files.remove(file)}
 			>
 				<XIcon size="24" class="text-muted" />
@@ -277,7 +336,7 @@
 		{#if !currentConverter}
 			{#if file.name.startsWith("vertd")}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
@@ -288,7 +347,7 @@
 				</div>
 			{:else}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
@@ -305,7 +364,7 @@
 			{@const isLarge = file.isLarge()}
 			{#if formatInfo && !formatInfo.fromSupported}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
@@ -316,7 +375,7 @@
 				</div>
 			{:else if isLarge && !file.supportsStreaming()}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
@@ -327,104 +386,51 @@
 						})}
 					</p>
 				</div>
-			{:else if currentConverter.status === "downloading"}
-				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
-				>
-					<p class="font-body font-bold">
-						{m["convert.errors.cant_convert"]()}
-					</p>
-					<p class="font-normal">
-						{m["convert.errors.worker_downloading"]({
-							type: isAudio
-								? m["convert.errors.audio"]()
-								: isVideo
-									? m["convert.errors.video"]()
-									: isDocument
-										? m["convert.errors.doc"]()
-										: m["convert.errors.image"](),
-						})}
-					</p>
-				</div>
 			{:else if currentConverter.status === "error"}
 				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
+					class="flex h-full flex-col justify-center text-center text-failure"
 				>
 					<p class="font-body font-bold">
 						{m["convert.errors.cant_convert"]()}
 					</p>
 					<p class="font-normal">
 						{m["convert.errors.worker_error"]({
-							type: isAudio
-								? m["convert.errors.audio"]()
-								: isVideo
-									? m["convert.errors.video"]()
-									: isDocument
-										? m["convert.errors.doc"]()
-										: m["convert.errors.image"](),
-						})}
-					</p>
-				</div>
-			{:else if currentConverter.status === "not-ready"}
-				<div
-					class="h-full flex flex-col text-center justify-center text-failure"
-				>
-					<p class="font-body font-bold">
-						{m["convert.errors.cant_convert"]()}
-					</p>
-					<p class="font-normal">
-						{m["convert.errors.worker_timeout"]({
-							type: isAudio
-								? m["convert.errors.audio"]()
-								: isVideo
-									? m["convert.errors.video"]()
-									: isDocument
-										? m["convert.errors.doc"]()
-										: m["convert.errors.image"](),
+							type: getFileTypeLabel(fileType),
 						})}
 					</p>
 				</div>
 			{:else}
 				<div class="flex flex-row justify-between">
 					<div
-						class="flex gap-4 w-full h-[152px] overflow-hidden relative"
+						class="relative flex h-[152px] w-full gap-4 overflow-hidden"
 					>
-						<div class="w-1/2 h-full overflow-hidden rounded-xl">
+						<div class="h-full w-1/2 overflow-hidden rounded-xl">
 							{#if file.blobUrl}
 								<img
-									class="object-cover w-full h-full"
+									class="h-full w-full object-cover"
 									src={file.blobUrl}
-									alt={file.name}
+									alt={`${file.name} (${file.id})`}
 								/>
 							{:else}
+								{@const Icon = fileTypeBigIcons[fileType]}
 								<div
-									class="w-full h-full flex items-center justify-center text-black"
-									style="background: var({isAudio
-										? '--bg-gradient-purple-alt'
-										: isVideo
-											? '--bg-gradient-red-alt'
-											: isDocument
-												? '--bg-gradient-green-alt'
-												: '--bg-gradient-blue-alt'})"
+									class="flex h-full w-full items-center justify-center text-black"
+									style:background="var({gradientVars[
+										file.isZip()
+											? 'archive'
+											: (category ?? 'unknown')
+									]})"
 								>
-									{#if isAudio}
-										<FileMusicIcon size="56" />
-									{:else if isVideo}
-										<FileVideo2 size="56" />
-									{:else if isDocument}
-										<BookText size="56" />
-									{:else}
-										<ImageOffIcon size="56" />
-									{/if}
+									<Icon size="56" />
 								</div>
 							{/if}
 						</div>
 					</div>
 					<div
-						class="absolute top-16 right-0 mr-4 pl-2 h-[calc(100%-83px)] w-[calc(50%-38px)] pr-4 pb-1 flex items-center justify-center aspect-square"
+						class="absolute right-0 top-16 mr-4 flex aspect-square h-[calc(100%-83px)] w-[calc(50%-38px)] items-center justify-center pb-1 pl-2 pr-4"
 					>
 						<div
-							class="w-[122px] h-fit flex flex-col gap-2 items-center justify-center"
+							class="flex h-fit w-[122px] flex-col items-center justify-center gap-2"
 						>
 							<FormatDropdown
 								{categories}
@@ -435,22 +441,18 @@
 								{file}
 							/>
 							<div
-								class="w-full flex items-center justify-between"
+								class="flex w-full items-center justify-between"
 							>
 								<Tooltip
 									text={m["convert.tooltips.convert_file"]()}
 									position="bottom"
 								>
 									<button
-										class="btn {$effects
-											? ''
-											: '!scale-100'} p-0 w-14 h-14 text-black {isAudio
-											? 'bg-accent-purple'
-											: isVideo
-												? 'bg-accent-red'
-												: isDocument
-													? 'bg-accent-green'
-													: 'bg-accent-blue'}"
+										class={clsx(
+											"btn h-14 w-14 p-0 text-black",
+											!$effects && "!scale-100",
+											fileTypeColors[fileType],
+										)}
 										disabled={!files.isReady(file)}
 										onclick={() => file.convert()}
 									>
@@ -462,9 +464,10 @@
 									position="bottom"
 								>
 									<button
-										class="btn {$effects
-											? ''
-											: '!scale-100'} p-0 w-14 h-14"
+										class={clsx(
+											"btn h-14 w-14 p-0",
+											!$effects && "!scale-100",
+										)}
 										onclick={file.download}
 										disabled={!file.result}
 									>
@@ -480,27 +483,27 @@
 	</Panel>
 {/snippet}
 
-<div class="flex flex-col justify-center items-center gap-8 -mt-4 px-4 md:p-0">
-	<div class="max-w-[778px] w-full">
+<div class="-mt-4 flex flex-col items-center justify-center gap-8 px-4 md:p-0">
+	<div class="w-full max-w-[778px]">
 		<ConversionPanel />
 	</div>
 
 	<div
-		class="w-full max-w-[778px] grid grid-cols-1 md:grid-cols-2 auto-rows-[240px] gap-4 md:p-0"
+		class="grid w-full max-w-[778px] auto-rows-[240px] grid-cols-1 gap-4 md:grid-cols-2 md:p-0"
 	>
 		{#each files.files as file, i (file.id)}
 			{#if files.files.length >= 2 && i === 1}
 				<Uploader
-					class="w-full h-full col-start-1 row-start-1 md:col-start-2"
+					class="col-start-1 row-start-1 h-full w-full md:col-start-2"
 				/>
 			{/if}
 			{@render fileItem(file)}
 			{#if files.files.length < 2}
-				<Uploader class="w-full h-full" />
+				<Uploader class="h-full w-full" />
 			{/if}
 		{/each}
 		{#if files.files.length === 0}
-			<Uploader class="w-full h-full col-span-2" />
+			<Uploader class="col-span-2 h-full w-full" />
 		{/if}
 	</div>
 </div>

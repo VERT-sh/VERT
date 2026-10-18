@@ -1,8 +1,8 @@
-import { Settings } from "./index.svelte";
-import { PUB_VERTD_URL } from "$env/static/public";
-import { error, log } from "$lib/util/logger.svelte";
+import { getVertdLimit } from "#lib/store/index.svelte";
+import { error, log } from "#lib/util/logger.svelte";
+import { PUB_VERTD_URL } from "$app/env/public";
 import { writable } from "svelte/store";
-import { getVertdLimit } from "$lib/store/index.svelte";
+import { Settings } from "./index.svelte";
 
 const LOCATIONS = [
 	{ url: "https://eu.vertd.vert.sh" },
@@ -41,6 +41,7 @@ export const normalizeVertdUrl = (value: string): string => {
 	const trimmed = value.trim();
 	if (!trimmed) throw new Error("No vertd server URL configured");
 	try {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const url = new URL(
 			/^[a-z][a-z\d+.-]*:\/\//i.test(trimmed)
 				? trimmed

@@ -4,25 +4,26 @@
 		duration,
 		fade,
 		transition,
-	} from "$lib/util/animation";
-	import { m } from "$lib/paraglide/messages";
+	} from "#lib/util/animation";
+	import { m } from "#lib/paraglide/messages";
 	import {
 		isMobile,
 		files,
 		dropdownStates,
 		fileSettings,
-	} from "$lib/store/index.svelte";
-	import type { Categories } from "$lib/types";
+	} from "#lib/store/index.svelte";
+	import type { Categories } from "#lib/types";
 	import clsx from "clsx";
-	import { ChevronDown, SearchIcon, Settings } from "@lucide/svelte";
+	import { ChevronDownIcon, SearchIcon, SettingsIcon } from "@lucide/svelte";
 	import { onMount, tick } from "svelte";
 	import { quintOut } from "svelte/easing";
-	import { VertFile } from "$lib/types";
-	import { log } from "$lib/util/logger.svelte";
+	import { VertFile } from "#lib/types";
+	import { log } from "#lib/util/logger.svelte";
 	import FancyInput from "./FancyInput.svelte";
 	import Tooltip from "../visual/Tooltip.svelte";
-	import { vertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
-	import { formatBytes } from "$lib/util/file";
+	import { vertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
+	import { formatBytes } from "#lib/util/file";
+	import { getCodecs } from "#lib/converters/ffmpeg/ffmpeg.codecs.ts";
 
 	type Props = {
 		categories: Categories;
@@ -33,6 +34,7 @@
 		dropdownSize?: "default" | "large" | "small";
 		file?: VertFile;
 		allowEmpty?: boolean;
+		forceHideSettings?: boolean;
 	};
 
 	let {
@@ -44,6 +46,7 @@
 		dropdownSize = "default",
 		file,
 		allowEmpty = false,
+		forceHideSettings = false,
 	}: Props = $props();
 
 	let open = $state(false);
@@ -76,31 +79,68 @@
 		file.conversionSettings.imageSequenceFPS = imageSequenceFPS;
 		file.conversionSettings.imageSequenceTransparency =
 			imageSequenceTransparency;
+		files.syncSequenceConverters(file);
 	});
 
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
 
-	const isUnavailable = (format: string): boolean =>
-		!!file && !file.hasAvailableConverter(file.from, format);
-
+	// returns the reason a format is disabled for the current file/settings, or "" (empty string) if it's usable
 	const getUnavailableReason = (format: string): string => {
 		if (!file) return "";
-		// check if any compatible converters are available for this file and format
-		const compatible = file.converters.filter((converter) => {
-			const fromInfo = converter.supportedFormats.find(
-				(info) => info.name === file.from,
+
+		// zip + image sequence / per-image mode
+		const isZip = file.isZip();
+		const sequenceMode = isZip && imageSequence;
+		const sourceFormat = isZip
+			? (file.archiveFormats?.[0] ?? file.from)
+			: file.from;
+
+		// image sequences can only output animated formats
+		if (
+			imageSequence &&
+			categories["image"]?.formats.includes(format) &&
+			!sequenceFormats.includes(format)
+		)
+			return m["convert.dropdown.disabled.no_converter"]({
+				from: file.from,
+				to: format,
+			});
+
+		// can't carry audio track
+		if (
+			categories["audio"]?.formats.includes(from ?? "") &&
+			getCodecs(format).audio === "none"
+		)
+			return m["convert.dropdown.disabled.no_converter"]({
+				from: file.from,
+				to: format,
+			});
+
+		// converters that can produce this format for this file
+		const compatible = file.converters
+			.filter((converter) => {
+				const toInfo = converter.supportedFormats.find(
+					(info) => info.name === format,
+				);
+				if (!toInfo || !toInfo.toSupported) return false;
+
+				// if sequence mode, converters handle the archives itself (rather than its contents)
+				if (sequenceMode) return true;
+
+				const fromInfo = converter.supportedFormats.find(
+					(info) => info.name === sourceFormat,
+				);
+				return (
+					!!fromInfo &&
+					fromInfo.fromSupported &&
+					(fromInfo.isNative || toInfo.isNative)
+				);
+			})
+			.filter(
+				(converter) =>
+					!file.unavailableConverters[converter.name] &&
+					converter.isAvailable(),
 			);
-			const toInfo = converter.supportedFormats.find(
-				(info) => info.name === format,
-			);
-			return (
-				!!fromInfo &&
-				!!toInfo &&
-				fromInfo.fromSupported &&
-				toInfo.toSupported &&
-				(fromInfo.isNative || toInfo.isNative)
-			);
-		});
 
 		const largeFile = compatible.some(
 			(converter) =>
@@ -115,28 +155,19 @@
 				fileSize: formatBytes(file.size),
 			});
 
-		return m["convert.dropdown.disabled.no_converter"]({
-			from: file.from,
-			to: format,
-		});
+		if (compatible.length === 0)
+			return m["convert.dropdown.disabled.no_converter"]({
+				from: file.from,
+				to: format,
+			});
+
+		return "";
 	};
 
-	const shouldHide = (format: string): boolean =>
-		categories["audio"]?.formats.includes(from ?? "") === true &&
-		format === ".gif";
+	const isUnavailable = (format: string): boolean =>
+		!!getUnavailableReason(format);
 
-	const getFormats = (cat: string) => {
-		let formats = (categories[cat]?.formats ?? []).filter(
-			(f) => !shouldHide(f),
-		);
-
-		// if imageSequence is checked, filter image category to sequence formats only
-		if (imageSequence && cat === "image") {
-			formats = formats.filter((f) => sequenceFormats.includes(f));
-		}
-
-		return formats;
-	};
+	const getFormats = (cat: string) => categories[cat]?.formats ?? [];
 
 	const detectCategory = (): string => {
 		if (from) {
@@ -191,10 +222,14 @@
 
 		if (imageSequence) {
 			// TODO: image sequence -> video on vertd?
-			cats.push("video");
+			if (!cats.includes("video")) cats.push("video");
 		} else {
 			// handle special cases
-			if (from === ".gif" || from === ".webp") cats.push("video");
+			if (
+				(from === ".gif" || from === ".webp") &&
+				!cats.includes("video")
+			)
+				cats.push("video");
 			if (from === ".apng") {
 				//cats.push("image"); // -- buggy, magick can't convert from or to apng properly
 				cats = cats.filter((cat) => cat !== "audio");
@@ -220,16 +255,6 @@
 				? currentCategory
 				: availableCategories[0];
 
-		const hiddenFormats: string[] = [];
-
-		// if audio to video, hide these video formats (because they do not want audio tracks lol)
-		const nonAudioVideoFormats = [".gif", ".webp", ".apng", ".h264"];
-		if (
-			activeCategory === "video" &&
-			categories["audio"]?.formats.includes(from ?? "")
-		)
-			hiddenFormats.push(...nonAudioVideoFormats);
-
 		// if no query, return formats for current category
 		if (!searchQuery) {
 			const formats = getFormats(activeCategory ?? "");
@@ -250,7 +275,7 @@
 
 			return {
 				categories: availableCategories,
-				formats: formats.filter((f) => !hiddenFormats.includes(f)),
+				formats,
 				isFallback: false,
 				resolvedCategory: activeCategory ?? currentCategory,
 			};
@@ -258,22 +283,11 @@
 
 		const query = normalize(searchQuery);
 
-		const matches = (f: string, cat?: string) => {
-			if (
-				!normalize(f).includes(query) ||
-				shouldHide(f) ||
-				hiddenFormats.includes(f)
-			)
-				return false;
-			// if imageSequence and image category, only show animated formats
-			if (imageSequence && (cat ?? activeCategory) === "image") {
-				return sequenceFormats.includes(f);
-			}
-			return true;
-		};
+		// disabled formats stay visible (greyed out), so only match on the query
+		const matches = (f: string) => normalize(f).includes(query);
 
 		const matchingCategories = availableCategories.filter((cat) =>
-			(categories[cat]?.formats ?? []).some((f) => matches(f, cat)),
+			(categories[cat]?.formats ?? []).some((f) => matches(f)),
 		);
 
 		if (matchingCategories.length === 0) {
@@ -292,7 +306,7 @@
 				: matchingCategories[0];
 
 		const formats = (categories[resolvedCategory ?? ""]?.formats ?? [])
-			.filter((f) => matches(f, resolvedCategory))
+			.filter((f) => matches(f))
 			.sort((a, b) => {
 				// exact matches first, then original order
 				const aExact = normalize(a) === query;
@@ -304,7 +318,7 @@
 		// show categories with matches, formats from within resolved category
 		return {
 			categories: matchingCategories,
-			formats: formats.filter((f) => !hiddenFormats.includes(f)),
+			formats,
 			isFallback: false,
 			resolvedCategory,
 		};
@@ -428,7 +442,7 @@
 	const extract = async () => {
 		// extract all files in zip, then add all extracted files to files store
 		if (!file) return;
-		const { extractZip } = await import("$lib/util/file");
+		const { extractZip } = await import("#lib/util/file");
 		const extractedFiles = await extractZip(file.file);
 
 		if (!Array.isArray(extractedFiles) || extractedFiles.length === 0)
@@ -475,18 +489,20 @@
 </script>
 
 <div
-	class="relative w-full min-w-fit text-xl font-medium text-center"
+	class="relative w-full min-w-fit text-center text-xl font-medium"
 	bind:this={dropdown}
 >
 	<button
-		class="relative flex items-center justify-center w-full font-display px-3 py-3.5 bg-button rounded-full overflow-hidden cursor-pointer focus:!outline-none
-		{disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}"
+		class={clsx(
+			"relative flex w-full items-center justify-center overflow-hidden rounded-full bg-button px-3 py-3.5 font-display focus:!outline-none",
+			disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+		)}
 		onclick={() => clickDropdown()}
 		{disabled}
 	>
 		<!-- <p>{selected}</p> -->
 		<div
-			class="grid grid-cols-1 grid-rows-1 w-fit flex-grow-0 max-h-[2.5rem] overflow-hidden"
+			class="grid max-h-[2.5rem] w-fit flex-grow-0 grid-cols-1 grid-rows-1 overflow-hidden"
 		>
 			{#key selected}
 				<p
@@ -498,23 +514,23 @@
 						duration,
 						easing: quintOut,
 					}}
-					class="col-start-1 row-start-1 text-center font-body font-medium truncate max-w-[4rem]"
+					class="col-start-1 row-start-1 max-w-[4rem] truncate text-center font-body font-medium"
 				>
 					{selected || "N/A"}
 				</p>
 			{/key}
 			{#if currentCategory}
-				{#each categories[currentCategory].formats as option}
+				{#each categories[currentCategory].formats as option (option)}
 					<p
-						class="col-start-1 row-start-1 invisible pointer-events-none truncate max-w-[2.5rem]"
+						class="pointer-events-none invisible col-start-1 row-start-1 max-w-[2.5rem] truncate"
 					>
 						{option}
 					</p>
 				{/each}
 			{/if}
 		</div>
-		<ChevronDown
-			class="w-4 h-4 ml-3 mt-0.5 flex-shrink-0"
+		<ChevronDownIcon
+			class="ml-3 mt-0.5 h-4 w-4 flex-shrink-0"
 			style="transform: rotate({open
 				? 180
 				: 0}deg); transition: transform {duration}ms {transition};"
@@ -529,29 +545,31 @@
 			}}
 			class={clsx(
 				$isMobile
-					? "fixed inset-x-0 bottom-0 w-full z-[200] shadow-xl bg-panel-alt shadow-black/25 rounded-t-2xl overflow-hidden"
-					: "min-w-full shadow-xl bg-panel-alt shadow-black/25 absolute top-full mt-2 z-50 rounded-2xl overflow-hidden",
+					? "fixed inset-x-0 bottom-0 z-[200] w-full overflow-hidden rounded-t-2xl bg-panel-alt shadow-xl shadow-black/25"
+					: "absolute top-full z-50 mt-2 min-w-full overflow-hidden rounded-2xl bg-panel-alt shadow-xl shadow-black/25",
 				!$isMobile && {
 					"w-[320%]": dropdownSize === "large",
 					"w-[250%]": dropdownSize === "default",
 					"w-[150%]": dropdownSize === "small",
 				},
 				!$isMobile && {
-					"-translate-x-1/2 left-1/2": dropdownPosition === "center",
+					"left-1/2 -translate-x-1/2": dropdownPosition === "center",
 					"left-0": dropdownPosition === "left",
 					"right-0": dropdownPosition === "right",
 				},
 			)}
 		>
 			<!-- search box -->
-			<div class="p-3 w-full">
+			<div class="w-full p-3">
 				<div class="relative">
 					<input
 						type="text"
 						placeholder={m["convert.dropdown.placeholder"]()}
-						class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground {filteredData.isFallback
-							? 'opacity-50 cursor-not-allowed'
-							: ''}"
+						class={clsx(
+							"w-full flex-grow rounded-lg bg-panel !pl-11 !pr-3 text-foreground",
+							filteredData.isFallback &&
+								"cursor-not-allowed opacity-50",
+						)}
 						bind:value={searchQuery}
 						oninput={handleSearch}
 						onkeydown={onEnter}
@@ -561,11 +579,12 @@
 						disabled={filteredData.isFallback}
 					/>
 					<span
-						class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center {filteredData.isFallback
-							? 'opacity-50'
-							: ''}"
+						class={clsx(
+							"absolute left-4 top-1/2 flex -translate-y-1/2 items-center",
+							filteredData.isFallback && "opacity-50",
+						)}
 					>
-						<SearchIcon class="w-4 h-4" />
+						<SearchIcon class="h-4 w-4" />
 					</span>
 					{#if searchQuery}
 						<span
@@ -582,18 +601,20 @@
 			</div>
 			<!-- fallback message -->
 			{#if filteredData.isFallback}
-				<div class="pb-4 text-center text-muted text-base">
+				<div class="pb-4 text-center text-base text-muted">
 					{m["convert.dropdown.fallback"]()}
 				</div>
 			{/if}
 			<!-- available categories -->
 			<div class="flex items-center justify-between">
-				{#each filteredData.categories as category}
+				{#each filteredData.categories as category (category)}
 					<button
-						class="flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize
-                        {currentCategory === category
-							? 'text-accent border-b-accent'
-							: 'border-b-separator text-muted'}"
+						class={clsx(
+							"hover:text-muted/20 flex-grow border-b-2 pb-2 text-lg capitalize",
+							currentCategory === category
+								? "border-b-accent text-accent"
+								: "border-b-separator text-muted",
+						)}
 						onclick={() => selectCategory(category)}
 					>
 						<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
@@ -605,7 +626,7 @@
 			<div use:animateHeight>
 				{#key currentCategory}
 					<div
-						class="max-h-80 overflow-y-auto grid grid-cols-3 gap-2 p-2"
+						class="grid max-h-80 grid-cols-3 gap-2 overflow-y-auto p-2"
 						in:fade={{
 							duration: duration,
 							easing: quintOut,
@@ -618,15 +639,14 @@
 					>
 						{#if filteredData.formats.length > 0}
 							{#each filteredData.formats as format (format)}
-								{@const unavailable = isUnavailable(format)}
-								{#if unavailable}
-									<Tooltip
-										text={getUnavailableReason(format)}
-									>
+								{@const unavailableReason =
+									getUnavailableReason(format)}
+								{#if unavailableReason}
+									<Tooltip text={unavailableReason}>
 										<button
 											data-selected={format === selected}
 											aria-disabled="true"
-											class="w-full p-2 text-center rounded-xl opacity-45 cursor-not-allowed"
+											class="w-full cursor-not-allowed rounded-xl p-2 text-center opacity-45"
 											tabindex="0"
 											onclick={(e) => e.preventDefault()}
 											onkeydown={(e) =>
@@ -638,12 +658,14 @@
 								{:else}
 									<button
 										data-selected={format === selected}
-										class="w-full p-2 text-center rounded-xl
-								{format === selected
-											? 'bg-accent text-black'
-											: format === from
-												? 'bg-separator'
-												: 'hover:bg-panel'}"
+										class={clsx(
+											"w-full rounded-xl p-2 text-center",
+											format === selected
+												? "bg-accent text-black"
+												: format === from
+													? "bg-separator"
+													: "hover:bg-panel",
+										)}
 										onclick={() => selectOption(format)}
 									>
 										{format}
@@ -651,7 +673,7 @@
 								{/if}
 							{/each}
 						{:else}
-							<div class="col-span-3 text-center p-4 text-muted">
+							<div class="col-span-3 p-4 text-center text-muted">
 								{searchQuery
 									? m["convert.dropdown.no_results"]()
 									: m["convert.dropdown.no_formats"]()}
@@ -663,72 +685,93 @@
 			<!-- format options -->
 			{#if file?.name.toLowerCase().endsWith(".zip")}
 				<div
-					class="flex flex-col gap-2 p-2 border-t border-separator text-base"
+					class="flex flex-col gap-2 border-t border-separator p-2 text-base"
 				>
 					<button
-						class="w-full p-2 text-center rounded-lg bg-accent text-black"
+						class="w-full rounded-lg bg-accent p-2 text-center text-black"
 						onclick={() => extract()}
 					>
 						{m["convert.archive_file.extract"]()}
 					</button>
-					<!-- FIXME this is terrible -->
-					<div class="flex flex-col flex-wrap gap-1">
-						<!-- first row -->
-						<div class="flex items-center gap-3">
-							<div
-								class="flex items-center gap-2 flex-1 min-w-0 h-full"
-							>
-								<FancyInput
-									type="checkbox"
-									bind:checked={imageSequence}
-								/>
-								<label for="extract-sequence" class="text-sm">
-									{m[
-										"convert.image_sequence.image_sequence"
-									]()}
-								</label>
+					{#if file.sequenceKind !== "dash"}
+						<!-- FIXME this is terrible -->
+						<div class="flex flex-col flex-wrap gap-1">
+							<!-- first row -->
+							<div class="flex items-center gap-3">
+								<div
+									class="flex h-full min-w-0 flex-1 items-center gap-2"
+								>
+									<FancyInput
+										type="checkbox"
+										bind:checked={imageSequence}
+									/>
+									<label
+										for="extract-sequence"
+										class="text-sm"
+									>
+										{m[
+											"convert.image_sequence.image_sequence"
+										]()}
+									</label>
+								</div>
+								<div class="w-[80px] shrink-0">
+									<FancyInput
+										thin
+										inputClass="!h-9 !text-xs"
+										type="number"
+										extension="FPS"
+										placeholder="15"
+										bind:value={imageSequenceFPS}
+										disabled={!imageSequence}
+									/>
+								</div>
 							</div>
-							<div class="w-[80px] shrink-0">
-								<FancyInput
-									thin
-									inputClass="!h-9 !text-xs"
-									type="number"
-									extension="FPS"
-									placeholder="15"
-									bind:value={imageSequenceFPS}
-									disabled={!imageSequence}
-								/>
-							</div>
-						</div>
 
-						<!-- second row -->
-						<div class="flex items-center gap-3">
-							<div
-								class="flex items-center gap-2 flex-1 min-w-0 h-full"
-							>
-								<FancyInput
-									type="checkbox"
-									bind:checked={imageSequenceTransparency}
-									disabled={!imageSequence}
-								/>
-								<label for="extract-sequence" class="text-sm">
-									{m["convert.image_sequence.transparency"]()}
-								</label>
+							<!-- second row -->
+							<div class="flex items-center gap-3">
+								<div
+									class="flex h-full min-w-0 flex-1 items-center gap-2"
+								>
+									<FancyInput
+										type="checkbox"
+										bind:checked={imageSequenceTransparency}
+										disabled={!imageSequence}
+									/>
+									<label
+										for="extract-sequence"
+										class="text-sm"
+									>
+										{m[
+											"convert.image_sequence.transparency"
+										]()}
+									</label>
+								</div>
+								<!-- second thing -->
 							</div>
-							<!-- second thing -->
 						</div>
-					</div>
+					{/if}
+					{#if file.sequenceKind === "frameSequence" && imageSequence && !forceHideSettings}
+						<div class="flex flex-col border-t border-separator">
+							<button
+								class="mt-2 flex w-full justify-center gap-3 rounded-lg bg-accent p-2.5 text-center text-black"
+								onclick={() => ($fileSettings = file)}
+							>
+								<SettingsIcon size="24" />
+								{m["convert.settings.settings"]()}
+							</button>
+						</div>
+					{/if}
 				</div>
-			{:else}
-				<div class="border-t border-separator text-base p-2">
+			{:else if file && !forceHideSettings}
+				<div class="border-t border-separator p-2 text-base">
 					<button
-						class="w-full p-2.5 flex gap-3 justify-center text-center rounded-lg bg-accent text-black"
+						class="flex w-full justify-center gap-3 rounded-lg bg-accent p-2.5 text-center text-black"
 						onclick={() => {
 							if (file) $fileSettings = file;
 							else $fileSettings = undefined; // all files
 						}}
 					>
-						<Settings size="24" />
+						<SettingsIcon size="24" />
 						{m["convert.settings.settings"]()}
 					</button>
 				</div>

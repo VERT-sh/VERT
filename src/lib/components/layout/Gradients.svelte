@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { duration, transition } from "$lib/util/animation";
-	import VertVBig from "$lib/assets/vert-bg.svg?component";
-	import { files, gradientColor } from "$lib/store/index.svelte";
+	import { duration, transition } from "#lib/util/animation";
+	import VertVBig from "#lib/assets/vert-bg.svg?component";
+	import { files, gradientColor } from "#lib/store/index.svelte";
 	import { quintOut } from "svelte/easing";
-	import { fade } from "$lib/util/animation";
+	import { fade } from "#lib/util/animation";
 	import { Tween } from "svelte/motion";
 
 	const colors: {
@@ -70,38 +70,38 @@
 
 {#if page.url.pathname === "/"}
 	<div
-		class="fixed -z-30 top-0 left-0 w-screen h-screen flex items-center justify-center overflow-hidden"
+		class="fixed left-0 top-0 -z-30 flex h-screen w-screen items-center justify-center overflow-hidden"
 		transition:fade={{
 			duration,
 			easing: quintOut,
 		}}
 	>
 		<VertVBig
-			class="fill-[--fg] opacity-10 dynadark:opacity-5 scale-[200%] md:scale-[80%]"
+			class="scale-[200%] fill-[--fg] opacity-10 dynadark:opacity-5 md:scale-[80%]"
 		/>
 	</div>
 {/if}
 
 <div
-	class="fixed top-0 left-0 w-screen h-screen -z-40 pointer-events-none"
-	style="background-color: {color.color}; 
-	mask-image: {maskImage}; 
-	-webkit-mask-image: {maskImage};
-	transition: background-color {duration}ms {transition};"
+	class="pointer-events-none fixed left-0 top-0 -z-40 h-screen w-screen"
+	style:background-color={color.color}
+	style:mask-image={maskImage}
+	style:-webkit-mask-image={maskImage}
+	style:transition="background-color {duration}ms {transition}"
 ></div>
 
 {#if page.url.pathname === "/convert/" && files.files.length === 1}
 	{@const bgMask =
 		"linear-gradient(to top, transparent 5%, rgba(0, 0, 0, 0.5) 100%)"}
 	<div
-		class="fixed top-0 left-0 w-screen h-screen -z-50"
-		style="background-image: url({files.files[0].blobUrl});
-		background-size: cover;
-		background-position: center;
-		background-repeat: no-repeat;
-		filter: blur(10px);
-		mask-image: {bgMask};
-		-webkit-mask-image: {bgMask};"
+		class="fixed left-0 top-0 -z-50 h-screen w-screen"
+		style:background-image="url({files.files[0].blobUrl})"
+		style:background-size="cover"
+		style:background-position="center"
+		style:background-repeat="no-repeat"
+		style:filter="blur(10px)"
+		style:mask-image={bgMask}
+		style:-webkit-mask-image={bgMask}
 		transition:fade={{ duration, easing: quintOut }}
 	></div>
 {/if}

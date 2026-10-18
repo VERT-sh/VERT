@@ -1,15 +1,18 @@
-const CACHE_NAME = "vert-wasm-cache-v3"; // updated when workers update
+const CACHE_NAME = "vert-wasm-cache-v7"; // updated when workers update
+
+let coepCredentialless = false;
 
 const WASM_FILES = [
-	"/pandoc.wasm", // from https://github.com/haskell-wasm/pandoc-wasm
-	"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js",
-	"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm",
+	// any static wasm files that should be cached
 ];
 
 const WASM_URL_PATTERNS = [
 	/\/src\/lib\/workers\/.*\.js$/, // dev mode worker files
 	/\/assets\/.*worker.*\.js$/, // prod worker files
 	/magick.*\.wasm$/, // magick-wasm (unneeded?)
+	/vips.*\.wasm$/, // wasm-vips (main + dynamic libs)
+	/pandoc.*\.wasm$/, // pandoc-wasm
+	/\/ffmpeg-core[^/]*\.(js|wasm)$/, // ffmpeg wasm core
 ];
 
 function shouldCacheUrl(url) {
@@ -63,6 +66,51 @@ async function revalidate(request) {
 	}
 }
 
+// add COOP/COEP headers to requests so we are cross-origin isolated, needed for SharedArrayBuffer
+function withCrossOriginIsolation(response) {
+	if (response.status === 0) return response;
+
+	const headers = new Headers(response.headers);
+	headers.set(
+		"Cross-Origin-Embedder-Policy",
+		coepCredentialless ? "credentialless" : "require-corp",
+	);
+	if (!coepCredentialless)
+		headers.set("Cross-Origin-Resource-Policy", "cross-origin");
+	headers.set("Cross-Origin-Opener-Policy", "same-origin");
+
+	return new Response(response.body, {
+		status: response.status,
+		statusText: response.statusText,
+		headers,
+	});
+}
+
+// fetch a cacheable url, storing a copy on success
+async function fetchAndCache(request) {
+	const response = await fetch(request);
+
+	if (!response.ok) {
+		console.warn(
+			"[SW] not caching failed response:",
+			response.status,
+			request.url,
+		);
+		return response;
+	}
+
+	const responseToCache = response.clone();
+	caches
+		.open(CACHE_NAME)
+		.then((cache) => cache.put(request, responseToCache))
+		.then(() => console.log("[SW] cached successfully:", request.url))
+		.catch((err) =>
+			console.warn("[SW] failed to cache:", request.url, err),
+		);
+
+	return response;
+}
+
 self.addEventListener("install", (e) => {
 	console.log("[SW] installing service worker");
 
@@ -107,60 +155,35 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-	const request = e.request;
+	const r = e.request;
 
-	if (!shouldCacheUrl(request.url)) {
-		return; // Let the request go through normally if not a target URL
-	}
+	if (r.cache === "only-if-cached" && r.mode !== "same-origin") return;
 
-	// else intercept request
+	const request =
+		coepCredentialless && r.mode === "no-cors"
+			? new Request(r, { credentials: "omit" })
+			: r;
+
+	const caching = shouldCacheUrl(request.url);
 	const revalidateInBackground = shouldRevalidate(request.url);
 
 	e.respondWith(
-		caches.match(request).then((cachedResponse) => {
-			if (cachedResponse) {
-				console.log("[SW] serving from cache:", request.url);
-				return cachedResponse;
-			}
-
-			console.log("[SW] fetching and caching:", request.url);
-			return fetch(request)
-				.then((response) => {
-					if (!response.ok) {
-						console.warn(
-							"[SW] not caching failed response:",
-							response.status,
-							request.url,
-						);
-						return response;
+		(caching
+			? caches.match(request).then((cachedResponse) => {
+					if (cachedResponse) {
+						console.log("[SW] serving from cache:", request.url);
+						return cachedResponse;
 					}
-
-					const responseToCache = response.clone();
-					caches.open(CACHE_NAME).then((cache) => {
-						cache
-							.put(request, responseToCache)
-							.then(() => {
-								console.log(
-									"[SW] cached successfully:",
-									request.url,
-								);
-							})
-							.catch((err) => {
-								console.warn(
-									"[SW] failed to cache:",
-									request.url,
-									err,
-								);
-							});
-					});
-
-					return response;
+					console.log("[SW] fetching and caching:", request.url);
+					return fetchAndCache(request);
 				})
-				.catch((err) => {
-					console.error("[SW] fetch failed for:", request.url, err);
-					throw err;
-				});
-		}),
+			: fetch(request)
+		)
+			.then(withCrossOriginIsolation)
+			.catch((err) => {
+				console.error("[SW] fetch failed for:", request.url, err);
+				throw err;
+			}),
 	);
 
 	// refresh same-origin wasm in the background so a redeploy is picked up, even while the cached copy is served
@@ -171,6 +194,11 @@ self.addEventListener("message", (e) => {
 	if (!e.data) return;
 	const type = e.data.type;
 	const port = e.ports?.[0];
+
+	if (type === "coepCredentialless") {
+		coepCredentialless = e.data.value === true;
+		return;
+	}
 
 	if (type === "GET_CACHE_INFO") {
 		if (!port) return;

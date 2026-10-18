@@ -1,26 +1,28 @@
+import type { WorkerMessage } from "#lib/types";
+import type { ConversionSettings } from "#lib/types/conversion-settings";
+import { formatError } from "#lib/util/error";
 import {
+	AlphaAction,
 	ColorSpace,
 	initializeImageMagick,
+	initializeImageMagickx64,
 	MagickColor,
 	MagickFormat,
 	MagickImage,
 	MagickImageCollection,
 	MagickReadSettings,
-	AlphaAction,
 	type IMagickImage,
 	type IMagickImageCollection,
 } from "@imagemagick/magick-wasm";
 import { makeZip } from "client-zip";
-import type { WorkerMessage } from "$lib/types";
-import type { ConversionSettings } from "$lib/types/conversion-settings";
 
 let magickInitialized = false;
 
 self.postMessage({ type: "ready", id: "0" });
 
 // formats requiring special parsing/handling we do
-let dicomPromise: Promise<typeof import("$lib/util/parse/dicom")> | null = null;
-let aniPromise: Promise<typeof import("$lib/util/parse/ani")> | null = null;
+let dicomPromise: Promise<typeof import("#lib/util/parse/dicom")> | null = null;
+let aniPromise: Promise<typeof import("#lib/util/parse/ani")> | null = null;
 let icnsPromise: Promise<typeof import("vert-wasm")> | null = null;
 
 const handleMessage = async (
@@ -37,13 +39,16 @@ const handleMessage = async (
 
 				const wasmBytes = new Uint8Array(message.wasm);
 
-				await initializeImageMagick(wasmBytes);
+				const initialize = message.x64
+					? initializeImageMagickx64
+					: initializeImageMagick;
+				await initialize(wasmBytes);
 				magickInitialized = true;
 				return { type: "loaded" };
 			} catch (error) {
 				return {
 					type: "error",
-					error: `error loading magick-wasm: ${(error as Error).message}`,
+					error: `error loading magick-wasm: ${formatError(error)}`,
 				};
 			}
 		}
@@ -137,10 +142,10 @@ const convertCollectionToZip = async (
 };
 
 const loadDicomHelpers = async () =>
-	(dicomPromise ??= import("$lib/util/parse/dicom"));
+	(dicomPromise ??= import("#lib/util/parse/dicom"));
 
 const loadAniHelpers = async () =>
-	(aniPromise ??= import("$lib/util/parse/ani"));
+	(aniPromise ??= import("#lib/util/parse/ani"));
 
 const loadIcnsHelpers = async () => (icnsPromise ??= import("vert-wasm"));
 
@@ -154,9 +159,7 @@ const handleSpecialInput = async (
 			const { renderDicomToPng } = await loadDicomHelpers();
 			return await renderDicomToPng(new Uint8Array(buffer));
 		} catch (error) {
-			throw new Error(
-				`Failed to parse DICOM: ${(error as Error).message}`,
-			);
+			throw new Error(`Failed to parse DICOM: ${formatError(error)}`);
 		}
 	}
 
@@ -265,7 +268,7 @@ const handleSpecialOutput = async (
 		} catch (error) {
 			return {
 				type: "error",
-				error: `Failed to parse ANI: ${(error as Error).message}`,
+				error: `Failed to parse ANI: ${formatError(error)}`,
 			};
 		}
 	}
@@ -502,7 +505,7 @@ onmessage = async (e) => {
 	} catch (e) {
 		postMessage({
 			type: "error",
-			error: e,
+			error: formatError(e),
 			id: message.id,
 		});
 	}

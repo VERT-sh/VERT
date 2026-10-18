@@ -1,34 +1,30 @@
-import { VertFile } from "$lib/types";
-import { Converter, FormatInfo } from "../converter.svelte";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { browser } from "$app/environment";
-import { error, log } from "$lib/util/logger.svelte";
-import { m } from "$lib/paraglide/messages";
-import { Settings } from "$lib/sections/settings/index.svelte";
-import { ToastManager } from "$lib/util/toast.svelte";
-import { getCodecs, toArgs } from "./ffmpeg.codecs";
-import { buildImageSequenceCommand } from "./ffmpeg.animated";
-import { extractAlbumArt, avWithArt, avWithBg } from "./utils/ffmpeg";
+import { m } from "#lib/paraglide/messages";
+import { Settings } from "#lib/sections/settings/index.svelte";
+import { VertFile } from "#lib/types";
 import type {
-	SettingCategories,
-	SettingDefinition,
 	ConversionSettings,
 	NormalizedSettings,
-} from "$lib/types/conversion-settings";
-import { videoFormats } from "../vertd/vertd.svelte";
+	SettingCategories,
+	SettingDefinition,
+} from "#lib/types/conversion-settings";
+import { browser } from "$app/env";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { FormatInfo, formatDuration } from "../../converter.svelte";
+import { applyPriorities } from "../../priority";
+import { videoFormats } from "../../vertd/vertd.svelte";
+import { BaseFFmpegConverter } from "../ffmpeg.base.svelte";
+import { getCodecs, toArgs } from "../ffmpeg.codecs";
+import { avWithArt, avWithBg, extractAlbumArt } from "../utils/ffmpeg";
 
 // TODO: differentiate in UI? (not native formats)
-export class FFmpegConverter extends Converter {
-	private ffmpeg: FFmpeg = null!;
+export class FFmpegConverter extends BaseFFmpegConverter {
 	public name = "ffmpeg";
 	public ready = $state(false);
 
-	private activeConversions = new Map<string, FFmpeg>();
-
 	// non supported audio to video formats
-	private cantConvert: string[] = ["ogx"];
+	private cantConvert: string[] = ["ogx", "y4m", "ivf"]; // y4m/ivf are uncompressed/raw video containers without audio
 
-	public supportedFormats = [
+	public supportedFormats = applyPriorities("ffmpeg", [
 		new FormatInfo("mp3", true, true),
 		new FormatInfo("wav", true, true),
 		new FormatInfo("flac", true, true),
@@ -57,58 +53,22 @@ export class FFmpegConverter extends Converter {
 		new FormatInfo("au", true, true),
 		new FormatInfo("m4b", true, true),
 		new FormatInfo("voc", true, true),
+		new FormatInfo("tta", true, true),
+		new FormatInfo("amr", true, false), // only decode in ffmpeg-wasm
+		new FormatInfo("ape", true, false),
 		...videoFormats.map(
 			//  exclude cantConvert from audio to video
 			(f: string) => {
 				const isCantConvert = this.cantConvert.includes(f);
-				return new FormatInfo(f, true, !isCantConvert, false, 0);
+				return new FormatInfo(f, true, !isCantConvert, false);
 			},
 		),
-	];
-
-	public readonly reportsProgress = true;
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
+	]);
 
 	constructor() {
 		super();
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
-		this.log(`created converter`);
 		if (!browser) return;
-
-		// this is just to cache the wasm and js for when we actually use it. we're not using this ffmpeg instance
-		this.ffmpeg = new FFmpeg();
-		void (async () => {
-			try {
-				const baseURL =
-					"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
-
-				this.status = "downloading";
-
-				await this.ffmpeg.load({
-					coreURL: `${baseURL}/ffmpeg-core.js`,
-					wasmURL: `${baseURL}/ffmpeg-core.wasm`,
-				});
-
-				this.status = "ready";
-				this.ffmpeg.terminate();
-				this.log(
-					"preloaded ffmpeg assets and released the cache instance",
-				);
-			} catch (err) {
-				this.error(`Error loading ffmpeg: ${err}`);
-				this.status = "error";
-				this.ffmpeg.terminate();
-				ToastManager.add({
-					type: "error",
-					message: m["workers.errors.ffmpeg"](),
-				});
-			}
-		})();
+		this.log(`created converter`);
 	}
 
 	public async getAvailableSettings(): Promise<SettingCategories> {
@@ -216,6 +176,8 @@ export class FFmpegConverter extends Converter {
 	): Promise<VertFile> {
 		this.trackConversion(input);
 		if (!to.startsWith(".")) to = `.${to}`;
+		this.log(`converting ${input.name} (${input.id}) to ${to}`);
+		const startedAt = performance.now();
 
 		const conversionSettings =
 			Object.keys(settings).length > 4 // TODO: find better way to do this lmfao, rn we are just assuming all settings are present if there's at least 5 keys but ts bad
@@ -227,6 +189,8 @@ export class FFmpegConverter extends Converter {
 
 		const isAlac = to === ".alac";
 		if (isAlac) to = ".m4a";
+
+		await this.ensureCore();
 
 		let conversionError: string | null = null;
 		const ffmpeg = await this.setupFFmpeg(input);
@@ -271,7 +235,7 @@ export class FFmpegConverter extends Converter {
 
 			if (input.from === ".qoa") {
 				const { decodeQoa, encodeWav } =
-					await import("$lib/util/parse/qoa");
+					await import("#lib/util/parse/qoa");
 				const decoded = decodeQoa(buf);
 				buf = new Uint8Array(
 					encodeWav(
@@ -284,7 +248,7 @@ export class FFmpegConverter extends Converter {
 			}
 
 			await ffmpeg.writeFile("input", buf);
-			this.log(`wrote ${input.name} to ffmpeg virtual fs`);
+			this.log(`wrote ${input.name} (${input.id}) to ffmpeg virtual fs`);
 
 			const specialHandled = await handleSpecialOutput(
 				ffmpeg,
@@ -318,9 +282,14 @@ export class FFmpegConverter extends Converter {
 
 				const outputFileName =
 					input.name.split(".").slice(0, -1).join(".") + to;
-				this.log(`read ${outputFileName} from ffmpeg virtual fs`);
+				this.log(
+					`read ${outputFileName} (${input.id}) from ffmpeg virtual fs`,
+				);
 
 				const outBuf = new Uint8Array(output).buffer.slice(0);
+				this.log(
+					`converted ${input.name} (${input.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
+				);
 				return new VertFile(new File([outBuf], outputFileName), to);
 			}
 		} finally {
@@ -330,41 +299,6 @@ export class FFmpegConverter extends Converter {
 			this.activeConversions.delete(input.id);
 			ffmpeg.terminate();
 		}
-	}
-
-	public async cancel(input: VertFile): Promise<void> {
-		const ffmpeg = this.activeConversions.get(input.id);
-		if (!ffmpeg) {
-			this.error(`no active conversion found for file ${input.name}`);
-			return;
-		}
-
-		this.log(`cancelling conversion for file ${input.name}`);
-
-		ffmpeg.terminate();
-		this.activeConversions.delete(input.id);
-	}
-
-	private async setupFFmpeg(
-		input: VertFile,
-		temporary = false,
-	): Promise<FFmpeg> {
-		const ffmpeg = new FFmpeg();
-
-		if (!temporary) {
-			ffmpeg.on("progress", (progress) => {
-				input.progress = progress.progress * 100;
-			});
-		}
-
-		const baseURL =
-			"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
-		await ffmpeg.load({
-			coreURL: `${baseURL}/ffmpeg-core.js`,
-			wasmURL: `${baseURL}/ffmpeg-core.wasm`,
-		});
-
-		return ffmpeg;
 	}
 
 	private async buildConversionCommand(
@@ -377,57 +311,10 @@ export class FFmpegConverter extends Converter {
 		const inputFormat = input.from.slice(1);
 		const outputFormat = to.slice(1);
 		const m4a = isAlac || to === ".m4a";
-		const isImageSequence = input.isZip() && settings.imageSequence;
 
 		const userBitrate = settings.bitrate;
 		const userSampleRate = settings.sampleRate;
 		const keepMetadata = settings.metadata;
-
-		// image sequences -> animated image // video
-		if (isImageSequence) {
-			this.log(`converting image sequence ${input.name} to ${to}`);
-
-			const { extractZip } = await import("$lib/util/file");
-			const entries = (await extractZip(input.file)).sort((a, b) =>
-				a.filename.localeCompare(b.filename, undefined, {
-					numeric: true,
-					sensitivity: "base",
-				}),
-			);
-
-			if (!entries.length)
-				throw new Error("No images found in zip archive");
-
-			const imageFiles: Array<{ name: string }> = [];
-
-			for (const [index, entry] of entries.entries()) {
-				const fileName =
-					entry.filename.split("/").pop() ?? entry.filename;
-				const ext = fileName.split(".").pop()?.toLowerCase();
-				if (!ext) continue;
-
-				const paddedName = `img${String(index + 1).padStart(5, "0")}.${ext}`;
-				await ffmpeg.writeFile(paddedName, entry.data);
-				imageFiles.push({ name: paddedName });
-			}
-
-			if (!imageFiles.length)
-				throw new Error("No images found in zip archive");
-
-			const listContent = imageFiles
-				.map(
-					(image) =>
-						`file '${image.name}'\nduration ${1 / (settings.imageSequenceFPS || 15)}`,
-				)
-				.join("\n");
-			await ffmpeg.writeFile(
-				"frames.txt",
-				`${listContent}\nfile '${imageFiles[imageFiles.length - 1].name}'\n`,
-			);
-			this.log(`wrote ${imageFiles.length} images to ffmpeg virtual fs`);
-
-			return buildImageSequenceCommand(outputFormat, settings, isAlac);
-		}
 
 		// else normal single file conversion
 
@@ -478,7 +365,9 @@ export class FFmpegConverter extends Converter {
 
 		// video to audio
 		if (videoFormats.includes(inputFormat)) {
-			this.log(`Converting video ${input.from} to audio ${to}`);
+			this.log(
+				`Converting video ${input.from} to audio ${to} (${input.name} ${input.id})`,
+			);
 			return [
 				"-i",
 				"input",
@@ -495,7 +384,9 @@ export class FFmpegConverter extends Converter {
 
 		// audio to video
 		if (videoFormats.includes(outputFormat)) {
-			this.log(`Converting audio ${input.from} to video ${to}`);
+			this.log(
+				`Converting audio ${input.from} to video ${to} (${input.name} ${input.id})`,
+			);
 
 			const hasAlbumArt = keepMetadata
 				? await extractAlbumArt(ffmpeg)
@@ -528,7 +419,9 @@ export class FFmpegConverter extends Converter {
 		}
 
 		// audio to audio
-		this.log(`Converting audio ${input.from} to audio ${to}`);
+		this.log(
+			`Converting audio ${input.from} to audio ${to} (${input.name} ${input.id})`,
+		);
 		const { audio: audioCodec } = getCodecs(to, isAlac);
 		if (m4a && keepMetadata) extraArgs.push("-c:v", "copy"); // for album art
 
@@ -548,13 +441,6 @@ export class FFmpegConverter extends Converter {
 		];
 	}
 }
-
-// const handleSpecialInput = async (
-// 	ffmpeg: FFmpeg,
-// 	input: VertFile,
-// ): Promise<VertFile | null> => {
-//
-// }
 
 const parseChannels = (value: ConversionSettings[string]): number | null => {
 	const text = String(value ?? "").trim();
@@ -616,7 +502,7 @@ const handleSpecialOutput = async (
 		)) as unknown as Uint8Array;
 		if (!pcmRaw || pcmRaw.length === 0)
 			throw new Error("FFmpeg QOA conversion returned empty PCM audio");
-		const { encodeQoa } = await import("$lib/util/parse/qoa");
+		const { encodeQoa } = await import("#lib/util/parse/qoa");
 		const qoaBytes = encodeQoa(
 			new Uint8Array(pcmRaw),
 			sampleRate,

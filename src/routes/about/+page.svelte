@@ -1,37 +1,26 @@
 <script lang="ts">
-	import { error } from "$lib/util/logger.svelte";
-	import * as About from "$lib/sections/about";
+	import { error } from "#lib/util/logger.svelte";
+	import * as About from "#lib/sections/about";
 	import { InfoIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
-	import avatarNullptr from "$lib/assets/avatars/nullptr.jpg";
-	import avatarLiam from "$lib/assets/avatars/liam.jpg";
-	import avatarJovannMC from "$lib/assets/avatars/jovannmc.jpg";
-	import avatarRealmy from "$lib/assets/avatars/realmy.jpg";
-	import avatarAzurejelly from "$lib/assets/avatars/azurejelly.jpg";
-	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$env/static/public";
+	import avatarNullptr from "#lib/assets/avatars/nullptr.jpg";
+	import avatarLiam from "#lib/assets/avatars/liam.jpg";
+	import avatarJovannMC from "#lib/assets/avatars/jovannmc.jpg";
+	import avatarRealmy from "#lib/assets/avatars/realmy.jpg";
+	import avatarAzurejelly from "#lib/assets/avatars/azurejelly.jpg";
+	import { PUB_DONATION_URL, PUB_STRIPE_KEY } from "$app/env/public";
 	import {
 		DISABLE_ALL_EXTERNAL_REQUESTS,
 		GITHUB_API_URL,
-	} from "$lib/util/consts";
-	import { m } from "$lib/paraglide/messages";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	// import { dev } from "$app/environment";
-	// import { page } from "$app/state";
-
-	/* interface Donator {
-		name: string;
-		amount?: string | number;
-		avatar: string;
-	} */
-
+	} from "#lib/util/consts";
+	import { m } from "#lib/paraglide/messages";
+	import { ToastManager } from "#lib/util/toast.svelte";
 	interface Contributor {
 		name: string;
 		github: string;
 		avatar: string;
 		role?: string;
 	}
-
-	// const donors: Donator[] = [];
 
 	const mainContribs: Contributor[] = [
 		{
@@ -100,7 +89,9 @@
 
 		// Fetch GitHub contributors
 		try {
-			const response = await fetch(`${GITHUB_API_URL}/contributors`);
+			const response = await fetch(
+				`${GITHUB_API_URL}/contributors?per_page=100`,
+			);
 			if (!response.ok) {
 				ToastManager.add({
 					type: "error",
@@ -145,17 +136,17 @@
 		PUB_STRIPE_KEY && PUB_DONATION_URL && !DISABLE_ALL_EXTERNAL_REQUESTS;
 </script>
 
-<div class="flex flex-col h-full items-center">
-	<h1 class="hidden md:block text-[40px] tracking-tight leading-[72px] mb-6">
-		<InfoIcon size="40" class="inline-block -mt-2 mr-2" />
+<div class="flex h-full flex-col items-center">
+	<h1 class="mb-6 hidden text-[40px] leading-[72px] tracking-tight md:block">
+		<InfoIcon size="40" class="-mt-2 mr-2 inline-block" />
 		{m["about.title"]()}
 	</h1>
 
 	<div
-		class="w-full max-w-[1280px] flex flex-col md:flex-row gap-4 p-4 md:px-4 md:py-0"
+		class="flex w-full max-w-[1280px] flex-col gap-4 p-4 md:flex-row md:px-4 md:py-0"
 	>
 		<!-- Why VERT? & Credits -->
-		<div class="flex flex-col gap-4 flex-1">
+		<div class="flex flex-1 flex-col gap-4">
 			{#if donationsEnabled}
 				<About.Donate />
 			{/if}
@@ -164,7 +155,7 @@
 		</div>
 
 		<!-- Resources & Donate to VERT -->
-		<div class="flex flex-col gap-4 flex-1">
+		<div class="flex flex-1 flex-col gap-4">
 			<About.Resources />
 			<About.Credits {mainContribs} {notableContribs} {ghContribs} />
 		</div>

@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { duration, fade, fly } from "$lib/util/animation";
-	import { removeDialog } from "$lib/store/DialogProvider";
+	import { duration, fade, fly } from "#lib/util/animation";
+	import { removeDialog } from "#lib/store/DialogProvider";
 	import {
 		BanIcon,
 		CheckIcon,
 		InfoIcon,
-		TriangleAlert,
+		TriangleAlertIcon,
 	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
-	import type { Dialog as DialogType } from "$lib/store/DialogProvider";
+	import type { Dialog as DialogType } from "#lib/store/DialogProvider";
+	import clsx from "clsx";
 
 	type Props = DialogType;
 
@@ -29,7 +30,7 @@
 		success: CheckIcon,
 		error: BanIcon,
 		info: InfoIcon,
-		warning: TriangleAlert,
+		warning: TriangleAlertIcon,
 	};
 
 	let color = $derived(colors[type]);
@@ -37,7 +38,7 @@
 </script>
 
 <div
-	class="flex flex-col items-center justify-between w-full max-w-md p-4 gap-6 bg-panel border-accent-{color}-alt rounded-lg shadow-md"
+	class="flex w-full max-w-md flex-col items-center justify-between gap-6 bg-panel p-4 border-accent-{color}-alt rounded-lg shadow-md"
 	in:fly={{
 		duration,
 		easing: quintOut,
@@ -49,19 +50,19 @@
 		easing: quintOut,
 	}}
 >
-	<div class="flex justify-between w-full items-center">
+	<div class="flex w-full items-center justify-between">
 		<div class="flex items-center gap-3">
 			<div
-				class="rounded-full bg-accent-{color} p-2 inline-block w-8 h-8"
+				class="rounded-full bg-accent-{color} inline-block h-8 w-8 p-2"
 			>
 				<Icon size="16" color="black" />
 			</div>
 			<p class="text-lg font-semibold">{title}</p>
 		</div>
 	</div>
-	<div class="flex flex-col gap-1 w-full">
+	<div class="flex w-full flex-col gap-1">
 		{#if typeof message === "string"}
-			<p class="text-sm font-normal text-muted whitespace-pre-wrap">
+			<p class="whitespace-pre-wrap text-sm font-normal text-muted">
 				{message}
 			</p>
 		{:else}
@@ -71,13 +72,15 @@
 			</div>
 		{/if}
 	</div>
-	<div class="flex flex-row items-center justify-between gap-4 w-full">
-		{#each buttons as { text, action }, i}
+	<div class="flex w-full flex-row items-center justify-between gap-4">
+		{#each buttons as { text, action }, i (`${i}-${text}`)}
 			<button
-				class="w-full justify-center hover:scale-105 active:scale-100 duration-200 flex items-center gap-2 p-2 rounded-md {i ===
-				1
-					? `bg-accent-${color} text-black`
-					: 'bg-button text-black dynadark:text-white'} px-6"
+				class={clsx(
+					"flex w-full items-center justify-center gap-2 rounded-md p-2 px-6 duration-200 hover:scale-105 active:scale-100",
+					i === 1
+						? `bg-accent-${color} text-black`
+						: "bg-button text-black dynadark:text-white",
+				)}
 				onclick={() => {
 					action();
 					removeDialog(id);

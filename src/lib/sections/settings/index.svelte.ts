@@ -1,12 +1,13 @@
-import { PUB_VERTD_URL } from "$env/static/public";
-import type { ConversionSpeed } from "$lib/converters/vertd/vertd.svelte";
-import { readSettings } from "$lib/util/settings";
+import type { ConversionSpeed } from "#lib/converters/vertd/vertd.svelte";
+import { readSettings } from "#lib/util/settings";
+import { PUB_VERTD_URL } from "$app/env/public";
+import { SvelteMap } from "svelte/reactivity";
 import { VertdInstance } from "./vertdSettings.svelte";
 
 export { default as Appearance } from "./Appearance.svelte";
 export { default as Conversion } from "./Conversion.svelte";
-export { default as Vertd } from "./Vertd.svelte";
 export { default as Privacy } from "./Privacy.svelte";
+export { default as Vertd } from "./Vertd.svelte";
 
 // TODO: clean up settings & button code (componetize)
 
@@ -23,10 +24,11 @@ export interface ISettings {
 	metadata: boolean;
 	plausible: boolean;
 	vertdURL: string;
-	vertdSpeed: ConversionSpeed; // videos
+	vertdSpeed: ConversionSpeed; // videos (vertd)
 	vertdBlockedHashes: Map<string, Date[]>; // hashes of files blocked from vertd conversion
 	vertdCustomHeaders: string; // custom headers to send to the vertd server
 	magickQuality: number; // images
+	ffmpegVideoSpeed: ConversionSpeed; // videos (local ffmpeg.wasm)
 }
 
 export class Settings {
@@ -45,9 +47,10 @@ export class Settings {
 		plausible: true,
 		vertdURL: PUB_VERTD_URL,
 		vertdSpeed: "slow",
-		vertdBlockedHashes: new Map<string, Date[]>(),
+		vertdBlockedHashes: new SvelteMap<string, Date[]>(),
 		vertdCustomHeaders: "",
 		magickQuality: 90,
+		ffmpegVideoSpeed: "medium",
 	});
 
 	public save() {
@@ -61,7 +64,7 @@ export class Settings {
 			const persisted = readSettings<ISettings>();
 			if (!Object.keys(persisted).length) return;
 			const settings = persisted as ISettings;
-			const vertdBlockedHashes = new Map<string, Date[]>(
+			const vertdBlockedHashes = new SvelteMap<string, Date[]>(
 				Object.entries(
 					settings.vertdBlockedHashes ||
 						this.settings.vertdBlockedHashes,

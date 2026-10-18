@@ -1,24 +1,57 @@
-import { browser } from "$app/environment";
 import {
 	byNative,
 	categories,
+	categoryByConverter,
 	converterCategories,
 	converters,
-} from "$lib/converters";
-import type { Converter } from "$lib/converters/converter.svelte";
-import { error, log } from "$lib/util/logger.svelte";
-import { VertFile } from "$lib/types";
+} from "#lib/converters";
+import type { Converter } from "#lib/converters/converter.svelte";
+import { priorityFor } from "#lib/converters/priority";
+import { vertdFetch } from "#lib/converters/vertd/vertd.svelte";
+import { m } from "#lib/paraglide/messages";
+import { getLocale, setLocale } from "#lib/paraglide/runtime";
+import { VertFile } from "#lib/types";
+import { conversionConcurrency, GB } from "#lib/util/consts";
+import { formatError } from "#lib/util/error";
+import { formatFilename } from "#lib/util/file";
+import { error, log } from "#lib/util/logger.svelte";
+import { readSettings } from "#lib/util/settings";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { browser } from "$app/env";
 import { parseBlob, selectCover } from "music-metadata";
-import { get, writable } from "svelte/store";
 import PQueue from "p-queue";
-import { getLocale, setLocale } from "$lib/paraglide/runtime";
-import { m } from "$lib/paraglide/messages";
 import sanitizeHtml from "sanitize-html";
-import { ToastManager } from "$lib/util/toast.svelte";
-import { conversionConcurrency, GB } from "$lib/util/consts";
-import { readSettings } from "$lib/util/settings";
-import { formatFilename } from "$lib/util/file";
-import { vertdFetch } from "$lib/converters/vertd/vertd.svelte";
+import { get, writable } from "svelte/store";
+
+const IMAGE_FORMATS = new Set(
+	converters
+		.find((c) => c.name === "imagemagick")
+		?.formatStrings((f) => f.fromSupported) ?? [],
+);
+
+const zipExtension = (filename: string): string => {
+	const base = filename.replace(/\\/g, "/").split("/").pop() ?? filename;
+	const dot = base.lastIndexOf(".");
+	return dot === -1 ? "" : base.slice(dot).toLowerCase();
+};
+
+// detect a media sequence zip (frameSequence or DASH) from its members
+function detectSequenceKind(
+	filenames: string[],
+): "frameSequence" | "dash" | undefined {
+	const exts = filenames.map(zipExtension);
+
+	// DASH - an .mpd manifest, or bare .m4s/.m4d segments
+	if (exts.some((ext) => ext === ".mpd" || ext === ".m4s" || ext === ".m4d"))
+		return "dash";
+
+	// frameSequence - all files being the same image format
+	const first = exts[0];
+	if (first && IMAGE_FORMATS.has(first) && exts.every((ext) => ext === first))
+		return "frameSequence";
+
+	return undefined;
+}
 
 class Files {
 	public files = $state<VertFile[]>([]);
@@ -58,6 +91,55 @@ class Files {
 		);
 	}
 
+	// preload first required converter when added to list (or changing format)
+	public preloadConverters(file: VertFile): void {
+		const [preferred] = this.getRequiredConverters(file);
+		void preferred?.init();
+	}
+
+	// for frame sequences, toggle between video engines when on, per-image engines when off.
+	public syncSequenceConverters(file: VertFile): void {
+		if (file.sequenceKind !== "frameSequence") return;
+
+		const sequenceMode = file.conversionSettings.imageSequence === true;
+		const candidates = sequenceMode
+			? converters.filter(
+					(c) => c.name === "ffmpeg-video" || c.name === "vertd",
+				)
+			: converters;
+
+		file.converters = candidates;
+
+		const current = file.conversionSettings.converter;
+		if (current && candidates.some((c) => c.name === current)) return;
+
+		const fallback = sequenceMode
+			? !file.isLarge() &&
+				candidates.some((c) => c.name === "ffmpeg-video")
+				? "ffmpeg-video"
+				: (candidates.find((c) => c.name === "vertd")?.name ??
+					candidates[0]?.name)
+			: ([...candidates].sort(
+					(a, b) =>
+						priorityFor(
+							b.name,
+							file.archiveFormats?.[0] ?? file.from,
+						) -
+						priorityFor(
+							a.name,
+							file.archiveFormats?.[0] ?? file.from,
+						),
+				)[0]?.name ?? candidates[0]?.name);
+
+		if (fallback) {
+			file.conversionSettings = {
+				...file.conversionSettings,
+				converter: fallback,
+			};
+			void candidates.find((c) => c.name === fallback)?.init();
+		}
+	}
+
 	public requiredConverters = $derived(
 		Array.from(
 			new Set(
@@ -88,11 +170,15 @@ class Files {
 
 	private _addThumbnail = async (file: VertFile) => {
 		this.thumbnailQueue.add(async () => {
+			// for now only ffmpeg are "real" audio files that music-metadata can read
 			const isAudio = converters
-				.find((c) => converterCategories.audio.includes(c.name))
-				?.supportedFormats.filter((f) => f.isNative)
-				.map((f) => f.name)
-				?.includes(file.from.toLowerCase());
+				.filter((c) => c.name === "ffmpeg")
+				.flatMap((c) =>
+					c.supportedFormats
+						.filter((f) => f.isNative)
+						.map((f) => f.name),
+				)
+				.includes(file.from.toLowerCase());
 			const isVideo = converters
 				.find((c) => converterCategories.video.includes(c.name))
 				?.supportedFormats.filter((f) => f.isNative)
@@ -208,20 +294,27 @@ class Files {
 		const file = input.file;
 		try {
 			log(["files"], `extracting zip file: ${file.name}`);
-			ToastManager.add({
-				type: "info",
-				message: m["convert.archive_file.extracting"]({
-					filename: file.name,
-				}),
-			});
 
-			const { extractZip } = await import("$lib/util/file");
+			const { extractZip } = await import("#lib/util/file");
 			const entries = await extractZip(file);
 
 			const totalEntries = entries.length;
 			log(["files"], `extracted ${totalEntries} files from zip`);
 
+			const sequenceKind = detectSequenceKind(
+				entries.map((entry) => entry.filename),
+			);
+
+			if (sequenceKind === "dash") {
+				await this._handleDashZip(input);
+				return;
+			}
+
+			if (sequenceKind === "frameSequence")
+				input.sequenceKind = "frameSequence";
+
 			// check if all files in zip use the same converter and are compatible
+			// eslint-disable-next-line svelte/prefer-svelte-reactivity
 			const convertersUsed = new Set<string>();
 			let incompatibleFiles = false;
 			const archiveFiles: VertFile[] = [];
@@ -262,30 +355,53 @@ class Files {
 				const vf = input;
 				vf.to = ".zip";
 				vf.archiveFormats = archiveFiles.map((member) => member.from);
-				vf.converters = converters.filter(
-					(c) => c.name === Array.from(convertersUsed)[0],
-				);
-
-				const converterName = vf.converters[0].name;
-				const type =
-					converterName === "imagemagick"
-						? "image"
-						: converterName === "ffmpeg"
-							? "audio"
-							: converterName === "pandoc"
-								? "doc"
-								: "video";
+				const mainConverter = Array.from(convertersUsed)[0];
+				vf.converters =
+					vf.sequenceKind === "frameSequence"
+						? vf.conversionSettings.imageSequence
+							? converters.filter(
+									(c) =>
+										c.name === "ffmpeg-video" ||
+										c.name === "vertd",
+								)
+							: converters
+						: converters.filter((c) => c.name === mainConverter);
 
 				this.files.push(vf);
 				this._addThumbnail(vf);
 
-				// set converter
 				// TODO: this is weird, we rely on conversionSettings for the right converter but zip archives obv dont have settings to change
+				let defaultConverter: string;
+				if (
+					vf.sequenceKind === "frameSequence" &&
+					vf.conversionSettings.imageSequence
+				) {
+					// sequence mode prefers local ffmpeg, then falls back to vertd
+					const has = (name: string) =>
+						vf.converters.some((c) => c.name === name);
+					defaultConverter =
+						!vf.isLarge() && has("ffmpeg-video")
+							? "ffmpeg-video"
+							: has("vertd")
+								? "vertd"
+								: vf.converters[0].name;
+				} else {
+					// pick first inner format (if multiple) for priority check, since all files should be compatible with the same converter
+					const inner = vf.archiveFormats?.[0] ?? vf.from;
+					defaultConverter =
+						[...vf.converters].sort(
+							(a, b) =>
+								priorityFor(b.name, inner) -
+								priorityFor(a.name, inner),
+						)[0]?.name ?? vf.converters[0].name;
+				}
 				vf.conversionSettings = {
 					...vf.conversionSettings,
-					converter: vf.converters[0].name,
+					converter: defaultConverter,
 				};
+				this.preloadConverters(vf);
 
+				const type = categoryByConverter[mainConverter] ?? "video";
 				ToastManager.add({
 					type: "success",
 					message: m["convert.archive_file.detected"]({
@@ -315,6 +431,44 @@ class Files {
 		}
 	}
 
+	private async _handleDashZip(input: VertFile): Promise<void> {
+		const vertd = converters.find((c) => c.name === "vertd");
+		if (!vertd) {
+			throw new Error(
+				"DASH media sequences require the vertd server, which is unavailable",
+			);
+		}
+
+		input.sequenceKind = "dash";
+		input.archiveFormats = [input.from];
+		input.converters = [vertd];
+		input.conversionSettings = {
+			...input.conversionSettings,
+			converter: "vertd",
+			imageSequence: true,
+		};
+
+		this.files.push(input);
+		this._addThumbnail(input);
+		this.preloadConverters(input);
+
+		log(["files"], `detected dash media sequence in ${input.name}`);
+		ToastManager.add({
+			type: "success",
+			message: m["convert.archive_file.detected"]({
+				type: m["convert.archive_file.video"](),
+				filename: input.name,
+			}),
+		});
+		ToastManager.add({
+			type: "success",
+			message: m["convert.archive_file.detected_sequence"]({
+				sequence: m["convert.archive_file.sequence_dash"](),
+				filename: input.name,
+			}),
+		});
+	}
+
 	private async _add(file: VertFile | File) {
 		const input =
 			file instanceof VertFile ? file : new VertFile(file, ".zip");
@@ -330,7 +484,7 @@ class Files {
 					type: "error",
 					message: m["convert.archive_file.extract_error"]({
 						filename: input.file.name,
-						error: String(err),
+						error: formatError(err),
 					}),
 				});
 			}
@@ -339,6 +493,7 @@ class Files {
 		if (file instanceof VertFile) {
 			this.files.push(file);
 			this._addThumbnail(file);
+			this.preloadConverters(file);
 		} else {
 			// regular files
 			const format = input.from;
@@ -360,9 +515,13 @@ class Files {
 			const category = Object.keys(categories).find((name) =>
 				categories[name].formats.includes(format),
 			);
-			const to = category
-				? categories[category].formats.find((f) => f !== format)
-				: converter.formatStrings().find((f) => f !== format);
+			// first format (in category order) the file can actually convert to
+			const candidates = category
+				? categories[category].formats
+				: converter.formatStrings();
+			const to = candidates.find(
+				(f) => f !== format && input.hasAvailableConverter(format, f),
+			);
 			if (!to) {
 				log(["files"], `no output format found for ${file.name}`);
 				return;
@@ -371,6 +530,7 @@ class Files {
 			vf.to = to;
 			this.files.push(vf);
 			this._addThumbnail(vf);
+			this.preloadConverters(vf);
 
 			const convName = converter.name;
 			if (
@@ -398,7 +558,7 @@ class Files {
 				type: "error",
 				message: m["workers.errors.general"]({
 					file: input.name,
-					message: String(err),
+					message: formatError(err),
 				}),
 			});
 		});

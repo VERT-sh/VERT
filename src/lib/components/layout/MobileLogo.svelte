@@ -1,16 +1,17 @@
 <script>
-	import Logo from "$lib/components/visual/svg/Logo.svelte";
+	import Logo from "#lib/components/visual/svg/Logo.svelte";
+	import { resolve } from "$app/paths";
 </script>
 
-<div class="flex md:hidden justify-center items-center pb-8 pt-4">
+<div class="flex items-center justify-center pb-8 pt-4 md:hidden">
 	<a
-		class="flex items-center justify-center bg-panel p-2 rounded-[20px] shadow-panel"
-		href="/"
+		class="flex items-center justify-center rounded-[20px] bg-panel p-2 shadow-panel"
+		href={resolve("/")}
 	>
 		<div
-			class="h-14 bg-accent rounded-[14px] flex items-center justify-center"
+			class="flex h-14 items-center justify-center rounded-[14px] bg-accent"
 		>
-			<div class="w-28 h-5">
+			<div class="h-5 w-28">
 				<Logo />
 			</div>
 		</div>

@@ -41,10 +41,10 @@
 	);
 </script>
 
-<div class="w-full h-full relative">
-	{#each blurSteps as { blurIntensity, mask }, index}
+<div class="relative h-full w-full">
+	{#each blurSteps as { blurIntensity, mask }, index (index)}
 		<div
-			class="absolute w-full h-full"
+			class="absolute h-full w-full"
 			style="
         z-index: {index + 2};
         backdrop-filter: blur( calc({blurIntensity}px * var(--blur-amount, 1)) );
@@ -62,7 +62,7 @@
     "
 	></div>
 	<div
-		class="absolute top-0 left-0 w-full h-full z-50"
+		class="absolute left-0 top-0 z-50 h-full w-full"
 		style="background: linear-gradient({getGradientDirection()}, transparent 0%, {fadeTo} 100%); opacity: var(--blur-amount, 1);"
 	></div>
 </div>

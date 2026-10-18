@@ -33,7 +33,7 @@
 				"ready": "ready",
 				"partially_ready": "partially ready",
 				"not_ready": "not ready",
-				"not_initialized": "not initialized",
+				"not_initialized": "not initialized yet",
 				"downloading": "downloading...",
 				"initializing": "initializing...",
 				"unknown": "unknown status"
@@ -50,13 +50,16 @@
 	"convert": {
 		"archive_file": {
 			"extract": "Extract archive",
-			"extracting": "Detected '{filename}' as an archive.",
 			"extracted": "Extracted {extract_count} files from '{filename}'. {ignore_count} items were ignored.",
 			"detected": "Detected {type} files in '{filename}'.",
+			"detected_sequence": "Detected {sequence} sequence in '{filename}'.",
+			"sequence_dash": "DASH media",
 			"audio": "audio",
 			"video": "video",
 			"doc": "document",
 			"image": "image",
+			"archive": "archive",
+			"unknown": "unknown",
 			"extract_error": "Error extracting '{filename}': {error}",
 			"conversion_failed": "Failed to convert {count} files in '{filename}'. See '{reportName}' in the archive for more information."
 		},
@@ -110,6 +113,14 @@
 			},
 			"description": "Editing conversion settings for:",
 			"all_files": "all files",
+			"file_id": "File ID: {id}",
+			"engines": {
+				"auto": "Auto",
+				"magick_x64": "64-bit",
+				"magick_x86": "32-bit",
+				"ffmpeg_mt": "Multi-threaded",
+				"ffmpeg_st": "Single-threaded"
+			},
 			"cancel": "Cancel",
 			"apply": "Apply",
 			"none": "No settings available for this format.",
@@ -135,7 +146,14 @@
 				},
 				"color_space": "Color space",
 				"transparency": "Transparency",
-				"single_size": "Single size image"
+				"single_size": "Single size image",
+				"vectorize": {
+					"detail": "Vectorization detail",
+					"detail_bw": "Black & white",
+					"detail_poster": "Poster (flat colors)",
+					"detail_photo": "Photo (gradients)",
+					"optimize": "Optimize SVG"
+				}
 			},
 			"audio": {
 				"bitrate": {
@@ -158,6 +176,16 @@
 					"title": "Conversion speed",
 					"description": "This will be overridden if you manually set the bitrate or resolution below - selecting options other than \"auto\".",
 					"very_slow": "Highest quality (slowest)",
+					"slower": "Higher quality (slower)",
+					"slow": "High quality (slow)",
+					"medium": "Medium quality (average)",
+					"fast": "Lower quality (faster)",
+					"ultra_fast": "Lowest quality (fastest)"
+				},
+				"local_speed": {
+					"title": "Conversion speed",
+					"description": "This controls the encoder preset for the local FFmpeg converter. Local video conversion is very slow - higher quality settings can take a long time. This is overridden if you manually set a video bitrate.",
+					"very_slow": "Highest quality (very slow)",
 					"slower": "Higher quality (slower)",
 					"slow": "High quality (slow)",
 					"medium": "Medium quality (average)",
@@ -206,8 +234,10 @@
 			"video_file": "Video file",
 			"document_file": "Document file",
 			"image_file": "Image file",
+			"archive_file": "Archive file",
 			"convert_file": "Convert this file",
-			"download_file": "Download this file"
+			"download_file": "Download this file",
+			"converter_initializing": "The {type} conversion tools are currently being downloaded. This only happens once and shouldn't take too long."
 		},
 		"errors": {
 			"cant_convert": "We can't convert this file.",
@@ -220,13 +250,15 @@
 			},
 			"unsupported_format": "Only image, video, audio, and document files are supported",
 			"format_output_only": "This format can currently only be used as output (converted to), not as input.",
-			"worker_downloading": "The {type} converter is currently being initialized, please wait a few moments.",
+			"worker_downloading": "The {type} converter is currently being downloaded and/or initialized, please wait a few moments.",
 			"worker_error": "The {type} converter had an error during initialization, please try again later.",
 			"worker_timeout": "The {type} converter is taking longer than expected to initialize, please wait a few more moments or refresh the page.",
 			"audio": "audio",
+			"archive": "archive",
 			"doc": "document",
 			"image": "image",
 			"video": "video",
+			"unknown": "unknown",
 			"vertd": {
 				"server": "what are you doing..? you're supposed to run the vertd server!",
 				"not_found": "Could not find the vertd instance to start video conversion. Are you sure the instance URL is set correctly?",
@@ -410,8 +442,9 @@
 				"title": "Converters",
 				"formats": "Formats",
 				"statuses": {
-					"not_ready": "Not ready",
+					"idle": "Not initialized",
 					"downloading": "Downloading",
+					"initializing": "Initializing",
 					"ready": "Ready",
 					"partially_ready": "Partially ready",
 					"error": "Error"
@@ -443,7 +476,7 @@
 		"title": "About",
 		"why": {
 			"title": "Why VERT?",
-			"description": "<b>File converters have always disappointed us.</b> They're ugly, riddled with ads, and most importantly; slow. We decided to solve this problem once and for all by making an alternative that solves all those problems, and more.<br/><br/>When possible, all files are converted completely on-device; this means that there's no delay between sending and receiving the files from a server, and we never get to snoop on the files you convert.<br/><br/>If the conversion is unsupported locally in your browser, video files get uploaded to our lightning-fast RTX 4000 Ada server. Your videos stay on there for an hour if you do not convert them. If you do convert the file, the video will stay on the server for an hour, or until it is downloaded fully. The file will then be deleted from our server."
+			"description": "<b>File converters have always disappointed us.</b> They're ugly, riddled with ads, and most importantly; slow. We decided to solve this problem once and for all by making an alternative that solves all those problems, and more.<br/><br/>When possible, all files are converted completely on-device; this means that there's no delay between sending and receiving the files from a server, and we never get to snoop on the files you convert.<br/><br/>If the conversion is unsupported locally in your browser, video files get uploaded to our lightning-fast RTX 4000 Ada server. Your videos stay on there for an hour if you do not convert them. If you do convert the file, the video will stay on the server for an hour, or until it is downloaded fully. The file will then be deleted from our server.<br><br>Read more about our [privacy_link]privacy policy[/privacy_link] to learn more about how we handle your minimal data."
 		},
 		"sponsors": {
 			"title": "Sponsors",
@@ -499,7 +532,10 @@
 			"general": "Error converting '{file}': {message}",
 			"cancel": "Error canceling conversion for '{file}': {message}",
 			"magick": "Error in Magick worker, image conversion may not work as expected.",
+			"vips": "Error in libvips worker, image conversion may not work as expected.",
+			"vectorizer": "Error in vectorizer worker, image vectorization may not work as expected.",
 			"ffmpeg": "Error loading FFmpeg, some features may not work as expected.",
+			"spessasynth": "Error in the MIDI / SoundFont converter, some features may not work as expected.",
 			"pandoc": "Error loading Pandoc worker, document conversion may not work as expected.",
 			"mediabunny": {
 				"init": "Error loading Mediabunny, video conversion may not work as expected.",
@@ -509,11 +545,22 @@
 			"no_audio": "No audio stream found.",
 			"invalid_rate": "Invalid sample rate specified: {rate}Hz",
 			"invalid_channels": "Invalid audio channel count: {channels}",
+			"ffmpeg_video_unsupported": "Encoding to {to} is not supported by the local FFmpeg converter.",
+			"ffmpeg_video_no_audio_encoder": "No audio encoder is available for {to} in the local FFmpeg converter.",
 			"file_too_large": "This file exceeds the {limit}GB browser / device limit. Try Firefox or Safari to convert this large file, which typically have higher limits."
 		},
 		"warnings": {
 			"settings_change": "Changed setting '{setting}' from '{oldValue}' to '{newValue}' for '{file}' ({to}) to prevent conversion failure.",
 			"file_type_mismatch": "File '{filename}' is named {expected}, but was detected as {actual}. This may cause conversion issues."
+		},
+		"info": {
+			"magick_x64_unavailable": "64-bit ImageMagick isn't supported in this browser, falling back to the 32-bit version. Very large images may fail to convert.",
+			"ffmpeg_mt_unavailable": "Multi-threaded FFmpeg isn't available in this browser, falling back to the single-threaded version. Conversions may be slower."
+		},
+		"sw": {
+			"reload_success": "Your page was reloaded automatically to enable cross-origin isolation, which is required for certain features to work.",
+			"reload_error": "Your page was reloaded automatically to enable cross-origin isolation, which is required for certain features to work, however it was not enabled successfully. Some features may not work as expected.",
+			"not_isolated": "Cross-origin isolation is not enabled, which is required for certain features to work. Some features may not work as expected."
 		}
 	},
 	"privacy": {

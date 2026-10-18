@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
 	import {
 		theme,
 		effects,
@@ -7,7 +7,7 @@
 		setTheme,
 		updateLocale,
 		availableLocales,
-	} from "$lib/store/index.svelte";
+	} from "#lib/store/index.svelte";
 	import {
 		MoonIcon,
 		PaletteIcon,
@@ -16,9 +16,10 @@
 		SunIcon,
 	} from "@lucide/svelte";
 	import { onMount, onDestroy } from "svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { getLocale } from "$lib/paraglide/runtime";
-	import Dropdown from "$lib/components/functional/Dropdown.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { getLocale } from "#lib/paraglide/runtime";
+	import Dropdown from "#lib/components/functional/Dropdown.svelte";
+	import clsx from "clsx";
 
 	let currentLocale = $state("en");
 
@@ -99,7 +100,7 @@
 		<h2 class="text-2xl font-bold">
 			<PaletteIcon
 				size="40"
-				class="inline-block -mt-1 mr-2 bg-accent-purple p-2 rounded-full"
+				class="-mt-1 mr-2 inline-block rounded-full bg-accent-purple p-2"
 				color="black"
 			/>
 			{m["settings.appearance.title"]()}
@@ -110,31 +111,33 @@
 					<p class="text-base font-bold">
 						{m["settings.appearance.brightness.theme"]()}
 					</p>
-					<p class="text-sm text-muted font-normal italic">
+					<p class="text-sm font-normal italic text-muted">
 						{m["settings.appearance.brightness.description"]()}
 					</p>
 				</div>
-				<div class="flex flex-col gap-3 w-full">
-					<div class="flex gap-3 w-full">
+				<div class="flex w-full flex-col gap-3">
+					<div class="flex w-full gap-3">
 						<button
 							bind:this={lightElement}
 							onclick={() => setTheme("light")}
-							class="btn {$effects
-								? ''
-								: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+							class={clsx(
+								"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
+								!$effects && "!scale-100",
+							)}
 						>
-							<SunIcon size="24" class="inline-block mr-2" />
+							<SunIcon size="24" class="mr-2 inline-block" />
 							{m["settings.appearance.light"]()}
 						</button>
 
 						<button
 							bind:this={darkElement}
 							onclick={() => setTheme("dark")}
-							class="btn {$effects
-								? ''
-								: '!scale-100'} flex-1 p-4 rounded-lg text-black flex items-center justify-center"
+							class={clsx(
+								"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black",
+								!$effects && "!scale-100",
+							)}
 						>
-							<MoonIcon size="24" class="inline-block mr-2" />
+							<MoonIcon size="24" class="mr-2 inline-block" />
 							{m["settings.appearance.dark"]()}
 						</button>
 					</div>
@@ -145,31 +148,33 @@
 					<p class="text-base font-bold">
 						{m["settings.appearance.effect.settings"]()}
 					</p>
-					<p class="text-sm text-muted font-normal italic">
+					<p class="text-sm font-normal italic text-muted">
 						{m["settings.appearance.effect.description"]()}
 					</p>
 				</div>
-				<div class="flex flex-col gap-3 w-full">
-					<div class="flex gap-3 w-full">
+				<div class="flex w-full flex-col gap-3">
+					<div class="flex w-full gap-3">
 						<button
 							bind:this={enableEffectsElement}
 							onclick={() => setEffects(true)}
-							class="btn {$effects
-								? ''
-								: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+							class={clsx(
+								"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
+								!$effects && "!scale-100",
+							)}
 						>
-							<PlayIcon size="24" class="inline-block mr-2" />
+							<PlayIcon size="24" class="mr-2 inline-block" />
 							{m["settings.appearance.enable"]()}
 						</button>
 
 						<button
 							bind:this={disableEffectsElement}
 							onclick={() => setEffects(false)}
-							class="btn {$effects
-								? ''
-								: '!scale-100'} flex-1 p-4 rounded-lg text-black dynadark:text-white flex items-center justify-center"
+							class={clsx(
+								"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
+								!$effects && "!scale-100",
+							)}
 						>
-							<PauseIcon size="24" class="inline-block mr-2" />
+							<PauseIcon size="24" class="mr-2 inline-block" />
 							{m["settings.appearance.disable"]()}
 						</button>
 					</div>
@@ -182,14 +187,14 @@
 						{#if currentLocale !== "en"}
 							(Language){/if}
 					</p>
-					<p class="text-sm text-muted font-normal italic">
+					<p class="text-sm font-normal italic text-muted">
 						{m["settings.appearance.language.description"]()}
 					</p>
 				</div>
-				<div class="flex flex-col gap-3 w-full">
+				<div class="flex w-full flex-col gap-3">
 					<Dropdown
 						options={languageOptions}
-						style={"settings"}
+						style="settings"
 						selected={getLanguageDisplayName(currentLocale)}
 						onselect={handleLanguageChange}
 					/>

@@ -1,23 +1,26 @@
-import { byNative, converters } from "$lib/converters";
-import type { Converter } from "$lib/converters/converter.svelte";
-import { m } from "$lib/paraglide/messages";
-import { ToastManager } from "$lib/util/toast.svelte";
-import { addDialog } from "$lib/store/DialogProvider";
+import FallbackToast from "#lib/components/functional/popups/FallbackToast.svelte";
+import ServerUploadWarning from "#lib/components/functional/popups/ServerUploadWarning.svelte";
+import SlowConversionToast from "#lib/components/functional/popups/SlowConversionToast.svelte";
+import { byNative, converters } from "#lib/converters";
+import type { Converter } from "#lib/converters/converter.svelte";
+import { formatDuration } from "#lib/converters/converter.svelte";
+import { m } from "#lib/paraglide/messages";
+import { addDialog } from "#lib/store/DialogProvider";
+import { MAX_ARRAY_BUFFER_SIZE } from "#lib/store/index.svelte";
+import { conversionConcurrency } from "#lib/util/consts";
+import { formatError } from "#lib/util/error";
+import { formatFilename } from "#lib/util/file";
+import { error, log } from "#lib/util/logger.svelte";
+import { readSettings } from "#lib/util/settings";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { fileTypeFromBuffer } from "file-type";
 import type { Component } from "svelte";
-import { MAX_ARRAY_BUFFER_SIZE } from "$lib/store/index.svelte";
-import FallbackToast from "$lib/components/functional/popups/FallbackToast.svelte";
-import SlowConversionToast from "$lib/components/functional/popups/SlowConversionToast.svelte";
-import ServerUploadWarning from "$lib/components/functional/popups/ServerUploadWarning.svelte";
+import { SvelteSet } from "svelte/reactivity";
 import type {
 	ConversionSettings,
 	NormalizedSettings,
 	SettingCategories,
 } from "./conversion-settings";
-import { error, log } from "$lib/util/logger.svelte";
-import { readSettings } from "$lib/util/settings";
-import { formatFilename } from "$lib/util/file";
-import { conversionConcurrency } from "$lib/util/consts";
-import { fileTypeFromBuffer } from "file-type";
 
 const LARGE_FILE = 2 * 1024 * 1024 * 1024; // 2GB
 const FILE_TYPE_HEADER_SIZE = 4100;
@@ -121,9 +124,10 @@ export class VertFile {
 
 	public converters: Converter[] = [];
 	public archiveFormats?: string[];
+	public sequenceKind = $state<"frameSequence" | "dash" | undefined>();
 	private fallbackToastId: number | null = null;
 	private slowConversionToastId: number | null = null;
-	private attemptedConverters = new Set<string>();
+	private attemptedConverters = new SvelteSet<string>();
 	private retryingFallback = false;
 	private postDownload: (() => Promise<void>) | null = null;
 	private disposal: Promise<void> | null = null;
@@ -203,7 +207,7 @@ export class VertFile {
 			.filter((converter) => {
 				if (
 					unavailableConverters[converter.name] ||
-					!converter.isReady()
+					!converter.isAvailable()
 				)
 					return false;
 				if (
@@ -229,6 +233,8 @@ export class VertFile {
 						(f) => f.name === this.to,
 					);
 					if (!theirFrom || !theirTo) return false;
+					if (!theirFrom.fromSupported || !theirTo.toSupported)
+						return false;
 					if (!theirFrom.isNative && !theirTo.isNative) return false;
 				}
 
@@ -249,12 +255,23 @@ export class VertFile {
 			});
 	}
 
+	private fallbackCandidates(): Converter[] {
+		if (!this.isZip()) return this.findConverters([this.from, this.to]);
+
+		// for .zip media sequences
+		return this.converters.filter((c) => {
+			if (this.unavailableConverters[c.name] || !c.isAvailable())
+				return false;
+			return c.name === "ffmpeg-video" || c.name === "vertd";
+		});
+	}
+
 	// returns true if there is at least one converter that can convert from `from` to `to`
 	public hasAvailableConverter(from: string, to: string): boolean {
 		return this.converters.some((converter) => {
 			if (
 				this.unavailableConverters[converter.name] ||
-				!converter.isReady()
+				!converter.isAvailable()
 			)
 				return false;
 
@@ -307,7 +324,7 @@ export class VertFile {
 
 			if (!this.fileType) return;
 
-			const forceKeep = ["mpo"];
+			const forceKeep = ["mpo", "fb2"];
 			const aliases: Record<string, string> = {
 				// original: alias
 				jpg: "jpeg",
@@ -320,6 +337,7 @@ export class VertFile {
 				mpg: "mpeg",
 				mpe: "mpeg",
 				mpv: "mpeg",
+				midi: "mid",
 			};
 			const fileExtension = this.originalFrom.slice(1);
 			const isPngContainer =
@@ -373,26 +391,51 @@ export class VertFile {
 		if (!this.retryingFallback) this.attemptedConverters.clear();
 		this.cancelled = false;
 		let res: VertFile | undefined;
+		const startedAt = performance.now();
 		try {
 			log(
 				["file", "convert"],
-				`Starting conversion for ${this.file.name} from ${this.from} to ${this.to}`,
+				`Starting conversion for ${this.file.name} (${this.id}) from ${this.from} to ${this.to}`,
 			);
 			if (!this.converters.length) throw new Error("No converters found");
 
 			let converter: Converter | undefined;
+			const isDash = this.sequenceKind === "dash";
 			const isImageSequence =
-				this.conversionSettings.imageSequence && this.isZip();
+				this.isZip() &&
+				(this.conversionSettings.imageSequence || isDash);
 
-			// force ffmpeg for image sequences
-			// TODO: should allow vertd as well probably(?) but maybe in the future
 			if (isImageSequence) {
-				converter = converters.find((c) => c.name === "ffmpeg");
-				if (!converter) {
-					throw new Error(
-						"FFmpeg converter not found for image sequence conversion",
+				const supported = (c: Converter) =>
+					!this.to ||
+					this.to === ".zip" ||
+					c.supportedFormats.some(
+						(f) => f.name === this.to && f.toSupported,
 					);
-				}
+				const candidates = this.converters.filter(
+					(c) =>
+						(c.name === "ffmpeg-video" || c.name === "vertd") &&
+						!this.unavailableConverters[c.name] &&
+						c.isAvailable() &&
+						supported(c),
+				);
+
+				// dash + large files go to the server, everything else prefers local ffmpeg
+				const preference = isDash
+					? ["vertd"]
+					: this.isLarge()
+						? ["vertd", "ffmpeg-video"]
+						: ["ffmpeg-video", "vertd"];
+				const chosen = this.conversionSettings.converter;
+				const order =
+					chosen && candidates.some((c) => c.name === chosen)
+						? [chosen, ...preference.filter((n) => n !== chosen)]
+						: preference;
+				const selected = order
+					.map((name) => candidates.find((c) => c.name === name))
+					.find((c) => c && !this.attemptedConverters.has(c.name));
+
+				if (selected) converter = selected;
 			} else {
 				const customConverter = this.converters.find(
 					(c) => c.name === this.conversionSettings.converter,
@@ -449,6 +492,8 @@ export class VertFile {
 					["file", "settings"],
 					`changed setting "${change.setting}" from "${change.oldValue}" to "${change.newValue}" for file ${change.file}`,
 				);
+				this.conversionSettings[change.setting] =
+					normalizedSettings.settings[change.setting];
 				ToastManager.add({
 					type: "warning",
 					message: m["workers.warnings.settings_change"]({
@@ -471,7 +516,7 @@ export class VertFile {
 			// for zips: extract > convert each > re-zip
 			// else convert normally
 			res =
-				this.isZip() && !this.conversionSettings.imageSequence
+				this.isZip() && !isImageSequence
 					? await this.convertZip(
 							converter,
 							normalizedSettings.settings,
@@ -487,6 +532,10 @@ export class VertFile {
 				return;
 			}
 			this.result = res;
+			log(
+				["file", "convert"],
+				`finished conversion for ${this.file.name} (${this.id}) to ${this.to} in ${formatDuration(performance.now() - startedAt)}`,
+			);
 			if (this.fallbackToastId !== null) {
 				ToastManager.remove(this.fallbackToastId);
 				this.fallbackToastId = null;
@@ -499,10 +548,7 @@ export class VertFile {
 			if (this.disposed) return;
 			if (!this.cancelled) this.toastErr(err);
 
-			const compatibleConverters = this.findConverters([
-				this.from,
-				this.to,
-			]);
+			const compatibleConverters = this.fallbackCandidates();
 			const nextConverter = compatibleConverters.find(
 				(c) => !this.attemptedConverters.has(c.name),
 			);
@@ -526,7 +572,7 @@ export class VertFile {
 
 							log(
 								["file", "convert"],
-								`retrying ${this.name} with next compatible converter: ${nextConverter.name}`,
+								`retrying ${this.name} (${this.id}) with next compatible converter: ${nextConverter.name}`,
 							);
 
 							this.conversionSettings = {
@@ -582,7 +628,7 @@ export class VertFile {
 		converter: Converter,
 		settings: ConversionSettings,
 	): Promise<VertFile> {
-		const { extractZip, createZip } = await import("$lib/util/file");
+		const { extractZip, createZip } = await import("#lib/util/file");
 		const { default: PQueue } = await import("p-queue");
 
 		const entries = await extractZip(this.file);
@@ -591,6 +637,7 @@ export class VertFile {
 		const convertedFiles: File[] = [];
 		const convertedResults: VertFile[] = [];
 		const failedFiles: string[] = [];
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const progressFiles = new Map<number, VertFile>();
 		const progressInterval = setInterval(() => {
 			for (const [index, file] of progressFiles)
@@ -661,10 +708,7 @@ export class VertFile {
 							}
 						} catch (err) {
 							if (!this.cancelled) {
-								const message =
-									err instanceof Error
-										? err.message
-										: String(err);
+								const message = formatError(err);
 								failedFiles[index] = `${filename}: ${message}`;
 								error(
 									["file", "zip"],
@@ -800,7 +844,7 @@ export class VertFile {
 		if (typeof castedErr === "string") {
 			toastMsg = castedErr;
 		} else if (castedErr instanceof Error) {
-			toastMsg = castedErr.message;
+			toastMsg = formatError(castedErr);
 		} else {
 			toastMsg = castedErr;
 		}
@@ -913,6 +957,7 @@ export class VertFile {
 
 	public hash(): Promise<string> {
 		const stream = this.file.stream();
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const hashes = new Set<string>();
 		const reader = stream.getReader();
 		return new Promise<string>((resolve, reject) => {

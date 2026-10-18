@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from "$lib/paraglide/messages";
+	import { m } from "#lib/paraglide/messages";
 
 	type Additional = {
 		filename: string;
@@ -26,13 +26,13 @@
 	</p>
 	<div class="flex gap-4">
 		<button
-			class="btn rounded-lg h-fit py-2 w-full"
+			class="btn h-fit w-full rounded-lg py-2"
 			onclick={additional.onContinue}
 		>
 			{m["convert.slow_conversion.continue"]()}
 		</button>
 		<button
-			class="btn rounded-lg h-fit py-2 w-full bg-accent-blue text-black"
+			class="btn h-fit w-full rounded-lg bg-accent-blue py-2 text-black"
 			onclick={() => additional.onSwitch()}
 		>
 			{m["convert.slow_conversion.switch"]({

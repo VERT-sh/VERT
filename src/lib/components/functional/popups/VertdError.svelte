@@ -10,11 +10,12 @@
 </script>
 
 <script lang="ts">
-	import { vertdFetch } from "$lib/converters/vertd/vertd.svelte";
+	import { vertdFetch } from "#lib/converters/vertd/vertd.svelte";
 
-	import { m } from "$lib/paraglide/messages";
-	import { ToastManager, type ToastProps } from "$lib/util/toast.svelte";
-	import { addDialog } from "$lib/store/DialogProvider";
+	import { m } from "#lib/paraglide/messages";
+	import { formatError } from "#lib/util/error";
+	import { ToastManager, type ToastProps } from "#lib/util/toast.svelte";
+	import { addDialog } from "#lib/store/DialogProvider";
 	import VertdErrorDetails from "./VertdErrorDetails.svelte";
 
 	const toast: ToastProps<VertdErrorProps> = $props();
@@ -52,7 +53,7 @@
 			ToastManager.add({
 				type: "error",
 				message: m["convert.errors.vertd.failed_to_keep"]({
-					error: (e as Error).message || e || "Unknown error",
+					error: formatError(e),
 				}),
 			});
 		}
@@ -87,20 +88,20 @@
 	<div class="flex flex-col gap-2">
 		<button
 			onclick={showDetails}
-			class="btn rounded-lg h-fit py-2 w-full bg-accent-blue text-black"
+			class="btn h-fit w-full rounded-lg bg-accent-blue py-2 text-black"
 			disabled={submitting}
 			>{m["convert.errors.vertd.generic.view"]()}</button
 		>
 		<div class="flex gap-4">
 			<button
 				onclick={submit}
-				class="btn rounded-lg h-fit py-2 w-full bg-accent-red-alt text-white"
+				class="btn h-fit w-full rounded-lg bg-accent-red-alt py-2 text-white"
 				disabled={submitting}
 				>{m["convert.errors.vertd.generic.yes"]()}</button
 			>
 			<button
 				onclick={remove}
-				class="btn rounded-lg h-fit py-2 w-full"
+				class="btn h-fit w-full rounded-lg py-2"
 				disabled={submitting}
 				>{m["convert.errors.vertd.generic.no"]()}</button
 			>

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from "$lib/paraglide/messages";
-	import type { DialogProps } from "$lib/store/DialogProvider";
-	import { link, sanitize } from "$lib/store/index.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import type { DialogProps } from "#lib/store/DialogProvider";
+	import { link, sanitize } from "#lib/store/index.svelte";
 
 	interface VertdErrorDetailsProps {
 		jobId: string;

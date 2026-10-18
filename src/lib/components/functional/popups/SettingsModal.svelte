@@ -4,17 +4,19 @@
 	import Dropdown from "../Dropdown.svelte";
 	import FancyInput from "../FancyInput.svelte";
 	import Modal from "./Modal.svelte";
-	import { m } from "$lib/paraglide/messages";
-	import type { VertFile } from "$lib/types";
-	import { effects, files } from "$lib/store/index.svelte";
-	import { converterCategories } from "$lib/converters";
-	import { log, error } from "$lib/util/logger.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import type { VertFile } from "#lib/types";
+	import { effects, files } from "#lib/store/index.svelte";
+	import { categoryByConverter } from "#lib/converters";
+	import { canonicalCodecName } from "#lib/converters/codec-labels";
+	import { log, error } from "#lib/util/logger.svelte";
 	import type {
 		ConversionSettings,
 		SettingCategories,
-	} from "$lib/types/conversion-settings";
+		SettingDefinition,
+	} from "#lib/types/conversion-settings";
 	import clsx from "clsx";
-	import { animateHeight, duration, fade } from "$lib/util/animation";
+	import { animateHeight, duration, fade } from "#lib/util/animation";
 	import { quintOut } from "svelte/easing";
 
 	type Props = {
@@ -51,6 +53,15 @@
 		const availableConverters = vertFile.converters.filter(
 			(converter) => !vertFile.unavailableConverters[converter.name],
 		);
+
+		// image sequences can be converted locally (local ffmpeg) or on the server (vertd)
+		if (vertFile.sequenceKind)
+			return availableConverters.filter(
+				(converter) =>
+					converter.name === "ffmpeg-video" ||
+					converter.name === "vertd",
+			);
+
 		const supportedConverters = vertFile.findConverters(
 			[vertFile.from, vertFile.to],
 			vertFile.unavailableConverters,
@@ -65,32 +76,76 @@
 		return available.find((c) => c.name === name) || available[0];
 	};
 
-	const converterCategoryByName = new Map(
-		Object.entries(converterCategories).flatMap(([category, names]) =>
-			names.map((name) => [name, category] as const),
-		),
-	);
+	const shouldShowConverterTab = (vertFile: VertFile) => {
+		const available = getAvailableConverters(vertFile);
+		if (available.length > 1) return true;
+		const [only] = available;
+		return !!only && (only.getVariantOptions()?.length ?? 0) > 0;
+	};
 
 	const getFileType = (vertFile: VertFile) => {
 		const converter = vertFile.converters.find(
 			({ name, supportedFormats }) =>
-				converterCategoryByName.has(name) &&
+				categoryByConverter[name] &&
 				supportedFormats.some(
 					(format) =>
 						format.name === vertFile.from && format.isNative,
 				),
 		);
 
-		return converter
-			? converterCategoryByName.get(converter.name)!
-			: vertFile.from;
+		return converter ? categoryByConverter[converter.name] : vertFile.from;
 	};
 
 	let settings = $state<ConversionSettings>({});
 	let activeTab = $state("Converter");
 	let availableCategories = $state<SettingCategories>({});
 
+	// resolve a value against a setting's options, translating codec aliases (e.g. mediabunny's "avc" is vertd's "h264")
+	const resolveSettingValue = (
+		value: unknown,
+		setting: SettingDefinition,
+	) => {
+		const options = setting.options ?? [];
+		if (options.some((option) => option.value === value)) return value;
+
+		const match = options.find(
+			(option) =>
+				canonicalCodecName(String(option.value)) ===
+				canonicalCodecName(String(value)),
+		);
+
+		return match?.value ?? setting.default;
+	};
+
+	// drop/translate values that the given settings don't support
+	const sanitizeSettings = (
+		current: ConversionSettings,
+		categories: SettingCategories,
+	) => {
+		const sanitized = { ...current };
+
+		for (const setting of Object.values(categories).flat()) {
+			if (
+				setting.type !== "select" ||
+				sanitized[setting.key] === undefined
+			)
+				continue;
+
+			const resolved = resolveSettingValue(
+				sanitized[setting.key],
+				setting,
+			);
+			if (resolved === undefined) delete sanitized[setting.key];
+			else sanitized[setting.key] = resolved;
+		}
+
+		return sanitized;
+	};
+
 	const settingTabs = $derived.by((): SettingCategories => {
+		// sequences expose only Converter tab (ffmpeg/vertd)
+		if (targetFile?.sequenceKind) return { Converter: [] };
+
 		const categories = Object.fromEntries(
 			Object.entries(availableCategories).filter(
 				([, settings]) => settings.length > 0,
@@ -98,7 +153,7 @@
 		);
 
 		return {
-			...(targetFile && getAvailableConverters(targetFile).length > 1
+			...(targetFile && shouldShowConverterTab(targetFile)
 				? { Converter: [] }
 				: {}),
 			...categories,
@@ -125,14 +180,27 @@
 			return;
 		}
 
+		if (currentFile.sequenceKind) {
+			availableCategories = {};
+			activeTab = "Converter";
+			return;
+		}
+
 		void currentFile
 			.getAvailableSettings(currentFile, currentConverter)
 			.then((categories) => {
 				if (cancelled) return;
 
 				availableCategories = categories;
-				const hasConverterTab =
-					getAvailableConverters(currentFile).length > 1;
+				const sanitized = sanitizeSettings(settings, categories);
+				for (const key of Object.keys(settings)) {
+					if (!(key in sanitized)) delete settings[key];
+				}
+				for (const [key, value] of Object.entries(sanitized)) {
+					if (settings[key] !== value) settings[key] = value;
+				}
+
+				const hasConverterTab = shouldShowConverterTab(currentFile);
 				if (
 					(!hasConverterTab && activeTab === "Converter") ||
 					(activeTab !== "Converter" && !categories[activeTab])
@@ -160,8 +228,10 @@
 		const referenceFile = targetFile;
 		const targetFiles =
 			selectedFileId === allFilesValue && referenceFile
-				? files.files.filter(
-						(f) => getFileType(f) === getFileType(referenceFile),
+				? files.files.filter((f) =>
+						referenceFile.sequenceKind
+							? f.sequenceKind === referenceFile.sequenceKind
+							: getFileType(f) === getFileType(referenceFile),
 					)
 				: files.files.filter((f) => f.id === selectedFileId);
 		if (targetFiles.length === 0) {
@@ -186,6 +256,20 @@
 					continue;
 				}
 
+				void converter.init();
+
+				if (targetFile.sequenceKind) {
+					targetFile.conversionSettings = {
+						...targetFile.conversionSettings,
+						converter: converter.name,
+					};
+					log(
+						["settings", "modal"],
+						`set converter for sequence ${targetFile.name}: ${converter.name}`,
+					);
+					continue;
+				}
+
 				const categories =
 					await converter.getAvailableSettings(targetFile);
 				const supportedKeys = new Set(
@@ -194,9 +278,9 @@
 						.map((setting) => setting.key),
 				);
 				const applicableSettings = Object.fromEntries(
-					Object.entries(settings).filter(([key]) =>
-						supportedKeys.has(key),
-					),
+					Object.entries(
+						sanitizeSettings(settings, categories),
+					).filter(([key]) => supportedKeys.has(key)),
 				);
 				const defaultSettings = Object.fromEntries(
 					Object.values(categories)
@@ -207,7 +291,11 @@
 				// apply defaults, then existing settings, then new settings on top
 				targetFile.conversionSettings = {
 					...defaultSettings,
-					...targetFile.conversionSettings,
+					// existing settings may come from another converter (e.g. "avc")
+					...sanitizeSettings(
+						targetFile.conversionSettings,
+						categories,
+					),
 					...applicableSettings,
 					converter: converter.name,
 				};
@@ -258,7 +346,7 @@
 	]}
 	onclose={() => onclose?.()}
 >
-	<div class="flex flex-col gap-8 max-h-[calc(100vh-225px)] overflow-y-auto">
+	<div class="flex max-h-[calc(100vh-225px)] flex-col gap-8 overflow-y-auto">
 		{#if targetFile}
 			{@const availableConverters = getAvailableConverters(targetFile)}
 			{@const validConverter = getValidConverter(
@@ -270,21 +358,32 @@
 				<Dropdown
 					options={fileOptions}
 					selected={selectedFileId}
-					style={"inline"}
+					style="inline"
 					onselect={(value) => {
 						selectedFileId = value;
 						settings = {};
 					}}
 				/>
+				{#if selectedFileId !== allFilesValue}
+					<p class="mt-1 text-xs text-muted">
+						{m["convert.settings.file_id"]({
+							id: targetFile.id ?? "N/A",
+						})}
+					</p>
+				{:else}
+					<p class="mt-1 text-xs text-muted">
+						{m["convert.settings.file_id"]({ id: "N/A" })}
+					</p>
+				{/if}
 			</div>
 
 			<div class="flex items-center justify-between">
-				{#each Object.keys(settingTabs) as tab}
+				{#each Object.keys(settingTabs) as tab (tab)}
 					<button
 						class={clsx(
-							"flex-grow text-lg hover:text-muted/20 border-b-2 pb-2 capitalize",
+							"hover:text-muted/20 flex-grow border-b-2 pb-2 text-lg capitalize",
 							activeTab === tab
-								? "text-accent border-b-accent"
+								? "border-b-accent text-accent"
 								: "border-b-separator text-muted",
 						)}
 						onclick={() => (activeTab = tab)}
@@ -302,12 +401,17 @@
 					>
 						{#if activeTab === "Converter"}
 							<div class="flex flex-col gap-2">
-								{#each availableConverters as converter}
+								{#each availableConverters as converter (converter.name)}
+									{@const variantLabel =
+										converter.getVariantLabel()}
+									{@const variantOptions =
+										converter.getVariantOptions()}
+									{@const isSelected =
+										converter.name === validConverter?.name}
 									<button
 										class={clsx(
-											"w-full p-3 text-left rounded-xl border-2 border-button",
-											converter.name ===
-												validConverter?.name &&
+											"w-full rounded-xl border-2 border-button p-3 text-left",
+											isSelected &&
 												"bg-accent-purple text-black",
 											$effects && "transition",
 										)}
@@ -315,8 +419,32 @@
 											settings.converter = converter.name;
 										}}
 									>
-										{converter.name}
+										{converter.name}{variantLabel
+											? ` (${variantLabel})`
+											: ""}
 									</button>
+									{#if isSelected && variantOptions}
+										<div class="ml-3 flex flex-wrap gap-2">
+											{#each variantOptions as option (option.value)}
+												<button
+													class={clsx(
+														"rounded-lg border-2 border-button px-3 py-1.5 text-sm",
+														converter.getVariantValue() ===
+															option.value &&
+															"bg-accent-purple text-black",
+														$effects &&
+															"transition",
+													)}
+													onclick={() =>
+														converter.setVariant(
+															option.value,
+														)}
+												>
+													{option.label}
+												</button>
+											{/each}
+										</div>
+									{/if}
 								{/each}
 							</div>
 						{:else if availableCategories[activeTab]?.length}
@@ -338,7 +466,7 @@
 											{setting.label}
 										</p>
 										{#if setting.description}
-											<p class="text-xs text-muted mt-1">
+											<p class="mt-1 text-xs text-muted">
 												{setting.description}
 											</p>
 										{/if}
@@ -353,14 +481,15 @@
 																}
 															: opt,
 												) || []}
-												selected={settings[
-													setting.key
-												] ??
-													targetFile
-														.conversionSettings[
-														setting.key
-													] ??
-													setting.default}
+												selected={resolveSettingValue(
+													settings[setting.key] ??
+														targetFile
+															.conversionSettings[
+															setting.key
+														] ??
+														setting.default,
+													setting,
+												)}
 												style="settings"
 												onselect={(value) =>
 													handleSettingChange(
@@ -401,7 +530,7 @@
 												setting.options?.[rangeValue]
 													?.label ?? rangeValue}
 											<div
-												class="flex items-center mt-2 gap-2"
+												class="mt-2 flex items-center gap-2"
 											>
 												<input
 													type="range"
@@ -419,7 +548,7 @@
 													disabled={setting.disabled}
 												/>
 												<span
-													class="text-sm max-w-28 w-full text-right"
+													class="w-full max-w-28 text-right text-sm"
 													>{rangeLabel}</span
 												>
 											</div>

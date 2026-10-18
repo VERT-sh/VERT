@@ -1,24 +1,26 @@
-import { browser } from "$app/environment";
-import { PUB_ENV } from "$env/static/public";
+import { converters } from "#lib/converters";
+import { m } from "#lib/paraglide/messages";
+import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "#lib/util/consts";
+import {
+	formatLogLine,
+	error as logError,
+	logs,
+	type LogEntry,
+} from "#lib/util/logger.svelte";
+import { swManager, type CacheInfo } from "#lib/util/sw";
+import { browser } from "$app/env";
+import { PUB_ENV } from "$app/env/public";
 import {
 	AudioLinesIcon,
 	BookTextIcon,
 	FilmIcon,
 	ImageIcon,
+	MusicIcon,
 	RefreshCwIcon,
 	ServerIcon,
+	ShapesIcon,
 } from "@lucide/svelte";
 import type { Component } from "svelte";
-import { converters } from "$lib/converters";
-import { m } from "$lib/paraglide/messages";
-import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/util/consts";
-import {
-	error as logError,
-	formatLogLine,
-	logs,
-	type LogEntry,
-} from "$lib/util/logger.svelte";
-import { swManager, type CacheInfo } from "$lib/util/sw";
 
 declare const __COMMIT_HASH__: string | undefined;
 export const commitHash =
@@ -44,9 +46,29 @@ export const CONVERTER_META: Record<
 		icon: ImageIcon,
 		accent: "bg-accent-blue",
 	},
+	libvips: {
+		category: "image",
+		icon: ImageIcon,
+		accent: "bg-accent-blue-alt",
+	},
+	vectorizer: {
+		category: "image",
+		icon: ShapesIcon,
+		accent: "bg-accent-purple",
+	},
 	ffmpeg: {
 		category: "audio",
 		icon: AudioLinesIcon,
+		accent: "bg-accent-purple",
+	},
+	"spessasynth-midi": {
+		category: "audio",
+		icon: MusicIcon,
+		accent: "bg-accent-purple",
+	},
+	"spessasynth-soundfont": {
+		category: "audio",
+		icon: MusicIcon,
 		accent: "bg-accent-purple",
 	},
 	pandoc: {
@@ -59,6 +81,11 @@ export const CONVERTER_META: Record<
 		icon: FilmIcon,
 		accent: "bg-accent-red",
 	},
+	"ffmpeg-video": {
+		category: "video",
+		icon: FilmIcon,
+		accent: "bg-accent-purple",
+	},
 	vertd: {
 		category: "video",
 		icon: ServerIcon,
@@ -67,8 +94,9 @@ export const CONVERTER_META: Record<
 };
 
 export const STATUS_CLASSES: Record<string, string> = {
-	"not-ready": "bg-button text-muted",
+	idle: "bg-button text-muted",
 	downloading: "bg-accent-blue text-black",
+	initializing: "bg-accent-blue text-black",
 	ready: "bg-accent-green text-black",
 	"partially-ready": "bg-accent-purple text-black",
 	error: "bg-accent-red text-black",
@@ -76,8 +104,9 @@ export const STATUS_CLASSES: Record<string, string> = {
 
 export function getStatusLabels(): Record<string, string> {
 	return {
-		"not-ready": m["settings.debug.converters.statuses.not_ready"](),
+		idle: m["settings.debug.converters.statuses.idle"](),
 		downloading: m["settings.debug.converters.statuses.downloading"](),
+		initializing: m["settings.debug.converters.statuses.initializing"](),
 		ready: m["settings.debug.converters.statuses.ready"](),
 		"partially-ready":
 			m["settings.debug.converters.statuses.partially_ready"](),
@@ -199,6 +228,7 @@ export async function getStorageInfo(): Promise<StorageInfo> {
 }
 
 export function formatFileStamp(): string {
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	return new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 }
 
@@ -216,6 +246,7 @@ export function downloadText(filename: string, content: string): void {
 export function buildReport(systemInfo: SystemInfo): string {
 	return [
 		`${VERT_NAME} debug report`,
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		`Generated: ${new Date().toISOString()}`,
 		`Environment: ${PUB_ENV}`,
 		`Commit: ${commitHash}`,

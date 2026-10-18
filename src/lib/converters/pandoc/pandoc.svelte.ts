@@ -1,54 +1,57 @@
-import { VertFile, type WorkerMessage } from "$lib/types";
-import { Converter, FormatInfo } from "../converter.svelte";
-import { browser } from "$app/environment";
-import PandocWorker from "$lib/workers/pandoc?worker&url";
-import { error, log } from "$lib/util/logger.svelte";
-import { ToastManager } from "$lib/util/toast.svelte";
-import { m } from "$lib/paraglide/messages";
+import { m } from "#lib/paraglide/messages";
+import { VertFile, type WorkerMessage } from "#lib/types";
+import { ToastManager } from "#lib/util/toast.svelte";
+import PandocWorker from "#lib/workers/pandoc?worker&url";
+import { browser } from "$app/env";
+import pandocWasm from "pandoc-wasm/wasm?url";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
 
 export class PandocConverter extends Converter {
 	public name = "pandoc";
 	public ready = $state(false);
 	public wasm: ArrayBuffer = null!;
 
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	private activeConversions = new Map<string, Worker>();
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	private workerCancellation = new Map<Worker, AbortController>();
 
 	constructor() {
 		super();
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
 		if (!browser) return;
-		(async () => {
-			try {
-				this.status = "downloading";
-				this.wasm = await fetch("/pandoc.wasm").then((r) =>
-					r.arrayBuffer(),
-				);
+		this.log(`created converter`);
+	}
 
-				this.status = "ready";
-			} catch (err) {
-				this.status = "error";
-				this.error(`Failed to load Pandoc worker: ${err}`);
-				ToastManager.add({
-					type: "error",
-					message: m["workers.errors.pandoc"](),
-				});
-			}
-		})();
+	protected async download(): Promise<void> {
+		if (!browser) return;
+		try {
+			this.wasm = await fetch(pandocWasm).then((r) => r.arrayBuffer());
+
+			this.status = "ready";
+			return Promise.resolve();
+		} catch (err) {
+			this.error(`Failed to load Pandoc WASM: ${err}`);
+			ToastManager.add({
+				type: "error",
+				message: m["workers.errors.pandoc"](),
+			});
+			throw err;
+		}
 	}
 
 	public async convert(file: VertFile, to: string): Promise<VertFile> {
+		await this.init();
+
 		this.trackConversion(file);
+		this.log(`converting ${file.name} (${file.id}) to ${to}`);
+		const startedAt = performance.now();
 		const worker = new Worker(PandocWorker, {
 			type: "module",
 		});
 
 		this.activeConversions.set(file.id, worker);
+		const cancellation = new AbortController();
+		this.workerCancellation.set(worker, cancellation);
 
 		try {
 			const loadMsg: WorkerMessage = {
@@ -57,7 +60,8 @@ export class PandocConverter extends Converter {
 				id: file.id,
 			};
 			worker.postMessage(loadMsg);
-			await waitForMessage(worker, "loaded");
+			await waitForMessage(worker, cancellation.signal, "loaded");
+			cancellation.signal.throwIfAborted();
 			const convertMsg: WorkerMessage = {
 				type: "convert",
 				to,
@@ -71,7 +75,7 @@ export class PandocConverter extends Converter {
 				conversionSettings: "", // no settings for pandoc yet
 			};
 			worker.postMessage(convertMsg);
-			const result = await waitForMessage(worker);
+			const result = await waitForMessage(worker, cancellation.signal);
 			if (result.type === "error") {
 				const error = result.error.toString();
 				switch (result.errorKind) {
@@ -106,11 +110,16 @@ export class PandocConverter extends Converter {
 			}
 
 			if (!to.startsWith(".")) to = `.${to}`;
+			this.log(
+				`converted ${file.name} (${file.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
+			);
 			return new VertFile(
 				new File([result.output], file.name),
-				result.isZip ? ".zip" : to,
+				result.zip ? ".zip" : to,
 			);
 		} finally {
+			cancellation.abort();
+			this.workerCancellation.delete(worker);
 			this.clearTrackedConversion(file);
 			this.activeConversions.delete(file.id);
 			worker.terminate();
@@ -120,12 +129,15 @@ export class PandocConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const worker = this.activeConversions.get(input.id);
 		if (!worker) {
-			this.error(`no active conversion found for file ${input.name}`);
+			this.error(
+				`no active conversion found for file ${input.name} (${input.id})`,
+			);
 			return;
 		}
 
-		this.log(`cancelling conversion for file ${input.name}`);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
+		this.workerCancellation.get(worker)?.abort();
 		worker.terminate();
 		this.activeConversions.delete(input.id);
 	}
@@ -143,21 +155,49 @@ export class PandocConverter extends Converter {
 		new FormatInfo("epub", true, true),
 		new FormatInfo("odt", true, true),
 		new FormatInfo("docbook", true, true),
+		new FormatInfo("ipynb", true, true),
+		new FormatInfo("typ", true, true),
+		new FormatInfo("opml", true, true),
+		new FormatInfo("org", true, true),
+		new FormatInfo("fb2", true, true),
+		new FormatInfo("tex", true, true),
+		new FormatInfo("man", true, true),
+		new FormatInfo("jats", true, true),
+		new FormatInfo("adoc", false, true),
 	];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function waitForMessage(worker: Worker, type?: string): Promise<any> {
-	return new Promise((resolve) => {
-		const onMessage = (e: MessageEvent) => {
-			if (type && e.data.type === type) {
-				worker.removeEventListener("message", onMessage);
-				resolve(e.data);
-			} else {
-				worker.removeEventListener("message", onMessage);
-				resolve(e.data);
-			}
+function waitForMessage(
+	worker: Worker,
+	signal: AbortSignal,
+	type?: string,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+	return new Promise((resolve, reject) => {
+		const cleanup = () => {
+			worker.removeEventListener("message", onMessage);
+			worker.removeEventListener("error", onError);
+			signal.removeEventListener("abort", onAbort);
 		};
+		const onAbort = () => {
+			cleanup();
+			reject(signal.reason);
+		};
+		const onMessage = (e: MessageEvent) => {
+			if (type && e.data.type !== type && e.data.type !== "error") return;
+			cleanup();
+			resolve(e.data);
+		};
+		const onError = (e: ErrorEvent) => {
+			cleanup();
+			reject(new Error(`Worker error: ${e.message}`));
+		};
+		if (signal.aborted) {
+			onAbort();
+			return;
+		}
+		signal.addEventListener("abort", onAbort);
 		worker.addEventListener("message", onMessage);
+		worker.addEventListener("error", onError);
 	});
 }

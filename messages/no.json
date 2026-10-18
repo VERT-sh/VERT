@@ -113,15 +113,22 @@
 					"close": "Lukk"
 				},
 				"generic": {
+					"title": "Feil ved videokonvertering",
 					"view": "Vis feildetaljer",
 					"body": "En feil oppstod under konvertering av videoen din. Vil du sende denne videoen til utviklerne for å hjelpe med å fikse feilen? Kun videofilen din vil bli sendt. Ingen identifiserende informasjon lastes opp.",
-					"title": "Feil ved videokonvertering",
 					"yes": "Send video",
 					"no": "Ikke send"
 				},
 				"failed_to_keep": "Kunne ikke beholde videoen på serveren: {error}",
 				"ratelimit": "Videoen din, '{filename}', har feilet å konvertere flere ganger. For å forhindre overbelastning av serveren er videre konverteringsforsøk for denne filen midlertidig blokkert. Prøv igjen senere.",
 				"not_found": "Kunne ikke finne vertd-instansen for å starte videokonvertering. Er du sikker på at instans-URL-en er satt riktig?"
+			}
+		},
+		"settings": {
+			"audio": {
+				"sample_rate": {
+					"label": "Samplingsfrekvens (Hz)"
+				}
 			}
 		}
 	},
@@ -186,17 +193,15 @@
 			"loading": "laster...",
 			"available": "tilgjengelig, commit id {commitId}",
 			"unavailable": "utilgjengelig (er url-en riktig?)",
-			"description": {
-				"main": "<code>vertd</code>-prosjektet er en server-wrapper for FFmpeg. Dette lar deg konvertere videoer gjennom VERTs webgrensesnitt, samtidig som du kan bruke kraften til GPU-en din for å gjøre det så raskt som mulig.",
-				"info": "Vi hoster en offentlig instans for din bekvemmelighet, men det er ganske enkelt å hoste din egen på PC-en eller serveren din hvis du vet hva du gjør. Du kan laste ned server-binærfiler [vertd_link]her[/vertd_link] - prosessen med å sette dette opp vil bli enklere i fremtiden, så følg med!"
-			},
+			"description": "<code>vertd</code>-prosjektet er en server-wrapper for FFmpeg. Dette lar deg konvertere videoer gjennom VERTs webgrensesnitt, samtidig som du kan bruke kraften til GPU-en din for å gjøre det så raskt som mulig.",
+			"hosting_info": "Vi hoster en offentlig instans for din bekvemmelighet, men det er ganske enkelt å hoste din egen på PC-en eller serveren din hvis du vet hva du gjør. Du kan laste ned server-binærfiler [vertd_link]her[/vertd_link] - prosessen med å sette dette opp vil bli enklere i fremtiden, så følg med!",
 			"instance": {
-				"custom": "Egendefinert",
 				"label": "Instans",
 				"url_placeholder": "Eksempel: http://localhost:24153",
 				"auto": "Auto (anbefalt)",
 				"eu": "Falkenstein, Tyskland",
-				"us": "Washington, USA"
+				"us": "Washington, USA",
+				"custom": "Egendefinert"
 			},
 			"conversion_speed": {
 				"speeds": {
@@ -288,9 +293,9 @@
 			"roles": {
 				"lead_developer": "Hovedutvikler; konverteringsbackend, UI-implementering",
 				"developer": "Utvikler; UI-implementering",
-				"designer": "Designer; UX, merkevarebygging, markedsføring",
-				"docker_ci": "Vedlikehold av Docker & CI-støtte",
-				"former_cofounder": "Tidligere medgründer & designer"
+				"liam": "Designer; UX, merkevarebygging, markedsføring",
+				"azure": "Vedlikehold av Docker & CI-støtte",
+				"realmy": "Tidligere medgründer & designer"
 			}
 		},
 		"errors": {

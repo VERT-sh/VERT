@@ -78,4 +78,4 @@ function removeDialog(id: number) {
 	);
 }
 
-export { dialogs, addDialog, removeDialog };
+export { addDialog, dialogs, removeDialog };

@@ -1,20 +1,23 @@
-import VertdErrorComponent from "$lib/components/functional/popups/VertdError.svelte";
-import { error, log } from "$lib/util/logger.svelte";
-import { m } from "$lib/paraglide/messages";
-import { Settings } from "$lib/sections/settings/index.svelte";
+import VertdErrorComponent from "#lib/components/functional/popups/VertdError.svelte";
+import { m } from "#lib/paraglide/messages";
+import { Settings } from "#lib/sections/settings/index.svelte";
 import {
 	VertdInstance,
 	getVertdCustomHeaders,
-} from "$lib/sections/settings/vertdSettings.svelte";
-import { VertFile } from "$lib/types";
-import { Converter, FormatInfo } from "../converter.svelte";
-import { PUB_DISABLE_FAILURE_BLOCKS } from "$env/static/public";
-import { ToastManager } from "$lib/util/toast.svelte";
+} from "#lib/sections/settings/vertdSettings.svelte";
+import { VertFile } from "#lib/types";
 import type {
-	SettingDefinition,
-	SettingCategories,
 	ConversionSettings,
-} from "$lib/types/conversion-settings";
+	SettingCategories,
+	SettingDefinition,
+} from "#lib/types/conversion-settings";
+import { formatError } from "#lib/util/error";
+import { ToastManager } from "#lib/util/toast.svelte";
+import { PUB_DISABLE_FAILURE_BLOCKS } from "$app/env/public";
+import { SvelteMap, SvelteSet } from "svelte/reactivity";
+import { type CodecInfo, codecOptions, toCodecInfo } from "../codec-labels";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
+import { applyPriorities } from "../priority";
 
 interface UploadResponse {
 	id: string;
@@ -23,6 +26,12 @@ interface UploadResponse {
 	to: null;
 	completed: false;
 	totalFrames: number;
+	// for .zip uploads
+	sequence?: {
+		kind: "frameSequence" | "dash";
+		extension: string;
+		entry: string;
+	};
 }
 
 interface RouteRequestMap {
@@ -33,18 +42,36 @@ interface RouteRequestMap {
 }
 
 interface CodecsResponse {
-	videoCodecs: string[];
-	audioCodecs: string[];
+	videoCodecs: CodecInfo[];
+	audioCodecs: CodecInfo[];
 }
+
+type CodecsRouteResponse = {
+	format?: string;
+	videoCodecs?: (CodecInfo | string)[];
+	audioCodecs?: (CodecInfo | string)[];
+	codec?: string;
+	formats?: string[];
+};
 
 interface RouteResponseMap {
 	"/api/upload": UploadResponse;
 	"/api/version": string;
 	"/api/size_limit": number | null;
 	"/api/keep": void;
-	"/api/codecs": string[]; // get list of all codecs supported by vertd server
-	[key: `/api/codecs/${string}`]: unknown; // list of codecs for this format
-	[key: `/api/codecs/support/${string}`]: unknown; // list of formats supporting this codec -- i dont know how this works in ts, i have to put both as unknown since this and /api/codecs are different types (CodecsResponse & string[]) and TS errors
+	// get list of all codecs supported by vertd server
+	"/api/codecs": {
+		video: CodecInfo[];
+		audio: CodecInfo[];
+		all: CodecInfo[];
+	};
+	// list of codecs for this format
+	[key: `/api/codecs/${string}`]: CodecsRouteResponse;
+	// list of formats supporting this codec
+	[key: `/api/codecs/support/${string}`]: {
+		codec: string;
+		formats: string[];
+	};
 	[key: `/api/confirm/${string}/${string}`]: void; // confirm download - job id, token
 }
 
@@ -214,18 +241,6 @@ const progressEstimate = (
 	return progress * progressEstimates[type] + previousValues;
 };
 
-const formatError = (message: unknown): string => {
-	if (typeof message === "string") return message;
-	if (message instanceof Error) return message.message;
-	if (message === undefined) return "Unknown Vertd error";
-
-	try {
-		return JSON.stringify(message);
-	} catch {
-		return String(message);
-	}
-};
-
 interface UploadTask {
 	promise: Promise<UploadResponse>;
 	abort: () => void;
@@ -234,8 +249,10 @@ interface UploadTask {
 const createUploadTask = async (
 	file: VertFile,
 	apiUrl: string,
+	sequenceKind?: "frameSequence" | "dash",
 ): Promise<UploadTask> => {
 	const formData = new FormData();
+	if (sequenceKind) formData.append("sequenceKind", sequenceKind);
 	formData.append("file", file.file, file.name);
 	const xhr = new XMLHttpRequest();
 	xhr.open("POST", `${apiUrl}/api/upload`, true);
@@ -256,7 +273,7 @@ const createUploadTask = async (
 				console.log("xhr.responseText");
 				const res = JSON.parse(xhr.responseText);
 				if (res.type === "error") {
-					reject(res.data);
+					reject(new Error(formatError(res.data)));
 					return;
 				}
 				resolve(res.data);
@@ -338,7 +355,7 @@ const downloadTask = (url: string, file: VertFile): DownloadTask => {
 };
 
 // prettier-ignore
-export const videoFormats: string[] = ["mp4", "mkv", "webm", "avi", "wmv", "mov", "gif", "apng", "webp", "mts", "ts", "m2ts", "mpg", "mpeg", "flv", "f4v", "vob", "m4v", "3gp", "3g2", "mxf", "ogx", "ogv", "gxf", "rm", "rmvb", "h264", "divx", "swf", "amv", "asf", "nut"];
+export const videoFormats: string[] = ["mp4", "mkv", "webm", "avi", "wmv", "mov", "gif", "apng", "webp", "mts", "ts", "m2ts", "mpg", "mpeg", "flv", "f4v", "vob", "m4v", "3gp", "3g2", "mxf", "ogx", "ogv", "gxf", "rm", "rmvb", "h264", "divx", "swf", "amv", "asf", "nut", "ivf", "y4m"];
 const cantEncode: string[] = ["rm", "rmvb"];
 const cantDecode: string[] = [];
 
@@ -347,7 +364,7 @@ export class VertdConverter extends Converter {
 	public ready = $state(false);
 	public reportsProgress = true;
 
-	private activeConversions = new Map<
+	private activeConversions = new SvelteMap<
 		string,
 		{
 			ws: WebSocket;
@@ -356,32 +373,26 @@ export class VertdConverter extends Converter {
 		}
 	>();
 
-	private activeUploads = new Map<string, UploadTask>();
+	private activeUploads = new SvelteMap<string, UploadTask>();
 
-	private activeDownloads = new Map<string, DownloadTask>();
+	private activeDownloads = new SvelteMap<string, DownloadTask>();
 
-	private cancelledConversions = new Set<string>();
+	private cancelledConversions = new SvelteSet<string>();
 
-	public supportedFormats = [
+	public supportedFormats = applyPriorities("vertd", [
+		new FormatInfo("zip", true, false, false, 0),
 		...videoFormats
-			.map((f: string) => new FormatInfo(f, true, true, true, 0))
+			.map((f: string) => new FormatInfo(f, true, true, true))
 			.filter((format) => !cantEncode.includes(format.name.slice(1)))
 			.filter((format) => !cantDecode.includes(format.name.slice(1))),
-		...cantEncode.map((f) => new FormatInfo(f, true, false, true, 0)),
-		...cantDecode.map((f) => new FormatInfo(f, false, true, true, 0)),
-	];
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
+		...cantEncode.map((f) => new FormatInfo(f, true, false, true)),
+		...cantDecode.map((f) => new FormatInfo(f, false, true, true)),
+	]);
 
 	private codecs: CodecsResponse = { videoCodecs: [], audioCodecs: [] };
 
 	constructor() {
 		super();
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
 		this.log("created converter");
 		this.log("not rly sure how to implement this :P");
 		this.status = "ready";
@@ -393,11 +404,13 @@ export class VertdConverter extends Converter {
 		// ensure it's a map
 		// this might fix the "e.get" isn't a function error, but i can't reproduce it
 		if (!(blockedHashes instanceof Map) || blockedHashes === null) {
+			// eslint-disable-next-line svelte/prefer-svelte-reactivity
 			blockedHashes = new Map(Object.entries(blockedHashes || {}));
 			Settings.instance.settings.vertdBlockedHashes = blockedHashes;
 			Settings.instance.save();
 		}
 
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const now = new Date();
 		const dates = blockedHashes.get(hash) || [];
 		const filteredDates = dates.filter(
@@ -421,11 +434,13 @@ export class VertdConverter extends Converter {
 
 		// same as above (blocked())
 		if (!(blockedHashes instanceof Map) || blockedHashes === null) {
+			// eslint-disable-next-line svelte/prefer-svelte-reactivity
 			blockedHashes = new Map(Object.entries(blockedHashes || {}));
 			Settings.instance.settings.vertdBlockedHashes = blockedHashes;
 			Settings.instance.save();
 		}
 
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const now = new Date();
 		const dates = blockedHashes.get(hash) || [];
 		dates.push(now);
@@ -478,11 +493,15 @@ export class VertdConverter extends Converter {
 				baseUrl,
 			);
 
+			const nextCodecs: CodecsResponse = {
+				videoCodecs: (codecsJson.videoCodecs || []).map(toCodecInfo),
+				audioCodecs: (codecsJson.audioCodecs || []).map(toCodecInfo),
+			};
 			const previousCodecs = JSON.stringify(this.codecs);
-			const newCodecs = JSON.stringify(codecsJson);
+			const newCodecs = JSON.stringify(nextCodecs);
 
 			if (previousCodecs !== newCodecs) {
-				this.codecs = codecsJson as CodecsResponse;
+				this.codecs = nextCodecs;
 				this.log(`updated codecs from vertd: ${newCodecs}`);
 			}
 		} catch (e) {
@@ -532,10 +551,7 @@ export class VertdConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...(this.codecs.videoCodecs || []).map((codec) => ({
-					value: codec,
-					label: codec,
-				})),
+				...codecOptions(this.codecs.videoCodecs),
 			],
 		};
 
@@ -559,10 +575,7 @@ export class VertdConverter extends Converter {
 			default: "auto",
 			options: [
 				{ value: "auto", label: m["convert.settings.common.auto"]() },
-				...(this.codecs.audioCodecs || []).map((codec) => ({
-					value: codec,
-					label: codec,
-				})),
+				...codecOptions(this.codecs.audioCodecs),
 			],
 		};
 
@@ -647,6 +660,8 @@ export class VertdConverter extends Converter {
 	): Promise<VertFile> {
 		this.trackConversion(input);
 		if (to.startsWith(".")) to = to.slice(1);
+		this.log(`converting ${input.name} (${input.id}) to .${to}`);
+		const startedAt = performance.now();
 
 		const fileUpload = input;
 		const apiUrl = await VertdInstance.instance.url();
@@ -660,7 +675,9 @@ export class VertdConverter extends Converter {
 			hash = await fileUpload.hash();
 
 			if (this.blocked(hash)) {
-				this.log(`conversion blocked for file ${input.name}`);
+				this.log(
+					`conversion blocked for file ${input.name} (${input.id})`,
+				);
 				throw new Error(
 					m["convert.errors.vertd.ratelimit"]({
 						filename: input.name,
@@ -669,7 +686,11 @@ export class VertdConverter extends Converter {
 			}
 		}
 
-		const uploadTask = await createUploadTask(fileUpload, apiUrl);
+		const uploadTask = await createUploadTask(
+			fileUpload,
+			apiUrl,
+			fileUpload.sequenceKind,
+		);
 		this.activeUploads.set(input.id, uploadTask);
 
 		let uploadRes: UploadResponse;
@@ -678,6 +699,11 @@ export class VertdConverter extends Converter {
 		} finally {
 			this.activeUploads.delete(input.id);
 		}
+
+		if (uploadRes.sequence)
+			this.log(
+				`received sequence upload for ${input.name} (${input.id}) (kind: ${uploadRes.sequence.kind}, extension: ${uploadRes.sequence.extension}, entry: ${uploadRes.sequence.entry})`,
+			);
 
 		if (this.cancelledConversions.has(input.id))
 			throw new Error("Conversion cancelled");
@@ -740,7 +766,7 @@ export class VertdConverter extends Converter {
 
 				clearTimeout(connectTimeout);
 				this.log(
-					`opened ws connection to vertd for file ${input.name}`,
+					`opened ws connection to vertd for file ${input.name} (${input.id})`,
 				);
 				const msg: StartJobMessage = {
 					type: "startJob",
@@ -753,11 +779,13 @@ export class VertdConverter extends Converter {
 				};
 				ws.send(JSON.stringify(msg));
 				this.log(JSON.stringify(msg, null, 2));
-				this.log(`sent startJob message for file ${input.name}`);
+				this.log(
+					`sent startJob message for file ${input.name} (${input.id})`,
+				);
 			};
 
 			ws.onerror = () => {
-				this.error(`ws error for file ${input.name}`);
+				this.error(`ws error for file ${input.name} (${input.id})`);
 				rejectConversion(new Error("vertd websocket error"));
 			};
 
@@ -769,7 +797,7 @@ export class VertdConverter extends Converter {
 				}
 
 				this.error(
-					`ws closed unexpectedly for file ${input.name} (code: ${e.code})`,
+					`ws closed unexpectedly for file ${input.name} (${input.id}) (code: ${e.code})`,
 				);
 				rejectConversion(
 					new Error("vertd websocket closed unexpectedly"),
@@ -791,7 +819,9 @@ export class VertdConverter extends Converter {
 					return;
 				}
 
-				this.log(`received message ${msg.type} for file ${input.name}`);
+				this.log(
+					`received message ${msg.type} for file ${input.name} (${input.id})`,
+				);
 				switch (msg.type) {
 					case "progressUpdate": {
 						const data = msg.data;
@@ -805,7 +835,9 @@ export class VertdConverter extends Converter {
 					}
 
 					case "jobRetried": {
-						this.log(`job retrying for file ${input.name}`);
+						this.log(
+							`job retrying for file ${input.name} (${input.id})`,
+						);
 						ToastManager.add({
 							type: "error",
 							message: m["convert.errors.vertd.retry"]({
@@ -816,7 +848,9 @@ export class VertdConverter extends Converter {
 					}
 
 					case "jobFinished": {
-						this.log(`job finished for file ${input.name}`);
+						this.log(
+							`job finished for file ${input.name} (${input.id})`,
+						);
 						try {
 							if (settled) break;
 							const url = `${apiUrl}/api/download/${msg.data.jobId}/${uploadRes.auth}`;
@@ -839,14 +873,20 @@ export class VertdConverter extends Converter {
 									apiUrl,
 								);
 								this.log(
-									`confirmed download for file ${input.name}`,
+									`confirmed download for file ${input.name} (${input.id})`,
 								);
 							} catch (e) {
 								this.error(`failed to confirm download: ${e}`);
 							}
 
+							this.log(
+								`converted ${input.name} (${input.id}) to .${to} in ${formatDuration(performance.now() - startedAt)}`,
+							);
 							resolveConversion(
-								new VertFile(new File([res], input.name), to),
+								new VertFile(
+									new File([res], input.name),
+									`.${to}`,
+								),
 							);
 						} catch (e) {
 							// don't count cancellations as failures
@@ -870,8 +910,8 @@ export class VertdConverter extends Converter {
 					}
 
 					case "error": {
-						const errorMessage = formatError(msg.data.message);
-						this.error(`error: ${errorMessage}`);
+						const errorText = formatError(msg.data.message);
+						this.error(`error: ${errorText}`);
 						if (hash) this.failure(hash);
 
 						rejectConversion({
@@ -881,7 +921,7 @@ export class VertdConverter extends Converter {
 								auth: uploadRes.auth,
 								from: input.from,
 								to: to,
-								errorMessage,
+								errorMessage: errorText,
 							},
 						});
 						break;
@@ -893,7 +933,6 @@ export class VertdConverter extends Converter {
 				}
 			};
 		});
-		this.clearTrackedConversion(input);
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
@@ -901,14 +940,16 @@ export class VertdConverter extends Converter {
 
 		const activeUpload = this.activeUploads.get(input.id);
 		if (activeUpload) {
-			this.log(`cancelling upload for file ${input.name}`);
+			this.log(`cancelling upload for file ${input.name} (${input.id})`);
 			activeUpload.abort();
 			this.activeUploads.delete(input.id);
 		}
 
 		const activeDownload = this.activeDownloads.get(input.id);
 		if (activeDownload) {
-			this.log(`cancelling download for file ${input.name}`);
+			this.log(
+				`cancelling download for file ${input.name} (${input.id})`,
+			);
 			activeDownload.abort();
 			this.activeDownloads.delete(input.id);
 		}
@@ -916,14 +957,13 @@ export class VertdConverter extends Converter {
 		const activeConversion = this.activeConversions.get(input.id);
 		if (!activeConversion) {
 			if (!activeUpload && !activeDownload)
-				this.error(`no active conversion found for file ${input.name}`);
+				this.error(
+					`no active conversion found for file ${input.name} (${input.id})`,
+				);
 			return;
 		}
 
-		log(
-			["converters", this.name],
-			`cancelling conversion for file ${input.name}`,
-		);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
 		const { ws, jobId, token } = activeConversion;
 
@@ -936,7 +976,9 @@ export class VertdConverter extends Converter {
 				},
 			};
 			ws.send(JSON.stringify(cancelMsg));
-			this.log(`sent cancelJob message for file ${input.name}`);
+			this.log(
+				`sent cancelJob message for file ${input.name} (${input.id})`,
+			);
 		}
 
 		ws.close();

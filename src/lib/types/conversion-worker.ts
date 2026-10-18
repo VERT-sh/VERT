@@ -23,6 +23,7 @@ interface FinishedMessage {
 interface LoadMessage {
 	type: "load";
 	wasm: ArrayBuffer;
+	x64?: boolean; // for magick-wasm x64
 }
 
 interface LoadedMessage {

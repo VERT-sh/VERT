@@ -9,6 +9,6 @@
 	const { class: classList, children }: Props = $props();
 </script>
 
-<div class="bg-panel {classList} p-3 rounded-2.5xl shadow-panel">
+<div class="bg-panel {classList} rounded-2.5xl p-3 shadow-panel">
 	{@render children?.()}
 </div>

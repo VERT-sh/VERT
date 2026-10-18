@@ -1,6 +1,7 @@
 <script lang="ts" context="module">
-	import { GITHUB_URL_VERT, DISCORD_URL } from "$lib/util/consts";
-	import { m } from "$lib/paraglide/messages";
+	import { resolve } from "$app/paths";
+	import { GITHUB_URL_VERT, DISCORD_URL } from "#lib/util/consts";
+	import { m } from "#lib/paraglide/messages";
 
 	declare const __COMMIT_HASH__: string | undefined;
 
@@ -16,38 +17,41 @@
 </script>
 
 <footer
-	class="hidden md:block w-full h-14 border-t border-separator fixed bottom-0 mt-12"
+	class="fixed bottom-0 mt-12 hidden h-14 w-full border-t border-separator md:block"
 >
 	<div
-		class="w-full h-full flex items-center justify-center text-muted gap-3 relative"
+		class="relative flex h-full w-full items-center justify-center gap-3 text-muted"
 	>
 		<p>{m["footer.copyright"]({ year })}</p>
 		<p>•</p>
 		<a
-			class="hover:underline font-normal"
+			class="font-normal hover:underline"
 			href={GITHUB_URL_VERT}
 			target="_blank"
+			rel="external"
 		>
 			{m["footer.source_code"]()}
 		</a>
 		<p>•</p>
 		<a
-			class="hover:underline font-normal"
+			class="font-normal hover:underline"
 			href={DISCORD_URL}
 			target="_blank"
+			rel="external"
 		>
 			{m["footer.discord_server"]()}
 		</a>
 		<p>•</p>
-		<a class="hover:underline font-normal" href="/privacy/">
+		<a class="font-normal hover:underline" href={resolve("/privacy")}>
 			{m["footer.privacy_policy"]()}
 		</a>
 		{#if commitHash}
 			<p>•</p>
 			<a
-				class="hover:underline font-normal"
+				class="font-normal hover:underline"
 				href="{GITHUB_URL_VERT}/commit/{commitHash}"
 				target="_blank"
+				rel="external"
 			>
 				{commitHash}
 			</a>
@@ -55,7 +59,7 @@
 	</div>
 
 	<div
-		class="absolute bottom-0 left-0 w-full h-24 -z-10 pointer-events-none"
+		class="pointer-events-none absolute bottom-0 left-0 -z-10 h-24 w-full"
 		style="background: linear-gradient(to bottom, transparent, var(--bg) 100%)"
 	></div>
 </footer>

@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { goto, beforeNavigate, afterNavigate } from "$app/navigation";
+	import { resolve } from "$app/paths";
 
-	import { PUB_PLAUSIBLE_URL, PUB_HOSTNAME } from "$env/static/public";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "$lib/util/consts";
-	import * as Layout from "$lib/components/layout";
-	import * as Navbar from "$lib/components/layout/Navbar";
-	import { Settings } from "$lib/sections/settings/index.svelte";
+	import { PUB_PLAUSIBLE_URL, PUB_HOSTNAME } from "$app/env/public";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS, VERT_NAME } from "#lib/util/consts";
+	import * as Layout from "#lib/components/layout";
+	import * as Navbar from "#lib/components/layout/Navbar";
+	import { Settings } from "#lib/sections/settings/index.svelte";
 	import {
 		files,
 		isMobile,
@@ -16,24 +17,29 @@
 		vertdLoaded,
 		locale,
 		updateLocale,
-	} from "$lib/store/index.svelte";
-	import "$lib/css/app.scss";
-	import { browser } from "$app/environment";
-	import { initStores } from "$lib/util/animation";
-	import { useVertdSizeLimit } from "$lib/sections/settings/vertdSettings.svelte";
-	import { converters } from "$lib/converters";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import { m } from "$lib/paraglide/messages";
+	} from "#lib/store/index.svelte";
+	import "#lib/css/app.scss";
+	import { browser } from "$app/env";
+	import { initStores } from "#lib/util/animation";
+	import { useVertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
+	import { converters } from "#lib/converters";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import { m } from "#lib/paraglide/messages";
 	import {
 		addLog,
 		installConsoleCapture,
 		log,
-	} from "$lib/util/logger.svelte";
+	} from "#lib/util/logger.svelte";
 
 	let { children } = $props();
-	let enablePlausible = $state(false);
 	let isAprilFools = $state(false);
+	let enablePlausible = $derived(
+		!!PUB_PLAUSIBLE_URL &&
+			Settings.instance.settings.plausible &&
+			!DISABLE_ALL_EXTERNAL_REQUESTS,
+	);
 
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	let scrollPositions = new Map<string, number>();
 
 	beforeNavigate((nav) => {
@@ -54,7 +60,7 @@
 		dropping.set(false);
 		const oldLength = files.files.length;
 		await files.addAsync(e.dataTransfer?.files);
-		if (files.files.length !== oldLength) goto("/convert");
+		if (files.files.length !== oldLength) goto(resolve("/convert"));
 	};
 
 	const handleDrag = (e: DragEvent, drag: boolean) => {
@@ -68,7 +74,7 @@
 		e.preventDefault();
 		const oldLength = files.files.length;
 		await files.addAsync(clipboardData.files);
-		if (files.files.length !== oldLength) goto("/convert");
+		if (files.files.length !== oldLength) goto(resolve("/convert"));
 	};
 
 	onMount(() => {
@@ -158,10 +164,6 @@
 	});
 
 	$effect(() => {
-		enablePlausible =
-			!!PUB_PLAUSIBLE_URL &&
-			Settings.instance.settings.plausible &&
-			!DISABLE_ALL_EXTERNAL_REQUESTS;
 		if (!enablePlausible && browser) {
 			// reset pushState on opt-out so that plausible stops firing events on page navigation
 			history.pushState = History.prototype.pushState;
@@ -232,7 +234,7 @@
 <!-- FIXME: if user resizes between desktop/mobile, highlight of page disappears (only shows on original size) -->
 {#key $locale}
 	<div
-		class="flex flex-col min-h-screen h-full w-full overflow-x-hidden"
+		class="flex h-full min-h-screen w-full flex-col overflow-x-hidden"
 		ondrop={dropFiles}
 		ondragenter={(e) => handleDrag(e, true)}
 		ondragover={(e) => handleDrag(e, true)}

@@ -1,31 +1,40 @@
-import { browser } from "$app/environment";
-import { error, log } from "$lib/util/logger.svelte";
-import { m } from "$lib/paraglide/messages";
-import { VertFile, type WorkerMessage } from "$lib/types";
-import MagickWorker from "$lib/workers/magick?worker&url";
-import { Converter, FormatInfo } from "../converter.svelte";
+import { m } from "#lib/paraglide/messages";
+import { Settings } from "#lib/sections/settings/index.svelte";
+import { VertFile, type WorkerMessage } from "#lib/types";
+import type {
+	ConversionSettings,
+	SettingCategories,
+	SettingDefinition,
+} from "#lib/types/conversion-settings";
+import { ToastManager } from "#lib/util/toast.svelte";
+import MagickWorker from "#lib/workers/magick?worker&url";
+import { browser } from "$app/env";
+import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";
+import magickWasmX64 from "@imagemagick/magick-wasm/x64/magick.wasm?url";
+import { SvelteMap } from "svelte/reactivity";
+import { Converter, FormatInfo, formatDuration } from "../converter.svelte";
+import { EngineVariants, type MagickVariant } from "../engine-variants.svelte";
+import { applyPriorities } from "../priority";
 import { imageFormats } from "./magick-automated";
 import {
 	formatsWithoutMetadataRemoval,
 	formatsWithoutTransparency,
 } from "./magick-settings";
-import { Settings } from "$lib/sections/settings/index.svelte";
-import magickWasm from "@imagemagick/magick-wasm/magick.wasm?url";
-import { ToastManager } from "$lib/util/toast.svelte";
-import type {
-	SettingDefinition,
-	SettingCategories,
-	ConversionSettings,
-} from "$lib/types/conversion-settings";
 
 export class MagickConverter extends Converter {
 	public name = "imagemagick";
 	public ready = $state(false);
 	public wasm: ArrayBuffer = null!;
 
-	private activeConversions = new Map<string, Worker>();
+	private loadedVariant: "x64" | "x86" | null = null;
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	private wasmCache = new Map<string, ArrayBuffer>();
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	private workerCancellation = new Map<Worker, AbortController>();
 
-	public supportedFormats = [
+	private activeConversions = new SvelteMap<string, Worker>();
+
+	public supportedFormats = applyPriorities("imagemagick", [
 		// manually tested formats
 		new FormatInfo("png", true, true),
 		new FormatInfo("jpeg", true, true),
@@ -86,45 +95,104 @@ export class MagickConverter extends Converter {
 
 		// formats added from maya's somewhat automated testing
 		...imageFormats,
-	];
+	]);
 
 	public readonly reportsProgress = false;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private log: (...msg: any[]) => void = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private error: (...msg: any[]) => void = () => {};
-
 	constructor() {
 		super();
-		this.log = (msg) => log(["converters", this.name], msg);
-		this.error = (msg) => error(["converters", this.name], msg);
-		this.log(`created converter`);
 		if (!browser) return;
-		this.initializeWasm();
+		this.log(`created converter`);
 	}
 
-	private async initializeWasm() {
+	public getVariantLabel(): string | null {
+		const variants = EngineVariants.instance;
+		const variant =
+			variants.magick !== "auto"
+				? variants.magick
+				: variants.magickX64Supported === null
+					? null
+					: variants.magickActive;
+		if (!variant) return null;
+		return variant === "x64"
+			? m["convert.settings.engines.magick_x64"]()
+			: m["convert.settings.engines.magick_x86"]();
+	}
+
+	public getVariantOptions() {
+		return [
+			{ value: "auto", label: m["convert.settings.engines.auto"]() },
+			{
+				value: "x64",
+				label: m["convert.settings.engines.magick_x64"](),
+			},
+			{
+				value: "x86",
+				label: m["convert.settings.engines.magick_x86"](),
+			},
+		];
+	}
+
+	public getVariantValue(): string {
+		return EngineVariants.instance.magick;
+	}
+
+	public setVariant(value: string): void {
+		EngineVariants.instance.setMagick(value as MagickVariant);
+	}
+
+	protected async download(): Promise<void> {
 		try {
-			this.status = "downloading";
-			const response = await fetch(magickWasm);
-			if (!response.ok) {
-				throw new Error(
-					`Failed to fetch WASM: ${response.status} ${response.statusText}`,
+			const variants = EngineVariants.instance;
+			await variants.resolve();
+
+			// forced 64-bit on a browser without memory64 -> fall back to 32-bit
+			if (
+				variants.magick === "x64" &&
+				variants.magickX64Supported === false
+			) {
+				this.log(
+					"64-bit magick-wasm requested but memory64 is unsupported, using 32-bit",
 				);
+				ToastManager.add({
+					type: "info",
+					message: m["workers.info.magick_x64_unavailable"](),
+				});
 			}
 
-			this.wasm = await response.arrayBuffer();
-			this.status = "ready";
-		} catch (err) {
-			this.status = "error";
-			this.error(`Failed to load ImageMagick WASM: ${err}`);
+			const useX64 = variants.magickActive === "x64";
 
+			this.wasm = await this.fetchWasm(
+				useX64 ? magickWasmX64 : magickWasm,
+			);
+			this.loadedVariant = useX64 ? "x64" : "x86";
+
+			this.status = "ready";
+			this.log(`using ${this.loadedVariant} magick-wasm`);
+			return Promise.resolve();
+		} catch (err) {
 			ToastManager.add({
 				type: "error",
 				message: m["workers.errors.magick"](),
 			});
+			throw err;
 		}
+	}
+
+	private async fetchWasm(url: string): Promise<ArrayBuffer> {
+		const cached = this.wasmCache.get(url);
+		if (cached) return cached;
+
+		const response = await fetch(url);
+		if (!response.ok) {
+			throw new Error(
+				`Failed to fetch WASM: ${response.status} ${response.statusText}`,
+			);
+		}
+
+		const bytes = await response.arrayBuffer();
+		this.wasmCache.set(url, bytes);
+		return bytes;
 	}
 
 	public async getAvailableSettings(
@@ -249,8 +317,15 @@ export class MagickConverter extends Converter {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		...args: any[]
 	): Promise<VertFile> {
+		await this.init();
+
+		await EngineVariants.instance.resolve();
+		if (EngineVariants.instance.magickActive !== this.loadedVariant)
+			await this.download();
+
 		this.trackConversion(input);
-		this.log(`converting ${input.name} to ${to}`);
+		this.log(`converting ${input.name} (${input.id}) to ${to}`);
+		const startedAt = performance.now();
 
 		// handle converting from SVG manually because magick-wasm doesn't support it
 		if (input.from === ".svg") {
@@ -272,44 +347,22 @@ export class MagickConverter extends Converter {
 			type: "module",
 		});
 		this.activeConversions.set(input.id, worker);
+		const cancellation = new AbortController();
+		this.workerCancellation.set(worker, cancellation);
 
 		try {
-			await Promise.race([
-				this.waitForMessage(worker, "ready"),
-				new Promise((_, reject) =>
-					setTimeout(
-						() =>
-							reject(
-								new Error(
-									"Magick worker ready timeout after 10 seconds",
-								),
-							),
-						10000,
-					),
-				),
-			]);
+			await this.waitForMessage(worker, "ready", 10000);
+			cancellation.signal.throwIfAborted();
 
 			const loadMsg: WorkerMessage = {
 				type: "load",
 				wasm: this.wasm,
+				x64: this.loadedVariant === "x64",
 				id: input.id,
 			};
 			worker.postMessage(loadMsg);
 
-			await Promise.race([
-				this.waitForMessage(worker, "loaded"),
-				new Promise((_, reject) =>
-					setTimeout(
-						() =>
-							reject(
-								new Error(
-									"Magick worker initialization timeout after 30 seconds",
-								),
-							),
-						30000,
-					),
-				),
-			]);
+			await this.waitForMessage(worker, "loaded", 30000);
 
 			// every other format handled by magick worker
 			const conversionSettings = // vertd expects object not string json
@@ -322,6 +375,7 @@ export class MagickConverter extends Converter {
 							}, // use defaults if not provided
 				);
 
+			cancellation.signal.throwIfAborted();
 			const convertMsg: WorkerMessage = {
 				type: "convert",
 				id: input.id,
@@ -338,7 +392,9 @@ export class MagickConverter extends Converter {
 
 			const res = await this.waitForMessage(worker);
 			if (res.type === "finished") {
-				this.log(`converted ${input.name} to ${to}`);
+				this.log(
+					`converted ${input.name} (${input.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
+				);
 				return new VertFile(
 					new File([res.output as unknown as BlobPart], input.name),
 					res.zip ? ".zip" : to,
@@ -351,6 +407,8 @@ export class MagickConverter extends Converter {
 
 			throw new Error("Unknown message type");
 		} finally {
+			cancellation.abort();
+			this.workerCancellation.delete(worker);
 			this.clearTrackedConversion(input);
 			this.activeConversions.delete(input.id);
 			worker.terminate();
@@ -360,43 +418,72 @@ export class MagickConverter extends Converter {
 	public async cancel(input: VertFile): Promise<void> {
 		const worker = this.activeConversions.get(input.id);
 		if (!worker) {
-			this.error(`no active conversion found for file ${input.name}`);
+			this.error(
+				`no active conversion found for file ${input.name} (${input.id})`,
+			);
 			return;
 		}
 
-		this.log(`cancelling conversion for file ${input.name}`);
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
+		this.workerCancellation.get(worker)?.abort();
 		worker.terminate();
 		this.activeConversions.delete(input.id);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private waitForMessage(worker: Worker, type?: string): Promise<any> {
+	private waitForMessage(
+		worker: Worker,
+		type?: string,
+		timeout?: number,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	): Promise<any> {
+		const signal = this.workerCancellation.get(worker)!.signal;
 		return new Promise((resolve, reject) => {
+			let timeoutId: ReturnType<typeof setTimeout> | undefined;
+			const cleanup = () => {
+				worker.removeEventListener("message", onMessage);
+				worker.removeEventListener("error", onError);
+				signal.removeEventListener("abort", onAbort);
+				if (timeoutId !== undefined) clearTimeout(timeoutId);
+			};
+			const onAbort = () => {
+				cleanup();
+				reject(signal.reason);
+			};
 			const onMessage = (e: MessageEvent) => {
 				if (type && e.data.type === type) {
-					worker.removeEventListener("message", onMessage);
-					worker.removeEventListener("error", onError);
+					cleanup();
 					resolve(e.data);
 				} else if (!type) {
-					worker.removeEventListener("message", onMessage);
-					worker.removeEventListener("error", onError);
+					cleanup();
 					resolve(e.data);
 				} else if (e.data.type === "error") {
-					worker.removeEventListener("message", onMessage);
-					worker.removeEventListener("error", onError);
+					cleanup();
 					reject(new Error(e.data.error));
 				}
 			};
 
 			const onError = (e: ErrorEvent) => {
-				worker.removeEventListener("message", onMessage);
-				worker.removeEventListener("error", onError);
+				cleanup();
 				reject(new Error(`Worker error: ${e.message}`));
 			};
 
+			if (signal.aborted) {
+				onAbort();
+				return;
+			}
+			signal.addEventListener("abort", onAbort);
 			worker.addEventListener("message", onMessage);
 			worker.addEventListener("error", onError);
+			if (timeout !== undefined)
+				timeoutId = setTimeout(() => {
+					cleanup();
+					reject(
+						new Error(
+							`Magick worker ${type === "ready" ? "ready" : "initialization"} timeout after ${timeout / 1000} seconds`,
+						),
+					);
+				}, timeout);
 		});
 	}
 

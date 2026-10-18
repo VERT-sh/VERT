@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export type LogLevel = "log" | "error";
 
@@ -18,6 +18,7 @@ export const logs = $state<{ entries: LogEntry[] }>({ entries: [] });
 
 let internalWrite = false;
 let consoleInstalled = false;
+// eslint-disable-next-line svelte/prefer-svelte-reactivity
 const originalConsole = new Map<string, (...args: any[]) => void>();
 
 const pad = (value: number, length = 2) => String(value).padStart(length, "0");
@@ -61,6 +62,7 @@ export const addLog = (
 ) => {
 	if (!browser) return;
 	const prefixes = Array.isArray(prefix) ? prefix : [prefix];
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	const now = new Date();
 	logs.entries.push({
 		id: logs.entries.length

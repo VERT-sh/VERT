@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
 	import { HeartHandshakeIcon } from "@lucide/svelte";
 	import {
 		DISABLE_ALL_EXTERNAL_REQUESTS,
 		GITHUB_URL_VERT,
-	} from "$lib/util/consts";
-	import { m } from "$lib/paraglide/messages";
-	import { link, sanitize } from "$lib/store/index.svelte";
+	} from "#lib/util/consts";
+	import { m } from "#lib/paraglide/messages";
+	import { link, sanitize } from "#lib/store/index.svelte";
 	import { clsx } from "clsx";
 
 	let { mainContribs, notableContribs, ghContribs } = $props();
@@ -23,7 +23,7 @@
 		<a
 			href={github}
 			target="_blank"
-			rel="noopener noreferrer"
+			rel="external noopener noreferrer"
 			class="flex-shrink-0"
 		>
 			<img
@@ -32,10 +32,10 @@
 				title={name}
 				class={clsx(
 					smaller
-						? "w-12 h-12 hoverable"
+						? "hoverable h-12 w-12"
 						: role
-							? "w-14 h-14 hoverable-md"
-							: "w-10 h-10 hoverable-lg",
+							? "hoverable-md h-14 w-14"
+							: "hoverable-lg h-10 w-10",
 					"rounded-full",
 				)}
 			/>
@@ -56,21 +56,21 @@
 {/snippet}
 
 <Panel class="flex flex-col gap-8 p-6">
-	<h2 class="text-2xl font-bold flex items-center">
-		<div class="rounded-full bg-blue-300 p-2 inline-block mr-3 w-10 h-10">
+	<h2 class="flex items-center text-2xl font-bold">
+		<div class="mr-3 inline-block h-10 w-10 rounded-full bg-blue-300 p-2">
 			<HeartHandshakeIcon color="black" />
 		</div>
 		{m["about.credits.title"]()}
 	</h2>
 
-	<p class="-mt-4 -mb-3 font-black text-lg">
+	<p class="-mb-3 -mt-4 text-lg font-black">
 		{m["about.credits.contact_team"]()}
 	</p>
 
 	<!-- Main contributors -->
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-col flex-wrap gap-2">
-			{#each mainContribs as contrib}
+			{#each mainContribs as contrib (contrib.github)}
 				{@const { name, github, avatar, role } = contrib}
 				{@render contributor(name, github, avatar, role)}
 			{/each}
@@ -84,11 +84,11 @@
 				{m["about.credits.notable_contributors"]()}
 			</h2>
 			<div class="flex flex-col gap-2">
-				<p class="text-base text-muted font-normal">
+				<p class="text-base font-normal text-muted">
 					{m["about.credits.notable_description"]()}
 				</p>
 				<div class="flex flex-col gap-2">
-					{#each notableContribs as contrib}
+					{#each notableContribs as contrib (contrib.github)}
 						{@const { name, github, avatar, role } = contrib}
 						{@render contributor(name, github, avatar, role, true)}
 					{/each}
@@ -104,7 +104,7 @@
 						{m["about.credits.github_contributors"]()}
 					</h2>
 					{#if ghContribs && ghContribs.length > 0}
-						<p class="text-base text-muted font-normal">
+						<p class="text-base font-normal text-muted">
 							{@html sanitize(
 								link(
 									"github_link",
@@ -115,7 +115,7 @@
 							)}
 						</p>
 					{:else}
-						<p class="text-base text-muted font-normal italic">
+						<p class="text-base font-normal italic text-muted">
 							{@html sanitize(
 								link(
 									"contribute_link",
@@ -130,7 +130,7 @@
 
 				{#if ghContribs && ghContribs.length > 0}
 					<div class="flex flex-row flex-wrap gap-2">
-						{#each ghContribs as contrib}
+						{#each ghContribs as contrib (contrib.github)}
 							{@const { name, github, avatar } = contrib}
 							{@render contributor(name, github, avatar)}
 						{/each}
@@ -138,7 +138,7 @@
 				{/if}
 			</div>
 
-			<h2 class="mt-2 -mb-2">{m["about.credits.libraries"]()}</h2>
+			<h2 class="-mb-2 mt-2">{m["about.credits.libraries"]()}</h2>
 			<p class="font-normal">
 				{m["about.credits.libraries_description"]()}
 			</p>

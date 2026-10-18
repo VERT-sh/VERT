@@ -1,26 +1,39 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
-	import { GITHUB_URL_VERTD } from "$lib/util/consts";
+	import Panel from "#lib/components/visual/Panel.svelte";
+	import { GITHUB_URL_VERTD } from "#lib/util/consts";
 	import { ServerIcon } from "@lucide/svelte";
 	import type { ISettings } from "./index.svelte";
 	import clsx from "clsx";
-	import Dropdown from "$lib/components/functional/Dropdown.svelte";
-	import { vertdLoaded } from "$lib/store/index.svelte";
-	import { m } from "$lib/paraglide/messages";
-	import { link, sanitize } from "$lib/store/index.svelte";
+	import Dropdown from "#lib/components/functional/Dropdown.svelte";
+	import { vertdLoaded } from "#lib/store/index.svelte";
+	import { m } from "#lib/paraglide/messages";
+	import { link, sanitize } from "#lib/store/index.svelte";
 	import {
 		VertdInstance,
 		getVertdCustomHeaders,
 		vertdSizeLimit,
 		type VertdInner,
 	} from "./vertdSettings.svelte";
-	import FancyInput from "$lib/components/functional/FancyInput.svelte";
-	import { formatBytes } from "$lib/util/file";
+	import FancyInput from "#lib/components/functional/FancyInput.svelte";
+	import { formatBytes } from "#lib/util/file";
 
 	let vertdCommit = $state<string | null>(null);
 	let abortController: AbortController | null = null;
 
+	const vertdStatusLabel = $derived.by(() => {
+		if (vertdCommit === null) return m["settings.vertd.unavailable"]();
+		if (vertdCommit === "loading") return m["settings.vertd.loading"]();
+		// legacy commitId passed into message for languages that aren't updated yet (and to avoid "undefined" showing)
+		return m["settings.vertd.available"]({ commitId: vertdCommit });
+	});
+
 	const { settings = $bindable() }: { settings: ISettings } = $props();
+
+	const vertdSizeLimitLabel = $derived.by(() => {
+		if (vertdCommit === null) return "N/A";
+		const size = formatBytes($vertdSizeLimit);
+		return size === "0 B" ? "unlimited" : size;
+	});
 
 	$effect(() => {
 		if (abortController) abortController.abort();
@@ -63,7 +76,7 @@
 		<h2 class="text-2xl font-bold">
 			<ServerIcon
 				size="40"
-				class="inline-block -mt-1 mr-2 bg-accent-red p-2 rounded-full overflow-visible"
+				class="-mt-1 mr-2 inline-block overflow-visible rounded-full bg-accent-red p-2"
 				color="black"
 			/>
 			{m["settings.vertd.title"]()}
@@ -78,17 +91,13 @@
 				})}
 			>
 				{m["settings.vertd.status"]()}
-				{vertdCommit
-					? vertdCommit === "loading"
-						? m["settings.vertd.loading"]()
-						: m["settings.vertd.available"]()
-					: m["settings.vertd.unavailable"]()}
+				{vertdStatusLabel}
 			</p>
 
-			<p class="text-sm text-muted font-normal">
+			<p class="text-sm font-normal text-muted">
 				{@html sanitize(m["settings.vertd.description.main"]())}
 			</p>
-			<p class="text-sm text-muted font-normal">
+			<p class="text-sm font-normal text-muted">
 				{@html sanitize(
 					link(
 						"vertd_link",
@@ -97,7 +106,7 @@
 					),
 				)}
 			</p>
-			<p class="text-sm text-muted font-normal">
+			<p class="text-sm font-normal text-muted">
 				{@html sanitize(
 					link(
 						"vertd_link",
@@ -157,7 +166,7 @@
 									]();
 							}
 						})()}
-						style={"settings"}
+						style="settings"
 					/>
 					{#if VertdInstance.instance.innerData().type === "custom"}
 						<FancyInput
@@ -168,14 +177,9 @@
 							bind:value={settings.vertdURL}
 						/>
 					{/if}
-					<p class="text-sm text-muted font-normal">
+					<p class="text-sm font-normal text-muted">
 						{m["settings.vertd.info"]({
-							sizeLimit:
-								vertdCommit === null
-									? "N/A"
-									: formatBytes($vertdSizeLimit) === "0 B"
-										? "unlimited"
-										: formatBytes($vertdSizeLimit),
+							sizeLimit: vertdSizeLimitLabel,
 							commitId: vertdCommit ?? "N/A",
 						})}
 					</p>
@@ -186,7 +190,7 @@
 					<p class="text-base font-bold">
 						{m["settings.vertd.conversion_speed.label"]()}
 					</p>
-					<p class="text-sm text-muted font-normal">
+					<p class="text-sm font-normal text-muted">
 						{m["settings.vertd.conversion_speed.description"]()}
 					</p>
 				</div>
@@ -201,7 +205,7 @@
 							"settings.vertd.conversion_speed.speeds.ultra_fast"
 						](),
 					]}
-					style={"settings"}
+					style="settings"
 					selected={(() => {
 						switch (settings.vertdSpeed) {
 							case "verySlow":
@@ -271,7 +275,7 @@
 					<p class="text-base font-bold">
 						{m["settings.vertd.custom_headers.label"]()}
 					</p>
-					<p class="text-sm text-muted font-normal">
+					<p class="text-sm font-normal text-muted">
 						{m["settings.vertd.custom_headers.description"]()}
 					</p>
 					<FancyInput

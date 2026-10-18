@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Panel from "$lib/components/visual/Panel.svelte";
-	import Dropdown from "$lib/components/functional/Dropdown.svelte";
+	import Panel from "#lib/components/visual/Panel.svelte";
+	import Dropdown from "#lib/components/functional/Dropdown.svelte";
 	import {
 		BugIcon,
 		ClipboardCopyIcon,
@@ -21,13 +21,13 @@
 	} from "@lucide/svelte";
 	import clsx from "clsx";
 	import type { Component } from "svelte";
-	import { browser } from "$app/environment";
+	import { browser } from "$app/env";
 	import { onMount } from "svelte";
-	import { PUB_ENV } from "$env/static/public";
-	import { effects } from "$lib/store/index.svelte";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import { swManager, type CacheInfo } from "$lib/util/sw";
-	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
+	import { PUB_ENV } from "$app/env/public";
+	import { effects } from "#lib/store/index.svelte";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import { swManager, type CacheInfo } from "#lib/util/sw";
+	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "#lib/util/consts";
 	import {
 		buildReport,
 		downloadText,
@@ -40,13 +40,13 @@
 		getSystemInfo,
 		STATUS_CLASSES,
 		type SystemInfo,
-	} from "$lib/util/debug.svelte";
+	} from "#lib/util/debug.svelte";
 	import {
 		clearLogs,
 		error as logError,
 		logs,
-	} from "$lib/util/logger.svelte";
-	import { m } from "$lib/paraglide/messages";
+	} from "#lib/util/logger.svelte";
+	import { m } from "#lib/paraglide/messages";
 
 	let logQuery = $state("");
 	let logLevel = $state("all");
@@ -136,44 +136,44 @@
 	});
 </script>
 
-<div class="flex flex-col h-full items-center">
-	<h1 class="hidden md:block text-[40px] tracking-tight leading-[72px] mb-6">
-		<BugIcon size="40" class="inline-block -mt-2 mr-2" />
+<div class="flex h-full flex-col items-center">
+	<h1 class="mb-6 hidden text-[40px] leading-[72px] tracking-tight md:block">
+		<BugIcon size="40" class="-mt-2 mr-2 inline-block" />
 		{m["settings.debug.title"]()}
 	</h1>
 
 	<div
-		class="w-full max-w-[1280px] flex flex-col md:flex-row gap-4 p-4 md:px-4 md:py-0"
+		class="flex w-full max-w-[1280px] flex-col gap-4 p-4 md:flex-row md:px-4 md:py-0"
 	>
 		<!-- left side -->
-		<div class="flex flex-col gap-4 flex-1 min-w-0">
+		<div class="flex min-w-0 flex-1 flex-col gap-4">
 			<!-- logs -->
-			<Panel class="flex flex-col gap-8 p-6 min-w-0">
-				<div class="flex flex-col gap-4 min-w-0">
+			<Panel class="flex min-w-0 flex-col gap-8 p-6">
+				<div class="flex min-w-0 flex-col gap-4">
 					<h2 class="text-2xl font-bold">
 						<TerminalIcon
 							size="40"
-							class="inline-block -mt-1 mr-2 bg-accent-blue p-2 rounded-full"
+							class="-mt-1 mr-2 inline-block rounded-full bg-accent-blue p-2"
 							color="black"
 						/>
 						{m["settings.debug.logs.title"]()}
 					</h2>
 
-					<div class="flex flex-col sm:flex-row gap-3">
+					<div class="flex flex-col gap-3 sm:flex-row">
 						<div class="relative flex flex-1">
 							<input
 								type="text"
 								placeholder={m[
 									"settings.debug.logs.search_placeholder"
 								]()}
-								class="flex-grow w-full !pl-11 !pr-3 rounded-lg bg-panel text-foreground"
+								class="w-full flex-grow rounded-lg bg-panel !pl-11 !pr-3 text-foreground"
 								bind:value={logQuery}
 								autocomplete="off"
 							/>
 							<span
-								class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center"
+								class="absolute left-4 top-1/2 flex -translate-y-1/2 items-center"
 							>
-								<SearchIcon class="w-4 h-4" />
+								<SearchIcon class="h-4 w-4" />
 							</span>
 							{#if logQuery}
 								<span
@@ -197,17 +197,17 @@
 					</div>
 
 					<div
-						class="rounded-lg border-2 border-button overflow-hidden"
+						class="overflow-hidden rounded-lg border-2 border-button"
 					>
 						<div
-							class="flex items-center justify-between px-3 py-2 bg-button"
+							class="flex items-center justify-between bg-button px-3 py-2"
 						>
 							<span
 								class="text-xs font-bold uppercase tracking-wide text-muted"
 							>
 								<TerminalIcon
 									size="14"
-									class="inline-block mr-1 -mt-0.5"
+									class="-mt-0.5 mr-1 inline-block"
 								/>
 								{m["settings.debug.logs.title"]()}
 							</span>
@@ -220,10 +220,10 @@
 						<div
 							class="h-72 overflow-auto font-mono text-xs leading-relaxed"
 						>
-							<div class="flex flex-col w-max min-w-full h-full">
+							<div class="flex h-full w-max min-w-full flex-col">
 								{#each filteredLogs as entry (entry.id)}
 									<div
-										class="flex gap-2 px-3 py-1.5 border-b border-separator hover:bg-panel-highlight whitespace-nowrap"
+										class="flex gap-2 whitespace-nowrap border-b border-separator px-3 py-1.5 hover:bg-panel-highlight"
 									>
 										<span class="shrink-0 text-muted"
 											>{entry.time}</span
@@ -247,7 +247,7 @@
 									</div>
 								{:else}
 									<div
-										class="flex flex-col items-center justify-center gap-2 h-full text-muted"
+										class="flex h-full flex-col items-center justify-center gap-2 text-muted"
 									>
 										<InfoIcon size="20" />
 										{m["settings.debug.logs.empty"]()}
@@ -258,7 +258,7 @@
 					</div>
 
 					<div class="flex flex-col gap-2">
-						<div class="flex flex-wrap gap-3 w-full">
+						<div class="flex w-full flex-wrap gap-3">
 							{@render logAction(
 								RefreshCwIcon,
 								m["settings.debug.logs.refresh"](),
@@ -282,7 +282,7 @@
 					<h2 class="text-2xl font-bold">
 						<WrenchIcon
 							size="40"
-							class="inline-block -mt-1 mr-2 bg-accent-red p-2 rounded-full"
+							class="-mt-1 mr-2 inline-block rounded-full bg-accent-red p-2"
 							color="black"
 						/>
 						{m["settings.debug.tools.title"]()}
@@ -293,11 +293,11 @@
 							<p class="text-sm font-bold">
 								{m["settings.debug.tools.report_title"]()}
 							</p>
-							<p class="text-xs text-muted font-normal">
+							<p class="text-xs font-normal text-muted">
 								{m["settings.debug.tools.report_description"]()}
 							</p>
 						</div>
-						<div class="flex flex-wrap gap-3 w-full">
+						<div class="flex w-full flex-wrap gap-3">
 							{@render logAction(
 								ClipboardCopyIcon,
 								m["settings.debug.tools.copy_report"](),
@@ -317,19 +317,19 @@
 		</div>
 
 		<!-- right side -->
-		<div class="flex flex-col gap-4 flex-1">
+		<div class="flex flex-1 flex-col gap-4">
 			<!-- system info -->
 			<Panel class="flex flex-col gap-8 p-6">
 				<div class="flex flex-col gap-4">
 					<h2 class="text-2xl font-bold">
 						<CpuIcon
 							size="40"
-							class="inline-block -mt-1 mr-2 bg-accent-purple p-2 rounded-full"
+							class="-mt-1 mr-2 inline-block rounded-full bg-accent-purple p-2"
 							color="black"
 						/>
 						{m["settings.debug.system.title"]()}
 					</h2>
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
 						{@render infoRow(
 							CpuIcon,
 							m["settings.debug.system.cores"](),
@@ -378,7 +378,7 @@
 						)}
 					</div>
 
-					<div class="rounded-lg bg-button p-4 flex flex-col gap-3">
+					<div class="flex flex-col gap-3 rounded-lg bg-button p-4">
 						<div class="flex items-center justify-between text-sm">
 							<span class="text-muted"
 								>{m[
@@ -400,11 +400,11 @@
 							</span>
 						</div>
 						<div
-							class="h-2 w-full rounded-full bg-panel overflow-hidden"
+							class="h-2 w-full overflow-hidden rounded-full bg-panel"
 						>
 							<div
 								class="h-full bg-accent-blue transition-all"
-								style="width: {quotaPercent}%"
+								style:width="{quotaPercent}%"
 							></div>
 						</div>
 						<span class="text-xs text-muted">
@@ -443,12 +443,12 @@
 					<h2 class="text-2xl font-bold">
 						<RefreshCwIcon
 							size="40"
-							class="inline-block -mt-1 mr-2 bg-accent p-2 rounded-full"
+							class="-mt-1 mr-2 inline-block rounded-full bg-accent p-2"
 							color="black"
 						/>
 						{m["settings.debug.converters.title"]()}
 					</h2>
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
 						{#each converterList as converter (converter.name)}
 							{@const Icon = converter.icon}
 							<div
@@ -458,23 +458,24 @@
 									class="flex items-start justify-between gap-3"
 								>
 									<div
-										class="flex items-center gap-3 min-w-0"
+										class="flex min-w-0 items-center gap-3"
 									>
 										<span
 											class={clsx(
-												"shrink-0 p-2 rounded-lg text-black",
+												"shrink-0 rounded-lg p-2 text-black",
 												converter.accent,
 											)}
 										>
 											<Icon size="20" />
 										</span>
-										<div class="flex flex-col min-w-0">
+										<div class="flex min-w-0 flex-col">
 											<span
-												class="text-sm font-bold truncate"
+												title={converter.name}
+												class="truncate text-sm font-bold"
 												>{converter.name}</span
 											>
 											<span
-												class="text-xs text-muted truncate"
+												class="truncate text-xs text-muted"
 											>
 												{converter.category}</span
 											>
@@ -482,7 +483,7 @@
 									</div>
 									<span
 										class={clsx(
-											"shrink-0 rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap",
+											"shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold",
 											statusClasses[converter.status] ??
 												"bg-button text-muted",
 										)}
@@ -521,7 +522,7 @@
 	<button
 		{onclick}
 		class={clsx(
-			"btn px-4 rounded-lg text-black dynadark:text-white flex items-center justify-center",
+			"btn flex items-center justify-center rounded-lg px-4 text-black dynadark:text-white",
 			$effects ? "" : "!scale-100",
 			className,
 		)}
@@ -535,17 +536,17 @@
 	<div
 		class="flex items-center justify-between gap-3 rounded-lg bg-button p-3"
 	>
-		<span class="flex items-center gap-2 text-sm text-muted min-w-0">
+		<span class="flex min-w-0 items-center gap-2 text-sm text-muted">
 			<Icon size="18" class="shrink-0" />
 			<span class="truncate">{label}</span>
 		</span>
-		<span class="text-sm font-bold truncate">{value}</span>
+		<span class="truncate text-sm font-bold">{value}</span>
 	</div>
 {/snippet}
 
 {#snippet statCard(label: string, value: string)}
-	<div class="bg-button p-4 rounded-lg">
+	<div class="rounded-lg bg-button p-4">
 		<div class="text-sm text-muted">{label}</div>
-		<div class="text-lg font-bold truncate">{value}</div>
+		<div class="truncate text-lg font-bold">{value}</div>
 	</div>
 {/snippet}

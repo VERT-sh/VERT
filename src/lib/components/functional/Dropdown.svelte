@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { duration, fade, transition } from "$lib/util/animation";
-	import { ChevronDown } from "@lucide/svelte";
+	import { duration, fade, transition } from "#lib/util/animation";
+	import { ChevronDownIcon } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import { clsx } from "clsx";
 
@@ -113,7 +113,7 @@
 		"min-w-fit text-center",
 		style !== "inline" && "w-full",
 		style === "inline" &&
-			"inline-flex w-[6.5rem] sm:w-[10.5rem] md:w-52 text-left",
+			"inline-flex w-[6.5rem] text-left sm:w-[10.5rem] md:w-52",
 		style === "default" && "text-xl font-medium",
 		style === "settings" && "font-normal",
 	)}
@@ -122,19 +122,19 @@
 	<button
 		bind:this={button}
 		class={clsx(
-			"font-display overflow-hidden relative w-full flex focus:!outline-none",
-			style !== "inline" && "bg-button py-3.5 px-3",
+			"relative flex w-full overflow-hidden font-display focus:!outline-none",
+			style !== "inline" && "bg-button px-3 py-3.5",
 			style === "inline" && "justify-start",
-			style === "settings" && "justify-between px-4 rounded-xl",
+			style === "settings" && "justify-between rounded-xl px-4",
 			style === "default" && "justify-center rounded-full",
-			disabled ? "opacity-50 cursor-auto" : "cursor-pointer",
+			disabled ? "cursor-auto opacity-50" : "cursor-pointer",
 		)}
 		onclick={toggle}
 		{disabled}
 	>
 		<div
 			class={clsx(
-				"grid grid-cols-1 grid-rows-1 min-w-0 flex-grow-1 truncate",
+				"flex-grow-1 grid min-w-0 grid-cols-1 grid-rows-1 truncate",
 				style === "inline" && "max-w-full",
 			)}
 		>
@@ -151,7 +151,7 @@
 					class={clsx(
 						"col-start-1 row-start-1 min-w-0 font-body",
 						style === "inline" &&
-							"truncate w-full md:max-w-52 text-left underline underline-offset-3 decoration-dotted",
+							"underline-offset-3 w-full truncate text-left underline decoration-dotted md:max-w-52",
 						style === "settings" && "text-left font-normal",
 						style === "default" && "text-center",
 						style !== "settings" && "font-medium",
@@ -163,10 +163,10 @@
 					)}
 				</p>
 			{/key}
-			{#each options as option}
+			{#each options as option (getValue(option))}
 				<p
 					class={clsx(
-						"col-start-1 row-start-1 pointer-events-none",
+						"pointer-events-none col-start-1 row-start-1",
 						style === "inline" ? "hidden" : "invisible",
 					)}
 				>
@@ -174,8 +174,8 @@
 				</p>
 			{/each}
 		</div>
-		<ChevronDown
-			class="w-4 h-4 ml-1.5 mt-0.5 flex-shrink-0"
+		<ChevronDownIcon
+			class="ml-1.5 mt-0.5 h-4 w-4 flex-shrink-0"
 			style="transform: rotate({open
 				? 180
 				: 0}deg); transition: transform {duration}ms {transition};"
@@ -190,13 +190,13 @@
 			duration,
 			easing: quintOut,
 		}}
-		class="shadow-xl bg-panel-alt shadow-black/25 overflow-hidden z-[9999] bg-background rounded-xl max-h-[23.5vh] overflow-y-auto"
+		class="bg-background z-[9999] max-h-[23.5vh] overflow-hidden overflow-y-auto rounded-xl bg-panel-alt shadow-xl shadow-black/25"
 	>
-		{#each options as option}
+		{#each options as option (getValue(option))}
 			<button
 				data-selected={getValue(option) === selected}
 				class={clsx(
-					"w-full p-2 px-4 text-left hover:bg-panel font-normal text-sm text-muted",
+					"w-full p-2 px-4 text-left text-sm font-normal text-muted hover:bg-panel",
 					getValue(option) === selected && "bg-separator",
 				)}
 				onclick={() => select(option)}

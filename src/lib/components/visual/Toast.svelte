@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { fade, fly } from "$lib/util/animation";
+	import { fade, fly } from "#lib/util/animation";
 	import {
 		BanIcon,
 		CheckIcon,
 		InfoIcon,
-		TriangleAlert,
+		TriangleAlertIcon,
 		XIcon,
 	} from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
-	import { ToastManager } from "$lib/util/toast.svelte";
-	import type { ToastProps } from "$lib/util/toast.svelte";
+	import { ToastManager } from "#lib/util/toast.svelte";
+	import type { ToastProps } from "#lib/util/toast.svelte";
 	import type { SvelteComponent } from "svelte";
 	import clsx from "clsx";
-	import type { Toast as ToastType } from "$lib/util/toast.svelte";
-	import { sanitize } from "$lib/store/index.svelte";
+	import type { Toast as ToastType } from "#lib/util/toast.svelte";
+	import { sanitize } from "#lib/store/index.svelte";
 
 	const props: {
 		toast: ToastType<unknown>;
@@ -37,7 +37,7 @@
 		success: CheckIcon,
 		error: BanIcon,
 		info: InfoIcon,
-		warning: TriangleAlert,
+		warning: TriangleAlertIcon,
 	};
 
 	let color = $derived(colors[type]);
@@ -59,7 +59,7 @@
 </script>
 
 <div
-	class="flex flex-col max-w-[100%] md:max-w-lg p-4 gap-2 bg-accent-{color} border-accent-{color}-alt border-l-4 rounded-lg shadow-md"
+	class="flex max-w-[100%] flex-col gap-2 p-4 md:max-w-lg bg-accent-{color} border-accent-{color}-alt rounded-lg border-l-4 shadow-md"
 	in:fly={{
 		duration: durations.enter,
 		easing: quintOut,
@@ -71,15 +71,15 @@
 		easing: quintOut,
 	}}
 >
-	<div class="flex flex-row items-center justify-between w-full gap-4">
+	<div class="flex w-full flex-row items-center justify-between gap-4">
 		<div class="flex items-center gap-4">
 			<Icon
-				class="w-6 h-6 text-black flex-shrink-0"
+				class="h-6 w-6 flex-shrink-0 text-black"
 				size="24"
 				fill="none"
 			/>
 			<p
-				class={clsx("text-black whitespace-pre-wrap", {
+				class={clsx("whitespace-pre-wrap text-black", {
 					"font-normal": !title,
 				})}
 			>
@@ -91,7 +91,7 @@
 			</p>
 		</div>
 		<button
-			class="text-gray-600 hover:text-black flex-shrink-0"
+			class="flex-shrink-0 text-gray-600 hover:text-black"
 			onclick={() => ToastManager.remove(id)}
 		>
 			<XIcon size="16" />

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade } from "$lib/util/animation";
+	import { fade } from "#lib/util/animation";
 	interface Props {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		children: () => any;
@@ -113,8 +113,8 @@
 <style lang="postcss">
 	.tooltip {
 		--border-size: 1px;
-		@apply fixed bg-panel-alt text-foreground border border-stone-400 dynadark:border-white drop-shadow-lg text-xs pointer-events-none z-[999] max-w-[200px] break-words whitespace-normal;
-		@apply px-3.5 py-2 rounded-xl;
+		@apply pointer-events-none fixed z-[999] max-w-[200px] whitespace-normal break-words border border-stone-400 bg-panel-alt text-xs text-foreground drop-shadow-lg dynadark:border-white;
+		@apply rounded-xl px-3.5 py-2;
 	}
 
 	.tooltip-top {
@@ -122,13 +122,13 @@
 	}
 
 	.tooltip-top::after {
-		@apply content-[""] absolute top-full left-1/2 -translate-x-1/2 border-8 border-x-transparent border-b-transparent;
+		@apply absolute left-1/2 top-full -translate-x-1/2 border-8 border-x-transparent border-b-transparent content-[""];
 	}
 
 	.tooltip-top::before {
 		border-width: calc(var(--border-size) + 8px);
 		margin-left: calc(-1 * (var(--border-size) + 8px));
-		@apply content-[""] absolute top-full left-1/2 border-x-transparent border-b-transparent border-t-inherit;
+		@apply absolute left-1/2 top-full border-x-transparent border-b-transparent border-t-inherit content-[""];
 	}
 
 	.tooltip-bottom {
@@ -136,13 +136,13 @@
 	}
 
 	.tooltip-bottom::after {
-		@apply content-[""] absolute bottom-full left-1/2 -ml-2 border-8 border-x-transparent border-t-transparent;
+		@apply absolute bottom-full left-1/2 -ml-2 border-8 border-x-transparent border-t-transparent content-[""];
 	}
 
 	.tooltip-bottom::before {
 		border-width: calc(var(--border-size) + 8px);
 		margin-left: calc(-1 * (var(--border-size) + 8px));
-		@apply content-[""] absolute bottom-full left-1/2 border-x-transparent border-t-transparent border-b-inherit;
+		@apply absolute bottom-full left-1/2 border-x-transparent border-b-inherit border-t-transparent content-[""];
 	}
 
 	.tooltip-left {
@@ -150,7 +150,7 @@
 	}
 
 	.tooltip-left::after {
-		@apply content-[""] absolute top-1/2 left-full -mt-2 border-8 border-y-transparent border-r-transparent border-l-inherit;
+		@apply absolute left-full top-1/2 -mt-2 border-8 border-y-transparent border-l-inherit border-r-transparent content-[""];
 	}
 
 	.tooltip-right {
@@ -159,13 +159,13 @@
 
 	.tooltip-right::after {
 		margin-right: -2px;
-		@apply content-[""] absolute top-1/2 right-full -mt-2 border-8 border-y-transparent border-l-transparent;
+		@apply absolute right-full top-1/2 -mt-2 border-8 border-y-transparent border-l-transparent content-[""];
 	}
 
 	.tooltip-right::before {
 		margin-right: -2px;
 		border-width: calc(var(--border-size) + 8px);
 		margin-top: calc(-1 * (var(--border-size) + 8px));
-		@apply content-[""] absolute top-1/2 right-full border-y-transparent border-l-transparent border-r-inherit;
+		@apply absolute right-full top-1/2 border-y-transparent border-l-transparent border-r-inherit content-[""];
 	}
 </style>
