@@ -42,7 +42,7 @@
 		const selectedValue = getValue(option);
 		selected = selectedValue;
 		onselect?.(selectedValue);
-		toggle();
+		open = false;
 	};
 
 	const toggle = () => {
@@ -64,7 +64,18 @@
 			"[data-selected='true']",
 		) as HTMLButtonElement | null;
 		if (!selectedButton) return;
-		selectedButton.scrollIntoView({ block: "start" });
+
+		const menuRect = menuElement.getBoundingClientRect();
+		const buttonRect = selectedButton.getBoundingClientRect();
+		if (
+			buttonRect.top >= menuRect.top &&
+			buttonRect.bottom <= menuRect.bottom
+		)
+			return;
+
+		if (buttonRect.top < menuRect.top)
+			menuElement.scrollTop -= menuRect.top - buttonRect.top;
+		else menuElement.scrollTop += buttonRect.bottom - menuRect.bottom;
 	};
 
 	// outside clicks

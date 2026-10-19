@@ -395,13 +395,15 @@
 
 		const listRect = formatList.getBoundingClientRect();
 		const optionRect = selectedOption.getBoundingClientRect();
-		// only scroll if button isnt fully visible
 		if (
 			optionRect.top >= listRect.top &&
 			optionRect.bottom <= listRect.bottom
 		)
 			return;
-		formatList.scrollTop += optionRect.top - listRect.top;
+
+		if (optionRect.top < listRect.top)
+			formatList.scrollTop -= listRect.top - optionRect.top;
+		else formatList.scrollTop += optionRect.bottom - listRect.bottom;
 	};
 
 	const clickDropdown = async () => {

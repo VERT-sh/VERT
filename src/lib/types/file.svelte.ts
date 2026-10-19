@@ -5,7 +5,6 @@ import { byNative, categories, converters } from "#lib/converters";
 import type { Converter } from "#lib/converters/converter.svelte";
 import { formatDuration } from "#lib/converters/converter.svelte";
 import { m } from "#lib/paraglide/messages";
-import { Settings } from "#lib/sections/settings/index.svelte";
 import { addDialog } from "#lib/store/DialogProvider";
 import { MAX_ARRAY_BUFFER_SIZE } from "#lib/store/index.svelte";
 import { conversionConcurrency } from "#lib/util/consts";
@@ -331,7 +330,10 @@ export class VertFile {
 	}
 
 	private async detectFileType() {
-		if (!Settings.instance.settings.fileTypeDetection) return;
+		const detectionEnabled =
+			readSettings<{ fileTypeDetection?: boolean }>().fileTypeDetection ??
+			true;
+		if (!detectionEnabled) return;
 
 		try {
 			this.fileType = await fileTypeFromBuffer(
