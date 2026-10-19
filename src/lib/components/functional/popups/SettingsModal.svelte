@@ -97,8 +97,19 @@
 	};
 
 	let settings = $state<ConversionSettings>({});
-	let activeTab = $state("Converter");
-	let availableCategories = $state<SettingCategories>({});
+	let selectedTab = $state<string | null>(null);
+	let loadedSettings = $state<{
+		fileId: string | undefined;
+		categories: SettingCategories;
+	}>({ fileId: undefined, categories: {} });
+	const settingsReady = $derived(
+		!targetFile ||
+			!!targetFile.sequenceKind ||
+			loadedSettings.fileId === targetFile.id,
+	);
+	const availableCategories = $derived(
+		settingsReady ? loadedSettings.categories : {},
+	);
 
 	// resolve a value against a setting's options, translating codec aliases (e.g. mediabunny's "avc" is vertd's "h264")
 	const resolveSettingValue = (
@@ -145,6 +156,7 @@
 	const settingTabs = $derived.by((): SettingCategories => {
 		// sequences expose only Converter tab (ffmpeg/vertd)
 		if (targetFile?.sequenceKind) return { Converter: [] };
+		if (!settingsReady) return {};
 
 		const categories = Object.fromEntries(
 			Object.entries(availableCategories).filter(
@@ -158,6 +170,12 @@
 				: {}),
 			...categories,
 		};
+	});
+
+	const activeTab = $derived.by(() => {
+		const tabs = Object.keys(settingTabs);
+		if (selectedTab && tabs.includes(selectedTab)) return selectedTab;
+		return tabs[0] ?? "";
 	});
 
 	const getTabLabel = (tab: string) => {
@@ -175,23 +193,14 @@
 		const currentConverter = settings.converter;
 		let cancelled = false;
 
-		if (!currentFile) {
-			availableCategories = {};
-			return;
-		}
-
-		if (currentFile.sequenceKind) {
-			availableCategories = {};
-			activeTab = "Converter";
-			return;
-		}
+		if (!currentFile || currentFile.sequenceKind) return;
 
 		void currentFile
 			.getAvailableSettings(currentFile, currentConverter)
 			.then((categories) => {
 				if (cancelled) return;
 
-				availableCategories = categories;
+				loadedSettings = { fileId: currentFile.id, categories };
 				const sanitized = sanitizeSettings(settings, categories);
 				for (const key of Object.keys(settings)) {
 					if (!(key in sanitized)) delete settings[key];
@@ -199,16 +208,11 @@
 				for (const [key, value] of Object.entries(sanitized)) {
 					if (settings[key] !== value) settings[key] = value;
 				}
-
-				const hasConverterTab = shouldShowConverterTab(currentFile);
-				if (
-					(!hasConverterTab && activeTab === "Converter") ||
-					(activeTab !== "Converter" && !categories[activeTab])
-				)
-					activeTab = Object.keys(categories)[0] ?? "Converter";
 			})
 			.catch((cause: unknown) => {
 				if (cancelled) return;
+				// mark as loaded so the modal doesn't stay blank on failure
+				loadedSettings = { fileId: currentFile.id, categories: {} };
 				error(
 					["settings", "modal"],
 					`failed to load settings for ${currentFile.name}: ${cause}`,
@@ -377,21 +381,24 @@
 				{/if}
 			</div>
 
-			<div class="flex items-center justify-between">
-				{#each Object.keys(settingTabs) as tab (tab)}
-					<button
-						class={clsx(
-							"hover:text-muted/20 flex-grow border-b-2 pb-2 text-lg capitalize",
-							activeTab === tab
-								? "border-b-accent text-accent"
-								: "border-b-separator text-muted",
-						)}
-						onclick={() => (activeTab = tab)}
-					>
-						{getTabLabel(tab)}
-					</button>
-				{/each}
-			</div>
+			{#if settingsReady && Object.keys(settingTabs).length > 0}
+				<div class="flex items-center justify-between">
+					{#each Object.keys(settingTabs) as tab (tab)}
+						<button
+							class={clsx(
+								"hover:text-muted/20 flex-grow border-b-2 pb-2 text-lg capitalize",
+								activeTab === tab
+									? "border-b-accent text-accent"
+									: "border-b-separator text-muted",
+							)}
+							onclick={() => (selectedTab = tab)}
+						>
+							{getTabLabel(tab)}
+						</button>
+					{/each}
+				</div>
+			{/if}
+
 			<div use:animateHeight>
 				{#key activeTab}
 					<div
@@ -399,7 +406,9 @@
 						in:fade={{ duration, easing: quintOut }}
 						out:fade={{ duration, easing: quintOut }}
 					>
-						{#if activeTab === "Converter"}
+						{#if !settingsReady}
+							<!-- tabs still loading-->
+						{:else if activeTab === "Converter"}
 							<div class="flex flex-col gap-2">
 								{#each availableConverters as converter (converter.name)}
 									{@const variantLabel =
