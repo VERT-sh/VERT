@@ -432,8 +432,8 @@ export class MediabunnyConverter extends Converter {
 			if (discardedTracks.length > 0) {
 				const discardedTrackCount = discardedTracks.length;
 				const discardedTrackList = discardedTracks.map(
-					(discarded, index) =>
-						`${index + 1}. ${discarded.track.type} (${discarded.track.getCodec()}) - ${discarded.reason}`,
+					async (discarded, index) =>
+						`${index + 1}. ${discarded.track.type} (${await discarded.track.getCodec()}) - ${discarded.reason}`,
 				);
 
 				const isValid = conversion.isValid;
