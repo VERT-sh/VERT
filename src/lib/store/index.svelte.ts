@@ -23,11 +23,16 @@ import PQueue from "p-queue";
 import sanitizeHtml from "sanitize-html";
 import { get, writable } from "svelte/store";
 
-const IMAGE_FORMATS = new Set(
-	converters
-		.find((c) => c.name === "imagemagick")
-		?.formatStrings((f) => f.fromSupported) ?? [],
-);
+let imageFormats: Set<string> | null = null;
+const getImageFormats = (): Set<string> => {
+	imageFormats ??= new Set(
+		converters
+			.find((c) => c.name === "imagemagick")
+			?.formatStrings((f) => f.fromSupported) ?? [],
+	);
+
+	return imageFormats;
+};
 
 const zipExtension = (filename: string): string => {
 	const base = filename.replace(/\\/g, "/").split("/").pop() ?? filename;
@@ -47,7 +52,11 @@ function detectSequenceKind(
 
 	// frameSequence - all files being the same image format
 	const first = exts[0];
-	if (first && IMAGE_FORMATS.has(first) && exts.every((ext) => ext === first))
+	if (
+		first &&
+		getImageFormats().has(first) &&
+		exts.every((ext) => ext === first)
+	)
 		return "frameSequence";
 
 	return undefined;

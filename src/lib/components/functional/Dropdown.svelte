@@ -3,6 +3,7 @@
 	import { ChevronDownIcon } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import { clsx } from "clsx";
+	import { popOverlayLayer, pushOverlayLayer } from "#lib/util/overlay";
 
 	type DropdownStyle = "default" | "settings" | "inline";
 
@@ -28,9 +29,27 @@
 	let dropdown = $state<HTMLDivElement>();
 	let menuElement = $state<HTMLDivElement>();
 	let button = $state<HTMLButtonElement>();
-	let clickHandler: ((e: MouseEvent) => void) | null = null;
 	let resizeHandler: (() => void) | null = null;
 	let scrollHandler: (() => void) | null = null;
+	let overlayLayer: symbol | null = null;
+
+	// the overlay stack dismisses this dropdown when a click lands outside of it
+	$effect(() => {
+		if (!open) return;
+
+		const layer = pushOverlayLayer({
+			// the menu is portaled to the body, so it isn't inside `dropdown`
+			contains: (target) =>
+				!!dropdown?.contains(target) || !!menuElement?.contains(target),
+			dismiss: () => (open = false),
+		});
+		overlayLayer = layer;
+
+		return () => {
+			popOverlayLayer(layer);
+			if (overlayLayer === layer) overlayLayer = null;
+		};
+	});
 
 	const getValue = (option: string | { value: string; label: string }) =>
 		typeof option === "string" ? option : option.value;
@@ -77,20 +96,6 @@
 			menuElement.scrollTop -= menuRect.top - buttonRect.top;
 		else menuElement.scrollTop += buttonRect.bottom - menuRect.bottom;
 	};
-
-	// outside clicks
-	$effect(() => {
-		clickHandler = (e: MouseEvent) => {
-			if (dropdown && !dropdown.contains(e.target as Node)) open = false;
-		};
-
-		window.addEventListener("click", clickHandler, true);
-
-		return () => {
-			if (clickHandler)
-				window.removeEventListener("click", clickHandler, true);
-		};
-	});
 
 	// dropdown menu positioning
 	$effect(() => {

@@ -4,6 +4,11 @@
 	import type { SearchIcon } from "@lucide/svelte";
 	import { quintOut } from "svelte/easing";
 	import clsx from "clsx";
+	import {
+		isTopOverlayLayer,
+		popOverlayLayer,
+		pushOverlayLayer,
+	} from "#lib/util/overlay";
 
 	export interface ModalButton {
 		text: string;
@@ -41,12 +46,30 @@
 
 	let backdropElement = $state<HTMLDivElement>();
 
+	let overlayLayer: symbol | null = null;
+	$effect(() => {
+		const layer = pushOverlayLayer({
+			contains: (target) => !!backdropElement?.contains(target),
+			dismiss: () => onclose?.(),
+			modal: true,
+		});
+		overlayLayer = layer;
+
+		return () => {
+			popOverlayLayer(layer);
+			if (overlayLayer === layer) overlayLayer = null;
+		};
+	});
+
 	const handleOutsideClick = () => {
+		if (!overlayLayer || !isTopOverlayLayer(overlayLayer)) return;
 		onclose?.();
 	};
 
 	const handleKeydown = (e: KeyboardEvent) => {
-		if (e.key === "Escape") onclose?.();
+		if (e.key !== "Escape") return;
+		if (!overlayLayer || !isTopOverlayLayer(overlayLayer)) return;
+		onclose?.();
 	};
 
 	$effect(() => {

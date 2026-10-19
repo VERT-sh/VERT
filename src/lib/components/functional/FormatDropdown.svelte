@@ -24,6 +24,10 @@
 	import { vertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
 	import { formatBytes } from "#lib/util/file";
 	import { getCodecs } from "#lib/converters/ffmpeg/ffmpeg.codecs.ts";
+	import {
+		popOverlayLayer,
+		pushOverlayLayer,
+	} from "#lib/util/overlay";
 
 	type Props = {
 		categories: Categories;
@@ -57,6 +61,24 @@
 	let currentCategory = $state<string | null>(null);
 	let searchQuery = $state("");
 	let rootCategory: string | null = null;
+	// token for this dropdown's entry on the overlay stack (null while closed)
+	let overlayLayer: symbol | null = null;
+
+	// the overlay stack dismisses this dropdown when a click lands outside of it
+	$effect(() => {
+		if (!open) return;
+
+		const layer = pushOverlayLayer({
+			contains: (target) => !!dropdown?.contains(target),
+			dismiss: () => (open = false),
+		});
+		overlayLayer = layer;
+
+		return () => {
+			popOverlayLayer(layer);
+			if (overlayLayer === layer) overlayLayer = null;
+		};
+	});
 
 	// svelte-ignore state_referenced_locally
 	let imageSequence = $state(
@@ -406,29 +428,32 @@
 		else formatList.scrollTop += optionRect.bottom - listRect.bottom;
 	};
 
+	// keep the menu within the viewport
+	const updateDropdownPosition = () => {
+		if (!dropdown) return;
+
+		const rect = dropdown.getBoundingClientRect();
+		const viewportWidth = window.innerWidth;
+
+		let dropdownWidth: number;
+		if (dropdownSize === "large") dropdownWidth = rect.width * 3.2;
+		else if (dropdownSize === "default") dropdownWidth = rect.width * 2.5;
+		else dropdownWidth = rect.width * 1.5;
+
+		const centerX = rect.left + rect.width / 2;
+		const leftEdge = centerX - dropdownWidth / 2;
+		const rightEdge = centerX + dropdownWidth / 2;
+
+		if (leftEdge < 0) dropdownPosition = "left";
+		else if (rightEdge > viewportWidth) dropdownPosition = "right";
+		else dropdownPosition = "center";
+	};
+
 	const clickDropdown = async () => {
 		open = !open;
 		if (!open) return;
 
-		// keep within viewport
-		if (dropdown) {
-			const rect = dropdown.getBoundingClientRect();
-			const viewportWidth = window.innerWidth;
-
-			let dropdownWidth: number;
-			if (dropdownSize === "large") dropdownWidth = rect.width * 3.2;
-			else if (dropdownSize === "default")
-				dropdownWidth = rect.width * 2.5;
-			else dropdownWidth = rect.width * 1.5;
-
-			const centerX = rect.left + rect.width / 2;
-			const leftEdge = centerX - dropdownWidth / 2;
-			const rightEdge = centerX + dropdownWidth / 2;
-
-			if (leftEdge < 0) dropdownPosition = "left";
-			else if (rightEdge > viewportWidth) dropdownPosition = "right";
-			else dropdownPosition = "center";
-		}
+		updateDropdownPosition();
 
 		await tick();
 
@@ -469,22 +494,14 @@
 	};
 
 	onMount(() => {
-		const handleClickOutside = (e: MouseEvent) => {
-			if (dropdown && !dropdown.contains(e.target as Node)) open = false;
-		};
-
 		const handleResize = () => {
-			if (open) {
-				// recalculate dropdown position on resize
-				clickDropdown();
-				open = true;
-			}
+			// only recalculate the position; re-toggling would push this dropdown back
+			// on top of the overlay stack (stealing priority from a modal above it)
+			if (open) updateDropdownPosition();
 		};
 
-		window.addEventListener("click", handleClickOutside);
 		window.addEventListener("resize", handleResize);
 		return () => {
-			window.removeEventListener("click", handleClickOutside);
 			window.removeEventListener("resize", handleResize);
 		};
 	});
