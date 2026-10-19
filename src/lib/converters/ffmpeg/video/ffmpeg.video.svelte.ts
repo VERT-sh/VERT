@@ -15,6 +15,11 @@ import { applyPriorities } from "../../priority";
 import { videoFormats } from "../../vertd/vertd.svelte";
 import { BaseFFmpegConverter } from "../ffmpeg.base.svelte";
 import { animatedImageFormats } from "../ffmpeg.codecs";
+import {
+	getDecodableAudioCodecs,
+	isSpatialAudioStream,
+	pickUsableAudioStreams,
+} from "../ffmpeg.decoders";
 import { buildImageSequenceCommand } from "./ffmpeg.animated";
 import {
 	applyConstraint,
@@ -341,10 +346,18 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 			? ["-map_metadata", "0", "-map_chapters", "0"]
 			: ["-map_metadata", "-1", "-map_chapters", "-1"];
 
-		const [video, audioStreams] = await Promise.all([
+		const [video, probedAudioStreams] = await Promise.all([
 			probeVideo(ffmpeg, input.name),
 			probeAudioStreams(ffmpeg, input.name),
 		]);
+		const audioStreams = pickUsableAudioStreams(
+			probedAudioStreams,
+			getDecodableAudioCodecs(),
+		);
+		if (audioStreams.length !== probedAudioStreams.length)
+			this.log(
+				`skipping ${probedAudioStreams.length - audioStreams.length} undecodable audio stream(s) in ${input.name} (${input.id})`,
+			);
 		const primary = primaryVideoStream(video.streams);
 		if (!primary)
 			this.log(
@@ -461,7 +474,7 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 							"-map",
 							"0:v:0",
 							"-map",
-							"0:a:0",
+							`0:${audioStreams[0].index}`,
 							"-strict",
 							"experimental",
 						);
@@ -544,7 +557,10 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 
 		// audio streams
 		const supportsAudio = !!toSupport && toSupport.audio.length > 0;
-		if (!supportsAudio) {
+		if (
+			!supportsAudio ||
+			(audioStreams.length === 0 && toFormat !== "amv")
+		) {
 			result.push("-an");
 		} else {
 			const audioCodec =
@@ -559,6 +575,8 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 
 				const copy =
 					!requiresAudioEncoding &&
+					!isSpatialAudioStream(stream) &&
+					!!stream.codec_name &&
 					supportsCodec(toSupport.audio, stream.codec_name);
 				const encoder = copy ? "copy" : audioCodec;
 				if (!encoder)

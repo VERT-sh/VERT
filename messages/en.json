@@ -565,8 +565,8 @@
 		},
 		"sw": {
 			"reload_success": "Your page was reloaded automatically to enable cross-origin isolation, which is required for certain features to work.",
-			"reload_error": "Your page was reloaded automatically to enable cross-origin isolation, which is required for certain features to work, however it was not enabled successfully. Some features may not work as expected.",
-			"not_isolated": "Cross-origin isolation is not enabled, which is required for certain features to work. Some features may not work as expected."
+			"reload_error": "Your page was reloaded automatically to enable cross-origin isolation, which is required for certain features to work, however it was not enabled successfully. Some features may not work as expected. Try clearing your browser cache (CTRL/CMD+SHIFT+R) and reloading the page.",
+			"not_isolated": "Cross-origin isolation is not enabled, which is required for certain features to work. Some features may not work as expected. Try clearing your browser cache (CTRL/CMD+SHIFT+R) and reloading the page."
 		}
 	},
 	"privacy": {

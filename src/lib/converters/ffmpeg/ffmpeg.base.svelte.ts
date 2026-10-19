@@ -11,6 +11,7 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { SvelteMap } from "svelte/reactivity";
 import { Converter } from "../converter.svelte";
 import { EngineVariants, type FFmpegVariant } from "../engine-variants.svelte";
+import { probeDecodableAudioCodecs } from "./ffmpeg.decoders";
 
 const coreURL = new URL(ffmpegCoreURL, import.meta.url).href;
 const wasmURL = new URL(ffmpegWasmURL, import.meta.url).href;
@@ -110,6 +111,7 @@ export abstract class BaseFFmpegConverter extends Converter {
 		const ffmpeg = new FFmpeg();
 		try {
 			await ffmpeg.load(this.loadConfig());
+			await probeDecodableAudioCodecs(ffmpeg, this.log);
 		} finally {
 			ffmpeg.terminate();
 		}

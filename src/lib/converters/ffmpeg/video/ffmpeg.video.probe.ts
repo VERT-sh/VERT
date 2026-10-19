@@ -15,7 +15,10 @@ export interface VideoStreamProbe {
 
 export interface AudioStreamProbe {
 	index: number;
-	codec_name: string;
+	// ffprobe omits this when the container tag maps to no known codec
+	codec_name?: string;
+	// fourcc from the container (e.g. `apac` for `apple_apac`)
+	codec_tag_string?: string;
 }
 
 export interface VideoMetadata {
@@ -121,7 +124,7 @@ export const probeAudioStreams = async (
 	const probe = await readJson<AudioStreamProbe>(
 		ffmpeg,
 		inputArgs,
-		"stream=index,codec_name",
+		"stream=index,codec_name,codec_tag_string",
 		"a",
 		path,
 		"probe-a.json",

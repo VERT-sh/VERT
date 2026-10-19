@@ -14,7 +14,12 @@ import { applyPriorities } from "../../priority";
 import { videoFormats } from "../../vertd/vertd.svelte";
 import { BaseFFmpegConverter } from "../ffmpeg.base.svelte";
 import { getCodecs, toArgs } from "../ffmpeg.codecs";
+import {
+	getDecodableAudioCodecs,
+	pickUsableAudioStreams,
+} from "../ffmpeg.decoders";
 import { avWithArt, avWithBg, extractAlbumArt } from "../utils/ffmpeg";
+import { probeAudioStreams } from "../video/ffmpeg.video.probe";
 
 // TODO: differentiate in UI? (not native formats)
 export class FFmpegConverter extends BaseFFmpegConverter {
@@ -208,7 +213,7 @@ export class FFmpegConverter extends BaseFFmpegConverter {
 				conversionError = m["workers.errors.invalid_rate"]({
 					rate,
 				});
-			} else if (msg.includes("Stream map '0:a:0' matches no streams.")) {
+			} else if (msg.includes("matches no streams")) {
 				conversionError = m["workers.errors.no_audio"]();
 			} else if (
 				msg.includes("Error initializing output stream") ||
@@ -369,11 +374,17 @@ export class FFmpegConverter extends BaseFFmpegConverter {
 			this.log(
 				`Converting video ${input.from} to audio ${to} (${input.name} ${input.id})`,
 			);
+			const usable = pickUsableAudioStreams(
+				await probeAudioStreams(ffmpeg, "input"),
+				getDecodableAudioCodecs(),
+			);
+			if (!usable.length) throw new Error(m["workers.errors.no_audio"]());
+			this.log(`extracting audio stream #${usable[0].index}`);
 			return [
 				"-i",
 				"input",
 				"-map",
-				"0:a:0",
+				`0:${usable[0].index}`,
 				...metadataArgs,
 				...audioBitrateArgs,
 				...sampleRateArgs,
@@ -476,9 +487,17 @@ const handleSpecialOutput = async (
 				}),
 			);
 
+		const usable = pickUsableAudioStreams(
+			await probeAudioStreams(ffmpeg, "input"),
+			getDecodableAudioCodecs(),
+		);
+		if (!usable.length) throw new Error(m["workers.errors.no_audio"]());
+
 		const pcmArgs = [
 			"-i",
 			"input",
+			"-map",
+			`0:${usable[0].index}`,
 			"-f",
 			"f32le",
 			"-ar",
