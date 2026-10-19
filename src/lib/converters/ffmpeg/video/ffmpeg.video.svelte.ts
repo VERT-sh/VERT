@@ -555,6 +555,18 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 			);
 		}
 
+		// AVI needs Annex B h264, so convert the bitstream when copying an AVCC source.
+		const finalVideoEncoder = lastCodecValue(result, "-c:v") ?? "";
+		if (inputCodec.includes("h264")) {
+			const bsf = aviCopyBitstreamFilter(toFormat, finalVideoEncoder);
+			if (bsf) {
+				this.log(
+					`copying AVCC h264 into ${toFormat}, adding ${bsf} (${input.name} ${input.id})`,
+				);
+				result.push("-bsf:v", bsf);
+			}
+		}
+
 		// audio streams
 		const supportsAudio = !!toSupport && toSupport.audio.length > 0;
 		if (
@@ -586,6 +598,15 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 						}),
 					);
 				result.push(`-c:a:${outputIndex}`, encoder);
+
+				// AVI needs an explicit codec tag to accept copied ADTS AAC
+				if (
+					encoder === "copy" &&
+					stream.codec_name?.toLowerCase() === "aac"
+				) {
+					const tag = aviAacCodecTag(toFormat, encoder);
+					if (tag) result.push(`-tag:a:${outputIndex}`, tag);
+				}
 
 				// webm + opus needs to be stereo
 				if (
@@ -697,6 +718,30 @@ const lastCodecValue = (args: string[], flag: string): string | null => {
 		if (args[i] === flag) return args[i + 1];
 	return null;
 };
+
+// format.rs `Conversion::is_avi_family`
+const isAviFamily = (toFormat: string): boolean =>
+	toFormat === "avi" || toFormat === "divx";
+
+// format.rs `Conversion::avi_copy_bitstream_filter`
+// avi needs the bitstream filter for h264 if copying
+// "no startcode found, use the video bitstream filter 'h264_mp4toannexb'"
+const aviCopyBitstreamFilter = (
+	toFormat: string,
+	videoEncoder: string,
+): string | null =>
+	isAviFamily(toFormat) && videoEncoder === "copy"
+		? "h264_mp4toannexb"
+		: null;
+
+// format.rs `Conversion::avi_aac_codec_tag`
+// avi needs the codec tag for ADTS AAC if copying
+// "ADTS is only supported with codec tag 0x1610"
+const aviAacCodecTag = (
+	toFormat: string,
+	audioEncoder: string,
+): string | null =>
+	isAviFamily(toFormat) && audioEncoder === "copy" ? "0x1610" : null;
 
 // converter/format.rs `Conversion::append_video_filter`
 const appendVideoFilter = (args: string[], filter: string): void => {
