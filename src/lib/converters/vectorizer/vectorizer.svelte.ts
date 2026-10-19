@@ -18,6 +18,8 @@ export class VectorizerConverter extends Converter {
 
 	private activeConversions = new SvelteMap<string, Worker>();
 
+	private workerCancellation = new SvelteMap<Worker, AbortController>();
+
 	public supportedFormats = vectorizerFormats;
 
 	public readonly reportsProgress = false;
@@ -42,7 +44,7 @@ export class VectorizerConverter extends Converter {
 	protected async download(): Promise<void> {
 		const worker = new Worker(VectorizerWorker, { type: "module" });
 		try {
-			await this.waitForMessage(worker, "loaded", 60000, () => {
+			await this.waitForMessage(worker, "loaded", 60000, undefined, () => {
 				worker.postMessage({ type: "load", id: "init" });
 			});
 
@@ -104,6 +106,8 @@ export class VectorizerConverter extends Converter {
 	): Promise<VertFile> {
 		await this.init();
 
+		this.throwIfCancelled(input);
+
 		this.trackConversion(input);
 		this.log(`converting ${input.name} (${input.id}) to ${to}`);
 		const startedAt = performance.now();
@@ -115,10 +119,17 @@ export class VectorizerConverter extends Converter {
 
 		const worker = new Worker(VectorizerWorker, { type: "module" });
 		this.activeConversions.set(input.id, worker);
+		const cancellation = new AbortController();
+		this.workerCancellation.set(worker, cancellation);
 
 		try {
 			worker.postMessage({ type: "load", id: input.id });
-			await this.waitForMessage(worker, "loaded", 60000);
+			await this.waitForMessage(
+				worker,
+				"loaded",
+				60000,
+				cancellation.signal,
+			);
 
 			const convertMsg: WorkerMessage = {
 				type: "convert",
@@ -134,7 +145,12 @@ export class VectorizerConverter extends Converter {
 			};
 			worker.postMessage(convertMsg);
 
-			const res = await this.waitForMessage(worker);
+			const res = await this.waitForMessage(
+				worker,
+				undefined,
+				0,
+				cancellation.signal,
+			);
 			if (res.type === "finished") {
 				this.log(
 					`converted ${input.name} (${input.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
@@ -149,23 +165,22 @@ export class VectorizerConverter extends Converter {
 
 			throw new Error("Unknown message type");
 		} finally {
+			cancellation.abort();
+			this.workerCancellation.delete(worker);
 			this.clearTrackedConversion(input);
+			this.clearCancel(input);
 			this.activeConversions.delete(input.id);
 			worker.terminate();
 		}
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
+		await super.cancel(input);
+
 		const worker = this.activeConversions.get(input.id);
-		if (!worker) {
-			this.error(
-				`no active conversion found for file ${input.name} (${input.id})`,
-			);
-			return;
-		}
+		if (!worker) return;
 
-		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
-
+		this.workerCancellation.get(worker)?.abort();
 		worker.terminate();
 		this.activeConversions.delete(input.id);
 	}
@@ -174,6 +189,7 @@ export class VectorizerConverter extends Converter {
 		worker: Worker,
 		type?: string,
 		timeout?: number,
+		signal?: AbortSignal,
 		post?: () => void,
 	): Promise<T> {
 		return new Promise<T>((resolve, reject) => {
@@ -195,9 +211,15 @@ export class VectorizerConverter extends Converter {
 				reject(new Error(`Worker error: ${e.message}`));
 			};
 
+			const onAbort = () => {
+				cleanup();
+				reject(new Error("Conversion cancelled"));
+			};
+
 			const cleanup = () => {
 				worker.removeEventListener("message", onMessage);
 				worker.removeEventListener("error", onError);
+				signal?.removeEventListener("abort", onAbort);
 				if (timeoutId) clearTimeout(timeoutId);
 			};
 
@@ -212,8 +234,11 @@ export class VectorizerConverter extends Converter {
 					}, timeout)
 				: undefined;
 
+			if (signal?.aborted) return onAbort();
+
 			worker.addEventListener("message", onMessage);
 			worker.addEventListener("error", onError);
+			signal?.addEventListener("abort", onAbort);
 
 			post?.();
 		});

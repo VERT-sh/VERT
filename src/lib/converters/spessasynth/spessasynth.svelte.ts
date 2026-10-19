@@ -69,6 +69,8 @@ export class SpessaSynthConverter extends Converter {
 	): Promise<VertFile> {
 		await this.init();
 
+		this.throwIfCancelled(input);
+
 		this.trackConversion(input);
 		this.log(`converting ${input.name} (${input.id}) to ${to}`);
 		const startedAt = performance.now();
@@ -118,15 +120,17 @@ export class SpessaSynthConverter extends Converter {
 			throw err;
 		} finally {
 			this.clearTrackedConversion(input);
+			this.clearCancel(input);
 			this.activeConversions.delete(input.id);
 			worker.terminate();
 		}
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
+		await super.cancel(input);
+
 		const worker = this.activeConversions.get(input.id);
 		if (!worker) return;
-		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 		worker.terminate();
 		this.activeConversions.delete(input.id);
 	}

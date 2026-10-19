@@ -7,6 +7,7 @@ import type {
 	SettingCategories,
 } from "#lib/types/conversion-settings";
 import { error, log } from "#lib/util/logger.svelte";
+import { SvelteSet } from "svelte/reactivity";
 import { canonicalCodecName, codecLabel } from "./codec-labels";
 
 export type WorkerStatus =
@@ -67,6 +68,8 @@ export class Converter {
 	private timeoutId?: ReturnType<typeof setTimeout>;
 	private activeInput?: VertFile;
 	private initPromise: Promise<void> | null = null;
+
+	protected readonly cancelledBeforeStart = new SvelteSet<string>();
 
 	protected log: (...msg: unknown[]) => void = (...msg) =>
 		log(["converters", this.name], ...msg);
@@ -244,6 +247,22 @@ export class Converter {
 		}
 	}
 
+	// used for checking if a conversion was cancelled before it started (e.g. during init)
+	protected throwIfCancelled(input: VertFile) {
+		if (this.cancelledBeforeStart.has(input.id)) {
+			this.cancelledBeforeStart.delete(input.id);
+			throw new Error("Conversion cancelled");
+		}
+	}
+
+	protected isCancelled(input: VertFile) {
+		return this.cancelledBeforeStart.has(input.id);
+	}
+
+	protected clearCancel(input: VertFile) {
+		this.cancelledBeforeStart.delete(input.id);
+	}
+
 	/**
 	 * Convert a file to a different format.
 	 * @param input The input file.
@@ -260,10 +279,13 @@ export class Converter {
 
 	/**
 	 * Cancel the active conversion of a file.
+	 * Subclasses should call `super.clearCancel(input)` after handling their own
+	 * resources, so cancels during initialization are never lost.
 	 * @param input The input file.
 	 */
 	public async cancel(input: VertFile): Promise<void> {
-		throw new Error("Not implemented");
+		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
+		this.cancelledBeforeStart.add(input.id);
 	}
 
 	public async valid(): Promise<boolean> {

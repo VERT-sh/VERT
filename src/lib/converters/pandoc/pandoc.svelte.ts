@@ -42,6 +42,8 @@ export class PandocConverter extends Converter {
 	public async convert(file: VertFile, to: string): Promise<VertFile> {
 		await this.init();
 
+		this.throwIfCancelled(file);
+
 		this.trackConversion(file);
 		this.log(`converting ${file.name} (${file.id}) to ${to}`);
 		const startedAt = performance.now();
@@ -121,21 +123,17 @@ export class PandocConverter extends Converter {
 			cancellation.abort();
 			this.workerCancellation.delete(worker);
 			this.clearTrackedConversion(file);
+			this.clearCancel(file);
 			this.activeConversions.delete(file.id);
 			worker.terminate();
 		}
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
-		const worker = this.activeConversions.get(input.id);
-		if (!worker) {
-			this.error(
-				`no active conversion found for file ${input.name} (${input.id})`,
-			);
-			return;
-		}
+		await super.cancel(input);
 
-		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
+		const worker = this.activeConversions.get(input.id);
+		if (!worker) return;
 
 		this.workerCancellation.get(worker)?.abort();
 		worker.terminate();
@@ -148,8 +146,8 @@ export class PandocConverter extends Converter {
 		new FormatInfo("md", true, true),
 		new FormatInfo("html", true, true),
 		new FormatInfo("rtf", true, false),
-		new FormatInfo("csv", true, true),
-		new FormatInfo("tsv", true, true),
+		new FormatInfo("csv", true, false),
+		new FormatInfo("tsv", true, false),
 		new FormatInfo("json", true, true), // must be a pandoc-converted json
 		new FormatInfo("rst", true, true),
 		new FormatInfo("epub", true, true),

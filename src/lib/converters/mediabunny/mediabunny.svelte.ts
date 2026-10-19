@@ -357,6 +357,8 @@ export class MediabunnyConverter extends Converter {
 		const originalName = file.file.name.split(".").slice(0, -1).join(".");
 		const outputFilename = `${originalName}.${toFormat}`;
 
+		this.throwIfCancelled(file);
+
 		let streamTargetContext: Awaited<
 			ReturnType<typeof this.createStreamingTarget>
 		> = null;
@@ -402,6 +404,7 @@ export class MediabunnyConverter extends Converter {
 			});
 
 			this.activeConversions.set(file.id, conversion);
+			this.throwIfCancelled(file);
 
 			const mobile = get(isMobile);
 			const deviceMemory = (
@@ -487,6 +490,7 @@ export class MediabunnyConverter extends Converter {
 			return new VertFile(f, toFormat);
 		} finally {
 			this.clearTrackedConversion(file);
+			this.clearCancel(file);
 			if (slowConversionTimer) clearTimeout(slowConversionTimer);
 			this.activeConversions.delete(file.id);
 			try {
@@ -535,15 +539,10 @@ export class MediabunnyConverter extends Converter {
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
-		const conversion = this.activeConversions.get(input.id);
-		if (!conversion) {
-			this.error(
-				`no active conversion found for file ${input.name} (${input.id})`,
-			);
-			return;
-		}
+		await super.cancel(input);
 
-		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
+		const conversion = this.activeConversions.get(input.id);
+		if (!conversion) return;
 
 		await conversion.cancel();
 	}

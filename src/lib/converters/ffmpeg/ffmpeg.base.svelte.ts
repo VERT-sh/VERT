@@ -36,6 +36,8 @@ export abstract class BaseFFmpegConverter extends Converter {
 
 	protected activeConversions = new SvelteMap<string, FFmpeg>();
 
+	private cancelLoad = new SvelteMap<string, () => void>();
+
 	public getVariantLabel(): string | null {
 		const variant = EngineVariants.instance.ffmpegActive;
 		return variant === "mt"
@@ -130,21 +132,41 @@ export abstract class BaseFFmpegConverter extends Converter {
 			input.progress = progress.progress * 100;
 		});
 
-		await ffmpeg.load(this.loadConfig());
+		this.activeConversions.set(input.id, ffmpeg);
+
+		let abortLoad!: () => void;
+		const aborted = new Promise<never>((_, reject) => {
+			abortLoad = () => reject(new Error("Conversion cancelled"));
+		});
+		this.cancelLoad.set(input.id, abortLoad);
+
+		try {
+			await Promise.race([ffmpeg.load(this.loadConfig()), aborted]);
+			if (this.isCancelled(input))
+				throw new Error("Conversion cancelled");
+		} catch (err) {
+			// don't leave a half-loaded instance registered
+			if (this.activeConversions.get(input.id) === ffmpeg) {
+				// we throw before the caller's try/finally, so clear the marker here
+				this.activeConversions.delete(input.id);
+			}
+			this.clearCancel(input);
+			ffmpeg.terminate();
+			throw err;
+		} finally {
+			this.cancelLoad.delete(input.id);
+		}
 
 		return ffmpeg;
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
-		const ffmpeg = this.activeConversions.get(input.id);
-		if (!ffmpeg) {
-			this.error(
-				`no active conversion found for file ${input.name} (${input.id})`,
-			);
-			return;
-		}
+		await super.cancel(input);
 
-		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
+		this.cancelLoad.get(input.id)?.();
+
+		const ffmpeg = this.activeConversions.get(input.id);
+		if (!ffmpeg) return;
 
 		ffmpeg.terminate();
 		this.activeConversions.delete(input.id);

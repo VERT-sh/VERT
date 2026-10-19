@@ -673,7 +673,6 @@ export class VertdConverter extends Converter {
 		let hash: string;
 		if (PUB_DISABLE_FAILURE_BLOCKS === "false") {
 			hash = await fileUpload.hash();
-
 			if (this.blocked(hash)) {
 				this.log(
 					`conversion blocked for file ${input.name} (${input.id})`,
@@ -693,6 +692,12 @@ export class VertdConverter extends Converter {
 		);
 		this.activeUploads.set(input.id, uploadTask);
 
+		// cover a cancel that arrived during url resolution / upload setup
+		if (this.isCancelled(input)) {
+			this.clearCancel(input);
+			throw new Error("Conversion cancelled");
+		}
+
 		let uploadRes: UploadResponse;
 		try {
 			uploadRes = await uploadTask.promise;
@@ -705,8 +710,10 @@ export class VertdConverter extends Converter {
 				`received sequence upload for ${input.name} (${input.id}) (kind: ${uploadRes.sequence.kind}, extension: ${uploadRes.sequence.extension}, entry: ${uploadRes.sequence.entry})`,
 			);
 
-		if (this.cancelledConversions.has(input.id))
+		if (this.cancelledConversions.has(input.id)) {
+			this.clearCancel(input);
 			throw new Error("Conversion cancelled");
+		}
 
 		return new Promise((resolve, reject) => {
 			let settled = false;
@@ -728,6 +735,7 @@ export class VertdConverter extends Converter {
 				settled = true;
 				clearTimeout(connectTimeout);
 				this.cancelledConversions.delete(input.id);
+				this.clearCancel(input);
 				this.activeUploads.delete(input.id);
 				this.activeDownloads.get(input.id)?.abort();
 				this.activeDownloads.delete(input.id);
@@ -746,6 +754,7 @@ export class VertdConverter extends Converter {
 				settled = true;
 				clearTimeout(connectTimeout);
 				this.cancelledConversions.delete(input.id);
+				this.clearCancel(input);
 				this.activeUploads.delete(input.id);
 				this.activeDownloads.delete(input.id);
 				this.activeConversions.delete(input.id);
@@ -936,6 +945,8 @@ export class VertdConverter extends Converter {
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
+		await super.cancel(input);
+
 		this.cancelledConversions.add(input.id);
 
 		const activeUpload = this.activeUploads.get(input.id);
@@ -962,8 +973,6 @@ export class VertdConverter extends Converter {
 				);
 			return;
 		}
-
-		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
 
 		const { ws, jobId, token } = activeConversion;
 

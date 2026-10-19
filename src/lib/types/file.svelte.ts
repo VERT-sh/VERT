@@ -324,7 +324,7 @@ export class VertFile {
 
 			if (!this.fileType) return;
 
-			const forceKeep = ["mpo", "fb2"];
+			const forceKeep = ["mpo", "fb2", "opml", "jats"];
 			const aliases: Record<string, string> = {
 				// original: alias
 				jpg: "jpeg",

@@ -323,6 +323,8 @@ export class MagickConverter extends Converter {
 		if (EngineVariants.instance.magickActive !== this.loadedVariant)
 			await this.download();
 
+		this.throwIfCancelled(input);
+
 		this.trackConversion(input);
 		this.log(`converting ${input.name} (${input.id}) to ${to}`);
 		const startedAt = performance.now();
@@ -410,21 +412,17 @@ export class MagickConverter extends Converter {
 			cancellation.abort();
 			this.workerCancellation.delete(worker);
 			this.clearTrackedConversion(input);
+			this.clearCancel(input);
 			this.activeConversions.delete(input.id);
 			worker.terminate();
 		}
 	}
 
 	public async cancel(input: VertFile): Promise<void> {
-		const worker = this.activeConversions.get(input.id);
-		if (!worker) {
-			this.error(
-				`no active conversion found for file ${input.name} (${input.id})`,
-			);
-			return;
-		}
+		await super.cancel(input);
 
-		this.log(`cancelling conversion for file ${input.name} (${input.id})`);
+		const worker = this.activeConversions.get(input.id);
+		if (!worker) return;
 
 		this.workerCancellation.get(worker)?.abort();
 		worker.terminate();

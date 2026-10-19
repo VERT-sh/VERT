@@ -246,9 +246,10 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 
 		await this.ensureCore();
 
+		this.throwIfCancelled(input);
+
 		let conversionError: string | null = null;
 		const ffmpeg = await this.setupFFmpeg(input);
-		this.activeConversions.set(input.id, ffmpeg);
 
 		const errorListener = (l: { message: string }) => {
 			const msg = l.message;
@@ -315,6 +316,7 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 			return new VertFile(new File([outBuf], outputFileName), to);
 		} finally {
 			this.clearTrackedConversion(input);
+			this.clearCancel(input);
 			ffmpeg.off("log", errorListener);
 			ffmpeg.off("log", logListener);
 			this.activeConversions.delete(input.id);

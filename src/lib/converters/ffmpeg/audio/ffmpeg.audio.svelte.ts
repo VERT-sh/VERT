@@ -192,10 +192,10 @@ export class FFmpegConverter extends BaseFFmpegConverter {
 
 		await this.ensureCore();
 
+		this.throwIfCancelled(input);
+
 		let conversionError: string | null = null;
 		const ffmpeg = await this.setupFFmpeg(input);
-
-		this.activeConversions.set(input.id, ffmpeg);
 
 		// listen for errors during conversion
 		const errorListener = (l: { message: string }) => {
@@ -294,6 +294,7 @@ export class FFmpegConverter extends BaseFFmpegConverter {
 			}
 		} finally {
 			this.clearTrackedConversion(input);
+			this.clearCancel(input);
 			ffmpeg.off("log", errorListener);
 			ffmpeg.off("log", logListener);
 			this.activeConversions.delete(input.id);

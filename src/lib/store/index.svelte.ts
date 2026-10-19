@@ -334,7 +334,7 @@ class Files {
 					continue;
 				}
 
-				const converter = converters
+				const converter = [...converters]
 					.sort(byNative(format))
 					.find((c) => c.formatStrings().includes(format));
 
@@ -501,7 +501,7 @@ class Files {
 				log(["files"], `no extension found for ${file.name}`);
 				return;
 			}
-			const converter = converters
+			const converter = [...converters]
 				.sort(byNative(format))
 				.find((converter) =>
 					converter.formatStrings().includes(format),

@@ -99,15 +99,14 @@ categories.doc.formats =
 		.map((f) => f.name) || [];
 
 export const byNative = (format: string) => {
-	return (a: Converter, b: Converter) => {
-		const aFormat = a.supportedFormats.find((f) => f.name === format);
-		const bFormat = b.supportedFormats.find((f) => f.name === format);
-
-		if (aFormat && bFormat) {
-			return aFormat.isNative ? -1 : 1;
-		}
-		return 0;
+	// rank native support first, then non-native, then unsupported.
+	const rank = (converter: Converter) => {
+		const info = converter.supportedFormats.find((f) => f.name === format);
+		if (!info) return 2;
+		return info.isNative ? 0 : 1;
 	};
+
+	return (a: Converter, b: Converter) => rank(a) - rank(b);
 };
 
 export function categoryStatus(category: ConverterCategory): WorkerStatus {
