@@ -22,6 +22,7 @@ export interface ISettings {
 	defaultFormat: DefaultFormats;
 	useDefaultFormat: boolean;
 	metadata: boolean;
+	fileTypeDetection: boolean; // detect the real format from file contents
 	plausible: boolean;
 	vertdURL: string;
 	vertdSpeed: ConversionSpeed; // videos (vertd)
@@ -44,6 +45,7 @@ export class Settings {
 		},
 		useDefaultFormat: false,
 		metadata: true,
+		fileTypeDetection: true,
 		plausible: true,
 		vertdURL: PUB_VERTD_URL,
 		vertdSpeed: "slow",

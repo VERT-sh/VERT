@@ -49,6 +49,41 @@
 				/>
 			</div>
 			<div class="flex flex-col gap-4">
+				<div class="flex flex-col gap-2">
+					<p class="text-base font-bold">
+						{m["settings.conversion.file_type_detection.label"]()}
+					</p>
+					<p class="text-sm font-normal text-muted">
+						{m["settings.conversion.file_type_detection.description"]()}
+					</p>
+				</div>
+				<div class="flex w-full gap-3">
+					<button
+						onclick={() => (settings.fileTypeDetection = true)}
+						class={clsx(
+							"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
+							!$effects && "!scale-100",
+							settings.fileTypeDetection && "selected",
+						)}
+					>
+						<PlayIcon size="24" class="mr-2 inline-block" />
+						{m["settings.conversion.file_type_detection.enable"]()}
+					</button>
+
+					<button
+						onclick={() => (settings.fileTypeDetection = false)}
+						class={clsx(
+							"btn flex flex-1 items-center justify-center rounded-lg p-4 text-black dynadark:text-white",
+							!$effects && "!scale-100",
+							!settings.fileTypeDetection && "selected",
+						)}
+					>
+						<PauseIcon size="24" class="mr-2 inline-block" />
+						{m["settings.conversion.file_type_detection.disable"]()}
+					</button>
+				</div>
+			</div>
+			<div class="flex flex-col gap-4">
 				<button
 					onclick={() => (showAdvanced = !showAdvanced)}
 					class="flex w-full items-center justify-between rounded-lg bg-button p-4 text-black dynadark:text-white"

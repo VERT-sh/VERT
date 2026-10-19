@@ -318,6 +318,12 @@
 				"description": "This will determine the name of the file on download, <b>not including the file extension.</b> You can put the following templates in the format, which will be replaced with the relevant information: <b>%name%</b> for the original file name, <b>%extension%</b> for the original file extension, <b>%datetime%</b> for the full ISO 8601 timestamp, <b>%date%</b> for the date, <b>%time%</b> for the time, and <b>%unix%</b> for the unix timestamp.",
 				"placeholder": "VERT_%name%"
 			},
+			"file_type_detection": {
+				"label": "File type detection",
+				"description": "Detect the actual format of a file from its contents instead of trusting the file extension. This helps with files that were renamed incorrectly, but may change the format of files you named on purpose.",
+				"enable": "Enable",
+				"disable": "Disable"
+			},
 			"default_format": {
 				"label": "Default conversion format",
 				"enable": "Enable",

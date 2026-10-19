@@ -5,6 +5,7 @@ import { byNative, categories, converters } from "#lib/converters";
 import type { Converter } from "#lib/converters/converter.svelte";
 import { formatDuration } from "#lib/converters/converter.svelte";
 import { m } from "#lib/paraglide/messages";
+import { Settings } from "#lib/sections/settings/index.svelte";
 import { addDialog } from "#lib/store/DialogProvider";
 import { MAX_ARRAY_BUFFER_SIZE } from "#lib/store/index.svelte";
 import { conversionConcurrency } from "#lib/util/consts";
@@ -330,6 +331,8 @@ export class VertFile {
 	}
 
 	private async detectFileType() {
+		if (!Settings.instance.settings.fileTypeDetection) return;
+
 		try {
 			this.fileType = await fileTypeFromBuffer(
 				await this.file.slice(0, FILE_TYPE_HEADER_SIZE).arrayBuffer(),
@@ -403,7 +406,7 @@ export class VertFile {
 			this.converters = converters.filter((converter) =>
 				converter.formatStrings().includes(this.from),
 			);
-			
+
 			// reset target format if previous format wasn't compatible (that was rewritten from this function)
 			if (!this.hasAvailableConverter(this.from, this.to))
 				this.to = this.defaultTargetFormat();
