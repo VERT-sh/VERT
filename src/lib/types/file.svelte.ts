@@ -1,7 +1,7 @@
 import FallbackToast from "#lib/components/functional/popups/FallbackToast.svelte";
 import ServerUploadWarning from "#lib/components/functional/popups/ServerUploadWarning.svelte";
 import SlowConversionToast from "#lib/components/functional/popups/SlowConversionToast.svelte";
-import { byNative, converters } from "#lib/converters";
+import { byNative, categories, converters } from "#lib/converters";
 import type { Converter } from "#lib/converters/converter.svelte";
 import { formatDuration } from "#lib/converters/converter.svelte";
 import { m } from "#lib/paraglide/messages";
@@ -316,6 +316,19 @@ export class VertFile {
 		return (this.fileTypeCheck ??= this.detectFileType());
 	}
 
+	// first target format (in category order) this file can actually convert to
+	private defaultTargetFormat(): string {
+		const category = Object.keys(categories).find((name) =>
+			categories[name].formats.includes(this.from),
+		);
+		const candidates = category ? categories[category].formats : [];
+		const target = candidates
+			.filter((format) => format !== this.from)
+			.find((format) => this.hasAvailableConverter(this.from, format));
+
+		return target ?? this.from;
+	}
+
 	private async detectFileType() {
 		try {
 			this.fileType = await fileTypeFromBuffer(
@@ -324,7 +337,19 @@ export class VertFile {
 
 			if (!this.fileType) return;
 
-			const forceKeep = ["mpo", "fb2", "opml", "jats"];
+			// formats that may be misidentified as generic container (e.g. xml-based formats like fb2, opml, jats, etc.)
+			const forceKeep: Record<string, string> = {
+				// original: expected
+				mpo: "mpo",
+				fb2: "fb2",
+				opml: "opml",
+				jats: "jats",
+				kar: "kar",
+				rmi: "rmi",
+				m4b: "m4b",
+				aifc: "aifc",
+				aiff: "aiff",
+			};
 			const aliases: Record<string, string> = {
 				// original: alias
 				jpg: "jpeg",
@@ -338,14 +363,15 @@ export class VertFile {
 				mpe: "mpeg",
 				mpv: "mpeg",
 				midi: "mid",
+				aif: "aiff",
 			};
 			const fileExtension = this.originalFrom.slice(1);
 			const isPngContainer =
 				this.fileType.ext === "png" || this.fileType.ext === "apng";
 			// preserve file type for png and apng so they can convert
 			// TODO: apng can't be converted with magick-wasm - use another library for it
-			const detectedExtension = forceKeep.includes(fileExtension)
-				? fileExtension
+			const detectedExtension = Object.hasOwn(forceKeep, fileExtension)
+				? forceKeep[fileExtension]
 				: isPngContainer &&
 					  (fileExtension === "png" || fileExtension === "apng")
 					? fileExtension
@@ -377,6 +403,10 @@ export class VertFile {
 			this.converters = converters.filter((converter) =>
 				converter.formatStrings().includes(this.from),
 			);
+			
+			// reset target format if previous format wasn't compatible (that was rewritten from this function)
+			if (!this.hasAvailableConverter(this.from, this.to))
+				this.to = this.defaultTargetFormat();
 		} catch (error) {
 			log(
 				["file", "type"],
