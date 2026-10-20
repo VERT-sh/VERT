@@ -42,6 +42,7 @@ export class MagickConverter extends Converter {
 		new FormatInfo("webp", true, true),
 		new FormatInfo("gif", true, true),
 		new FormatInfo("svg", true, true),
+		new FormatInfo("svgz", true, true),
 		new FormatInfo("jxl", true, true),
 		new FormatInfo("avif", true, true),
 		new FormatInfo("heic", true, false), // seems to be unreliable? HEIC/HEIF is very weird if it will actually work
@@ -330,7 +331,7 @@ export class MagickConverter extends Converter {
 		const startedAt = performance.now();
 
 		// handle converting from SVG manually because magick-wasm doesn't support it
-		if (input.from === ".svg") {
+		if (input.from === ".svg" || input.from === ".svgz") {
 			try {
 				const blob = await this.svgToImage(input);
 				const pngFile = new VertFile(

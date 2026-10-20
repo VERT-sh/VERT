@@ -12,9 +12,10 @@ const WASM_URLS: Record<string, string> = {
 };
 
 // note: dynamic libraries still cause wasm-vips to take a long time to (or never) initialize, imagemagick handles all these anyways
+// TODO: check if this is actually true now, issue i had while troubleshooting wasn't this
 const DYNAMIC_LIBRARIES: string[] = [];
 
-const NO_QUALITY = new Set([".gif", ".svg", ".ppm", ".pnm"]);
+const NO_QUALITY = new Set([".gif", ".svg", ".svgz", ".ppm", ".pnm"]);
 const OPAQUE = new Set([".jpg", ".jpeg", ".jpe", ".jfif", ".ppm", ".pnm"]);
 
 const COLOURSPACES: Record<string, string> = {

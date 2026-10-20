@@ -354,6 +354,8 @@ export class VertFile {
 				m4b: "m4b",
 				aifc: "aifc",
 				aiff: "aiff",
+				svg: "svg",
+				svgz: "svgz",
 			};
 			const aliases: Record<string, string> = {
 				// original: alias
