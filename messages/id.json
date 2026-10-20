@@ -13,7 +13,8 @@
 		"discord_server": "Peladen Discord"
 	},
 	"upload": {
-		"title": "Konverter berkas andalanmu.",
+		"title": "Konverter berkas MTU Anda",
+		"documentation": "Dokumentasi",
 		"subtitle": "Semua gambar, audio, dan pemrosesan dokumen dilakukan pada perangkatmu. Video dikonversi pada peladen kilat kami. Tidak ada batas ukuran berkas, tidak ada iklan, dan benar-benar sumber terbuka.",
 		"uploader": {
 			"text": "Jatuhkan dan klik untuk {action}",

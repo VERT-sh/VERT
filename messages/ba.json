@@ -14,7 +14,8 @@
 		"privacy_policy": "Politika privatnosti"
 	},
 	"upload": {
-		"title": "Konverter datoteka koji ćete voljeti.",
+		"title": "Vaš MTU konverter datoteka",
+		"documentation": "Dokumentacija",
 		"subtitle": "Sva obrada slika, zvuka i dokumenata obavlja se na vašem uređaju. Video zapisi se konvertuju na našim izuzetno brzim serverima. Bez ograničenja veličine, bez reklama i potpuno otvorenog koda.",
 		"uploader": {
 			"text": "Prevucite ili kliknite da {action}",

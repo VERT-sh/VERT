@@ -14,7 +14,8 @@
 		"privacy_policy": "Privacy policy"
 	},
 	"upload": {
-		"title": "The file converter you'll love.",
+		"title": "Your MTU File Converter",
+		"documentation": "Documentation",
 		"subtitle": "All file processing is done on your device. No file size limit, no ads, and completely open source.",
 		"uploader": {
 			"text": "Drop or click to {action}",

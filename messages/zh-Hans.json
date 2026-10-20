@@ -14,7 +14,8 @@
 		"privacy_policy": "隐私政策"
 	},
 	"upload": {
-		"title": "你一定会喜欢的文件转换工具。",
+		"title": "你的 MTU 文件转换器",
+		"documentation": "文档",
 		"subtitle": "所有图片、音频和文档处理都在你的设备上进行。视频通过超快速服务器转换。无文件大小限制，无广告，完全开源。",
 		"uploader": {
 			"text": "拖放或点击以{action}",

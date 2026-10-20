@@ -14,7 +14,8 @@
 		"privacy_policy": "Gizlilik politikası"
 	},
 	"upload": {
-		"title": "Sevdiğiniz dosya dönüştürücü.",
+		"title": "MTU dosya dönüştürücünüz",
+		"documentation": "Belgeler",
 		"subtitle": "Tüm görüntü, ses ve belge işlemleri cihazınızda gerçekleştirilir. Videolar, ışık hızındaki sunucularımızda dönüştürülür. Dosya boyutu sınırı ve reklam yoktur. Tamamen açık kaynaklıdır.",
 		"uploader": {
 			"text": "{action} için sürükleyip bırakın veya dosya seçin",

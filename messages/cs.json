@@ -14,7 +14,8 @@
 		"privacy_policy": "Zásady ochrany osobních údajů"
 	},
 	"upload": {
-		"title": "Konvertor souborů, který si zamilujete.",
+		"title": "Váš konvertor souborů MTU",
+		"documentation": "Dokumentace",
 		"subtitle": "Veškeré zpracování obrázků, audia a dokumentů probíhá na vašem zařízení. Videa jsou konvertována na našich bleskově rychlých serverech. Žádné omezení velikosti souborů, bez reklam a kompletně open-source.",
 		"uploader": {
 			"text": "Přetáhněte soubor nebo klikněte pro {action}",

@@ -13,7 +13,8 @@
 		"discord_server": "Discord server"
 	},
 	"upload": {
-		"title": "Pretvarač datoteka koji ćeš obožavati.",
+		"title": "Vaš MTU pretvarač datoteka",
+		"documentation": "Dokumentacija",
 		"subtitle": "Cijelokupna obrada slika, zvuka i dokumenata se odvija na vašem uređaju. Videozapisi se pretvaraju na našim izrazito brzim serverima. Nema nikakvih ograničenja veličine niti reklama i potpuno je open source.",
 		"uploader": {
 			"text": "Ubaci ili klikni da {action}",

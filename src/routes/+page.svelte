@@ -6,7 +6,15 @@
 	import { converters } from "$lib/converters";
 	import { vertdLoaded } from "$lib/store/index.svelte";
 	import clsx from "clsx";
-	import { AudioLines, BookText, Check, Film, Image } from "@lucide/svelte";
+	import {
+		ArrowUpRight,
+		AudioLines,
+		BookOpen,
+		BookText,
+		Check,
+		Film,
+		Image,
+	} from "@lucide/svelte";
 	import { m } from "$lib/paraglide/messages";
 	import { OverlayScrollbarsComponent } from "overlayscrollbars-svelte";
 	import { browser } from "$app/environment";
@@ -15,6 +23,9 @@
 	import type { WorkerStatus } from "$lib/converters/converter.svelte";
 	import { sanitize } from "$lib/store/index.svelte";
 	import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
+
+	// Add the internal SharePoint documentation URL here when it is available.
+	const SHAREPOINT_DOCUMENTATION_URL = "";
 
 	const getSupportedFormats = (name: string) =>
 		converters
@@ -182,6 +193,27 @@
 				>
 					{m["upload.subtitle"]()}
 				</p>
+				{#if SHAREPOINT_DOCUMENTATION_URL}
+					<a
+						href={SHAREPOINT_DOCUMENTATION_URL}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-3 font-medium text-on-accent transition hover:opacity-90"
+					>
+						<BookOpen size="18" />
+						{m["upload.documentation"]()}
+						<ArrowUpRight size="16" />
+					</a>
+				{:else}
+					<button
+						type="button"
+						disabled
+						class="mt-6 inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-accent px-5 py-3 font-medium text-on-accent opacity-60"
+					>
+						<BookOpen size="18" />
+						{m["upload.documentation"]()}
+					</button>
+				{/if}
 			</div>
 			<div class="flex-grow w-full h-72">
 				<Uploader class="w-full h-full" />

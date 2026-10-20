@@ -14,7 +14,8 @@
 		"privacy_policy": "Datenschutzerklärung"
 	},
 	"upload": {
-		"title": "Der Dateikonverter, den du lieben wirst.",
+		"title": "Ihr MTU-Dateikonverter",
+		"documentation": "Dokumentation",
 		"subtitle": "Die Verarbeitung aller Bild-, Audio- und Dokumentdateien findet direkt auf deinem Gerät statt. Videos werden auf unseren blitzschnellen Servern konvertiert. Kein Dateigrößenlimit, keine Werbung und vollständig Open Source.",
 		"uploader": {
 			"text": "Dateien hier ablegen oder klicken zum {action}",
