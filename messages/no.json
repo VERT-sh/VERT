@@ -14,7 +14,8 @@
 		"privacy_policy": "Personvern"
 	},
 	"upload": {
-		"title": "Filkonvertereren du vil elske.",
+		"title": "Din MTU-filkonverter",
+		"documentation": "Dokumentasjon",
 		"subtitle": "All bilde-, lyd- og dokumentbehandling skjer på enheten din. Videoer konverteres på våre lynraske servere. Ingen filstørrelsesgrense, ingen annonser, og helt åpen kildekode.",
 		"uploader": {
 			"text": "Slipp eller klikk for å {action}",

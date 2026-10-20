@@ -14,7 +14,8 @@
 		"privacy_policy": "Política de privacidade"
 	},
 	"upload": {
-		"title": "O conversor de arquivos que você vai adorar.",
+		"title": "Seu conversor de arquivos MTU",
+		"documentation": "Documentação",
 		"subtitle": "Todo processamento de imagens, audio e documentos é feito no seu dispositivo. Vídeos são convertidos em nossos servidores ultrarrápidos. Sem limite de tamanho de arquivo, sem anúncios e totalmente de código aberto.",
 		"uploader": {
 			"text": "Arraste ou clique para {action}",

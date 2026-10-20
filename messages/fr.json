@@ -13,7 +13,8 @@
 		"discord_server": "Serveur Discord"
 	},
 	"upload": {
-		"title": "Le convertisseur de fichiers que vous allez adorer.",
+		"title": "Votre convertisseur de fichiers MTU",
+		"documentation": "Documentation",
 		"subtitle": "Tout le traitement des images, des fichiers audio et des documents s'effectue sur votre appareil. Les vidéos sont converties sur nos serveurs ultra-rapides. Aucune limite de taille de fichier, aucune publicité et entièrement open source.",
 		"uploader": {
 			"text": "Déposer ou cliquer pour {action}",
