@@ -25,6 +25,7 @@
 	import { converters } from "#lib/converters";
 	import { ToastManager } from "#lib/util/toast.svelte";
 	import { m } from "#lib/paraglide/messages";
+	import { getLocale } from "#lib/paraglide/runtime";
 	import {
 		addLog,
 		installConsoleCapture,
@@ -108,6 +109,7 @@
 		);
 		const storedLocale = localStorage.getItem("locale");
 		if (storedLocale) updateLocale(storedLocale);
+		else locale.set(getLocale()); // e.g. resolved from preferredLanguage
 
 		Settings.instance.load();
 

@@ -9,7 +9,7 @@ import type { Converter } from "#lib/converters/converter.svelte";
 import { priorityFor } from "#lib/converters/priority";
 import { vertdFetch } from "#lib/converters/vertd/vertd.svelte";
 import { m } from "#lib/paraglide/messages";
-import { getLocale, setLocale } from "#lib/paraglide/runtime";
+import { baseLocale, setLocale } from "#lib/paraglide/runtime";
 import { VertFile } from "#lib/types";
 import { conversionConcurrency, GB } from "#lib/util/consts";
 import { formatError } from "#lib/util/error";
@@ -741,7 +741,9 @@ export const fileSettings = $state(writable<VertFile | undefined | null>(null));
 export const isMobile = writable(false);
 export const effects = writable(true);
 export const theme = writable<"light" | "dark">("light");
-export const locale = writable(getLocale());
+// start at the prerendered locale so +layout's {#key $locale} re-renders once the client
+// locale is applied on mount ({@html} content is not updated during hydration)
+export const locale = writable(baseLocale);
 export const availableLocales = {
 	en: "English",
 	es: "Español",
@@ -770,7 +772,6 @@ export function updateLocale(newLocale: string) {
 	localStorage.setItem("locale", newLocale);
 	// @ts-expect-error shush
 	setLocale(newLocale, { reload: false });
-	// @ts-expect-error shush
 	locale.set(newLocale);
 }
 
