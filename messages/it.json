@@ -73,6 +73,7 @@
 			"document_file": "File documento",
 			"image_file": "File immagine",
 			"convert_file": "Converti questo file",
+			"done": "Fatto",
 			"download_file": "Scarica questo file"
 		},
 		"errors": {

@@ -67,6 +67,7 @@
 			"document_file": "Dokument",
 			"image_file": "Datoteka slike",
 			"convert_file": "Pretvori ovu datoteku",
+			"done": "Gotovo",
 			"download_file": "Preuzmi ovu datoteku"
 		},
 		"errors": {

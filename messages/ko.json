@@ -79,6 +79,7 @@
 			"document_file": "문서 파일",
 			"image_file": "이미지 파일",
 			"convert_file": "파일 변환하기",
+			"done": "완료",
 			"download_file": "파일 다운로드"
 		},
 		"errors": {

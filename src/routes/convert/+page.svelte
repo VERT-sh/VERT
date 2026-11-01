@@ -31,6 +31,7 @@
 		FileVideoCameraIcon,
 		FilmIcon,
 		ImageIcon,
+		CheckIcon,
 		ImageOffIcon,
 		RotateCwIcon,
 		XIcon,
@@ -268,6 +269,7 @@
 		currentConverter?.status === "idle" ||
 		currentConverter?.status === "downloading" ||
 		currentConverter?.status === "initializing"}
+	{@const converted = !!file.result && !file.processing}
 	<Panel class="relative flex min-w-0 flex-col gap-4 p-5">
 		<div class="flex h-8 w-full flex-shrink-0 items-center gap-2">
 			<Tooltip
@@ -444,19 +446,35 @@
 								class="flex w-full items-center justify-between"
 							>
 								<Tooltip
-									text={m["convert.tooltips.convert_file"]()}
+									text={converted
+										? m["convert.tooltips.done"]()
+										: m["convert.tooltips.convert_file"]()}
 									position="bottom"
 								>
 									<button
 										class={clsx(
-											"btn h-14 w-14 p-0 text-black",
+											"btn h-14 w-14 flex-col gap-0.5 p-0 text-black",
 											!$effects && "!scale-100",
 											fileTypeColors[fileType],
 										)}
 										disabled={!files.isReady(file)}
+										aria-label={converted
+											? `${m["convert.tooltips.done"]()}. ${m["convert.tooltips.convert_file"]()}`
+											: m[
+													"convert.tooltips.convert_file"
+												]()}
 										onclick={() => file.convert()}
 									>
-										<RotateCwIcon size="24" />
+										{#if converted}
+											<CheckIcon size="18" />
+											<span
+												class="text-[10px] font-semibold leading-none"
+											>
+												{m["convert.tooltips.done"]()}
+											</span>
+										{:else}
+											<RotateCwIcon size="24" />
+										{/if}
 									</button>
 								</Tooltip>
 								<Tooltip

@@ -73,6 +73,7 @@
 			"document_file": "ドキュメントファイル",
 			"image_file": "画像ファイル",
 			"convert_file": "このファイルを変換",
+			"done": "完了",
 			"download_file": "このファイルをダウンロード"
 		},
 		"errors": {

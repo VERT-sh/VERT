@@ -88,6 +88,7 @@
 			"document_file": "Dokumentfil",
 			"image_file": "Bildefil",
 			"convert_file": "Konverter denne filen",
+			"done": "Ferdig",
 			"download_file": "Last ned denne filen"
 		},
 		"errors": {

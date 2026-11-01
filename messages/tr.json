@@ -88,6 +88,7 @@
 			"document_file": "Belge dosyası",
 			"image_file": "Görsel dosyası",
 			"convert_file": "Bu dosyayı dönüştür",
+			"done": "Bitti",
 			"download_file": "Bu dosyayı indir"
 		},
 		"errors": {

@@ -88,6 +88,7 @@
 			"document_file": "Dokument",
 			"image_file": "Obrázek",
 			"convert_file": "Konvertovat tento soubor",
+			"done": "Hotovo",
 			"download_file": "Stáhnout tento soubor"
 		},
 		"errors": {

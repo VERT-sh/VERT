@@ -80,6 +80,7 @@
 			"document_file": "文档文件",
 			"image_file": "图片文件",
 			"convert_file": "转换此文件",
+			"done": "完成",
 			"download_file": "下载此文件"
 		},
 		"errors": {

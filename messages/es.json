@@ -76,6 +76,7 @@
 			"document_file": "Documento",
 			"image_file": "Imagen",
 			"convert_file": "Convertir este archivo",
+			"done": "Listo",
 			"download_file": "Descargar este archivo"
 		},
 		"errors": {

@@ -74,6 +74,7 @@
 			"document_file": "Berkas dokumen",
 			"image_file": "Berkas gambar",
 			"convert_file": "Konversi berkas ini",
+			"done": "Selesai",
 			"download_file": "Unduh berkas ini"
 		},
 		"errors": {

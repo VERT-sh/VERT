@@ -88,6 +88,7 @@
 			"document_file": "Arquivo de documento",
 			"image_file": "Arquivo de imagem",
 			"convert_file": "Converter este arquivo",
+			"done": "Pronto",
 			"download_file": "Baixar este arquivo"
 		},
 		"errors": {
