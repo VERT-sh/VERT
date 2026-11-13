@@ -15,7 +15,7 @@
 	},
 	"upload": {
 		"title": "Sevdiğiniz dosya dönüştürücü.",
-		"subtitle": "Tüm görüntü, ses ve belge işlemleri cihazınızda gerçekleştirilir. Videolar, ışık hızındaki sunucularımızda dönüştürülür. Dosya boyutu sınırı ve reklam yoktur. Tamamen açık kaynaklıdır.",
+		"subtitle": "Tüm işlemler cihazınızda gerçekleştirilir. Dosya boyutu sınırı ve reklam yoktur; tamamen açık kaynaklıdır.",
 		"uploader": {
 			"text": "{action} için sürükleyip bırakın veya dosya seçin",
 			"convert": "dönüştürmek"
@@ -26,11 +26,12 @@
 			"audio": "Ses",
 			"documents": "Belge",
 			"video": "Video",
-			"video_server_processing": "Sunucuda gerçekleşir",
+			"video_server_processing": "Cihazınızda ve sunucuda gerçekleşir",
 			"local_supported": "Cihazınızda gerçekleşir",
 			"status": {
 				"text": "<b>Durum:</b> {status}",
 				"ready": "hazır",
+				"partially_ready": "kısmen hazır",
 				"not_ready": "hazır değil",
 				"not_initialized": "başlatılmamış",
 				"downloading": "indiriliyor...",
@@ -43,31 +44,49 @@
 			"partial_support": "Bu format yalnızca şu şekilde dönüştürülebilir: {direction}.",
 			"direction_input": "kaynak",
 			"direction_output": "çıktı",
-			"video_server_processing": "Videolar varsayılan olarak işlenmek üzere sunucuya yüklenir. Yerel olarak nasıl ayarlayacağınızı buradan öğrenebilirsiniz."
+			"video_server_processing": "Mümkün olduğunda VERT, videoları doğrudan tarayıcınızda yerel olarak dönüştürür. Bazı dönüştürmeler sunucu tarafında işlem gerektirebilir; yerel olarak nasıl kuracağınızı buradan öğrenebilirsiniz."
 		}
 	},
 	"convert": {
 		"archive_file": {
 			"extract": "Arşivi çıkar",
-			"extracting": "Arşiv algılandı: {filename}",
 			"extracted": "{filename} arşivinden {extract_count} dosya çıkarıldı. {ignore_count} öğe yoksayıldı.",
 			"detected": "{filename} içinde {type} dosyası algılandı.",
+			"detected_sequence": "{filename} içinde {sequence} dizisi algılandı.",
+			"sequence_dash": "DASH medyası",
 			"audio": "ses",
 			"video": "video",
 			"doc": "belge",
 			"image": "görsel",
-			"extract_error": "{filename} çıkarılırken hata oluştu: {error}"
+			"archive": "arşiv",
+			"unknown": "bilinmeyen",
+			"extract_error": "{filename} çıkarılırken hata oluştu: {error}",
+			"conversion_failed": "{filename} içindeki {count} dosya dönüştürülemedi. Daha fazla bilgi için arşivdeki '{reportName}' dosyasına göz atın."
 		},
-		"large_file_warning": "Tarayıcı / cihaz kısıtlamaları nedeniyle, bu dosya için videodan sese dönüştürme devre dışı bırakıldı çünkü {limit}GB'dan daha büyük. Bu boyuttaki dosyalar için daha az kısıtlamaya sahip olan Firefox veya Safari kullanmanızı öneririz.",
+		"image_sequence": {
+			"image_sequence": "Görsel Dizisi",
+			"fps": "FPS",
+			"transparency": "Şeffaflık"
+		},
+		"large_file_warning": "Tarayıcı / cihaz kısıtlamaları nedeniyle, '{filename}' dosyası {limit}GB'dan daha büyük olduğundan videodan sese dönüştürme devre dışı bırakıldı. Bu boyuttaki dosyalar için daha az kısıtlamaya sahip olan Firefox veya Safari kullanmanızı öneririz.",
 		"external_warning": {
 			"title": "Harici sunucu uyarısı",
-			"text": "Video formatına dönüştürmeyi seçerseniz, bu dosyalar dönüştürülmek üzere harici bir sunucuya yüklenecektir. Devam etmek istiyor musunuz?",
+			"text": "'{filename}' dosyasını mevcut ayarlarıyla dönüştürmek yerel olarak desteklenmemektedir ve sunucu tarafında işlem gerektirir. Devam etmek istiyor musunuz?",
 			"yes": "Evet",
-			"no": "Hayır"
+			"no": "Hayır",
+			"dont_show_again": "Bir daha gösterme"
+		},
+		"slow_conversion": {
+			"title": "Dönüştürme biraz zaman alabilir",
+			"device_body": "Cihazınız '{filename}' dosyasını yerel olarak dönüştürürken yavaş kalabilir. Yerel dönüştürmeyi denemeye devam edebilirsiniz ancak sunucuda dönüştürmeye geçmek daha iyi sonuç verebilir.",
+			"timeout_body": "'{filename}' dosyasının dönüştürülmesi beklenenden uzun sürüyor. Beklemeye devam edebilir veya bunun yerine sunucuda dönüştürmeyi deneyebilirsiniz.",
+			"continue": "Cihazda devam et",
+			"switch": "Sunucuda devam et"
 		},
 		"panel": {
 			"convert_all": "Tümünü dönüştür",
 			"download_all": "Tümünü indir",
+			"download_all_toast": "İndirme için {count} dosya ({size}MB) sıkıştırılıyor (.zip). Büyük dosyalar için bu işlem biraz zaman alabilir (akış olarak iletilebilir).",
 			"remove_all": "Tüm dosyaları kaldır",
 			"set_all_to": "Tümünü ayarla",
 			"na": "N/A"
@@ -79,7 +98,135 @@
 			"image": "Görsel",
 			"placeholder": "Format ara",
 			"no_formats": "Kullanılabilir format yok",
-			"no_results": "Aramanızla eşleşen format bulunamadı"
+			"no_results": "Aramanızla eşleşen format bulunamadı",
+			"fallback": "Kullanılabilir kategoriler ve formatlar yüklenirken bir hata oluştu, tümü gösteriliyor.",
+			"disabled": {
+				"no_converter": "{from} formatından {to} formatına uyumlu bir dönüştürücü bulunamadı.",
+				"vertd_size_limit": "Dosya boyutu seçilen vertd sunucusu için çok büyük olduğundan bu dosya bu formata dönüştürülemiyor."
+			}
+		},
+		"settings": {
+			"settings": "Ayarlar",
+			"title": "Dosya dönüştürme ayarları",
+			"badge": {
+				"text": "BETA"
+			},
+			"description": "Dönüştürme ayarları düzenlenen:",
+			"all_files": "tüm dosyalar",
+			"file_id": "Dosya ID: {id}",
+			"engines": {
+				"auto": "Otomatik",
+				"magick_x64": "64-bit",
+				"magick_x86": "32-bit",
+				"ffmpeg_mt": "Çok iş parçacıklı",
+				"ffmpeg_st": "Tek iş parçacıklı"
+			},
+			"cancel": "İptal",
+			"apply": "Uygula",
+			"none": "Bu format için ayar bulunmuyor.",
+			"tabs": {
+				"converter": "Dönüştürücü",
+				"general": "Genel",
+				"video": "Video",
+				"audio": "Ses",
+				"image": "Görsel"
+			},
+			"image": {
+				"resolution": {
+					"label": "Çözünürlük",
+					"placeholder": "ör. 1920x1080, 1280x720"
+				},
+				"quality": {
+					"label": "Kalite (%)",
+					"placeholder": "ör. 75, 90, 100"
+				},
+				"depth": {
+					"label": "Renk derinliği (bit)",
+					"placeholder": "ör. 8, 16, 32"
+				},
+				"color_space": "Renk uzayı",
+				"transparency": "Şeffaflık",
+				"single_size": "Tek boyutlu görsel",
+				"vectorize": {
+					"detail": "Vektörleştirme detayı",
+					"detail_bw": "Siyah & beyaz",
+					"detail_poster": "Poster (düz renkler)",
+					"detail_photo": "Fotoğraf (gradyanlar)",
+					"optimize": "SVG'yi optimize et"
+				}
+			},
+			"audio": {
+				"bitrate": {
+					"label": "Bit hızı (kbps)",
+					"placeholder": "ör. 128, 192, 320"
+				},
+				"sample_rate": {
+					"label": "Örnekleme hızı (Hz)",
+					"placeholder": "ör. 44100, 48000"
+				},
+				"channels": {
+					"label": "Ses kanalları",
+					"placeholder": "ör. 1 (mono), 2 (stereo)"
+				}
+			},
+			"video": {
+				"quality": "Kalite",
+				"metadata": "Meta veri",
+				"speed": {
+					"title": "Dönüştürme hızı",
+					"description": "Aşağıda manuel olarak bit hızı veya çözünürlük belirlerseniz (\"otomatik\" dışındaki seçenekler belirlendiğinde) bu ayar geçersiz kılınacaktır.",
+					"very_slow": "En yüksek kalite (en yavaş)",
+					"slower": "Daha yüksek kalite (daha yavaş)",
+					"slow": "Yüksek kalite (yavaş)",
+					"medium": "Orta kalite (ortalama)",
+					"fast": "Daha düşük kalite (daha hızlı)",
+					"ultra_fast": "En düşük kalite (en hızlı)"
+				},
+				"local_speed": {
+					"title": "Dönüştürme hızı",
+					"description": "Bu ayar, yerel FFmpeg dönüştürücüsü için kodlayıcı ön ayarını (preset) kontrol eder. Yerel video dönüştürme oldukça yavaştır; daha yüksek kalite ayarları uzun zaman alabilir. Manuel olarak bir video bit hızı belirlerseniz bu ayar geçersiz kılınır.",
+					"very_slow": "En yüksek kalite (çok yavaş)",
+					"slower": "Daha yüksek kalite (daha yavaş)",
+					"slow": "Yüksek kalite (yavaş)",
+					"medium": "Orta kalite (ortalama)",
+					"fast": "Daha düşük kalite (daha hızlı)",
+					"ultra_fast": "En düşük kalite (en hızlı)"
+				},
+				"fps": {
+					"label": "Kare hızı (FPS)",
+					"placeholder": "ör. 24, 30, 60"
+				},
+				"resolution": {
+					"label": "Çözünürlük",
+					"placeholder": "ör. 1920x1080, 1280x720"
+				},
+				"bitrate": {
+					"video": "Video bit hızı (kbps)",
+					"audio": "Ses bit hızı (kbps)",
+					"video_placeholder": "ör. 1000, 2000, 4000",
+					"audio_placeholder": "ör. 128, 192, 320"
+				},
+				"sample_rate": {
+					"label": "Ses örnekleme hızı (Hz)",
+					"placeholder": "ör. 44100, 48000"
+				},
+				"codec": {
+					"video": "Video kodeği",
+					"audio": "Ses kodeği"
+				},
+				"audioChannels": {
+					"label": "Ses kanalları",
+					"placeholder": "ör. 1 (mono), 2 (stereo)"
+				}
+			},
+			"document": {
+				"something": "Bir şey"
+			},
+			"common": {
+				"metadata": "Meta veri",
+				"auto": "Otomatik",
+				"custom": "Özel"
+			}
 		},
 		"tooltips": {
 			"unknown_file": "Bilinmeyen dosya türü",
@@ -87,41 +234,55 @@
 			"video_file": "Video dosyası",
 			"document_file": "Belge dosyası",
 			"image_file": "Görsel dosyası",
+			"archive_file": "Arşiv dosyası",
 			"convert_file": "Bu dosyayı dönüştür",
-			"download_file": "Bu dosyayı indir"
+			"download_file": "Bu dosyayı indir",
+			"converter_initializing": "{type} dönüştürme araçları şu anda indiriliyor. Bu işlem yalnızca bir kez yapılır ve çok uzun sürmeyecektir."
 		},
 		"errors": {
 			"cant_convert": "Bu dosyayı dönüştüremiyoruz.",
+			"converter_fallback": {
+				"title": "Dönüştürücü değiştirilsin mi?",
+				"body": "'{filename}' için dönüştürme başarısız oldu. Sıradaki uyumlu dönüştürücüyü ('{converter}') denemek ister misiniz?",
+				"yes": "Sonraki dönüştürücü",
+				"no": "Dönüştürmeyi iptal et",
+				"all_failed": "'{filename}' için tüm uyumlu dönüştürücüler başarısız oldu. Dönüştürme iptal edildi."
+			},
 			"unsupported_format": "Yalnızca görüntü, video, ses ve belge dosyaları desteklenir.",
 			"format_output_only": "Bu format şu anda yalnızca çıktı (dönüştürülen format) olarak kullanılabilir, girdi olarak kullanılamaz.",
 			"worker_downloading": "{type} dönüştürme işlemi şu anda başlatılıyor, lütfen birkaç saniye bekleyin.",
 			"worker_error": "{type} dönüştürme işlemi başlatılırken bir hata oluştu, lütfen daha sonra tekrar deneyin.",
 			"worker_timeout": "{type} dönüştürme işlemi beklenenden daha uzun sürüyor, lütfen biraz daha bekleyin veya sayfayı yenileyin.",
 			"audio": "ses",
+			"archive": "arşiv",
 			"doc": "belge",
 			"image": "görsel",
+			"video": "video",
+			"unknown": "bilinmeyen",
 			"vertd": {
 				"server": "Ne yapıyorsun..? vertd sunucusunu çalıştırman gerekiyordu!",
+				"not_found": "Video dönüştürme işlemini başlatmak için vertd örneği bulunamadı. Sunucu URL’sinin doğru ayarlandığından emin misiniz?",
+				"ratelimit": "'{filename}' videonuz birkaç kez dönüştürülemedi. Sunucu aşırı yüklenmesini önlemek için, bu dosya için daha fazla dönüştürme denemesi geçici olarak engellendi. Lütfen daha sonra tekrar deneyin.",
+				"file_too_large": "'{filename}' dosyası <b>{fileSize}</b> boyutunda, ancak seçilen vertd sunucusu yalnızca <b>{limit}</b> boyutuna kadar olan dosyaları destekliyor.\n Daha küçük bir dosya veya farklı bir format kullanmayı deneyin ya da Ayarlar'dan vertd sunucunuzu değiştirin.",
+				"failed_to_keep": "Video sunucuda tutulamadı: {error}",
+				"retry": "İşlemin başarısız sonlanması nedeniyle '{filename}' video dönüştürmesi farklı ayarlarla yeniden deneniyor. Bu işlem normalden uzun sürebilir.",
+				"generic": {
+					"title": "Video dönüştürme hatası",
+					"view": "Hata ayrıntılarını görüntüle",
+					"body": "Videonuz dönüştürülmeye çalışılırken bir hata oluştu. Hatayı düzeltmeye yardımcı olmak için videoyu geliştiricilere göndermek ister misiniz? Yalnızca video dosyası gönderilecektir. Hiçbir kimlik bilgisi yüklenmeyecektir.",
+					"yes": "Videoyu gönder",
+					"no": "Gönderme"
+				},
 				"details": {
 					"view": "Hata ayrıntılarını görüntüle",
 					"body": "Gönder'e basarsanız, incelememiz için bize bildirilen hata kaydıyla birlikte <b>videonuz da eklenecektir</b>. Aşağıdaki bilgiler otomatik olarak aldığımız hata kaydıdır:",
 					"footer": "Bu bilgiler yalnızca sorun giderme amacıyla kullanılacak ve asla paylaşılmayacaktır. Daha fazla ayrıntı için [privacy_link]gizlilik politikamıza[/privacy_link] göz atın.",
+					"close": "Kapat",
 					"job_id": "<b>İş ID:</b> {jobId}",
 					"from": "<b>Kaynak format:</b> {from}",
 					"to": "<b>Hedef format:</b> {to}",
-					"error_message": "<b>Hata mesajı:</b> [view_link]Hata kayıtlarını görüntüle[/view_link]",
-					"close": "Kapat"
-				},
-				"generic": {
-					"view": "Hata ayrıntılarını görüntüle",
-					"body": "Videonuz dönüştürülmeye çalışılırken bir hata oluştu. Hatayı düzeltmeye yardımcı olmak için videoyu geliştiricilere göndermek ister misiniz? Yalnızca video dosyası gönderilecektir. Hiçbir kimlik bilgisi yüklenmeyecektir.",
-					"title": "Video dönüştürme hatası",
-					"yes": "Videoyu gönder",
-					"no": "Gönderme"
-				},
-				"failed_to_keep": "Video sunucuda tutulamadı: {error}",
-				"ratelimit": "'{filename}' videonuz birkaç kez dönüştürülemedi. Sunucu aşırı yüklenmesini önlemek için, bu dosya için daha fazla dönüştürme denemesi geçici olarak engellendi. Lütfen daha sonra tekrar deneyin.",
-				"not_found": "Video dönüştürme işlemini başlatmak için vertd örneği bulunamadı. Sunucu URL’sinin doğru ayarlandığından emin misiniz?"
+					"error_message": "<b>Hata mesajı:</b> [view_link]Hata kayıtlarını görüntüle[/view_link]"
+				}
 			}
 		}
 	},
@@ -132,18 +293,18 @@
 		},
 		"appearance": {
 			"title": "Görünüm",
-			"light": "Açık",
-			"dark": "Koyu",
-			"enable": "Etkinleştir",
-			"disable": "Devre dışı bırak",
 			"brightness": {
 				"theme": "Tema seçimi",
 				"description": "Güneşli bir gün mü istersiniz, yoksa sessiz ve yalnız bir gece mi?"
 			},
+			"light": "Açık",
+			"dark": "Koyu",
 			"effect": {
 				"settings": "Efekt ayarları",
 				"description": "Süslü efektler mi istersiniz, yoksa daha sade bir deneyim mi?"
 			},
+			"enable": "Etkinleştir",
+			"disable": "Devre dışı bırak",
 			"language": {
 				"title": "Dil",
 				"description": "VERT arayüzü için tercih ettiğiniz dili seçin."
@@ -152,15 +313,26 @@
 		"conversion": {
 			"title": "Dönüştürme",
 			"advanced_settings": "Gelişmiş ayarlar",
+			"filename": {
+				"format": "Dosya adı formatı",
+				"description": "Bu ayar, <b>dosya uzantısını etkilemeden</b> indirilen dosyanın adını belirleyecektir. Biçimlendirmeye aşağıdaki şablonları ekleyebilirsiniz; bunlar ilgili bilgilerle değiştirilecektir: orijinal dosya adı için <b>%name%</b>, orijinal dosya uzantısı için <b>%extension%</b>, tam ISO 8601 zaman damgası için <b>%datetime%</b>, tarih için <b>%date%</b>, saat için <b>%time%</b> ve unix zaman damgası için <b>%unix%</b>.",
+				"placeholder": "VERT_%name%"
+			},
+			"file_type_detection": {
+				"label": "Dosya türü algılama",
+				"description": "Dosya uzantısına güvenmek yerine dosyanın gerçek biçimini içeriğinden algılar. Bu, yanlış yeniden adlandırılan dosyalarda yardımcı olur ancak bilerek adlandırdığınız dosyaların biçimini değiştirebilir.",
+				"enable": "Etkinleştir",
+				"disable": "Devre dışı bırak"
+			},
 			"default_format": {
-				"image": "Görsel",
-				"audio": "Ses",
-				"document": "Belge",
+				"label": "Varsayılan dönüştürme formatı",
 				"enable": "Etkinleştir",
 				"disable": "Devre dışı bırak",
-				"label": "Varsayılan dönüştürme formatı",
 				"description": "Bu ayar, bu dosya türünde bir dosya yüklediğinizde seçili olan varsayılan formatı değiştirecektir.",
-				"video": "Video"
+				"image": "Görsel",
+				"video": "Video",
+				"audio": "Ses",
+				"document": "Belge"
 			},
 			"metadata": {
 				"label": "Dosya metadata",
@@ -173,32 +345,36 @@
 				"description": "Bu, dönüştürülen dosyaların (kendi kategorisinde) varsayılan çıktı kalitesini değiştirir. Yüksek değerler, uzun dönüştürme sürelerine ve büyük dosya boyutuna neden olabilir.",
 				"video": "Bu, dönüştürülen videoların varsayılan çıktı kalitesini değiştirir. Yüksek değerler, uzun dönüştürme sürelerine ve büyük dosya boyutuna neden olabilir.",
 				"images": "Görsel (%)"
-			},
-			"filename": {
-				"format": "Dosya adı formatı",
-				"description": "Bu ayar, <b>dosya uzantısını etkilemeden</b> indirilen dosyanın adını belirleyecektir. Aşağıdaki şablonları formata ekleyebilirsiniz, bunlar ilgili bilgilerle değiştirilecektir: orijinal dosya adı için <b>%name%</b>, orijinal dosya uzantısı için <b>%extension%</b> ve dosyanın dönüştürüldüğü tarihin tarih için <b>%date%</b>.",
-				"placeholder": "VERT_%name%"
 			}
 		},
 		"vertd": {
 			"title": "Video dönüştürme",
 			"status": "durum:",
 			"loading": "yükleniyor...",
-			"available": "uygun, işlem no: {commitId}",
+			"available": "kullanılabilir",
 			"unavailable": "uygun değil (url doğru mu?)",
+			"info": "boyut sınırı: {sizeLimit}, işlem no: {commitId}",
 			"description": {
-				"main": "<code>vertd</code> projesi, FFmpeg için bir sunucu sarmalayıcısıdır (server wrapper). Bu ayar, VERT'in web arayüzünün kullanım kolaylığı ile videoları dönüştürmenize olanak sağlarken, ekran kartınızın gücünden yararlanarak işlemi mümkün olan en hızlı şekilde yapmanızı sağlar.",
-				"info": "Kolaylık sağlaması açısından herkese açık bir dönüştürücü sunuyoruz, ancak kendi bilgisayarınızda veya sunucunuzda kendi dönüştürücünüzü kurmak da oldukça kolaydır. Sunucu binary dosyalarını [vertd_link]buradan[/vertd_link] indirebilirsiniz. Kurulum işlemini gelecekte daha kolay hale getirmeye çalışıyoruz, bu nedenle bizi takip etmeyi unutmayın!"
+				"main": "VERT, videoları tarayıcınızda yerel olarak işleyerek güvenli bir şekilde dönüştürür; ancak bazı özel dönüştürmeler bir <code>vertd</code> sunucusuna bağlanmayı ve kullanmayı gerektirebilir. <code>vertd</code>, VERT'in web arayüzünün kullanım kolaylığını korurken, tarayıcınızın dönüştürme sınırlarına takılmadan sunucunun ekran kartını (GPU) kullanarak videoları dönüştürmenize olanak tanır.",
+				"info": "Kolaylık sağlaması açısından herkese açık bir vertd sunucusu sağlıyoruz, ancak nasıl yapılacağını biliyorsanız kendi bilgisayarınızda veya sunucunuzda kendi sunucunuzu barındırmak oldukça kolaydır.",
+				"more": "[vertd_link]Daha fazla bilgi edinin[/vertd_link]"
 			},
 			"instance": {
-				"custom": "Özel",
 				"label": "Sunucu",
 				"url_placeholder": "Örneğin: http://localhost:24153",
 				"auto": "Otomatik (önerilen)",
 				"eu": "Falkenstein, Germany",
-				"us": "Washington, USA"
+				"us": "Washington, USA",
+				"custom": "Özel"
+			},
+			"custom_headers": {
+				"label": "Özel başlıklar",
+				"description": "vertd sunucusuna yapılan her istekle birlikte gönderilecek özel başlıklar ekleyin; bu başlıklar kimlik doğrulama veya diğer amaçlar için kullanılabilir (her satıra bir adet).",
+				"placeholder": "Header-Name: Header Value"
 			},
 			"conversion_speed": {
+				"label": "Dönüştürme hızı",
+				"description": "Bu ayar, hız ve kalite arasındaki dengeyi belirlemenizi sağlar. Yüksek hızlar, düşük kaliteye neden olur ancak işlem daha hızlı tamamlanır.",
 				"speeds": {
 					"very_slow": "En Yavaş",
 					"slower": "Daha Yavaş",
@@ -206,9 +382,7 @@
 					"medium": "Orta",
 					"fast": "Hızlı",
 					"ultra_fast": "En Hızlı"
-				},
-				"label": "Dönüştürme hızı",
-				"description": "Bu ayar, hız ve kalite arasındaki dengeyi belirlemenizi sağlar. Yüksek hızlar, düşük kaliteye neden olur ancak işlem daha hızlı tamamlanır."
+				}
 			}
 		},
 		"privacy": {
@@ -240,6 +414,67 @@
 				"clear_all_data_cancel": "İptal",
 				"all_data_cleared": "Tüm site verileri temizlendi! Sayfa yeniden yükleniyor...",
 				"all_data_clear_error": "Site verileri temizlenemedi."
+			},
+			"debug_link": "Hata ayıklama araçları"
+		},
+		"debug": {
+			"title": "Hata Ayıklama",
+			"logs": {
+				"title": "Kayıtlar",
+				"search_placeholder": "Kayıtlarda ara...",
+				"count": "{count} kayıt",
+				"empty": "Gösterilecek kayıt yok",
+				"refresh": "Yenile",
+				"clear": "Temizle",
+				"cleared": "Kayıtlar temizlendi!",
+				"levels": {
+					"all": "Tüm seviyeler",
+					"log": "Kayıt",
+					"error": "Hata"
+				}
+			},
+			"system": {
+				"title": "Sistem bilgileri",
+				"cores": "CPU çekirdekleri",
+				"memory": "Cihaz belleği",
+				"platform": "Platform",
+				"screen": "Ekran",
+				"environment": "Ortam",
+				"external_requests": "Harici istekler",
+				"enabled": "Etkin",
+				"disabled": "Devre dışı"
+			},
+			"converters": {
+				"title": "Dönüştürücüler",
+				"formats": "Formatlar",
+				"statuses": {
+					"idle": "Başlatılmamış",
+					"downloading": "İndiriliyor",
+					"initializing": "Başlatılıyor",
+					"ready": "Hazır",
+					"partially_ready": "Kısmen hazır",
+					"error": "Hata"
+				}
+			},
+			"storage": {
+				"registration": "Service worker",
+				"registered": "Kayıtlı",
+				"controller": "SW denetleyicisi",
+				"controlled": "Aktif",
+				"cache_size": "Önbellek boyutu",
+				"cache_files": "Önbelleğe alınan dosyalar",
+				"quota_used": "Kullanılan alan",
+				"quota_available": "Kullanılabilir alan"
+			},
+			"tools": {
+				"title": "Hata ayıklama araçları",
+				"report_title": "Hata raporu",
+				"report_description": "Hata ayıklama amacıyla geliştiricilerle paylaşmak üzere sistem bilgilerini günlük kayıtlarınızla bir araya getirin. Bu rapor dosya adlarını, formatları ve dönüştürmelerinizle ilgili diğer bilgileri içerebilir.",
+				"copy_report": "Raporu kopyala",
+				"download_report": "Raporu indir",
+				"report_copied": "Rapor panoya kopyalandı!",
+				"report_copy_error": "Rapor kopyalanamadı.",
+				"report_downloaded": "Rapor indirildi!"
 			}
 		}
 	},
@@ -247,7 +482,7 @@
 		"title": "Hakkımızda",
 		"why": {
 			"title": "Neden VERT?",
-			"description": "<b>Dosya dönüştürücüler bizi her zaman hayal kırıklığına uğratmıştır. </b> Çoğu dönüştürücü site, kötü ve reklamlarla dolu arayüze sahiptir ve en önemlisi yavaştır. Tüm bu sorunları ve daha fazlasını çözen bir alternatif oluşturarak bu sorunu sonsuza kadar çözmeye karar verdik. <br/><br/>Video dışındaki tüm dosyalar tamamen cihazınızda dönüştürülür; bu, sunucuya dosya yükleme ve sunucudan dosya indirme sırasında gecikme olmaması ve dönüştürdüğünüz dosyaların asla başka biri tarafından görüntülenememesi anlamına gelir. <br/><br/>Video dosyaları, ışık hızındaki RTX 4000 Ada sunucumuza yüklenir. Videolarınızı dönüştürseniz de dönüştürmeseniz de bir saat sonra sunucularımızdan silinir. Video dönüştürme işlemi gerçekleştirirseniz, bir saat içinde dönüştürülmüş dosyayı indirebilirsiniz. Dosya daha sonra sunucumuzdan silinir."
+			"description": "<b>Dosya dönüştürücüler bizi her zaman hayal kırıklığına uğratmıştır. </b> Çoğu dönüştürücü site, kötü ve reklamlarla dolu arayüze sahiptir ve en önemlisi yavaştır. Tüm bu sorunları ve daha fazlasını çözen bir alternatif oluşturarak bu sorunu sonsuza kadar çözmeye karar verdik. <br/><br/>Mümkün olduğunda tüm dosyalar tamamen cihazınızda dönüştürülür; bu da sunucuya dosya gönderme ve alma arasında herhangi bir gecikme olmadığı ve dönüştürdüğünüz dosyaları asla gözetleyemeyeceğimiz anlamına gelir.<br/><br/>Dönüştürme işlemi tarayıcınızda yerel olarak desteklenmiyorsa, video dosyaları ışık hızındaki RTX 4000 Ada sunucumuza yüklenir. Videolarınızı dönüştürmezseniz sunucuda bir saat boyunca kalır. Dosyayı dönüştürürseniz, video bir saat boyunca veya tamamen indirilene kadar sunucuda kalır. Ardından dosya sunucumuzdan silinir.<br><br>Minimum düzeyde verilerinizi nasıl işlediğimiz hakkında daha fazla bilgi edinmek için [privacy_link]gizlilik politikamızı[/privacy_link] okuyun."
 		},
 		"sponsors": {
 			"title": "Sponsorlar",
@@ -284,13 +519,14 @@
 			"github_description": "Yardımcı olan herkese çok teşekkürler! [github_link]Sen de yardım etmek ister misin?[/github_link]",
 			"no_contributors": "Henüz kimse katkıda bulunmamış gibi görünüyor... [contribute_link]ilk katkıda bulunan sen ol![/contribute_link]",
 			"libraries": "Kütüphaneler",
-			"libraries_description": "Bu mükemmel kütüphaneleri yıllardır geliştirdikleri için FFmpeg (ses, video), ImageMagick (görseller) ve Pandoc (belgeler)'a çok teşekkür ederiz. VERT, dönüştürme işlemleri için bu kütüphaneleri kullanmaktadır.",
+			"libraries_description": "Bu mükemmel kütüphaneleri yıllardır geliştirdikleri için Mediabunny (video), FFmpeg (ses, video), ImageMagick (görseller) ve Pandoc (belgeler)'a çok teşekkür ederiz. VERT, dönüştürme işlemlerini size sunmak için bu kütüphanelere güvenmektedir.",
 			"roles": {
-				"lead_developer": "Lead developer; conversion backend, UI implementation",
-				"developer": "Developer; UI implementation",
-				"designer": "Designer; UX, branding, marketing",
-				"docker_ci": "Maintaining Docker & CI support",
-				"former_cofounder": "Former co-founder & designer"
+				"maddie": "Geliştirici; altyapı, dönüştürme işlemleri, kullanıcı arayüzü",
+				"maya": "Geliştirici; dönüştürme işlemleri, kullanıcı arayüzü",
+				"eva": "Geliştirici; altyapı",
+				"liam": "Tasarımcı; UX, marka kimliği, pazarlama",
+				"azure": "Docker ve CI desteğinin sürdürülmesi",
+				"realmy": "Eski kurucu ortak ve tasarımcı"
 			}
 		},
 		"errors": {
@@ -302,11 +538,35 @@
 			"general": "{file} dönüştürülürken hata oluştu: {message}",
 			"cancel": "{file} için dönüştürme işlemi iptal edilirken hata oluştu: {message}",
 			"magick": "Magick işlemi sırasında hata oluştu, görsel dönüştürme işlemi beklendiği gibi çalışmayabilir.",
+			"vips": "libvips worker'ında hata oluştu, görsel dönüştürme işlemi beklendiği gibi çalışmayabilir.",
+			"vectorizer": "Vektörleştirici worker'ında hata oluştu, görsel vektörleştirme işlemi beklendiği gibi çalışmayabilir.",
 			"ffmpeg": "ffmpeg yüklenirken hata oluştu, bazı özellikler çalışmayabilir.",
+			"spessasynth": "MIDI / SoundFont dönüştürücüsünde hata oluştu, bazı özellikler beklendiği gibi çalışmayabilir.",
 			"pandoc": "Pandoc işlemi sırasında hata oluştu, belge dönüştürme işlemi beklendiği gibi çalışmayabilir.",
+			"mediabunny": {
+				"init": "Mediabunny yüklenirken hata oluştu, video dönüştürme işlemi beklendiği gibi çalışmayabilir.",
+				"webcodecs": "Bazı WebCodecs API'leri bu tarayıcıda desteklenmiyor, video dönüştürme işlemi beklendiği gibi çalışmayabilir.",
+				"discarded": "Mediabunny, '{file}' dosyası için {count} parçayı atladı. Ayrıntılar için tarayıcı konsoluna bakın."
+			},
 			"no_audio": "Ses akışı bulunamadı.",
 			"invalid_rate": "Geçersiz örnekleme hızı: {rate}Hz",
+			"invalid_channels": "Geçersiz ses kanalı sayısı: {channels}",
+			"ffmpeg_video_unsupported": "{to} formatına kodlama yerel FFmpeg dönüştürücüsü tarafından desteklenmiyor.",
+			"ffmpeg_video_no_audio_encoder": "Yerel FFmpeg dönüştürücüsünde {to} için uygun bir ses kodlayıcısı yok.",
 			"file_too_large": "Bu dosya {limit}GB olan tarayıcı / cihaz sınırını aşıyor. Bu büyük dosyayı dönüştürmek için genellikle daha yüksek sınırlara sahip olan Firefox veya Safari'yi deneyin."
+		},
+		"warnings": {
+			"settings_change": "Dönüştürme hatasını önlemek için '{file}' ({to}) dosyasında '{setting}' ayarı '{oldValue}' değerinden '{newValue}' değerine değiştirildi.",
+			"file_type_mismatch": "'{filename}' dosyası {expected} olarak adlandırılmış ancak {actual} olarak algılandı. Bu durum dönüştürme sorunlarına neden olabilir."
+		},
+		"info": {
+			"magick_x64_unavailable": "64-bit ImageMagick bu tarayıcıda desteklenmiyor, 32-bit sürüme geçiliyor. Çok büyük görseller dönüştürülemeyebilir.",
+			"ffmpeg_mt_unavailable": "Çok iş parçacıklı FFmpeg bu tarayıcıda kullanılamıyor, tek iş parçacıklı sürüme geçiliyor. Dönüştürmeler daha yavaş olabilir."
+		},
+		"sw": {
+			"reload_success": "Belirli özelliklerin çalışması için gerekli olan çapraz kaynak izolasyonunu (cross-origin isolation) etkinleştirmek amacıyla sayfanız otomatik olarak yeniden yüklendi.",
+			"reload_error": "Belirli özelliklerin çalışması için gerekli olan çapraz kaynak izolasyonunu etkinleştirmek amacıyla sayfanız otomatik olarak yeniden yüklendi ancak başarıyla etkinleştirilemedi. Bazı özellikler beklendiği gibi çalışmayabilir. Tarayıcı önbelleğinizi temizlemeyi (CTRL/CMD+SHIFT+R) ve sayfayı yeniden yüklemeyi deneyin.",
+			"not_isolated": "Belirli özelliklerin çalışması için gerekli olan çapraz kaynak izolasyonu etkin değil. Bazı özellikler beklendiği gibi çalışmayabilir. Tarayıcı önbelleğinizi temizlemeyi (CTRL/CMD+SHIFT+R) ve sayfayı yeniden yüklemeyi deneyin."
 		}
 	},
 	"privacy": {
@@ -321,7 +581,7 @@
 		},
 		"donations": {
 			"title": "Bağışlar",
-			"description": "Bağış toplamak için [about_link]hakkımızda[/about_link] sayfasında Stripe kullanıyoruz. Stripe, [gelişmiş dolandırıcılık tespiti hakkındaki belgelerinde] (https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) açıklandığı gibi dolandırıcılığı önlemek için ödeme ve cihaz hakkında belirli bilgiler toplayabilir. Stripe'a yönelik harici ağ istekleri, yalnızca ödeme yapılırken gerçekleşir."
+			"description": "Bağış toplamak için [about_link]hakkımızda[/about_link] sayfasında Stripe kullanıyoruz. Stripe, [stripe_link]gelişmiş dolandırıcılık tespiti hakkındaki belgelerinde[/stripe_link] açıklandığı gibi dolandırıcılığı önlemek için ödeme ve cihaz hakkında belirli bilgiler toplayabilir. Stripe'a yönelik harici ağ istekleri, yalnızca ödeme yapılırken gerçekleşir."
 		},
 		"conversion_errors": {
 			"title": "Dönüştürme Hataları",
@@ -336,6 +596,10 @@
 		"analytics": {
 			"title": "Analitik",
 			"description": "Tamamen anonim ve toplu analizler için kendi bünyemizde barındırdığımız bir Plausible uygulaması kullanıyoruz. Plausible çerez kullanmaz ve tüm ana gizlilik düzenlemelerine (GDPR/CCPA/PECR) uygundur. [settings_link]ayarlar[/settings_link] içindeki \"Gizlilik ve veriler\" bölümünden analizlerden çıkabilir ve Plausible'ın gizlilik uygulamaları hakkında daha fazla bilgiyi [plausible_link]buradan[/plausible_link] okuyabilirsiniz."
+		},
+		"debugging": {
+			"title": "Hata Ayıklama",
+			"description": "Sunucu video dönüştürme (vertd) hataları ve Plausible ile toplanan anonim analizler dışında, hata ayıklama amaçlı olanlar da dahil olmak üzere hiçbir nedenle ek veri toplamıyoruz. Yukarıda belirtildiği gibi, video dosyaları yalnızca sunucu video dönüştürmeleri için bize açıkça izin verdiğiniz durumlarda saklanır.<br><br>Bir hata bildirmek isterseniz, [settings_link]ayarlar[/settings_link] sayfasındaki \"Gizlilik & kişisel veriler\" bölümünde bulunan \"Hata ayıklama araçları\"nı kullanarak geliştiricilere göndermek üzere günlük kayıtlarınızı ve asgari sistem ile tarayıcı bilgilerinizi içeren bir rapor oluşturabilirsiniz. Bu rapor dosya adlarını, formatları ve dönüştürmelerinizle ilgili diğer bilgileri içerebilir; ancak bu araçları kullandığınızda hiçbir kişisel veri otomatik olarak toplanmaz veya iletilmez."
 		},
 		"local_storage": {
 			"title": "Yerel Depolama",
