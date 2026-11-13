@@ -23,7 +23,7 @@ const isBank = (ext: string) =>
 
 const ensureDecoder = async () => {
 	try {
-		await BasicSoundBank.isSF3DecoderReady;
+		await BasicSoundBank.ready;
 	} catch (err) {
 		console.warn(`[spessasynth] SF3 decoder failed to initialise: ${err}`);
 	}
