@@ -54,7 +54,7 @@
 		},
 		"panel": {
 			"convert_all": "すべて変換",
-			"download_all": "すべてを.zipでダウンロード",
+			"download_all": "すべてダウンロード",
 			"remove_all": "すべてのファイルを削除",
 			"set_all_to": "すべてを設定",
 			"na": "該当なし"

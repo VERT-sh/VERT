@@ -67,7 +67,7 @@
 		},
 		"panel": {
 			"convert_all": "Tümünü dönüştür",
-			"download_all": "Tümünü .zip olarak indir",
+			"download_all": "Tümünü indir",
 			"remove_all": "Tüm dosyaları kaldır",
 			"set_all_to": "Tümünü ayarla",
 			"na": "N/A"

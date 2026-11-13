@@ -67,7 +67,7 @@
 		},
 		"panel": {
 			"convert_all": "Converter tudo",
-			"download_all": "Baixar tudo como .zip",
+			"download_all": "Baixar tudo",
 			"remove_all": "Remover todos os arquivos",
 			"set_all_to": "Definir todos para",
 			"na": "N/D"

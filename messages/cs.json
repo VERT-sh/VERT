@@ -67,7 +67,7 @@
 		},
 		"panel": {
 			"convert_all": "Konvertovat vše",
-			"download_all": "Stáhnout vše jako .zip",
+			"download_all": "Stáhnout vše",
 			"remove_all": "Odebrat všechny soubory",
 			"set_all_to": "Nastavit vše na",
 			"na": "Nedostupné"

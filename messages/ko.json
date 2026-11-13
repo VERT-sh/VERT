@@ -60,7 +60,7 @@
 		},
 		"panel": {
 			"convert_all": "모두 변환",
-			"download_all": ".zip으로 다운로드",
+			"download_all": "모두 다운로드",
 			"remove_all": "모든 파일 삭제",
 			"set_all_to": "모두 다음으로 설정",
 			"na": "N/A"

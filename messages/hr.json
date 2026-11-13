@@ -48,7 +48,7 @@
 	"convert": {
 		"panel": {
 			"convert_all": "Pretvori sve",
-			"download_all": "Preuzmi sve kao .zip",
+			"download_all": "Preuzmi sve",
 			"remove_all": "Makni sve datoteke",
 			"set_all_to": "Stavi sve na",
 			"na": "N/A"

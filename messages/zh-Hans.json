@@ -61,7 +61,7 @@
 		},
 		"panel": {
 			"convert_all": "全部转换",
-			"download_all": "下载全部为 .zip",
+			"download_all": "下载全部",
 			"remove_all": "删除所有文件",
 			"set_all_to": "全部设置为",
 			"na": "不适用"

@@ -54,7 +54,7 @@
 		},
 		"panel": {
 			"convert_all": "Μετατροπή όλων",
-			"download_all": "Λήψη όλων ως .zip",
+			"download_all": "Λήψη όλων",
 			"remove_all": "Αφαίρεση όλων των αρχείων",
 			"set_all_to": "Ορισμός όλων σε",
 			"na": "Μ/Δ"

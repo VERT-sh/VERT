@@ -48,7 +48,7 @@
 	"convert": {
 		"panel": {
 			"convert_all": "Convertir tout",
-			"download_all": "Télécharger l'ensemble au format .zip",
+			"download_all": "Tout télécharger",
 			"remove_all": "Supprimer tous les fichiers",
 			"set_all_to": "Tout configurer sur",
 			"na": "N/A"
