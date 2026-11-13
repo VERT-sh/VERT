@@ -4,15 +4,26 @@
 		FolderArchiveIcon,
 		RefreshCwIcon,
 		TrashIcon,
+		ChevronDownIcon,
+		SquareIcon,
 	} from "@lucide/svelte";
 	import Panel from "../visual/Panel.svelte";
 	import Dropdown from "./Dropdown.svelte";
-	import Tooltip from "../visual/Tooltip.svelte";
 	import ProgressBar from "../visual/ProgressBar.svelte";
 	import FormatDropdown from "./FormatDropdown.svelte";
 	import { categories } from "#lib/converters";
 	import { m } from "#lib/paraglide/messages";
 	import { clsx } from "clsx";
+	import { error } from "#lib/util/logger.svelte";
+	import { formatError } from "#lib/util/error";
+	import { ToastManager } from "#lib/util/toast.svelte";
+
+	const converting = $derived(
+		files.queueRunning || files.files.some((file) => file.processing),
+	);
+	const hasFailed = $derived(
+		files.files.some((file) => file.failed && !file.processing),
+	);
 
 	const length = $derived(files.files.length);
 	const progress = $derived(files.files.filter((f) => f.result).length);
@@ -37,6 +48,35 @@
 			);
 		});
 	});
+
+	async function clearFiles(status: "completed" | "failed" | "all") {
+		try {
+			await files.clear(status);
+		} catch (err) {
+			error(
+				["files"],
+				`error clearing ${status} files: ${formatError(err)}`,
+			);
+			ToastManager.add({ type: "error", message: formatError(err) });
+		}
+	}
+
+	const clearMenuItems = $derived([
+		{
+			label: m["convert.panel.clear.completed"](),
+			disabled: !files.results,
+			onSelect: () => void clearFiles("completed"),
+		},
+		{
+			label: m["convert.panel.clear.failed"](),
+			disabled: !hasFailed,
+			onSelect: () => void clearFiles("failed"),
+		},
+		{
+			label: m["convert.panel.clear.all"](),
+			onSelect: () => void clearFiles("all"),
+		},
+	]);
 </script>
 
 <Panel class="flex flex-col gap-4">
@@ -47,17 +87,34 @@
 			class="flex flex-col items-center gap-2.5 max-md:w-full md:flex-row"
 		>
 			<button
-				onclick={() => files.convertAll()}
+				onclick={() =>
+					converting ? files.stopConversions() : files.convertAll()}
+				aria-label={converting
+					? m["convert.panel.stop"]()
+					: m["convert.panel.convert_all"]()}
+				title={converting
+					? m["convert.panel.stop"]()
+					: m["convert.panel.convert_all"]()}
 				class={clsx(
 					"btn highlight flex gap-3 max-md:w-full",
 					!$effects && "!scale-100",
 					compactActions ? "p-4" : "md:max-w-[15.5rem]",
 				)}
-				disabled={!files.allReady}
+				disabled={files.stopping || (!converting && !files.allReady)}
 			>
-				<RefreshCwIcon size="24" />
+				{#if converting}
+					<SquareIcon size="24" />
+				{:else}
+					<RefreshCwIcon size="24" />
+				{/if}
 				{#if !compactActions}
-					<p>{m["convert.panel.convert_all"]()}</p>
+					<p>
+						{files.stopping
+							? m["convert.panel.stopping"]()
+							: converting
+								? m["convert.panel.stop"]()
+								: m["convert.panel.convert_all"]()}
+					</p>
 				{/if}
 			</button>
 			<button
@@ -66,7 +123,9 @@
 					!$effects && "!scale-100",
 					compactActions ? "p-4" : "md:max-w-[15.5rem]",
 				)}
-				disabled={!files.allReady || !files.results}
+				disabled={converting || files.stopping || !files.results}
+				aria-label={m["convert.panel.download_all"]()}
+				title={m["convert.panel.download_all"]()}
 				onclick={() => files.downloadAll()}
 			>
 				<FolderArchiveIcon size="24" />
@@ -74,35 +133,21 @@
 					<p>{m["convert.panel.download_all"]()}</p>
 				{/if}
 			</button>
-			{#if $isMobile}
-				<button
-					class={clsx(
-						"btn flex gap-3 p-4 max-md:w-full",
-						!$effects && "!scale-100",
-					)}
-					disabled={files.files.length === 0}
-					onclick={() => files.removeAll()}
-				>
+			<Dropdown
+				menuItems={clearMenuItems}
+				ariaLabel={m["convert.panel.clear.files"]()}
+				disabled={files.files.length === 0}
+				buttonClass={clsx(
+					"btn flex gap-3 p-4 text-base max-md:w-full",
+					!$effects && "!scale-100",
+				)}
+			>
+				{#snippet trigger()}
 					<TrashIcon size="24" />
-					<p>{m["convert.panel.remove_all"]()}</p>
-				</button>
-			{:else}
-				<Tooltip
-					text={m["convert.panel.remove_all"]()}
-					position="right"
-				>
-					<button
-						class={clsx(
-							"btn flex gap-3 p-4 max-md:w-full",
-							!$effects && "!scale-100",
-						)}
-						disabled={files.files.length === 0}
-						onclick={() => files.removeAll()}
-					>
-						<TrashIcon size="24" />
-					</button>
-				</Tooltip>
-			{/if}
+					<p>{m["convert.panel.clear.text"]()}</p>
+					<ChevronDownIcon size="16" />
+				{/snippet}
+			</Dropdown>
 		</div>
 		<div class="flex h-0.5 w-full bg-separator md:hidden"></div>
 		{#if manyFiles}

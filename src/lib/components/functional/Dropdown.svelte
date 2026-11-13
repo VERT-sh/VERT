@@ -4,25 +4,42 @@
 	import { quintOut } from "svelte/easing";
 	import { clsx } from "clsx";
 	import { popOverlayLayer, pushOverlayLayer } from "#lib/util/overlay";
+	import type { Snippet } from "svelte";
 
 	type DropdownStyle = "default" | "settings" | "inline";
+	type DropdownOption =
+		| string
+		| { value: string; label: string; disabled?: boolean };
+	type MenuItem = {
+		label: string;
+		disabled?: boolean;
+		onSelect: () => void;
+	};
 
 	type Props = {
-		options: string[] | { value: string; label: string }[];
+		options?: DropdownOption[];
+		menuItems?: MenuItem[];
 		selected?: string;
 		onselect?: (option: string) => void;
 		disabled?: boolean;
 		style?: DropdownStyle;
+		trigger?: Snippet;
+		buttonClass?: string;
+		ariaLabel?: string;
 	};
 
 	let {
 		options,
 		selected = $bindable(
-			typeof options[0] === "string" ? options[0] : options[0].value,
+			typeof options?.[0] === "string" ? options[0] : options?.[0]?.value,
 		),
+		menuItems,
 		onselect,
 		disabled,
 		style = "default",
+		trigger,
+		buttonClass,
+		ariaLabel,
 	}: Props = $props();
 
 	let open = $state(false);
@@ -51,16 +68,26 @@
 		};
 	});
 
-	const getValue = (option: string | { value: string; label: string }) =>
+	const getValue = (option: DropdownOption) =>
 		typeof option === "string" ? option : option.value;
 
-	const getLabel = (option: string | { value: string; label: string }) =>
+	const getLabel = (option: DropdownOption) =>
 		typeof option === "string" ? option : option.label;
 
-	const select = (option: string | { value: string; label: string }) => {
+	const isDisabled = (option: DropdownOption) =>
+		typeof option === "string" ? false : !!option.disabled;
+
+	const select = (option: DropdownOption) => {
+		if (isDisabled(option)) return;
 		const selectedValue = getValue(option);
 		selected = selectedValue;
 		onselect?.(selectedValue);
+		open = false;
+	};
+
+	const selectMenuItem = (item: MenuItem) => {
+		if (item.disabled) return;
+		item.onSelect();
 		open = false;
 	};
 
@@ -71,9 +98,14 @@
 	const updateMenuPosition = () => {
 		if (open && menuElement && button) {
 			const rect = button.getBoundingClientRect();
+			const maxMenuWidth = window.innerWidth - 24;
+			menuElement.style.minWidth = `${Math.min(rect.width, maxMenuWidth)}px`;
+			const menuWidth = menuElement.getBoundingClientRect().width;
 			menuElement.style.top = `${rect.bottom + 4}px`;
-			menuElement.style.left = `${rect.left}px`;
-			menuElement.style.width = `${rect.width}px`;
+			menuElement.style.left = `${Math.max(
+				12,
+				Math.min(rect.left, window.innerWidth - menuWidth - 12),
+			)}px`;
 		}
 	};
 
@@ -127,7 +159,7 @@
 <div
 	class={clsx(
 		"min-w-fit text-center",
-		style !== "inline" && "w-full",
+		menuItems ? "max-md:w-full" : style !== "inline" && "w-full",
 		style === "inline" &&
 			"inline-flex w-[6.5rem] text-left sm:w-[10.5rem] md:w-52",
 		style === "default" && "text-xl font-medium",
@@ -137,7 +169,7 @@
 >
 	<button
 		bind:this={button}
-		class={clsx(
+		class={buttonClass ?? clsx(
 			"relative flex w-full overflow-hidden font-display focus:!outline-none",
 			style !== "inline" && "bg-button px-3 py-3.5",
 			style === "inline" && "justify-start",
@@ -147,7 +179,12 @@
 		)}
 		onclick={toggle}
 		{disabled}
+		aria-label={ariaLabel}
+		aria-expanded={open}
 	>
+		{#if trigger}
+			{@render trigger()}
+		{:else}
 		<div
 			class={clsx(
 				"flex-grow-1 grid min-w-0 grid-cols-1 grid-rows-1 truncate",
@@ -174,12 +211,12 @@
 					)}
 				>
 					{getLabel(
-						options.find((opt) => getValue(opt) === selected) ||
+						options?.find((opt) => getValue(opt) === selected) ||
 							selected,
 					)}
 				</p>
 			{/key}
-			{#each options as option (getValue(option))}
+			{#each options ?? [] as option (getValue(option))}
 				<p
 					class={clsx(
 						"pointer-events-none col-start-1 row-start-1",
@@ -196,6 +233,7 @@
 				? 180
 				: 0}deg); transition: transform {duration}ms {transition};"
 		/>
+		{/if}
 	</button>
 </div>
 
@@ -206,19 +244,39 @@
 			duration,
 			easing: quintOut,
 		}}
-		class="bg-background z-[9999] max-h-[23.5vh] overflow-hidden overflow-y-auto rounded-xl bg-panel-alt shadow-xl shadow-black/25"
+		class="bg-background z-[9999] flex max-h-[23.5vh] w-max flex-col items-stretch overflow-hidden overflow-y-auto rounded-xl bg-panel-alt shadow-xl shadow-black/25"
+		style="max-width: calc(100vw - 1.5rem);"
 	>
-		{#each options as option (getValue(option))}
-			<button
-				data-selected={getValue(option) === selected}
-				class={clsx(
-					"w-full p-2 px-4 text-left text-sm font-normal text-muted hover:bg-panel",
-					getValue(option) === selected && "bg-separator",
-				)}
-				onclick={() => select(option)}
-			>
-				{getLabel(option)}
-			</button>
-		{/each}
+		<!-- menu options (trigger) -->
+		{#if menuItems}
+			{#each menuItems as item (item.label)}
+				<button
+					disabled={item.disabled}
+					class={clsx(
+						"p-2 px-4 text-left text-sm font-normal text-muted hover:bg-panel",
+						item.disabled && "cursor-not-allowed opacity-50",
+					)}
+					onclick={() => selectMenuItem(item)}
+				>
+					{item.label}
+				</button>
+			{/each}
+		{:else}
+			<!-- menu options (select) -->
+			{#each options ?? [] as option (getValue(option))}
+				<button
+					data-selected={getValue(option) === selected}
+					disabled={isDisabled(option)}
+					class={clsx(
+						"p-2 px-4 text-left text-sm font-normal text-muted hover:bg-panel",
+						getValue(option) === selected && "bg-separator",
+						isDisabled(option) && "cursor-not-allowed opacity-50",
+					)}
+					onclick={() => select(option)}
+				>
+					{getLabel(option)}
+				</button>
+			{/each}
+		{/if}
 	</div>
 {/if}

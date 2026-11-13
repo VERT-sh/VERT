@@ -64,6 +64,13 @@ function detectSequenceKind(
 
 class Files {
 	public files = $state<VertFile[]>([]);
+	public queueRunning = $state(false);
+	public stopping = $state(false);
+	private queue: {
+		queue: PQueue;
+		stopped: boolean;
+		stop: () => void;
+	} | null = null;
 
 	public async remove(file: VertFile): Promise<void> {
 		this.files = this.files.filter((entry) => entry !== file);
@@ -73,6 +80,16 @@ class Files {
 
 	public async removeAll(): Promise<void> {
 		await Promise.all([...this.files].map((file) => this.remove(file)));
+	}
+
+	public async clear(status: "completed" | "failed" | "all"): Promise<void> {
+		const matches = this.files.filter((file) =>
+			status === "all"
+				? true
+				: !file.processing &&
+					(status === "completed" ? !!file.result : file.failed),
+		);
+		await Promise.all(matches.map((file) => this.remove(file)));
 	}
 
 	private getRequiredConverters(file: VertFile): Converter[] {
@@ -169,9 +186,7 @@ class Files {
 			: this.files.every((file) => this.isReady(file)),
 	);
 
-	public results = $derived(
-		this.files.length === 0 ? false : this.files.every((f) => f.result),
-	);
+	public results = $derived(this.files.some((file) => file.result));
 
 	private thumbnailQueue = new PQueue({
 		concurrency: browser ? navigator.hardwareConcurrency || 4 : 4,
@@ -611,34 +626,86 @@ class Files {
 	}
 
 	public async convertAll() {
-		const filenames = this.files.map((file) => file.name);
-		const promiseFns = this.files.map((f) => () => f.convert());
-		const queue = new PQueue({ concurrency: conversionConcurrency() });
-		const results = await Promise.allSettled(
-			promiseFns.map((fn) => queue.add(fn)),
-		);
-		for (const [i, result] of results.entries()) {
-			if (result.status === "rejected")
-				error(
-					["files", "convert"],
-					`batch conversion failed for file ${i + 1} (${filenames[i]}): ${result.reason}`,
-				);
+		if (this.queueRunning || this.stopping) return;
+
+		const inputs = [...this.files];
+		let stop = () => {};
+		const stopped = new Promise<void>((resolve) => {
+			stop = resolve;
+		});
+		const queue = {
+			queue: new PQueue({ concurrency: conversionConcurrency() }),
+			stopped: false,
+			stop,
+		};
+
+		this.queue = queue;
+		this.queueRunning = true;
+		try {
+			const results = await Promise.allSettled(
+				inputs.map((file) =>
+					queue.queue.add(async () => {
+						if (queue.stopped || !this.files.includes(file)) return;
+						await Promise.race([file.convert(), stopped]);
+					}),
+				),
+			);
+			for (const [index, result] of results.entries()) {
+				if (result.status === "rejected")
+					error(
+						["files", "convert"],
+						`batch conversion failed for file ${index + 1} (${inputs[index].name}): ${result.reason}`,
+					);
+			}
+		} finally {
+			this.queue = null;
+			this.queueRunning = false;
+		}
+	}
+
+	public async stopConversions(): Promise<void> {
+		if (this.stopping) return;
+
+		this.stopping = true;
+		const queue = this.queue;
+		if (queue) {
+			queue.stopped = true;
+			queue.queue.pause();
+		}
+
+		try {
+			await Promise.all(this.files.map((file) => file.cancel()));
+			queue?.stop();
+			queue?.queue.start();
+			await queue?.queue.onIdle();
+			log(["files", "convert"], `stopped batch conversions`);
+		} catch (err) {
+			error(
+				["files", "convert"],
+				`error stopping batch: ${formatError(err)}`,
+			);
+			ToastManager.add({ type: "error", message: formatError(err) });
+		} finally {
+			queue?.stop();
+			queue?.queue.start();
+			this.stopping = false;
 		}
 	}
 
 	public async downloadAll() {
-		if (this.files.length === 0) return;
+		const completed = this.files.filter((file) => file.result);
+		if (completed.length === 0) return;
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const dlFiles: any[] = [];
 		const filenames: string[] = [];
 
-		for (let i = 0; i < this.files.length; i++) {
-			const file = this.files[i];
+		for (let i = 0; i < completed.length; i++) {
+			const file = completed[i];
 			const result = file.result;
 
 			if (!result) {
-				error(["files"], "No result found");
+				error(["files"], "no result found");
 				continue;
 			}
 
@@ -650,8 +717,8 @@ class Files {
 
 		let totalSize = 0;
 
-		for (let i = 0; i < this.files.length; i++) {
-			const file = this.files[i];
+		for (let i = 0; i < completed.length; i++) {
+			const file = completed[i];
 			const result = file.result;
 
 			if (!result) continue;

@@ -117,6 +117,7 @@ export class VertFile {
 	public blobUrl = $state<string>();
 	public processing = $state(false);
 	public cancelled = $state(false);
+	public failed = $state(false);
 	public unavailableConverters = $state<Record<string, UnavailableReasons>>(
 		{},
 	);
@@ -129,6 +130,7 @@ export class VertFile {
 	private slowConversionToastId: number | null = null;
 	private attemptedConverters = new SvelteSet<string>();
 	private retryingFallback = false;
+	private converting = false;
 	private postDownload: (() => Promise<void>) | null = null;
 	private disposal: Promise<void> | null = null;
 	private disposed = false;
@@ -424,7 +426,9 @@ export class VertFile {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async convert(...args: any[]) {
-		if (this.disposed) return;
+		if (this.disposed || this.converting) return;
+		this.converting = true;
+		this.failed = false;
 		if (!this.retryingFallback) this.attemptedConverters.clear();
 		this.cancelled = false;
 		let res: VertFile | undefined;
@@ -507,7 +511,7 @@ export class VertFile {
 			if (!converter) throw new Error("No converter found");
 
 			const canProceed = await this.confirmServerWarning(converter);
-			if (!canProceed) {
+			if (!canProceed || this.cancelled || this.disposed) {
 				this.cancelled = true;
 				return;
 			}
@@ -523,6 +527,8 @@ export class VertFile {
 						),
 					),
 				});
+
+			if (this.cancelled || this.disposed) return;
 
 			for (const change of normalizedSettings.changes) {
 				log(
@@ -546,6 +552,7 @@ export class VertFile {
 			log(["file", "convert"], `using converter: ${converter.name}`);
 
 			await this.result?.dispose();
+			if (this.cancelled || this.disposed) return;
 			this.result = null;
 			this.progress = 0;
 			this.processing = true;
@@ -583,6 +590,7 @@ export class VertFile {
 			}
 		} catch (err) {
 			if (this.disposed) return;
+			this.failed = !this.cancelled;
 			if (!this.cancelled) this.toastErr(err);
 
 			const compatibleConverters = this.fallbackCandidates();
@@ -644,6 +652,7 @@ export class VertFile {
 			await this.result?.dispose();
 			this.result = null;
 		} finally {
+			this.converting = false;
 			this.processing = false;
 			this.activeConverterName = null;
 		}
@@ -853,11 +862,12 @@ export class VertFile {
 	}
 
 	public async cancel() {
+		if (!this.processing && !this.converting) return;
+		this.cancelled = true;
 		if (!this.processing) return;
 		const selectedConverter = this.conversionSettings.converter;
 		const converterName = selectedConverter || this.activeConverterName;
 		const converter = this.converters.find((c) => c.name === converterName);
-		this.cancelled = true;
 		try {
 			if (!converter) return;
 			await converter.cancel(this);
