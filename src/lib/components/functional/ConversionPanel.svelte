@@ -177,6 +177,7 @@
 							files.files.forEach((f) => {
 								f.to = r;
 								f.result = null;
+								files.preloadConverters(f);
 							})}
 						{categories}
 						dropdownSize="large"
