@@ -110,7 +110,9 @@ export abstract class BaseFFmpegConverter extends Converter {
 	protected async probeCore(): Promise<void> {
 		const ffmpeg = new FFmpeg();
 		try {
-			await ffmpeg.load(this.loadConfig());
+			await ffmpeg.load(this.loadConfig(), {
+				signal: AbortSignal.timeout(60_000),
+			});
 			await probeDecodableAudioCodecs(ffmpeg, this.log);
 		} finally {
 			ffmpeg.terminate();
@@ -143,7 +145,12 @@ export abstract class BaseFFmpegConverter extends Converter {
 		this.cancelLoad.set(input.id, abortLoad);
 
 		try {
-			await Promise.race([ffmpeg.load(this.loadConfig()), aborted]);
+			await Promise.race([
+				ffmpeg.load(this.loadConfig(), {
+					signal: AbortSignal.timeout(60_000),
+				}),
+				aborted,
+			]);
 			if (this.isCancelled(input))
 				throw new Error("Conversion cancelled");
 		} catch (err) {

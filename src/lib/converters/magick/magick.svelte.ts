@@ -184,7 +184,9 @@ export class MagickConverter extends Converter {
 		const cached = this.wasmCache.get(url);
 		if (cached) return cached;
 
-		const response = await fetch(url);
+		const response = await fetch(url, {
+			signal: AbortSignal.timeout(60_000),
+		});
 		if (!response.ok) {
 			throw new Error(
 				`Failed to fetch WASM: ${response.status} ${response.statusText}`,

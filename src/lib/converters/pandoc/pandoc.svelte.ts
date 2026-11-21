@@ -25,7 +25,12 @@ export class PandocConverter extends Converter {
 	protected async download(): Promise<void> {
 		if (!browser) return;
 		try {
-			this.wasm = await fetch(pandocWasm).then((r) => r.arrayBuffer());
+			const response = await fetch(pandocWasm, {
+				signal: AbortSignal.timeout(60_000),
+			});
+			if (!response.ok)
+				throw new Error(`Failed to fetch WASM: ${response.status} ${response.statusText}`);
+			this.wasm = await response.arrayBuffer();
 
 			this.status = "ready";
 			return Promise.resolve();
@@ -62,7 +67,12 @@ export class PandocConverter extends Converter {
 				id: file.id,
 			};
 			worker.postMessage(loadMsg);
-			await waitForMessage(worker, cancellation.signal, "loaded");
+			const loaded = await waitForMessage(
+				worker,
+				AbortSignal.any([cancellation.signal, AbortSignal.timeout(30_000)]),
+				"loaded",
+			);
+			if (loaded.type === "error") throw new Error(loaded.error);
 			cancellation.signal.throwIfAborted();
 			const convertMsg: WorkerMessage = {
 				type: "convert",
