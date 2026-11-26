@@ -48,9 +48,15 @@ export class VipsConverter extends Converter {
 	protected async download(): Promise<void> {
 		const worker = new Worker(VipsWorker, { type: "module" });
 		try {
-			await this.waitForMessage(worker, "loaded", 60000, undefined, () => {
-				worker.postMessage({ type: "load", id: "init" });
-			});
+			await this.waitForMessage(
+				worker,
+				"loaded",
+				60000,
+				undefined,
+				() => {
+					worker.postMessage({ type: "load", id: "init" });
+				},
+			);
 
 			this.ready = true;
 			this.status = "ready";
@@ -84,13 +90,48 @@ export class VipsConverter extends Converter {
 			});
 		}
 
-		settings.push({
-			key: "resolution",
-			label: m["convert.settings.image.resolution.label"](),
-			type: "text",
-			default: "",
-			placeholder: m["convert.settings.image.resolution.placeholder"](),
-		});
+		settings.push(
+			{
+				key: "resizeMode",
+				label: m["convert.settings.image.resize_mode.label"](),
+				type: "select",
+				default: "contain",
+				options: [
+					{
+						value: "contain",
+						label: m[
+							"convert.settings.image.resize_mode.contain"
+						](),
+					},
+					{
+						value: "cover",
+						label: m["convert.settings.image.resize_mode.cover"](),
+					},
+					{
+						value: "stretch",
+						label: m[
+							"convert.settings.image.resize_mode.stretch"
+						](),
+					},
+				],
+			},
+			{
+				key: "width",
+				label: m["convert.settings.image.width.label"](),
+				type: "number",
+				min: 1,
+				default: "",
+				placeholder: m["convert.settings.image.width.placeholder"](),
+			},
+			{
+				key: "height",
+				label: m["convert.settings.image.height.label"](),
+				type: "number",
+				min: 1,
+				default: "",
+				placeholder: m["convert.settings.image.height.placeholder"](),
+			},
+		);
 
 		settings.push({
 			key: "depth",
@@ -161,7 +202,7 @@ export class VipsConverter extends Converter {
 		const cancellation = new AbortController();
 		this.workerCancellation.set(worker, cancellation);
 
-			try {
+		try {
 			worker.postMessage({ type: "load", id: input.id });
 			await this.waitForMessage(
 				worker,

@@ -112,14 +112,21 @@ const handleMessage = async (
 				}
 
 				// resize image
-				const resolution = String(settings.resolution ?? "").trim();
-				if (resolution && resolution !== "auto") {
-					const [width, height] = resolution
-						.split("x")
-						.map((dim: string) => Number.parseInt(dim, 10));
-					if (width && width > 0) {
-						resized = image.thumbnailImage(width, {
-							...(height && height > 0 ? { height } : {}),
+				const width = Number(settings.width) || 0;
+				const height = Number(settings.height) || 0;
+				if (width > 0 || height > 0) {
+					const mode = settings.resizeMode ?? "contain";
+					const targetWidth = width || image.width;
+					const targetHeight = height || image.height;
+
+					if (mode === "stretch") {
+						resized = image.resize(targetWidth / image.width, {
+							vscale: targetHeight / image.height,
+						});
+					} else {
+						resized = image.thumbnailImage(targetWidth, {
+							height: targetHeight,
+							crop: mode === "cover" ? "attention" : "none",
 						});
 					}
 				}

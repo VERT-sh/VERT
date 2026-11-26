@@ -162,6 +162,20 @@
 					"detail_poster": "Poster (flat colors)",
 					"detail_photo": "Photo (gradients)",
 					"optimize": "Optimize SVG"
+				},
+				"width": {
+					"label": "Width",
+					"placeholder": "e.g. 1920, 1280"
+				},
+				"height": {
+					"label": "Height",
+					"placeholder": "e.g. 1080, 720"
+				},
+				"resize_mode": {
+					"label": "Resize mode",
+					"contain": "Contain (fit within bounds)",
+					"cover": "Cover (fill bounds)",
+					"stretch": "Stretch"
 				}
 			},
 			"audio": {

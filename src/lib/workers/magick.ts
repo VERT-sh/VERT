@@ -8,6 +8,7 @@ import {
 	initializeImageMagickx64,
 	MagickColor,
 	MagickFormat,
+	MagickGeometry,
 	MagickImage,
 	MagickImageCollection,
 	MagickReadSettings,
@@ -338,15 +339,18 @@ const magickConvert = async (
 	if (fmt === "JFIF") fmt = "JPEG";
 	const singleSize = Boolean(conversionSettings?.singleSize);
 
-	const resolution = conversionSettings.resolution as string;
-	if (!singleSize && resolution && resolution !== "auto") {
-		const [width, height] = resolution
-			.split("x")
-			.map((dim: string) => parseInt(dim));
+	const width = Number(conversionSettings.width) || 0;
+	const height = Number(conversionSettings.height) || 0;
+	if (!singleSize && (width || height)) {
+		const geometry = new MagickGeometry(width, height);
 
-		if (width && height) {
-			img.resize(width, height);
-		}
+		geometry.ignoreAspectRatio =
+			conversionSettings.resizeMode === "stretch";
+		geometry.fillArea = conversionSettings.resizeMode === "cover";
+		img.resize(geometry);
+
+		if (conversionSettings.resizeMode === "cover" && width && height)
+			img.crop(width, height);
 	}
 
 	const icons = ["ICO", "ICON", "CUR"]; // TODO: icns (1024x1024 max)
@@ -358,15 +362,9 @@ const magickConvert = async (
 			// generate all standard sizes for icons
 			const standardSizes = [16, 24, 32, 48, 64, 128, 256];
 
-			let desired = 0;
-			if (resolution && resolution !== "auto") {
-				const [wsel, hsel] = (resolution || "")
-					.split("x")
-					.map((d: string) => parseInt(d) || 0);
-				desired = Math.max(wsel || 0, hsel || 0);
-			} else {
+			let desired = Math.max(width, height);
+			if (desired <= 0)
 				desired = Math.max(img.width || 0, img.height || 0);
-			}
 
 			if (desired <= 0) desired = Math.max(...standardSizes);
 			if (desired > Math.max(...standardSizes))
