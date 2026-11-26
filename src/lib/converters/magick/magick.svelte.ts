@@ -498,7 +498,7 @@ export class MagickConverter extends Converter {
 		const svgUrl = URL.createObjectURL(svgBlob);
 
 		const canvas = document.createElement("canvas");
-		const ctx = canvas.getContext("2d");
+		const ctx = canvas.getContext("2d", { alpha: true });
 		if (!ctx) throw new Error("Failed to get canvas context");
 
 		const img = new Image();
@@ -538,6 +538,15 @@ export class MagickConverter extends Converter {
 				try {
 					canvas.width = width;
 					canvas.height = height;
+
+					const outputFormat = input.to.replace(/^\./, "").toLowerCase();
+					if (
+						settings.transparency === false ||
+						formatsWithoutTransparency.has(outputFormat)
+					) {
+						ctx.fillStyle = "white";
+						ctx.fillRect(0, 0, width, height);
+					}
 
 					ctx.drawImage(img, 0, 0, width, height);
 
