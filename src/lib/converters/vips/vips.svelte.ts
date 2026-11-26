@@ -221,7 +221,10 @@ export class VipsConverter extends Converter {
 					to: input.to,
 				},
 				to,
-				conversionSettings: JSON.stringify(settings ?? {}),
+				conversionSettings: JSON.stringify({
+					...(await this.getDefaultSettings(input)),
+					...settings,
+				}),
 			};
 			worker.postMessage(convertMsg);
 

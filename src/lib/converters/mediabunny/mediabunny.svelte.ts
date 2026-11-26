@@ -384,13 +384,10 @@ export class MediabunnyConverter extends Converter {
 				target,
 			});
 
-			const conversionSettings =
-				Object.keys(settings).length > 4
-					? settings
-					: Object.assign(
-							settings,
-							await this.getDefaultSettings(file),
-						); // use defaults if not provided
+			const conversionSettings = {
+				...(await this.getDefaultSettings(file)),
+				...settings,
+			};
 
 			const videoConfig = buildVideoConfig(conversionSettings);
 			const audioConfig = buildAudioConfig(conversionSettings);

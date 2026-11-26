@@ -406,9 +406,7 @@ export class MagickConverter extends Converter {
 
 			// every other format handled by magick worker
 			const conversionSettings = JSON.stringify({
-				...(Object.keys(settings).length <= 4
-					? await this.getDefaultSettings(input)
-					: {}),
+				...(await this.getDefaultSettings(input)),
 				...settings,
 				animationFrames: input.exportsAnimationFrames(to),
 			});

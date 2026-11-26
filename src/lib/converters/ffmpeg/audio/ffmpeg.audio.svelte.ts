@@ -184,13 +184,10 @@ export class FFmpegConverter extends BaseFFmpegConverter {
 		this.log(`converting ${input.name} (${input.id}) to ${to}`);
 		const startedAt = performance.now();
 
-		const conversionSettings =
-			Object.keys(settings).length > 4 // TODO: find better way to do this lmfao, rn we are just assuming all settings are present if there's at least 5 keys but ts bad
-				? { ...settings }
-				: {
-						...(await this.getDefaultSettings()),
-						...settings,
-					}; // use defaults if not provided
+		const conversionSettings = {
+			...(await this.getDefaultSettings()),
+			...settings,
+		};
 
 		const isAlac = to === ".alac";
 		if (isAlac) to = ".m4a";
