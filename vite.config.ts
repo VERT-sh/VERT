@@ -7,6 +7,7 @@ import { execSync } from "child_process";
 import { resolve } from "node:path";
 import { defineConfig, type PluginOption } from "vite";
 import wasm from "vite-plugin-wasm";
+import basicSsl from "@vitejs/plugin-basic-ssl";
 
 const pandocPath = (path: string) => resolve("node_modules/pandoc-wasm", path);
 
@@ -26,6 +27,7 @@ if (commitHash === "unknown") {
 
 export default defineConfig(({ command }) => {
 	const plugins: PluginOption[] = [
+		basicSsl(),
 		sveltekit({
 			preprocess: vitePreprocess(),
 			adapter: adapter(),
@@ -85,6 +87,7 @@ export default defineConfig(({ command }) => {
 			],
 		},
 		server: {
+			https: true,
 			headers: {
 				"Cross-Origin-Embedder-Policy": "credentialless",
 				"Cross-Origin-Opener-Policy": "same-origin",
