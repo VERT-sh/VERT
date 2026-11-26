@@ -1,5 +1,17 @@
 // prettier-ignore
-export const animatedImageFormats = ["gif", "webp", "apng"];
+export const animatedMagickFormats = ["avif", "jxl"] as const;
+export type AnimatedMagickFormat = (typeof animatedMagickFormats)[number];
+export const animatedImageFormats = [
+	"gif",
+	"webp",
+	"apng",
+	...animatedMagickFormats,
+];
+
+export const isAnimatedMagickFormat = (
+	format: string,
+): format is AnimatedMagickFormat =>
+	animatedMagickFormats.some((candidate) => candidate === format);
 
 export const getCodecs = (
 	ext: string,
@@ -94,6 +106,8 @@ export const getCodecs = (
 		case ".gif":
 		case ".webp":
 		case ".apng":
+		case ".avif":
+		case ".jxl":
 			return { video: ext.slice(1), audio: "none" };
 
 		default:

@@ -68,8 +68,10 @@
 		"client-zip": "^2.5.1",
 		"clsx": "^2.1.1",
 		"dicom.ts": "^1.3.0",
+		"fast-png": "^8.0.0",
 		"fflate": "^0.8.3",
 		"file-type": "^22.3.0",
+		"image-meta": "^0.3.1",
 		"mediabunny": "^1.66.0",
 		"music-metadata": "^12.5.0",
 		"overlayscrollbars": "^2.17.0",
@@ -83,7 +85,8 @@
 		"svelte-stripe": "^2.0.0",
 		"vert-wasm": "^0.0.2",
 		"wasm-feature-detect": "^1.10.1",
-		"wasm-vips": "^0.0.19"
+		"wasm-vips": "^0.0.19",
+		"wasm-webp": "^0.1.0"
 	},
 	"trustedDependencies": [
 		"@parcel/watcher",

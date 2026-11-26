@@ -7,6 +7,7 @@ import type {
 	SettingCategories,
 	SettingDefinition,
 } from "#lib/types/conversion-settings";
+import { detectImageAnimation } from "#lib/util/parse/image-animation";
 import { browser } from "$app/env";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { codecOptions, filterCommonCodecs } from "../../codec-labels";
@@ -14,7 +15,12 @@ import { FormatInfo, formatDuration } from "../../converter.svelte";
 import { applyPriorities } from "../../priority";
 import { videoFormats } from "../../vertd/vertd.svelte";
 import { BaseFFmpegConverter } from "../ffmpeg.base.svelte";
-import { animatedImageFormats } from "../ffmpeg.codecs";
+import {
+	animatedImageFormats,
+	animatedMagickFormats,
+	isAnimatedMagickFormat,
+	type AnimatedMagickFormat,
+} from "../ffmpeg.codecs";
 import {
 	getDecodableAudioCodecs,
 	isSpatialAudioStream,
@@ -39,6 +45,7 @@ import {
 	probeVideo,
 	videoStreamIndices,
 } from "./ffmpeg.video.probe";
+import { processAnimation } from "./magick.animated";
 
 const normalize = (format: string) => format.replace(/^\./, "").toLowerCase();
 
@@ -95,7 +102,7 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 
 	public supportedFormats = applyPriorities(
 		"ffmpeg-video",
-		videoFormats.map(
+		[...videoFormats, ...animatedMagickFormats].map(
 			(f) => new FormatInfo(f, true, !cantEncode.includes(f), true),
 		),
 	);
@@ -244,10 +251,10 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 		this.log(`converting ${input.name} (${input.id}) to ${to}`);
 		const startedAt = performance.now();
 
-		const conversionSettings =
-			Object.keys(settings).length > 4
-				? { ...settings }
-				: { ...(await this.getDefaultSettings(input)), ...settings };
+		const conversionSettings = {
+			...(await this.getDefaultSettings(input)),
+			...settings,
+		};
 
 		await this.ensureCore();
 
@@ -274,47 +281,99 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 		ffmpeg.on("log", logListener);
 
 		try {
+			const fromFormat = normalize(input.from);
+			const toFormat = normalize(to);
+			const animationTarget = isAnimatedMagickFormat(toFormat)
+				? toFormat
+				: null;
+			const ffmpegTarget = animationTarget ? ".webp" : to;
+			const animatedWebP =
+				fromFormat === "webp" &&
+				(input.isAnimatedImage ||
+					(await detectImageAnimation(input.file, "webp")) === true);
+			const animatedSource = input.isAnimatedImage || animatedWebP;
+			if (
+				animationTarget ||
+				(animatedSource && animatedImageFormats.includes(toFormat))
+			)
+				conversionSettings.imageSequenceTransparency = true;
+
 			const isImageSequence =
 				input.isZip() && settings.imageSequence === true;
-
-			let command: string[];
+			let duration: number | undefined;
 			if (isImageSequence) {
-				command = await this.buildImageSequenceCommand(
+				await this.writeArchiveFrames(
 					ffmpeg,
 					input,
-					to,
+					conversionSettings.imageSequenceFPS || 15,
+				);
+			} else if (isAnimatedMagickFormat(fromFormat) || animatedWebP) {
+				duration = await this.writeAnimationFrames(
+					ffmpeg,
+					input,
+					fromFormat,
+				);
+			}
+
+			let command: string[];
+			if (isImageSequence || duration !== undefined) {
+				command = buildImageSequenceCommand(
+					normalize(ffmpegTarget),
 					conversionSettings,
+					duration,
 				);
 			} else {
-				const buf = new Uint8Array(await input.file.arrayBuffer());
-				// keep the extension so ffmpeg/ffprobe can detect the container
-				await ffmpeg.writeFile(input.name, buf);
+				await ffmpeg.writeFile(
+					input.name,
+					new Uint8Array(await input.file.arrayBuffer()),
+				);
 				this.log(
 					`wrote ${input.name} (${input.id}) to ffmpeg virtual fs`,
 				);
 				command = await this.buildVideoCommand(
 					ffmpeg,
 					input,
-					to,
+					ffmpegTarget,
 					conversionSettings,
 				);
 			}
 
+			if (animationTarget || (animatedSource && toFormat === "webp")) {
+				insertCodecArg(command, "-c:v", "libwebp_anim");
+				command.splice(
+					-1,
+					0,
+					"-an",
+					"-lossless",
+					"1",
+					"-pix_fmt",
+					"bgra",
+					...(command.includes("-r") ? [] : ["-fps_mode", "vfr"]),
+				);
+			}
 			this.log(`FFmpeg command: ${command.join(" ")}`);
-			await ffmpeg.exec(command);
+			const exitCode = await ffmpeg.exec(command);
 			this.log("executed ffmpeg command");
 
 			if (conversionError) throw new Error(conversionError);
+			if (exitCode !== 0)
+				throw new Error(`FFmpeg exited with code ${exitCode}`);
 
-			const output = (await ffmpeg.readFile(
-				"output" + to,
-			)) as unknown as Uint8Array;
-			if (!output || output.length === 0)
+			let output = await ffmpeg.readFile("output" + ffmpegTarget);
+			if (typeof output === "string" || output.length === 0)
 				throw new Error("empty file returned");
+			if (animationTarget) {
+				output = await processAnimation({
+					operation: "encode",
+					data: output,
+					format: animationTarget,
+				});
+				this.throwIfCancelled(input);
+			}
 
 			const outputFileName =
 				input.name.split(".").slice(0, -1).join(".") + to;
-			const outBuf = new Uint8Array(output).buffer.slice(0);
+			const outBuf = new Uint8Array(output).buffer;
 			this.log(
 				`converted ${input.name} (${input.id}) to ${to} in ${formatDuration(performance.now() - startedAt)}`,
 			);
@@ -637,6 +696,11 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 		return [
 			"-y",
 			"-hide_banner",
+			"-loglevel",
+			"info",
+			...(flattenAlpha && this.loadedVariant === "mt"
+				? ["-filter_threads", "1"]
+				: []),
 			...inputFormatArgs(from),
 			"-i",
 			input.name,
@@ -647,17 +711,11 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 		];
 	}
 
-	private async buildImageSequenceCommand(
+	private async writeArchiveFrames(
 		ffmpeg: FFmpeg,
 		input: VertFile,
-		to: string,
-		settings: ConversionSettings,
-	): Promise<string[]> {
-		const toFormat = normalize(to);
-		this.log(
-			`converting image sequence ${input.name} (${input.id}) to ${to}`,
-		);
-
+		fps: number,
+	): Promise<void> {
 		const { extractZip } = await import("#lib/util/file");
 		const entries = (await extractZip(input.file)).sort((a, b) =>
 			a.filename.localeCompare(b.filename, undefined, {
@@ -666,39 +724,62 @@ export class FFmpegVideoConverter extends BaseFFmpegConverter {
 			}),
 		);
 
-		if (!entries.length) throw new Error("No images found in zip archive");
-
-		const imageFiles: Array<{ name: string }> = [];
+		const files: string[] = [];
 		for (const [index, entry] of entries.entries()) {
-			const fileName = entry.filename.split("/").pop() ?? entry.filename;
-			const ext = fileName.split(".").pop()?.toLowerCase();
+			this.throwIfCancelled(input);
+
+			const filename = entry.filename.split("/").pop() ?? entry.filename;
+			const ext = filename.split(".").pop()?.toLowerCase();
 			if (!ext) continue;
 
-			const paddedName = `img${String(index + 1).padStart(5, "0")}.${ext}`;
-			await ffmpeg.writeFile(paddedName, entry.data);
-			imageFiles.push({ name: paddedName });
+			const name = `img${String(index + 1).padStart(5, "0")}.${ext}`;
+			await ffmpeg.writeFile(name, entry.data);
+			files.push(`file '${name}'`);
+		}
+		if (!files.length) throw new Error("No images found in zip archive");
+
+		const manifest = files.map((file) => `${file}\nduration ${1 / fps}`);
+		manifest.push(files[files.length - 1]);
+		await ffmpeg.writeFile("frames.txt", manifest.join("\n") + "\n");
+
+		this.log(`wrote ${files.length} images to ffmpeg virtual fs`);
+	}
+
+	private async writeAnimationFrames(
+		ffmpeg: FFmpeg,
+		input: VertFile,
+		format: AnimatedMagickFormat | "webp",
+	): Promise<number | undefined> {
+		const frames = await processAnimation({
+			operation: "decode",
+			file: input.file,
+			format,
+		});
+		if (!frames.length) {
+			if (format === "webp") return undefined;
+			throw new Error("No animation frames found");
 		}
 
-		if (!imageFiles.length)
-			throw new Error("No images found in zip archive");
+		const manifest: string[] = [];
+		let duration = 0;
+		let file = "";
+		for (const [index, frame] of frames.entries()) {
+			this.throwIfCancelled(input);
 
-		const listContent = imageFiles
-			.map(
-				(image) =>
-					`file '${image.name}'\nduration ${1 / (settings.imageSequenceFPS || 15)}`,
-			)
-			.join("\n");
-		await ffmpeg.writeFile(
-			"frames.txt",
-			`${listContent}\nfile '${imageFiles[imageFiles.length - 1].name}'\n`,
-		);
-		this.log(`wrote ${imageFiles.length} images to ffmpeg virtual fs`);
+			const name = `frame${index + 1}.png`;
+			await ffmpeg.writeFile(name, frame.png);
+			file = `file '${name}'\noption framerate 1000`;
 
-		return [
-			"-y",
-			"-hide_banner",
-			...buildImageSequenceCommand(toFormat, settings, false),
-		];
+			const seconds = Math.max(frame.duration, 1) / 1000;
+			manifest.push(`${file}\nduration ${seconds.toFixed(6)}`);
+			duration += seconds;
+		}
+
+		manifest.push(`${file}\nduration 0`);
+		await ffmpeg.writeFile("frames.txt", manifest.join("\n") + "\n");
+		this.log(`decoded ${input.from} into ${frames.length} frames`);
+
+		return Number(duration.toFixed(6));
 	}
 }
 

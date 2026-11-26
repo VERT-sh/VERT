@@ -60,6 +60,7 @@ const handleMessage = async (
 
 			if (!message.to.startsWith(".")) message.to = `.${message.to}`;
 			message.to = message.to.toLowerCase();
+			const outputExtension = message.to;
 			if (message.to === ".jfif") message.to = ".jpeg";
 
 			let to = message.to;
@@ -79,6 +80,7 @@ const handleMessage = async (
 				to,
 				buffer,
 				conversionSettings,
+				outputExtension,
 			);
 			if (specialResult) return specialResult;
 
@@ -107,39 +109,31 @@ const handleMessage = async (
 	}
 };
 
-const readToEnd = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
-	const chunks: Uint8Array[] = [];
-	let done = false;
-	while (!done) {
-		const { value, done: d } = await reader.read();
-		if (value) chunks.push(value);
-		done = d;
-	}
-	const blob = new Blob(
-		chunks.map((chunk) => new Uint8Array(chunk)),
-		{ type: "application/zip" },
-	);
-	const arrayBuffer = await blob.arrayBuffer();
-	return new Uint8Array(arrayBuffer);
-};
+const zipResult = async (files: Parameters<typeof makeZip>[0]) => ({
+	type: "finished" as const,
+	output: new Uint8Array(await new Response(makeZip(files)).arrayBuffer()),
+	zip: true as const,
+});
 
 const convertCollectionToZip = async (
 	collection: IMagickImageCollection,
 	to: string,
 	conversionSettings: ConversionSettings,
-): Promise<Uint8Array> => {
-	const convertedImages = await Promise.all(
-		collection.map((img) => magickConvert(img, to, conversionSettings)),
-	);
-	const zip = makeZip(
-		convertedImages.map(
-			(img, i) =>
-				new File([new Uint8Array(img)], `image${i}.${to.slice(1)}`),
-		),
-		"images.zip",
-	);
-
-	return await readToEnd(zip.getReader());
+	outputExtension: string,
+) => {
+	async function* files() {
+		const digits = String(collection.length).length;
+		for (const [index, frame] of collection.entries()) {
+			const name = conversionSettings.animationFrames
+				? `frame-${String(index + 1).padStart(digits, "0")}${outputExtension}`
+				: `image${index}${to}`;
+			yield {
+				name,
+				input: await magickConvert(frame, to, conversionSettings),
+			};
+		}
+	}
+	return zipResult(files());
 };
 
 const loadDicomHelpers = async () =>
@@ -174,9 +168,14 @@ const handleSpecialOutput = async (
 	to: string,
 	buffer: ArrayBuffer,
 	conversionSettings: ConversionSettings,
+	outputExtension: string,
 ): Promise<Partial<WorkerMessage> | null> => {
 	// converting multi-image formats to individual files
 	const collectionFormats: Record<string, MagickFormat> = {
+		...(conversionSettings.animationFrames
+			? { ".avif": MagickFormat.Avif, ".jxl": MagickFormat.Jxl }
+			: {}),
+		".apng": MagickFormat.APng,
 		".gif": MagickFormat.Gif,
 		".webp": MagickFormat.WebP,
 		".ico": MagickFormat.Ico,
@@ -186,15 +185,26 @@ const handleSpecialOutput = async (
 	if (collectionFormat !== undefined) {
 		const collection = MagickImageCollection.create();
 		try {
-			collection.read(
-				new Uint8Array(buffer),
-				new MagickReadSettings({ format: collectionFormat }),
-			);
+			if (from === ".apng") {
+				const { decodeApngFrames } = await import("./apng-frames");
+				for await (const frame of decodeApngFrames(
+					new Uint8Array(buffer),
+				)) {
+					collection.push(MagickImage.create(frame));
+				}
+			} else {
+				collection.read(
+					new Uint8Array(buffer),
+					new MagickReadSettings({ format: collectionFormat }),
+				);
+			}
 			console.log(
 				`read ${collection.length} images from ${collectionFormat}`,
 			);
 
-			if (from === ".gif" || from === ".webp") {
+			if (conversionSettings.animationFrames) {
+				if (from !== ".apng") collection.coalesce();
+			} else if ([".gif", ".webp", ".apng"].includes(from)) {
 				if (collection.length === 1)
 					return {
 						type: "finished",
@@ -219,15 +229,12 @@ const handleSpecialOutput = async (
 				}
 			}
 
-			return {
-				type: "finished",
-				output: await convertCollectionToZip(
-					collection,
-					to,
-					conversionSettings,
-				),
-				zip: true,
-			};
+			return await convertCollectionToZip(
+				collection,
+				to,
+				conversionSettings,
+				outputExtension,
+			);
 		} finally {
 			collection.dispose();
 		}
@@ -258,14 +265,7 @@ const handleSpecialOutput = async (
 				}),
 			);
 
-			const zip = makeZip(files, "images.zip");
-			const zipBytes = await readToEnd(zip.getReader());
-
-			return {
-				type: "finished",
-				output: zipBytes,
-				zip: true,
-			};
+			return await zipResult(files);
 		} catch (error) {
 			return {
 				type: "error",
@@ -311,20 +311,12 @@ const handleSpecialOutput = async (
 			}
 		}
 
-		const zip = makeZip(
-			outputs.map(
-				(img, i) =>
-					new File([new Uint8Array(img)], `image${i}.${to.slice(1)}`),
-			),
-			"images.zip",
+		return zipResult(
+			outputs.map((input, index) => ({
+				input,
+				name: `image${index}${to}`,
+			})),
 		);
-		const zipBytes = await readToEnd(zip.getReader());
-
-		return {
-			type: "finished",
-			output: zipBytes,
-			zip: true,
-		};
 	}
 
 	return null;

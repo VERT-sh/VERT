@@ -23,11 +23,12 @@
 	import Tooltip from "../visual/Tooltip.svelte";
 	import { vertdSizeLimit } from "#lib/sections/settings/vertdSettings.svelte";
 	import { formatBytes } from "#lib/util/file";
-	import { getCodecs } from "#lib/converters/ffmpeg/ffmpeg.codecs.ts";
 	import {
-		popOverlayLayer,
-		pushOverlayLayer,
-	} from "#lib/util/overlay";
+		animatedImageFormats,
+		getCodecs,
+		isAnimatedMagickFormat,
+	} from "#lib/converters/ffmpeg/ffmpeg.codecs";
+	import { popOverlayLayer, pushOverlayLayer } from "#lib/util/overlay";
 
 	type Props = {
 		categories: Categories;
@@ -53,6 +54,7 @@
 		forceHideSettings = false,
 	}: Props = $props();
 
+	const animationFramesId = $props.id();
 	let open = $state(false);
 	let dropdown = $state<HTMLDivElement>();
 	let dropdownMenu: HTMLDivElement | undefined = $state();
@@ -60,7 +62,7 @@
 	let dropdownPosition = $state<"left" | "center" | "right">("center");
 	let currentCategory = $state<string | null>(null);
 	let searchQuery = $state("");
-	let rootCategory: string | null = null;
+	let rootCategory = $state<string | null>(null);
 	// token for this dropdown's entry on the overlay stack (null while closed)
 	let overlayLayer: symbol | null = null;
 
@@ -93,7 +95,10 @@
 		file?.conversionSettings?.imageSequenceTransparency ?? false,
 	);
 
-	const sequenceFormats = [".webp", ".gif", ".apng", ".mpo"]; // .apng not supported by magick-wasm rn
+	const sequenceFormats = [
+		...animatedImageFormats.map((format) => `.${format}`),
+		".mpo",
+	];
 
 	$effect(() => {
 		if (!file) return;
@@ -107,7 +112,10 @@
 	const normalize = (str: string) => str.replace(/^\./, "").toLowerCase();
 
 	// returns the reason a format is disabled for the current file/settings, or "" (empty string) if it's usable
-	const getUnavailableReason = (format: string): string => {
+	const getUnavailableReason = (
+		format: string,
+		category = currentCategory,
+	): string => {
 		if (!file) return "";
 
 		// zip + image sequence / per-image mode
@@ -139,30 +147,21 @@
 			});
 
 		// converters that can produce this format for this file
-		const compatible = file.converters
-			.filter((converter) => {
-				const toInfo = converter.supportedFormats.find(
-					(info) => info.name === format,
-				);
-				if (!toInfo || !toInfo.toSupported) return false;
-
-				// if sequence mode, converters handle the archives itself (rather than its contents)
-				if (sequenceMode) return true;
-
-				const fromInfo = converter.supportedFormats.find(
-					(info) => info.name === sourceFormat,
-				);
-				return (
-					!!fromInfo &&
-					fromInfo.fromSupported &&
-					(fromInfo.isNative || toInfo.isNative)
-				);
-			})
-			.filter(
-				(converter) =>
-					!file.unavailableConverters[converter.name] &&
-					converter.isAvailable(),
-			);
+		const videoBridge =
+			!file.isAnimatedImage &&
+			category === "video" &&
+			isAnimatedMagickFormat(normalize(format));
+		const compatible = file.converters.filter(
+			(converter) =>
+				(!videoBridge || converter.name === "ffmpeg-video") &&
+				!file.unavailableConverters[converter.name] &&
+				converter.isAvailable() &&
+				file.supportsConversion(
+					converter,
+					format,
+					sequenceMode ? undefined : sourceFormat,
+				),
+		);
 
 		const largeFile = compatible.some(
 			(converter) =>
@@ -192,6 +191,7 @@
 	const getFormats = (cat: string) => categories[cat]?.formats ?? [];
 
 	const detectCategory = (): string => {
+		if (file?.isAnimatedImage) return "video";
 		if (from) {
 			// find category containing the input format, if any
 			const match = Object.keys(categories).find((cat) =>
@@ -235,6 +235,10 @@
 	// other available categories based on current category (e.g. converting between video and audio)
 	const availableCategories = $derived.by(() => {
 		if (!rootCategory) return Object.keys(categories);
+		if (file?.isAnimatedImage)
+			return ["image", "video"].filter(
+				(cat) => (categories[cat]?.formats.length ?? 0) > 0,
+			);
 
 		let cats = Object.keys(categories).filter(
 			(cat) =>
@@ -362,9 +366,11 @@
 
 	$effect(() => {
 		// this thing checks if selected format is still valid with the current filters (imageSequence or search query) and falls back if not
-		const allUnfilteredFormats = availableCategories
-			.flatMap((cat) => getFormats(cat))
-			.filter((format) => !isUnavailable(format));
+		const allUnfilteredFormats = availableCategories.flatMap((cat) =>
+			getFormats(cat).filter(
+				(format) => !getUnavailableReason(format, cat),
+			),
+		);
 
 		if (allowEmpty && !selected) return;
 
@@ -379,10 +385,34 @@
 
 	const selectOption = (option: string) => {
 		if (isUnavailable(option)) return;
+		const previousTarget = selected;
 		selected = option;
 
 		// save user's selection to dropdownStates for this session
 		if (file) {
+			if (
+				!file.isAnimatedImage &&
+				currentCategory === "video" &&
+				isAnimatedMagickFormat(normalize(option))
+			) {
+				file.conversionSettings.converter = "ffmpeg-video";
+			} else if (
+				!file.isZip() &&
+				file.conversionSettings.converter === "ffmpeg-video" &&
+				((currentCategory === "image" &&
+					isAnimatedMagickFormat(normalize(previousTarget))) ||
+					!file.converters.some(
+						(converter) =>
+							converter.name === "ffmpeg-video" &&
+							file.supportsConversion(
+								converter,
+								option,
+								file.from,
+							),
+					))
+			) {
+				delete file.conversionSettings.converter;
+			}
 			dropdownStates.update((states) => ({
 				...states,
 				[file.name]: option,
@@ -390,6 +420,20 @@
 		}
 
 		onselect?.(option);
+	};
+
+	const toggleAnimationFrames = (checked: boolean) => {
+		if (
+			!file ||
+			file.isConverting ||
+			file.exportsAnimationFrames(selected) === checked
+		)
+			return;
+
+		file.animationOutput = checked ? "frames" : "animated";
+		void file.result?.dispose();
+		file.result = null;
+		files.preloadConverters(file);
 	};
 
 	const selectCategory = (category: string) => {
@@ -702,6 +746,27 @@
 				{/key}
 			</div>
 			<!-- format options -->
+			{#if file?.canExportAnimationFrames(selected)}
+				<div
+					class="flex items-center gap-2 border-t border-separator p-2"
+				>
+					<FancyInput
+						type="checkbox"
+						checked={file.exportsAnimationFrames(selected)}
+						id={animationFramesId}
+						disabled={file.isConverting ||
+							!animatedImageFormats.includes(normalize(selected))}
+						onchange={(event: Event) =>
+							toggleAnimationFrames(
+								(event.currentTarget as HTMLInputElement)
+									.checked,
+							)}
+					/>
+					<label for={animationFramesId} class="text-sm">
+						{m["convert.image_sequence.individual_frames"]()}
+					</label>
+				</div>
+			{/if}
 			{#if file?.name.toLowerCase().endsWith(".zip")}
 				<div
 					class="flex flex-col gap-2 border-t border-separator p-2 text-base"

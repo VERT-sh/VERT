@@ -8,27 +8,40 @@ import { videoFormats } from "../../vertd/vertd.svelte";
 export function buildImageSequenceCommand(
 	outputFormat: string,
 	settings: ConversionSettings,
-	isAlac: boolean,
+	animationDuration?: number,
 ): string[] {
 	const to = `.${outputFormat}`;
-	const codecArgs = toArgs(to, isAlac);
+	const timed = animationDuration !== undefined;
+	const fpsFilter = `fps=${settings.imageSequenceFPS || 15}`;
 	const baseArgs = [
+		"-y",
+		"-hide_banner",
 		"-f",
 		"concat",
 		"-safe",
 		"0",
+		...(timed
+			? [
+					"-threads",
+					"1",
+					"-filter_threads",
+					"1",
+					"-filter_complex_threads",
+					"1",
+				]
+			: []),
 		"-i",
 		"frames.txt",
-		...codecArgs,
+		...toArgs(to),
 	];
 	const scaleFilter = "scale=trunc(iw/2)*2:trunc(ih/2)*2";
 	const isAnimatedImage = animatedImageFormats.includes(outputFormat);
 	const enableTransparency = settings.imageSequenceTransparency ?? false;
 
 	if (videoFormats.includes(outputFormat) && !isAnimatedImage) {
-		const fpsFilter = `fps=${settings.imageSequenceFPS || 15}`;
+		const backgroundDuration = timed ? `:d=${animationDuration}` : "";
 		const blackCompositeFilter =
-			`color=c=black,format=rgb24[bg];` +
+			`color=c=black${backgroundDuration},format=rgb24[bg];` +
 			`[0:v]${fpsFilter},${scaleFilter},setsar=1[fg];` +
 			`[bg][fg]scale2ref[bg2][fg2];` +
 			`[bg2][fg2]overlay=format=auto:shortest=1,setsar=1`;
@@ -56,7 +69,7 @@ export function buildImageSequenceCommand(
 			: "[p]paletteuse";
 		baseArgs.push(
 			"-filter_complex",
-			`fps=${settings.imageSequenceFPS || 15},${scaleFilter},split[s0][s1];[s0]palettegen[p];[s1]${paletteuse}`,
+			`${fpsFilter},${scaleFilter},split[s0][s1];[s0]palettegen[p];[s1]${paletteuse}`,
 		);
 	} else if (isAnimatedImage) {
 		baseArgs.push("-vf", scaleFilter);
@@ -71,6 +84,9 @@ export function buildImageSequenceCommand(
 		baseArgs.push("-vf", scaleFilter, "-pix_fmt", pixFmt);
 	}
 
+	if (timed) {
+		baseArgs.push("-threads", "1", "-t", String(animationDuration));
+	}
 	baseArgs.push("output" + to);
 	return baseArgs;
 }

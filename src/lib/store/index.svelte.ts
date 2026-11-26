@@ -536,9 +536,11 @@ class Files {
 				this.files.push(input);
 				return;
 			}
-			const category = Object.keys(categories).find((name) =>
-				categories[name].formats.includes(format),
-			);
+			const category = input.isAnimatedImage
+				? "video"
+				: Object.keys(categories).find((name) =>
+						categories[name].formats.includes(format),
+					);
 			// first format (in category order) the file can actually convert to
 			const candidates = category
 				? categories[category].formats

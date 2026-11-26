@@ -4,6 +4,11 @@ import SlowConversionToast from "#lib/components/functional/popups/SlowConversio
 import { byNative, categories, converters } from "#lib/converters";
 import type { Converter } from "#lib/converters/converter.svelte";
 import { formatDuration } from "#lib/converters/converter.svelte";
+import {
+	animatedImageFormats,
+	isAnimatedMagickFormat,
+} from "#lib/converters/ffmpeg/ffmpeg.codecs";
+import { processAnimation } from "#lib/converters/ffmpeg/video/magick.animated";
 import { m } from "#lib/paraglide/messages";
 import { addDialog } from "#lib/store/DialogProvider";
 import { MAX_ARRAY_BUFFER_SIZE } from "#lib/store/index.svelte";
@@ -11,6 +16,7 @@ import { conversionConcurrency } from "#lib/util/consts";
 import { formatError } from "#lib/util/error";
 import { formatFilename } from "#lib/util/file";
 import { error, log } from "#lib/util/logger.svelte";
+import { detectImageAnimation } from "#lib/util/parse/image-animation";
 import { readSettings } from "#lib/util/settings";
 import { ToastManager } from "#lib/util/toast.svelte";
 import { fileTypeFromBuffer } from "file-type";
@@ -109,6 +115,8 @@ export class VertFile {
 	public to = $state("");
 	public size = $state(0);
 	public fileType = $state<Awaited<ReturnType<typeof fileTypeFromBuffer>>>();
+	public isAnimatedImage = $state(false);
+	public animationOutput = $state<"animated" | "frames">("animated");
 	public isZip = $state(() => this.from === ".zip");
 
 	public conversionSettings = $state<ConversionSettings>({}); // empty object / key = default
@@ -130,7 +138,11 @@ export class VertFile {
 	private slowConversionToastId: number | null = null;
 	private attemptedConverters = new SvelteSet<string>();
 	private retryingFallback = false;
-	private converting = false;
+	private converting = $state(false);
+
+	public get isConverting(): boolean {
+		return this.converting;
+	}
 	private postDownload: (() => Promise<void>) | null = null;
 	private disposal: Promise<void> | null = null;
 	private disposed = false;
@@ -213,34 +225,19 @@ export class VertFile {
 				)
 					return false;
 				if (
-					!converter
-						.formatStrings()
-						.some((f) => supportedFormats.includes(f))
-				) {
-					return false;
-				}
-
-				if (
+					supportedFormats.length > 1 &&
 					supportedFormats.includes(this.from) &&
 					supportedFormats.includes(this.to)
-				) {
-					if (!converter.formatStrings().includes(this.to)) {
-						return false;
-					}
-
-					const theirFrom = converter.supportedFormats.find(
-						(f) => f.name === this.from,
+				)
+					return this.supportsConversion(
+						converter,
+						this.to,
+						this.from,
 					);
-					const theirTo = converter.supportedFormats.find(
-						(f) => f.name === this.to,
-					);
-					if (!theirFrom || !theirTo) return false;
-					if (!theirFrom.fromSupported || !theirTo.toSupported)
-						return false;
-					if (!theirFrom.isNative && !theirTo.isNative) return false;
-				}
 
-				return true;
+				return converter
+					.formatStrings()
+					.some((format) => supportedFormats.includes(format));
 			})
 			.sort(byNative(this.from))
 			.sort((a, b) => {
@@ -268,29 +265,36 @@ export class VertFile {
 		});
 	}
 
-	// returns true if there is at least one converter that can convert from `from` to `to`
-	public hasAvailableConverter(from: string, to: string): boolean {
-		return this.converters.some((converter) => {
-			if (
-				this.unavailableConverters[converter.name] ||
-				!converter.isAvailable()
-			)
-				return false;
+	public supportsConversion(
+		converter: Converter,
+		to: string,
+		from?: string,
+	): boolean {
+		if (this.isAnimatedImage) {
+			const engine = this.exportsAnimationFrames(to)
+				? "imagemagick"
+				: "ffmpeg-video";
+			if (converter.name !== engine) return false;
+		}
 
-			const fromInfo = converter.supportedFormats.find(
-				(info) => info.name === from,
-			);
-			const toInfo = converter.supportedFormats.find(
-				(info) => info.name === to,
-			);
-			return (
-				!!fromInfo &&
-				!!toInfo &&
-				fromInfo.fromSupported &&
-				toInfo.toSupported &&
-				(fromInfo.isNative || toInfo.isNative)
-			);
-		});
+		const target = converter.supportedFormats.find(
+			(format) => format.name === to,
+		);
+		if (!target?.toSupported) return false;
+		if (!from) return true; // an archive sequence supplies its own input
+		const source = converter.supportedFormats.find(
+			(format) => format.name === from,
+		);
+		return !!source?.fromSupported && (source.isNative || target.isNative);
+	}
+
+	public hasAvailableConverter(from: string, to: string): boolean {
+		return this.converters.some(
+			(converter) =>
+				!this.unavailableConverters[converter.name] &&
+				converter.isAvailable() &&
+				this.supportsConversion(converter, to, from),
+		);
 	}
 
 	public isLarge(): boolean {
@@ -315,14 +319,79 @@ export class VertFile {
 	}
 
 	public checkFileType(): Promise<void> {
-		return (this.fileTypeCheck ??= this.detectFileType());
+		return (this.fileTypeCheck ??= this.detectFileType().then(async () => {
+			const from = this.from;
+			const format = from.slice(1);
+			const isPng = format === "png" || format === "apng";
+
+			try {
+				let animated = await detectImageAnimation(this.file, format);
+				if (
+					animated === undefined &&
+					(format === "gif" || isAnimatedMagickFormat(format))
+				) {
+					animated =
+						(await processAnimation({
+							operation: "count",
+							file: this.file,
+							format,
+						})) > 1;
+				}
+
+				this.isAnimatedImage = animated === true;
+				if (isPng && animated !== undefined)
+					this.from = animated ? ".apng" : ".png";
+			} catch (err) {
+				log(
+					["file", "type"],
+					`could not inspect animation in ${this.name}: ${formatError(err)}`,
+				);
+			}
+
+			if (!this.isAnimatedImage && this.from === from) return;
+			this.converters = converters.filter(
+				({ name, supportedFormats }) =>
+					(!this.isAnimatedImage ||
+						name === "ffmpeg-video" ||
+						name === "imagemagick") &&
+					supportedFormats.some(
+						(info) => info.name === this.from && info.fromSupported,
+					),
+			);
+
+			if (!this.hasAvailableConverter(this.from, this.to))
+				this.to = this.defaultTargetFormat();
+		}));
+	}
+
+	public canExportAnimationFrames(to: string): boolean {
+		return (
+			this.isAnimatedImage &&
+			this.converters.some(
+				(converter) =>
+					converter.name === "imagemagick" &&
+					converter.supportedFormats.some(
+						(format) => format.name === to && format.toSupported,
+					),
+			)
+		);
+	}
+
+	public exportsAnimationFrames(to: string): boolean {
+		return (
+			this.canExportAnimationFrames(to) &&
+			(this.animationOutput === "frames" ||
+				!animatedImageFormats.includes(to.slice(1)))
+		);
 	}
 
 	// first target format (in category order) this file can actually convert to
 	private defaultTargetFormat(): string {
-		const category = Object.keys(categories).find((name) =>
-			categories[name].formats.includes(this.from),
-		);
+		const category = this.isAnimatedImage
+			? "video"
+			: Object.keys(categories).find((name) =>
+					categories[name].formats.includes(this.from),
+				);
 		const candidates = category ? categories[category].formats : [];
 		const target = candidates
 			.filter((format) => format !== this.from)
@@ -477,35 +546,16 @@ export class VertFile {
 					.find((c) => c && !this.attemptedConverters.has(c.name));
 
 				if (selected) converter = selected;
-			} else {
-				const customConverter = this.converters.find(
-					(c) => c.name === this.conversionSettings.converter,
+			} else if (this.isAnimatedImage) {
+				[converter] = this.findConverters(
+					[this.from, this.to],
+					this.unavailableConverters,
 				);
-				converter = customConverter;
-
-				if (!converter) {
-					const compatibleConverters = this.findConverters([
-						this.from,
-						this.to,
-					]);
-					if (compatibleConverters.length) {
-						converter = compatibleConverters[0];
-						log(
-							["file", "convert"],
-							`found compatible converter: ${converter.name}`,
-						);
-					} else {
-						log(
-							["file", "convert"],
-							`no compatible converter found for ${this.from} to ${this.to}`,
-						);
-					}
-				} else {
-					log(
-						["file", "convert"],
-						`using custom converter from settings: ${converter.name}`,
-					);
-				}
+			} else {
+				converter =
+					this.converters.find(
+						(c) => c.name === this.conversionSettings.converter,
+					) ?? this.findConverters([this.from, this.to])[0];
 			}
 
 			if (!converter) throw new Error("No converter found");

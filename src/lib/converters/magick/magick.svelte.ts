@@ -37,6 +37,7 @@ export class MagickConverter extends Converter {
 	public supportedFormats = applyPriorities("imagemagick", [
 		// manually tested formats
 		new FormatInfo("png", true, true),
+		new FormatInfo("apng", true, false),
 		new FormatInfo("jpeg", true, true),
 		new FormatInfo("jpg", true, true),
 		new FormatInfo("webp", true, true),
@@ -404,15 +405,13 @@ export class MagickConverter extends Converter {
 			await this.waitForMessage(worker, "loaded", 30000);
 
 			// every other format handled by magick worker
-			const conversionSettings = // vertd expects object not string json
-				JSON.stringify(
-					Object.keys(settings).length > 4
-						? { ...settings } // user-provided settings
-						: {
-								...(await this.getDefaultSettings(input)),
-								...settings,
-							}, // use defaults if not provided
-				);
+			const conversionSettings = JSON.stringify({
+				...(Object.keys(settings).length <= 4
+					? await this.getDefaultSettings(input)
+					: {}),
+				...settings,
+				animationFrames: input.exportsAnimationFrames(to),
+			});
 
 			cancellation.signal.throwIfAborted();
 			const convertMsg: WorkerMessage = {

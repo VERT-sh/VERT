@@ -65,6 +65,7 @@
 		},
 		"image_sequence": {
 			"image_sequence": "Image Sequence",
+			"individual_frames": "Individual frames (ZIP)",
 			"fps": "FPS",
 			"transparency": "Transparency"
 		},
